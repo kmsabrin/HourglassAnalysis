@@ -10,14 +10,16 @@ public class RandomNetworkGenerator {
 	CallDAG callDAG;
 	Map<String, Integer> functionLevel;
 	Set<String> visited;
+	boolean isCycle;
 	
 	public RandomNetworkGenerator(CallDAG callDAG) {
 		this.callDAG = callDAG;
 		functionLevel = new HashMap();
 		visited = new HashSet();
+		isCycle = false;
 	}
 	
-	public void traverse(String function) {
+	public void getFunctionLevelTraverse(String function) {
 		if (!callDAG.callTo.containsKey(function)) { // is Leaf
 			functionLevel.put(function, 1);
 			return;
@@ -30,24 +32,25 @@ public class RandomNetworkGenerator {
 		if (visited.contains(function)) { // is Cycle
 			functionLevel.put(function, 1); // is Wrong
 			return;
-		}
-		
+		}		
 		visited.add(function);
 		
 		int level = 1;
 		for (String f: callDAG.callTo.get(function)) {
-			traverse(f);
+			getFunctionLevelTraverse(f);
 			int childLevel = functionLevel.get(f);
 			level = Math.max(level, childLevel + 1);
 		}
 		
 		functionLevel.put(function, level);
+		visited.remove(function);
 	}
 	
 	public void getFunctionLevel() {
+		visited = new HashSet();
 		for (String f: callDAG.functions) {
 			if (!callDAG.callFrom.containsKey(f)) { // is Root
-				traverse(f);
+				getFunctionLevelTraverse(f);
 			}
 		}
 		
@@ -56,28 +59,61 @@ public class RandomNetworkGenerator {
 //		}
 	}
 	
-	public void propagateUpward(String fn) {
-		if (visited.contains(fn)) return; // is Cycle
-		if (!functionLevel.containsKey(fn)) return; // w-t-f
+	public void getFunctionLevelWithCutOffTraverse(String function, int cutOffLevel) {		
+		if (visited.contains(function)) { // is Cycle or Revisit, 
+			return; // is Wrong Anyway
+		}		
+		visited.add(function);
 		
-		int updatedlfn = 1; // updated level of function n
-		for (String s: callDAG.callTo.get(fn)) {
-			if (functionLevel.containsKey(s) && functionLevel.get(s) + 1 > updatedlfn) {
-				updatedlfn = functionLevel.get(s) + 1; 
+		if (functionLevel.get(function) < cutOffLevel) { // is at the cutOff update level
+			return;
+		}
+		
+		int level = 1;
+		for (String f: callDAG.callTo.get(function)) {
+			getFunctionLevelTraverse(f);
+			int childLevel = functionLevel.get(f);
+			level = Math.max(level, childLevel + 1);
+		}
+		
+		functionLevel.put(function, level);
+	}
+	
+	public void getFunctionLevelWithCutOff(int cutOffLevel) {
+		visited = new HashSet();
+		for (String f: callDAG.functions) {
+			if (!callDAG.callFrom.containsKey(f)) { // is Root
+				getFunctionLevelWithCutOffTraverse(f, cutOffLevel);
 			}
 		}
 		
-		visited.add(fn);
-		
-		if (updatedlfn != functionLevel.get(fn)) { // change in level
-			// propagate upwards
-			functionLevel.put(fn, updatedlfn);
-			if (callDAG.callFrom.containsKey(fn)) {
-				for (String s : callDAG.callFrom.get(fn)) {
-					propagateUpward(s);
-				}
-			}
+//		for (String f: functionLevel.keySet()) {
+//			System.out.println("Function: " + f + " Level: " + functionLevel.get(f));
+//		}
+	}
+	
+	public void cycleCheckTraverse(String node, String target, int targetLevel) {
+		if (node.equals(target)) { // target Found, cycle Exists
+			isCycle = true;
+			return;
 		}
+		
+		if (isCycle) return; // target Already Found
+		if (visited.contains(node)) return; // already Traversed
+		visited.add(node);
+		
+		if (functionLevel.containsKey(node) && functionLevel.get(node) <= targetLevel) return; // below the Target Level
+		if (!callDAG.callTo.containsKey(node)) return; // a leaf
+		
+		for (String f: callDAG.callTo.get(node)) {
+			cycleCheckTraverse(f, target, targetLevel);
+		}
+	}
+	
+	public void cycleCheck(String source, String target, int targetLevel) {
+		visited.clear();
+		isCycle = false;
+		cycleCheckTraverse(source, target, targetLevel);
 	}
 	
 	public void chooseEdgePairsAndSwap() {
@@ -87,9 +123,10 @@ public class RandomNetworkGenerator {
 //		Random random = new Random(1221388376679119L); //113355, 335577, 557789
 		int kount = 0;
 		
-		while(kount < callDAG.nEdges * 10) {
+		while(kount < callDAG.nEdges * 1) {
 			int rs1, rs2; // random_index_source_1 = rs1, random_index_source_2 = rs2
 			String fs1, fs2; // function-name_source_1 = fs1, function-name_source_2 = fs2
+			int ls1, ls2; // level_source_1 = ls1, level_source_2 = ls2
 			
 			do {
 				rs1 = random.nextInt(nFunctions);
@@ -102,47 +139,49 @@ public class RandomNetworkGenerator {
 				fs2 = (String)functionNames[rs2];	
 			} 
 			while (!callDAG.callTo.containsKey(fs2));
-			
-			int ls1 = functionLevel.get(fs1); // level_source_1 = ls1, level_source_2 = ls2
-			int ls2 = functionLevel.get(fs2);
-			
-			if (rs1 == rs2) {
-				continue; // same source, no swap will occur
-			}
 						
-			List<String> callToListS1 = new ArrayList();
-			for (String s: callDAG.callTo.get(fs1)) {
-				if (functionLevel.get(s) < ls2) {
-					callToListS1.add(s);
-				}
-			}
+			ls1 = functionLevel.get(fs1); 
+			ls2 = functionLevel.get(fs2);
+						
+			List<String> callToListS1 = new ArrayList(callDAG.callTo.get(fs1));
+			List<String> callToListS2 = new ArrayList(callDAG.callTo.get(fs2));
 			
-			List<String> callToListS2 = new ArrayList();
-			for (String s: callDAG.callTo.get(fs2)) {
-				if (functionLevel.get(s) < ls1) {
-					callToListS2.add(s);
-				}
-			}
+			int rt1, rt2; // random_index_target_1 = rt1, random_index_target_2 = rt2
+			String ft1, ft2; // function-name_target_1 = ft1, function-name_target_2 = ft2
+			int lt1, lt2; // level_target_1 = lt1, level_target_2 = lt2
 			
-			if (callToListS1.size() < 1 || callToListS2.size() < 1) {
-				continue; // no suitable target with expected level is found at least for one of the sources
-			}
+			rt1 = random.nextInt(callToListS1.size()); 
+			ft1 = callToListS1.get(rt1); 
+			lt1 = functionLevel.get(ft1); 
 			
-			int rt1 = random.nextInt(callToListS1.size()); // random_index_target_1 = rt1, random_index_target_2 = rt2
-			String ft1 = callToListS1.get(rt1); // function-name_target_1 = ft1, function-name_target_2 = ft2
-			int lt1 = functionLevel.get(ft1); // level_target_1 = lt1, level_target_2 = lt2
-			
-			int rt2 = random.nextInt(callToListS2.size());
-			String ft2 = callToListS2.get(rt2);
-			int lt2 = functionLevel.get(ft2);
+			rt2 = random.nextInt(callToListS2.size());
+			ft2 = callToListS2.get(rt2);
+			lt2 = functionLevel.get(ft2);
 			
 //			check if already exists, then no swap, start over
 			if (callDAG.callTo.get(fs1).contains(ft2) || callDAG.callTo.get(fs2).contains(ft1)) {
 				continue;
 			}
 			
+//			cycle check
+			if (ls1 <= lt2) {
+//				check if s1 is reachable from t2
+				cycleCheck(ft2, fs1, ls1);
+				if (isCycle) {
+					continue;
+				}
+			}
+			else if (ls2 <= lt1) {
+//				check if s2 is reachable from t1
+				cycleCheck(ft1, fs2, ls2);
+				if (isCycle) {
+					continue;
+				}
+			}
+			
 //			swap ...
 			++kount;
+			System.out.println("Swap count: " + kount);
 //			System.out.println("Swapped (" + fs1 + "," + ft1 + ") with (" + fs2 + "," + ft2 + ")");	
 
 //			should the callTo/callFrom be made Set! (done!)
@@ -166,16 +205,9 @@ public class RandomNetworkGenerator {
 				}
 			}
 			
-			if (updatedls1 != ls1) { // if change (decrease) in level of source 1
-				// propagate upwards;
+			if (updatedls1 != ls1) { // if change in level of source 1
 				functionLevel.put(fs1, updatedls1);
-				if (callDAG.callFrom.containsKey(fs1)) {
-					for (String s : callDAG.callFrom.get(fs1)) {
-						visited.clear();
-						propagateUpward(s);
-					}
-				}
-				continue; // change of level is exclusive for sources, only one can happen at a time
+				getFunctionLevelWithCutOff(Math.min(updatedls1, ls1) + 1);
 			}
 			
 			int updatedls2 = 1; // updated_level_source_2 = updatedls2
@@ -185,20 +217,26 @@ public class RandomNetworkGenerator {
 				}
 			}
 			
-			if (updatedls2 != ls2) { // if change (decrease) in level of source 2
-				// propagate upwards;
+			if (updatedls2 != ls2) { // if change  in level of source 2
 				functionLevel.put(fs2, updatedls2);
-				if (callDAG.callFrom.containsKey(fs2)) {
-					for (String s : callDAG.callFrom.get(fs2)) {
-						visited.clear();
-						propagateUpward(s);
-					}
-				}
+				getFunctionLevelWithCutOff(Math.min(updatedls2, ls2) + 1);
 			}
 		}
 		
 //		for (String f: functionLevel.keySet()) {
 //			System.out.println("Function: " + f + " Level: " + functionLevel.get(f));
+//		}
+//		
+//		for (String f: callDAG.functions) {
+//			System.out.print(f + " calling ");
+//			if (!callDAG.callTo.containsKey(f)) {
+//				System.out.println();
+//				continue;
+//			}
+//			for (String s: callDAG.callTo.get(f)) {
+//				System.out.print(s + " ");
+//			}
+//			System.out.println();
 //		}
 	}
 	

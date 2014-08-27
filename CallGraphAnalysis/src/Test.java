@@ -39,6 +39,7 @@ public class Test {
 		callDAG.callFrom.put("i", new HashSet<String>(Arrays.asList("f")));
 		callDAG.callFrom.put("k", new HashSet<String>(Arrays.asList("j")));
 
+		callDAG.nEdges = 13;
 //		removeCycles(); // nop only ignore cycles
 		callDAG.loadDegreeMetric();
 		callDAG.loadLocationMetric(); // must load degree metric before
@@ -78,8 +79,8 @@ public class Test {
 //		DiameterAnalysis da = new DiameterAnalysis();
 //		da.getEffectiveDiameter(test.callDAG);
 		
-//		RandomNetworkGenerator randomeNetworkGenerator = new RandomNetworkGenerator(test.callDAG);
-//		randomeNetworkGenerator.generateRandomNetwork();
+		RandomNetworkGenerator randomeNetworkGenerator = new RandomNetworkGenerator(test.callDAG);
+		randomeNetworkGenerator.generateRandomNetwork();
 	}
 }
 
