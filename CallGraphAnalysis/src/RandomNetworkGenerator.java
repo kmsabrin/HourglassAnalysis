@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 
+import org.apache.commons.math3.stat.StatUtils;
+
 public class RandomNetworkGenerator {
 	CallDAG callDAG;
 	Map<String, Integer> functionLevel;
@@ -28,13 +30,7 @@ public class RandomNetworkGenerator {
 		if (functionLevel.containsKey(function)) { // has been Traversed
 			return;
 		}
-		
-		if (visited.contains(function)) { // is Cycle
-			functionLevel.put(function, 1); // is Wrong
-			return;
-		}		
-		visited.add(function);
-		
+				
 		int level = 1;
 		for (String f: callDAG.callTo.get(function)) {
 			getFunctionLevelTraverse(f);
@@ -43,11 +39,9 @@ public class RandomNetworkGenerator {
 		}
 		
 		functionLevel.put(function, level);
-		visited.remove(function);
 	}
 	
 	public void getFunctionLevel() {
-		visited = new HashSet();
 		for (String f: callDAG.functions) {
 			if (!callDAG.callFrom.containsKey(f)) { // is Root
 				getFunctionLevelTraverse(f);
@@ -57,13 +51,17 @@ public class RandomNetworkGenerator {
 //		for (String f: functionLevel.keySet()) {
 //			System.out.println("Function: " + f + " Level: " + functionLevel.get(f));
 //		}
+		
+		double a[] = new double[functionLevel.values().size()];
+		int j = 0;
+		for (int i : functionLevel.values()) a[j++] = i;
+		System.out.println("Intial Median Level: " + StatUtils.percentile(a, 50.0));
 	}
 	
-	public void getFunctionLevelWithCutOffTraverse(String function, int cutOffLevel) {		
-		if (visited.contains(function)) { // is Cycle or Revisit, 
-			return; // is Wrong Anyway
+	public void updateFunctionLevelWithCutOffTraverse(String function, int cutOffLevel) {		
+		if (visited.contains(function)) { // is Revisit, 
+			return;
 		}		
-		visited.add(function);
 		
 		if (functionLevel.get(function) < cutOffLevel) { // is at the cutOff update level
 			return;
@@ -71,19 +69,20 @@ public class RandomNetworkGenerator {
 		
 		int level = 1;
 		for (String f: callDAG.callTo.get(function)) {
-			getFunctionLevelTraverse(f);
+			updateFunctionLevelWithCutOffTraverse(f, cutOffLevel);
 			int childLevel = functionLevel.get(f);
 			level = Math.max(level, childLevel + 1);
 		}
 		
 		functionLevel.put(function, level);
+		visited.add(function);
 	}
 	
-	public void getFunctionLevelWithCutOff(int cutOffLevel) {
+	public void updateFunctionLevelWithCutOff(int cutOffLevel) {
 		visited = new HashSet();
 		for (String f: callDAG.functions) {
 			if (!callDAG.callFrom.containsKey(f)) { // is Root
-				getFunctionLevelWithCutOffTraverse(f, cutOffLevel);
+				updateFunctionLevelWithCutOffTraverse(f, cutOffLevel);
 			}
 		}
 		
@@ -123,7 +122,8 @@ public class RandomNetworkGenerator {
 //		Random random = new Random(1221388376679119L); //113355, 335577, 557789
 		int kount = 0;
 		
-		while(kount < callDAG.nEdges * 1) {
+		while(kount < callDAG.nEdges * 5) {
+//		while(kount < 1000) {
 			int rs1, rs2; // random_index_source_1 = rs1, random_index_source_2 = rs2
 			String fs1, fs2; // function-name_source_1 = fs1, function-name_source_2 = fs2
 			int ls1, ls2; // level_source_1 = ls1, level_source_2 = ls2
@@ -181,7 +181,7 @@ public class RandomNetworkGenerator {
 			
 //			swap ...
 			++kount;
-			System.out.println("Swap count: " + kount);
+//			System.out.println("Swap count: " + kount);
 //			System.out.println("Swapped (" + fs1 + "," + ft1 + ") with (" + fs2 + "," + ft2 + ")");	
 
 //			should the callTo/callFrom be made Set! (done!)
@@ -200,26 +200,30 @@ public class RandomNetworkGenerator {
 			// level propagation
 			int updatedls1 = 1; // updated_level_source_1 = updatedls1
 			for (String s: callDAG.callTo.get(fs1)) {
-				if (functionLevel.get(s) + 1 > updatedls1) {
-					updatedls1 = functionLevel.get(s) + 1; 
-				}
+				updatedls1 = Math.max(updatedls1, functionLevel.get(s) + 1);
 			}
 			
 			if (updatedls1 != ls1) { // if change in level of source 1
 				functionLevel.put(fs1, updatedls1);
-				getFunctionLevelWithCutOff(Math.min(updatedls1, ls1) + 1);
+				updateFunctionLevelWithCutOff(Math.min(updatedls1, ls1) + 1);
 			}
 			
 			int updatedls2 = 1; // updated_level_source_2 = updatedls2
 			for (String s: callDAG.callTo.get(fs2)) {
-				if (functionLevel.get(s) + 1 > updatedls2) {
-					updatedls2 = functionLevel.get(s) + 1; 
-				}
+				updatedls2 = Math.max(updatedls2, functionLevel.get(s) + 1);
 			}
 			
 			if (updatedls2 != ls2) { // if change  in level of source 2
 				functionLevel.put(fs2, updatedls2);
-				getFunctionLevelWithCutOff(Math.min(updatedls2, ls2) + 1);
+				updateFunctionLevelWithCutOff(Math.min(updatedls2, ls2) + 1);
+			}
+			
+			if (kount % 5000 == 0) {
+//				print level median
+				double a[] = new double[functionLevel.values().size()];
+				int j = 0;
+				for (int i : functionLevel.values()) a[j++] = i;
+				System.out.println("Random Median of Levels: " + StatUtils.percentile(a, 50.0));
 			}
 		}
 		

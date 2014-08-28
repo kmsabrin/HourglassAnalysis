@@ -72,7 +72,7 @@ public class CallDAG {
 		
 		// load & initialize the attributes of the call graph
 		loadCallGraph(callGraphFileName);
-//		removeCycles(); // nop, only ignore cycles
+		removeCycles(); // should i only ignore cycles?
 		loadDegreeMetric();
 		loadLocationMetric(); // must load degree metric before
 		loadGeneralityMetric(); 
@@ -129,80 +129,53 @@ public class CallDAG {
 		}
 	}
 
-//	public void toLeafCycleRemoverHelper(String node) {
-//		if (!callTo.containsKey(node) || visited.contains(node))
-//			return;
-//
-//		cycleVisited.add(node); // cycle check
-//
-//		for (String s : callTo.get(node)) {
-//			if (cycleVisited.contains(s)) {
-//				// cycle found
-//				// record edge for removal
-//				cycleEdges.put(node, s);
-//				continue;
-//			}
-//
-//			toLeafCycleRemoverHelper(s);
-//		}
-//
-//		visited.add(node);
-//
-//		cycleVisited.remove(node);
-//	}
-//
-//	public void toRootCycleRemoverHelper(String node) {
-//		if (!callFrom.containsKey(node) || visited.contains(node))
-//			return;
-//
-//		cycleVisited.add(node); // cycle check
-//
-//		for (String s : callFrom.get(node)) {
-//			if (cycleVisited.contains(s)) {
-//				// cycle found
-//				// record edge for removal
-//				cycleEdges.put(node, s);
-//				continue;
-//			}
-//
-//			toRootCycleRemoverHelper(s);
-//		}
-//
-//		visited.add(node);
-//
-//		cycleVisited.remove(node);
-//	}
-//
-//	public void removeCycles() {
-//		// go through roots
-//		visited = new HashSet();
-//		for (String s : functions) {
-//			if (!callFrom.containsKey(s) && callTo.containsKey(s)) {
-//				cycleVisited = new HashSet();
-//				toLeafCycleRemoverHelper(s);
-//			}
-//		}
-//
-//		for (String s : cycleEdges.keySet()) {
-//			callTo.get(s).remove(cycleEdges.get(s));
-//			callFrom.get(cycleEdges.get(s)).remove(s);
-//		}
-//
-//		// go through leaves
-//		visited.clear();
-//		cycleEdges.clear();
-//		for (String s : functions) {
-//			if (callFrom.containsKey(s) && !callTo.containsKey(s)) {
-//				cycleVisited = new HashSet();
-//				toRootCycleRemoverHelper(s);
-//			}
-//		}
-//
-//		for (String s : cycleEdges.keySet()) {
-//			callTo.get(cycleEdges.get(s)).remove(s);
-//			callFrom.get(s).remove(cycleEdges.get(s));
-//		}
-//	}
+	public void removeCyclesTraverse(String node) {
+		if (!callTo.containsKey(node) || visited.contains(node))
+			return;
+
+		cycleVisited.add(node); // cycle check
+
+		for (String s : callTo.get(node)) {
+			if (cycleVisited.contains(s)) {
+//				cycle found, recording edge for removal
+				cycleEdges.put(node, s);
+				continue;
+			}
+			removeCyclesTraverse(s);
+		}
+
+		visited.add(node);
+		cycleVisited.remove(node);
+	}
+
+	public void removeCycles() {
+//		go through roots
+		while (true) {
+			visited = new HashSet();
+			cycleEdges = new HashMap();
+			for (String s : functions) {
+				if (!callFrom.containsKey(s)) {
+					cycleVisited = new HashSet();
+					removeCyclesTraverse(s);
+				}
+			}
+
+			if (cycleEdges.isEmpty()) {
+				break;
+			}
+			
+			for (String source : cycleEdges.keySet()) {
+				String target = cycleEdges.get(source);
+				callTo.get(source).remove(target);
+				callFrom.get(target).remove(source);
+				if (callTo.get(source).size() < 1) callTo.remove(source);
+				if (callFrom.get(target).size() < 1) callTo.remove(target);
+				if (!callTo.containsKey(source) && !callFrom.containsKey(source)) functions.remove(source);
+				if (!callTo.containsKey(target) && !callFrom.containsKey(target)) functions.remove(target);
+				--nEdges;
+			}
+		}
+	}
 	
 	public void loadDegreeMetric() {
 //		get the fanIn/Out

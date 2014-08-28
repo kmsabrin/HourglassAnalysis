@@ -69,7 +69,7 @@ public class LocationAnalysis {
 			totalPair += visited.size() - 1;			
 		}
 		
-		System.out.println(violatingPair / totalPair);
+		System.out.println("Violation Metric: " + violatingPair / totalPair);
 	}
 	
 	public void getClusterLocationDistribution(CallDAG callDAG) { // visually separated clusters

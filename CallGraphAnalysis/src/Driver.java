@@ -4,8 +4,8 @@ public class Driver {
 /*****************************************************************************/
 		String versionNum = "v15";
 		CallDAG callDAG = new CallDAG("callGraphs//full.graph-2.6.15");
-//		System.out.println("nFunctions: " + callDAG.functions.size());
-//		System.out.println("nEdges: " + callDAG.nEdges);
+		System.out.println("nFunctions: " + callDAG.functions.size());
+		System.out.println("nEdges: " + callDAG.nEdges);
 //		int nRoots = 0, nLeaves = 0;
 //		for (String s: callDAG.functions) {
 //			if (!callDAG.callFrom.containsKey(s)) ++nRoots;
@@ -94,7 +94,7 @@ public class Driver {
 /*****************************************************************************/
 
 /*****************************************************************************/		
-		String randVersionNum = versionNum + "r3";
+		String randVersionNum = versionNum + "r1";
 		randomNetworkGenerator.generateRandomNetwork();
 		randomNetworkGenerator.callDAG.loadLocationMetric(); //		degree already loaded
 		randomNetworkGenerator.callDAG.loadGeneralityMetric(); 
@@ -105,6 +105,7 @@ public class Driver {
 		generalityAnalysis.getLocationVSAvgGenerality(randomNetworkGenerator.callDAG, randVersionNum);
 		degreeAnalysis.getLocationVSAvgInDegree(randomNetworkGenerator.callDAG, randVersionNum);
 		degreeAnalysis.getLocationVSAvgOutDegree(randomNetworkGenerator.callDAG, randVersionNum);
+		locationAnalysis.getCallViolationMetric(randomNetworkGenerator.callDAG);
 /*****************************************************************************/
 	}
 }
