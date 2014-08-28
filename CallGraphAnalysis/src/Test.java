@@ -79,8 +79,8 @@ public class Test {
 //		DiameterAnalysis da = new DiameterAnalysis();
 //		da.getEffectiveDiameter(test.callDAG);
 		
-		RandomNetworkGenerator randomeNetworkGenerator = new RandomNetworkGenerator(test.callDAG);
-		randomeNetworkGenerator.generateRandomNetwork();
+//		RandomNetworkGenerator randomeNetworkGenerator = new RandomNetworkGenerator(test.callDAG);
+//		randomeNetworkGenerator.generateRandomNetwork();
 	}
 }
 

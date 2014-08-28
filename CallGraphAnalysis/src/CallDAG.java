@@ -11,11 +11,6 @@ public class CallDAG {
 	Map<String, Set<String>> callFrom; // who called me // reverse adjacency list
 	Map<String, Set<String>> callTo; // who I called // adjacency list
 
-	Set<String> visited;
-	Map<String, String> cycleEdges;
-	Set<String> cycleVisited;
-	double kount;
-	
 	Map<String, Double> numOfPath;
 	Map<String, Double> sumOfPath;
 	Map<String, Double> avgLeafDepth;
@@ -29,6 +24,11 @@ public class CallDAG {
 	Map<String, Integer> outDegree;
 	Map<String, Integer> inDegree;
 
+	Set<String> visited;
+	Map<String, String> cycleEdges;
+	Set<String> cycleVisited;
+	double kount;
+	
 	CallDAG() { // for test graph
 		functions = new HashSet();
 		callFrom = new HashMap();
@@ -150,29 +150,28 @@ public class CallDAG {
 
 	public void removeCycles() {
 //		go through roots
-		while (true) {
+		boolean loop = true;
+		while (loop) {
 			visited = new HashSet();
-			cycleEdges = new HashMap();
+			loop = false;
 			for (String s : functions) {
-				if (!callFrom.containsKey(s)) {
+				if (!visited.contains(s)) {
+					cycleEdges = new HashMap();
 					cycleVisited = new HashSet();
 					removeCyclesTraverse(s);
+					
+					for (String source : cycleEdges.keySet()) {
+						String target = cycleEdges.get(source);
+						callTo.get(source).remove(target);
+						callFrom.get(target).remove(source);
+						if (callTo.get(source).size() < 1) callTo.remove(source);
+						if (callFrom.get(target).size() < 1) callFrom.remove(target);
+						if (!callTo.containsKey(source) && !callFrom.containsKey(source)) functions.remove(source);
+						if (!callTo.containsKey(target) && !callFrom.containsKey(target)) functions.remove(target);
+						--nEdges;
+						loop = true;
+					}
 				}
-			}
-
-			if (cycleEdges.isEmpty()) {
-				break;
-			}
-			
-			for (String source : cycleEdges.keySet()) {
-				String target = cycleEdges.get(source);
-				callTo.get(source).remove(target);
-				callFrom.get(target).remove(source);
-				if (callTo.get(source).size() < 1) callTo.remove(source);
-				if (callFrom.get(target).size() < 1) callTo.remove(target);
-				if (!callTo.containsKey(source) && !callFrom.containsKey(source)) functions.remove(source);
-				if (!callTo.containsKey(target) && !callFrom.containsKey(target)) functions.remove(target);
-				--nEdges;
 			}
 		}
 	}
@@ -189,10 +188,6 @@ public class CallDAG {
 			
 			if (callFrom.containsKey(s)) {
 				in = callFrom.get(s).size();
-			}
-			
-			if (in == 0 && out == 0) { // bad node
-				//continue;
 			}
 			
 			outDegree.put(s, out);
@@ -212,36 +207,17 @@ public class CallDAG {
 			return;
 		}
 				
-		visited.add(node); // cycle check
-		
 		double nPath = 0;
 		double sPath = 0;
 		for (String s: callTo.get(node)) {
-				if (visited.contains(s)) {
-					// cycle found
-					cycleEdges.put(node, s);
-					continue;
-				}
-				
 				leafPath(s);
 				nPath += numOfPath.get(s);
 				sPath += numOfPath.get(s) + sumOfPath.get(s);
 		}
 		
-		if (nPath > 0) { // check 0/0 division
-			numOfPath.put(node, nPath);
-			sumOfPath.put(node, sPath);
-			avgLeafDepth.put(node, sPath / nPath); 
-		}
-		else {
-			numOfPath.put(node, 1.0);
-			sumOfPath.put(node, 0.0);
-			avgLeafDepth.put(node, 0.0);
-//			a cycle brought us here. this node had one only child which created a cycle
-//			what to do with it??  setting it as leaf
-		}
-		
-		visited.remove(node); // cycle check
+		numOfPath.put(node, nPath);
+		sumOfPath.put(node, sPath);
+		avgLeafDepth.put(node, sPath / nPath);
 	}
 	
 	public void rootPath(String node) {
@@ -256,44 +232,28 @@ public class CallDAG {
 			return;
 		}
 				
-		visited.add(node); // cycle check
+		visited.add(node);
 		
 		double nPath = 0;
 		double sPath = 0;
 		for (String s: callFrom.get(node)) {
-				if (visited.contains(s)) {
-					// cycle found
-					continue;
-				}
-				
 				rootPath(s);
 				nPath += numOfPath.get(s);
 				sPath += numOfPath.get(s) + sumOfPath.get(s);
 		}
 		
-		if (nPath > 0) { // check 0/0 division
-			numOfPath.put(node, nPath);
-			sumOfPath.put(node, sPath);
-			avgRootDepth.put(node, sPath / nPath); 
-		}
-		else {
-			numOfPath.put(node, 1.0);
-			sumOfPath.put(node, 0.0);
-			avgRootDepth.put(node, 0.0);
-//			a cycle brought us here. this node had one only parent which created a cycle
-//			what to do with it? setting it as root
-		}
+		numOfPath.put(node, nPath);
+		sumOfPath.put(node, sPath);
+		avgRootDepth.put(node, sPath / nPath);
 		
-		visited.remove(node); // cycle check
+		visited.remove(node);
 	}
 	
 	public void loadLocationMetric() {
 //		go through roots
 		for (String s: functions) {
 			if (!callFrom.containsKey(s)) {
-				visited = new HashSet();
 				leafPath(s);
-//				System.out.println(avgLeafDepth.get(s));
 			}
 		}
 		
@@ -308,39 +268,11 @@ public class CallDAG {
 			}
 		}
 		
-		int count = 0;
-		for (String s: functions) {
-//			due to cycle
-			if (!avgLeafDepth.containsKey(s) && avgRootDepth.containsKey(s)) { 
-//				set as root
-				location.put(s, 1.0);
-			}
-//			due to cycle
-			else if (avgLeafDepth.containsKey(s) && !avgRootDepth.containsKey(s)) {
-//				set as leaf
-				location.put(s, 0.0);
-			}
-			else if (!avgLeafDepth.containsKey(s) && !avgRootDepth.containsKey(s)) {
-				// W - T - F
-//				System.out.println("wtf!");
-				location.put(s, 0.0);
-			}
-			else {
-//				if both values are ZERO due to cycle, can set is as leaf
-				if (avgLeafDepth.get(s) == 0.0 && avgRootDepth.get(s) == 0 ) {
-//					set as leaf
-					location.put(s, 0.0);
-				}
-				else {
-					++count;
-					double m = avgLeafDepth.get(s) / (avgLeafDepth.get(s) + avgRootDepth.get(s));
-					m = ((int) (m * 100.0)) / 100.0; // round up to 2 decimal point														
-					location.put(s, m);
-				}
-			}
-		}
-		
-//		System.out.println("Cycle Free: " + count + " Out Of " + functions.size());
+		for (String s : functions) {
+			double m = avgLeafDepth.get(s) / (avgLeafDepth.get(s) + avgRootDepth.get(s));
+			m = ((int) (m * 100.0)) / 100.0; // round up to 2 decimal point
+			location.put(s, m);
+		}		
 	}
 		
 	public void reachableUpwardsNodes(String node) { // towards root
@@ -375,19 +307,14 @@ public class CallDAG {
 		}
 		
 		for (String s : functions) {
-			kount = -1.0; // for excluding itself
+			kount = -1.0; // for excluding itself, note kount is global
 			visited = new HashSet();
 			reachableUpwardsNodes(s); // how many nodes are using her
 			
-//			double g = kount / functions.size(); // not used metric
 			double g = 0;
 			int loc = Math.max((int)(location.get(s) * 100), 0);
 			if (loc < 100) {
 				g = kount / greaterLocNode[loc];
-//				g = Math.min(1.0, g); // problemmo :-( node being called from locations below 
-//				if (kount > greaterLocNode[loc]) {
-//					System.out.println(s + "\t" + kount + "\t" + greaterLocNode[loc]);
-//				}
 			}
 			
 			g = ((int) (g * 1000.0)) / 1000.0;
@@ -431,12 +358,10 @@ public class CallDAG {
 			visited = new HashSet();
 			reachableDownwardsNodes(s);
 			
-//			double c = kount / functions.size();
 			int loc = (int)(location.get(s) * 100);
 			double c = 0;
 			if (loc != 0) {
 				c = kount / lessLocNode[loc];
-//				c = Math.min(1.0, c); // some problems here
 			}
 			c = ((int) (c * 1000.0)) / 1000.0;
 			complexity.put(s, c);
