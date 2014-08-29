@@ -94,8 +94,8 @@ public class Driver {
 /*****************************************************************************/
 
 /*****************************************************************************/		
-		String randVersionNum = versionNum + "r2";
-		randomNetworkGenerator.generateRandomNetwork();
+		String randVersionNum = versionNum + "r3";
+		randomNetworkGenerator.generateRandomNetwork(randVersionNum);
 		randomNetworkGenerator.callDAG.loadLocationMetric(); //		degree already loaded
 		randomNetworkGenerator.callDAG.loadGeneralityMetric(); 
 		randomNetworkGenerator.callDAG.loadComplexityMetric();

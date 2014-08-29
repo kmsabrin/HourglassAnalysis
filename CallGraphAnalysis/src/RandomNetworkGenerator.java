@@ -1,3 +1,5 @@
+import java.io.File;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -13,6 +15,7 @@ public class RandomNetworkGenerator {
 	Map<String, Integer> functionLevel;
 	Set<String> visited;
 	boolean isCycle;
+	String randomVersionNumber;
 	
 	public RandomNetworkGenerator(CallDAG callDAG) {
 		this.callDAG = callDAG;
@@ -115,12 +118,13 @@ public class RandomNetworkGenerator {
 		cycleCheckTraverse(source, target, targetLevel);
 	}
 	
-	public void chooseEdgePairsAndSwap() {
+	public void chooseEdgePairsAndSwap() throws Exception {
 		int nFunctions = functionLevel.size();
 		Object[] functionNames = functionLevel.keySet().toArray();
-		Random random = new Random();
+		Random random = new Random(System.nanoTime());
 //		Random random = new Random(1221388376679119L); //113355, 335577, 557789
 		int kount = 0;
+		PrintWriter pw = new PrintWriter(new File("random-medians-" + randomVersionNumber + ".txt"));
 		
 		while(kount < callDAG.nEdges * 5) {
 //		while(kount < 1000) {
@@ -223,9 +227,11 @@ public class RandomNetworkGenerator {
 				double a[] = new double[functionLevel.values().size()];
 				int j = 0;
 				for (int i : functionLevel.values()) a[j++] = i;
-				System.out.println("Random Median of Levels: " + StatUtils.percentile(a, 50.0));
+				pw.println("Random Median of Levels: " + StatUtils.percentile(a, 50.0));
 			}
 		}
+		
+		pw.close();
 		
 //		for (String f: functionLevel.keySet()) {
 //			System.out.println("Function: " + f + " Level: " + functionLevel.get(f));
@@ -244,7 +250,8 @@ public class RandomNetworkGenerator {
 //		}
 	}
 	
-	public void generateRandomNetwork() {
+	public void generateRandomNetwork(String rVN) throws Exception {
+		randomVersionNumber = rVN;
 		getFunctionLevel();
 		chooseEdgePairsAndSwap();
 	}
