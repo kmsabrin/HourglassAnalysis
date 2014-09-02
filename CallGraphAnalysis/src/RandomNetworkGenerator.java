@@ -124,9 +124,9 @@ public class RandomNetworkGenerator {
 		Random random = new Random(System.nanoTime());
 //		Random random = new Random(1221388376679119L); //113355, 335577, 557789
 		int kount = 0;
-		PrintWriter pw = new PrintWriter(new File("random-medians-" + randomVersionNumber + ".txt"));
+		PrintWriter pw = new PrintWriter(new File("Results//random-level-medians-" + randomVersionNumber + ".txt"));
 		
-		while(kount < callDAG.nEdges * 5) {
+		while(kount < callDAG.nEdges * 40) {
 //		while(kount < 1000) {
 			int rs1, rs2; // random_index_source_1 = rs1, random_index_source_2 = rs2
 			String fs1, fs2; // function-name_source_1 = fs1, function-name_source_2 = fs2
@@ -186,7 +186,7 @@ public class RandomNetworkGenerator {
 //			swap ...
 			++kount;
 //			System.out.println("Swap count: " + kount);
-//			System.out.println("Swapped (" + fs1 + "," + ft1 + ") with (" + fs2 + "," + ft2 + ")");	
+			System.out.println("Swapped (" + fs1 + "," + ft1 + ") with (" + fs2 + "," + ft2 + ")");	
 
 //			should the callTo/callFrom be made Set! (done!)
 			callDAG.callTo.get(fs1).remove(ft1);
@@ -233,21 +233,21 @@ public class RandomNetworkGenerator {
 		
 		pw.close();
 		
-//		for (String f: functionLevel.keySet()) {
-//			System.out.println("Function: " + f + " Level: " + functionLevel.get(f));
-//		}
-//		
-//		for (String f: callDAG.functions) {
-//			System.out.print(f + " calling ");
-//			if (!callDAG.callTo.containsKey(f)) {
-//				System.out.println();
-//				continue;
-//			}
-//			for (String s: callDAG.callTo.get(f)) {
-//				System.out.print(s + " ");
-//			}
-//			System.out.println();
-//		}
+		for (String f: functionLevel.keySet()) {
+			System.out.println("Function: " + f + " Level: " + functionLevel.get(f));
+		}
+		
+		for (String f: callDAG.functions) {
+			System.out.print(f + " calling ");
+			if (!callDAG.callTo.containsKey(f)) {
+				System.out.println();
+				continue;
+			}
+			for (String s: callDAG.callTo.get(f)) {
+				System.out.print(s + " ");
+			}
+			System.out.println();
+		}
 	}
 	
 	public void generateRandomNetwork(String rVN) throws Exception {

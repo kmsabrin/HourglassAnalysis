@@ -93,6 +93,9 @@ public class Driver {
 //		diameterAnalysis.getEffectiveDiameterForAllVersions();
 /*****************************************************************************/
 
+//		ClusterAnalysis clusterAnalysis = new ClusterAnalysis(0.01, 20);
+//		clusterAnalysis.getClusters(callDAG);
+		
 /*****************************************************************************/		
 		String randVersionNum = versionNum + "r3";
 		randomNetworkGenerator.generateRandomNetwork(randVersionNum);

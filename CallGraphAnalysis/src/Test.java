@@ -47,7 +47,7 @@ public class Test {
 		callDAG.loadComplexityMetric();
 	}
 			
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		Test test = new Test();
 		test.loadCallGraph();
 		
@@ -80,7 +80,10 @@ public class Test {
 //		da.getEffectiveDiameter(test.callDAG);
 		
 //		RandomNetworkGenerator randomeNetworkGenerator = new RandomNetworkGenerator(test.callDAG);
-//		randomeNetworkGenerator.generateRandomNetwork();
+//		randomeNetworkGenerator.generateRandomNetwork("Test");
+		
+		ClusterAnalysis clusterAnalysis = new ClusterAnalysis(0.05, 1);
+		clusterAnalysis.getClusters(test.callDAG);
 	}
 }
 
