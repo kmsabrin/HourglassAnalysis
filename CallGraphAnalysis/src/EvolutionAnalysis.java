@@ -65,4 +65,13 @@ public class EvolutionAnalysis {
 			locationAnalysis.getCallViolationMetric(callDAG);
 		}
 	}
+	
+	public void getNumClustersForEachVersion() throws Exception {
+		for (int i = 0; i < 40; ++i) {
+			System.out.print("Version 2.6." + i + "\t");
+			CallDAG callDAG = new CallDAG("callGraphs//full.graph-2.6." + i);
+			ClusterAnalysis clusterAnalysis = new ClusterAnalysis(0.03,  30);
+			clusterAnalysis.getClusters(callDAG);
+		}
+	}
 }

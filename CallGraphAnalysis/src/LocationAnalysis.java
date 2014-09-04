@@ -53,7 +53,7 @@ public class LocationAnalysis {
 				;
 			else if(callDAG.cycleEdges.containsKey(sourceNode) && callDAG.cycleEdges.get(sourceNode) == node)
 				;
-			else if (callDAG.location.get(node) + 0.05 < sourceLocation) {
+			else if (callDAG.location.get(node) + 0.01 < sourceLocation) {
 				++violatingPair;
 			}
 		}

@@ -6,40 +6,22 @@ import java.util.Map;
 import java.util.TreeMap;
 
 public class GeneralityAnalysis {
-	public void getGeneralityHistogram(CallDAG callDAG) {
-		Map<Double, Integer> genHistogram = new TreeMap();
+	public void getGeneralityHistogram(CallDAG callDAG, String filePath) throws Exception {
+		PrintWriter pw = new PrintWriter(new File("Results//gen-hist-" + filePath + ".txt"));
 		for (String s: callDAG.generality.keySet()) {
 			double g = callDAG.generality.get(s);
-			if (genHistogram.containsKey(g)) {
-				int f = genHistogram.get(g);
-				genHistogram.put(g, f + 1);
-			}
-			else {
-				genHistogram.put(g, 1);
-			}
+			pw.println(g);
 		}
-		
-		for (Double d: genHistogram.keySet()) {
-			System.out.println(d + "\t" + genHistogram.get(d) * 100.0 / callDAG.functions.size());
-		}
+		pw.close();
 	}
 	
-	public void getComplexityHistogram(CallDAG callDAG) {
-		Map<Double, Integer> histogram = new TreeMap();
+	public void getComplexityHistogram(CallDAG callDAG, String filePath) throws Exception {
+		PrintWriter pw = new PrintWriter(new File("Results//cmp-hist-" + filePath + ".txt"));
 		for (String s: callDAG.complexity.keySet()) {
 			double c = callDAG.complexity.get(s);
-			if (histogram.containsKey(c)) {
-				int f = histogram.get(c);
-				histogram.put(c, f + 1);
-			}
-			else {
-				histogram.put(c, 1);
-			}
+			pw.println(c);
 		}
-		
-		for (Double d: histogram.keySet()) {
-			System.out.println(d + "\t" + histogram.get(d) * 100.0 / callDAG.functions.size());
-		}
+		pw.close();
 	}
 	
 	public void getLocationVSAvgGenerality(CallDAG callDAG, String filePath) throws Exception {
@@ -120,4 +102,3 @@ public class GeneralityAnalysis {
 		}
 	}
 }
-	

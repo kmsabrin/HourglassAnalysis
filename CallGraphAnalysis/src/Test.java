@@ -64,13 +64,13 @@ public class Test {
 //		locationAnalysis.getLocationHistogram(test.callDAG);
 //		locationAnalysis.getLocationVsCallDirection(test.callDAG);
 		
-//		GeneralityAnalysis generalityAnalysis = new GeneralityAnalysis();
-//		for (String s: test.callDAG.functions) {
-//			System.out.print(s);
-//			System.out.print("\t Location " + test.callDAG.location.get(s));
-//			System.out.print("\t Generality " + test.callDAG.generality.get(s));
-//			System.out.println("\t Complexity " + test.callDAG.complexity.get(s));
-//		}
+		GeneralityAnalysis generalityAnalysis = new GeneralityAnalysis();
+		for (String s: test.callDAG.functions) {
+			System.out.print(s);
+			System.out.print("\t Location " + test.callDAG.location.get(s));
+			System.out.print("\t Generality " + test.callDAG.generality.get(s));
+			System.out.println("\t Complexity " + test.callDAG.complexity.get(s));
+		}
 		
 //		generalityAnalysis.getGeneralityHistogram(test.callDAG);
 //		generalityAnalysis.getLocationVSAvgGenerality(test.callDAG);

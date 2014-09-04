@@ -9,7 +9,8 @@ import org.apache.commons.math3.stat.correlation.*;
 
 public class DegreeAnalysis {	
 	
-	void getInDegreeDistribution(CallDAG callDAG) {		
+	void getInDegreeDistribution(CallDAG callDAG, String filePath) throws Exception {		
+		PrintWriter pw = new PrintWriter(new File("Results//indeg-dist-" + filePath + ".txt"));
 		Map<Integer, Integer> inDegreeHistogram = new TreeMap();
 		
 		for (String s: callDAG.functions) {
@@ -30,11 +31,14 @@ public class DegreeAnalysis {
 		}
 		
 		for (int i: inDegreeHistogram.keySet()) {
-			System.out.println(i + "\t" + inDegreeHistogram.get(i) * 1.0 / callDAG.functions.size());
+			pw.println(Math.log10(i) + "\t" + Math.log10(inDegreeHistogram.get(i) * 1.0 / callDAG.functions.size()));
 		}
+		
+		pw.close();
 	}
 	
-	void getOutDegreeDistribution(CallDAG callDAG) {		
+	void getOutDegreeDistribution(CallDAG callDAG, String filePath) throws Exception {		
+		PrintWriter pw = new PrintWriter(new File("Results//outdeg-dist-" + filePath + ".txt"));
 		Map<Integer, Integer> outDegreeHistogram = new TreeMap();
 		
 		for (String s: callDAG.functions) {
@@ -55,8 +59,10 @@ public class DegreeAnalysis {
 		}
 		
 		for (int i: outDegreeHistogram.keySet()) {
-			System.out.println(i + "\t" + outDegreeHistogram.get(i) * 1.0 / callDAG.functions.size());
+			pw.println(Math.log10(i) + "\t" + Math.log10(outDegreeHistogram.get(i) * 1.0 / callDAG.functions.size()));
 		}
+		
+		pw.close();
 	}
 	
 	void getInDegreeCCDF(CallDAG callDAG, String filePath) throws Exception {		

@@ -72,7 +72,7 @@ public class CallDAG {
 		
 		// load & initialize the attributes of the call graph
 		loadCallGraph(callGraphFileName);
-		removeCycles(); // should i only ignore cycles?
+		removeCycles(); // or should I only ignore cycles?
 		loadDegreeMetric();
 		loadLocationMetric(); // must load degree metric before
 		loadGeneralityMetric(); 
@@ -151,6 +151,7 @@ public class CallDAG {
 	public void removeCycles() {
 //		go through roots
 		boolean loop = true;
+		int k = 0;
 		while (loop) {
 			visited = new HashSet();
 			loop = false;
@@ -169,11 +170,13 @@ public class CallDAG {
 						if (!callTo.containsKey(source) && !callFrom.containsKey(source)) functions.remove(source);
 						if (!callTo.containsKey(target) && !callFrom.containsKey(target)) functions.remove(target);
 						--nEdges;
+						++k;
 						loop = true;
 					}
 				}
 			}
 		}
+		System.out.println(k + " cycle edges removed!");
 	}
 	
 	public void loadDegreeMetric() {
