@@ -121,13 +121,16 @@ public class RandomNetworkGenerator {
 	public void chooseEdgePairsAndSwap() throws Exception {
 		int nFunctions = functionLevel.size();
 		Object[] functionNames = functionLevel.keySet().toArray();
-		Random random = new Random(System.nanoTime());
 //		Random random = new Random(1221388376679119L); //113355, 335577, 557789
 		int kount = 0;
+		int nAttempts = 0;
+		int nEventA = 0, nEventB = 0;
 		PrintWriter pw = new PrintWriter(new File("Results//random-level-medians-" + randomVersionNumber + ".txt"));
+		PrintWriter pw2 = new PrintWriter(new File("Results//rewiring-events-" + randomVersionNumber + ".txt"));		
 		
-		while(kount < callDAG.nEdges * 40) {
+		while(kount < callDAG.nEdges * 10) {
 //		while(kount < 1000) {
+			Random random = new Random(System.nanoTime());
 			int rs1, rs2; // random_index_source_1 = rs1, random_index_source_2 = rs2
 			String fs1, fs2; // function-name_source_1 = fs1, function-name_source_2 = fs2
 			int ls1, ls2; // level_source_1 = ls1, level_source_2 = ls2
@@ -167,6 +170,8 @@ public class RandomNetworkGenerator {
 				continue;
 			}
 			
+			++nAttempts; // skipping the already existing edge attempts + leaf as source attempts			
+			
 //			cycle check
 			if (ls1 <= lt2) {
 //				check if s1 is reachable from t2
@@ -186,8 +191,11 @@ public class RandomNetworkGenerator {
 //			swap ...
 			++kount;
 //			System.out.println("Swap count: " + kount);
-			System.out.println("Swapped (" + fs1 + "," + ft1 + ") with (" + fs2 + "," + ft2 + ")");	
+//			System.out.println("Swapped (" + fs1 + "," + ft1 + ") with (" + fs2 + "," + ft2 + ")");	
 
+			if ((ls1 > lt2) && (ls2 > lt1)) ++nEventA;
+			else ++nEventB;
+			
 //			should the callTo/callFrom be made Set! (done!)
 			callDAG.callTo.get(fs1).remove(ft1);
 			callDAG.callTo.get(fs1).add(ft2);
@@ -228,26 +236,29 @@ public class RandomNetworkGenerator {
 				int j = 0;
 				for (int i : functionLevel.values()) a[j++] = i;
 				pw.println("Random Median of Levels: " + StatUtils.percentile(a, 50.0));
+				pw2.println(nAttempts + "\t" + nEventA + "\t" + nEventB);
+				nAttempts = nEventA = nEventB = 0;
 			}
 		}
 		
 		pw.close();
+		pw2.close();
 		
-		for (String f: functionLevel.keySet()) {
-			System.out.println("Function: " + f + " Level: " + functionLevel.get(f));
-		}
-		
-		for (String f: callDAG.functions) {
-			System.out.print(f + " calling ");
-			if (!callDAG.callTo.containsKey(f)) {
-				System.out.println();
-				continue;
-			}
-			for (String s: callDAG.callTo.get(f)) {
-				System.out.print(s + " ");
-			}
-			System.out.println();
-		}
+//		for (String f: functionLevel.keySet()) {
+//			System.out.println("Function: " + f + " Level: " + functionLevel.get(f));
+//		}
+//		
+//		for (String f: callDAG.functions) {
+//			System.out.print(f + " calling ");
+//			if (!callDAG.callTo.containsKey(f)) {
+//				System.out.println();
+//				continue;
+//			}
+//			for (String s: callDAG.callTo.get(f)) {
+//				System.out.print(s + " ");
+//			}
+//			System.out.println();
+//		}
 	}
 	
 	public void generateRandomNetwork(String rVN) throws Exception {

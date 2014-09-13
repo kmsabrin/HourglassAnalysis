@@ -2,10 +2,10 @@
 public class Driver {
 	public static void main(String[] args) throws Exception {		
 /*****************************************************************************/
-		String versionNum = "v1.0.0";
-		CallDAG callDAG = new CallDAG("callGraphs//full.graph-sqlite-1.0.0");
-		System.out.println("nFunctions: " + callDAG.functions.size());
-		System.out.println("nEdges: " + callDAG.nEdges);
+//		String versionNum = "v26g4";
+//		CallDAG callDAG = new CallDAG("other_callGraphs//full.graph-2.6.26g4");
+//		System.out.println("nFunctions: " + callDAG.functions.size());
+//		System.out.println("nEdges: " + callDAG.nEdges);
 //		int nRoots = 0, nLeaves = 0;
 //		for (String s: callDAG.functions) {
 //			if (!callDAG.callFrom.containsKey(s)) ++nRoots;
@@ -28,23 +28,19 @@ public class Driver {
 /*****************************************************************************/
 //		degreeAnalysis.getInDegreeCCDF(callDAG);
 //		degreeAnalysis.getOutDegreeCCDF(callDAG);
-		
 //		degreeAnalysis.getLocationVSAvgInDegree(callDAG, versionNum);
 //		degreeAnalysis.getLocationVSAvgOutDegree(callDAG, versionNum);
-
 //		degreeAnalysis.getIndegreeVsOutDegree(callDAG);
-
 //		degreeAnalysis.getInDegreeDistribution(callDAG, versionNum);
 //		degreeAnalysis.getOutDegreeDistribution(callDAG, versionNum);
-		
 //		degreeAnalysis.getIndegreeVsOutDegreeCorrelationCoefficient(callDAG);
 //		degreeAnalysis.getSpearmanCoefficientForAllVersions();
 /*****************************************************************************/
 		
 /*****************************************************************************/
-		locationAnalysis.getLocationHistogram(callDAG, versionNum);
+//		locationAnalysis.getLocationHistogram(callDAG, versionNum);
 //		locationAnalysis.getLocationVsCallDirection(callDAG);
-//		locationAnalysis.getClusterLocationDistribution(callDAG);
+//		locationAnalysis.getClusterLocationDistribution();
 //		locationAnalysis.getLeafCallerLocationHistogram(callDAG);
 //		locationAnalysis.getLocationHistogramForEachVersion();
 //		locationAnalysis.getLeafAnomalyForMcount();
@@ -75,10 +71,14 @@ public class Driver {
 
 /*****************************************************************************/		
 //		evolutionaryAnalysis.getAverageGeneralityPerLocationForEachVersion();
-//		evolutionaryAnalysis.getDeathBirthTrendPerLocationForConsecutiveVersions();
+//		evolutionaryAnalysis.getEvolutionaryDeathBirthTrend();
 //		evolutionaryAnalysis.getLocationHistogramForEachVersion();
 //		evolutionaryAnalysis.getViolationMetricForEachVersion();
 //		evolutionaryAnalysis.getNumClustersForEachVersion();
+//		evolutionaryAnalysis.getLocationVsSizeTrend();
+//		evolutionaryAnalysis.getNetworkGrwothTrend();
+//		evolutionaryAnalysis.getClusterSizeTrend();
+		evolutionaryAnalysis.getGenCmpScatterForAllVersions();
 /*****************************************************************************/
 
 /*****************************************************************************/		

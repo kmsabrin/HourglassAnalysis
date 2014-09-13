@@ -1,3 +1,5 @@
+import java.io.File;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -28,10 +30,7 @@ public class AgeAnalysis {
 		Set<String> totalFunction = new HashSet();
 		Set<String> rebornFunction = new HashSet();
 		for (int i = 0; i < 40; ++i) {
-			CallDAG callDAG = new CallDAG("callGraphs//full.graph-2.6." + i);
-			
-//			int q1 = 0, q2 = 0, q3 = 0, q4 = 0;
-			
+			CallDAG callDAG = new CallDAG("callGraphs//full.graph-2.6." + i);		
 			for (String s: callDAG.functions) {
 				if (!birthVersion.containsKey(s)) {
 					birthVersion.put(s, i);
@@ -50,18 +49,7 @@ public class AgeAnalysis {
 				mostRecentLocation.put(s, callDAG.location.get(s));
 				mostRecentComplexity.put(s, callDAG.complexity.get(s));
 				mostRecentGenerality.put(s, callDAG.generality.get(s));
-				
-//				double m = mostRecentLocation.get(s);
-//				double g = mostRecentGenerality.get(s);
-//				double c = mostRecentComplexity.get(s);
-//				
-//				if (g > 0.250 && c > 0.090) { ++q1; continue; }
-//				if (g < 0.250 && c > 0.055) { ++q2; continue; }
-//				if (g < 0.250 && c < 0.055) { ++q3; continue; }
-//				if (g > 0.250 && c < 0.090) { ++q4; continue; }
 			}
-			
-//			System.out.println("version_" + i + "\t" + q1 + "\t" + q2 + "\t" + q3 + "\t" + q4);
 		}
 		
 //		System.out.println("nFunctions: " + totalFunction.size() + " nRebornFunctions: " + rebornFunction.size());
@@ -138,126 +126,126 @@ public class AgeAnalysis {
 //			System.out.println(i +"\t" + getMode(locationModeVSAge.get(i)));
 //		}
 //	}
-	
-	public void getLastLocationVSDeathPercentage() {
-		Map<Double, Integer> locationVSDeathFrequency = new TreeMap();
-		Map<Double, Integer> locationFrequency = new TreeMap();
-		
-		for (String s: birthVersion.keySet()) {
-			double location = mostRecentLocation.get(s); 
-			if (mostRecentVersion.get(s) < 29) {
-				if (locationVSDeathFrequency.containsKey(location)) {
-					int v = locationVSDeathFrequency.get(location);
-					locationVSDeathFrequency.put(location, v + 1);
-				}
-				else locationVSDeathFrequency.put(location, 1);
-			}
-			
-			if (locationFrequency.containsKey(location)) {
-				int v = locationFrequency.get(location);
-				locationFrequency.put(location, v + 1);
-			}
-			else locationFrequency.put(location, 1);		
-		}
-		
-		System.out.println("Last Location VS Death Percentage");
-		for (Double d: locationVSDeathFrequency.keySet()) {
-			System.out.println(d + "\t" + locationVSDeathFrequency.get(d) * 100.0 / locationFrequency.get(d));
-		}
-	}
-	
-	public void getLastLocationVSPersistency() {
-		Map<Double, Integer> locationVSAliveFrequency = new TreeMap();
-		Map<Double, Integer> locationFrequency = new TreeMap();
-		
-		for (String s: birthVersion.keySet()) {
-			double location = mostRecentLocation.get(s); 
-			if (mostRecentVersion.get(s) >= 29) {
-				if (locationVSAliveFrequency.containsKey(location)) {
-					int v = locationVSAliveFrequency.get(location);
-					locationVSAliveFrequency.put(location, v + 1);
-				}
-				else locationVSAliveFrequency.put(location, 1);
-			}
-			
-			if (locationFrequency.containsKey(location)) {
-				int v = locationFrequency.get(location);
-				locationFrequency.put(location, v + 1);
-			}
-			else locationFrequency.put(location, 1);		
-		}
-		
-		System.out.println("Last Location VS Alive Percentage");
-		for (Double d: locationVSAliveFrequency.keySet()) {
-			System.out.println(d + "\t" + locationVSAliveFrequency.get(d) * 100.0 / locationFrequency.get(d));
-		}
-	}
-	
-	public void getAgeVSDeathPercentage() {
-		int deathFrequencey[] = new int[50];
-		int nDeadNodes = 0;
-			
-		for (String s: birthVersion.keySet()) {
-			int age = mostRecentVersion.get(s) - birthVersion.get(s) + 1;
-			/*##########################################################*/
-			if (mostRecentVersion.get(s) < 29) { // hard code
-				++nDeadNodes;
-				deathFrequencey[age]++;
-			}
-		}
-		
-		System.out.println("Age VS Death Percentage");
-		for (int i = 1; i < 31; ++i) {
-			System.out.println(i + "\t" + deathFrequencey[i] * 100.0 / nDeadNodes);
-		}
-	}
-	
-	public void getLastLocationVSAverageAge() {
-		Map<Double, List<Integer>> locationVSAges = new TreeMap();
-		
-		for (String s: birthVersion.keySet()) {
-			if (mostRecentVersion.get(s) < 29) continue; // consider live nodes only
-			
-			int age = mostRecentVersion.get(s) - birthVersion.get(s) + 1;
-			double location = mostRecentLocation.get(s);
-			if (locationVSAges.containsKey(location)) {
-				locationVSAges.get(location).add(age);
-			}
-			else {
-				List<Integer> ages = new ArrayList();
-				ages.add(age);
-				locationVSAges.put(location, ages);
-			}
-		}
-		
-		for (double d: locationVSAges.keySet()) {
-//			AVERAGE
-			double sum = 0;
-			for (int i: locationVSAges.get(d)) {
-				sum += i;
-			}
-			double avg = sum / locationVSAges.get(d).size();
-			System.out.println(d + "\t" + avg);
-			
-//			MEDIAN
-//			List<Integer> ages = locationVSAges.get(d);
-//			Collections.sort(ages);
-//			double median = ages.get(ages.size() / 2);
-//			System.out.println(d + "\t" + median);
-		}
-	}
-	
-	public void getAgeVSLastLocation() {
-		Map<Double, Integer> locationAgeMap = new HashMap();
-		for (String s: birthVersion.keySet()) {
-			int age = mostRecentVersion.get(s) - birthVersion.get(s) + 1;
-			double location = mostRecentLocation.get(s);
-			// hard code
-			if (mostRecentVersion.get(s) >= 29 && age > 20) { 
-				System.out.println(age + "\t" + location);				
-			}	
-		}
-	}
+//	
+//	public void getLastLocationVSDeathPercentage() {
+//		Map<Double, Integer> locationVSDeathFrequency = new TreeMap();
+//		Map<Double, Integer> locationFrequency = new TreeMap();
+//		
+//		for (String s: birthVersion.keySet()) {
+//			double location = mostRecentLocation.get(s); 
+//			if (mostRecentVersion.get(s) < 29) {
+//				if (locationVSDeathFrequency.containsKey(location)) {
+//					int v = locationVSDeathFrequency.get(location);
+//					locationVSDeathFrequency.put(location, v + 1);
+//				}
+//				else locationVSDeathFrequency.put(location, 1);
+//			}
+//			
+//			if (locationFrequency.containsKey(location)) {
+//				int v = locationFrequency.get(location);
+//				locationFrequency.put(location, v + 1);
+//			}
+//			else locationFrequency.put(location, 1);		
+//		}
+//		
+//		System.out.println("Last Location VS Death Percentage");
+//		for (Double d: locationVSDeathFrequency.keySet()) {
+//			System.out.println(d + "\t" + locationVSDeathFrequency.get(d) * 100.0 / locationFrequency.get(d));
+//		}
+//	}
+//	
+//	public void getLastLocationVSPersistency() {
+//		Map<Double, Integer> locationVSAliveFrequency = new TreeMap();
+//		Map<Double, Integer> locationFrequency = new TreeMap();
+//		
+//		for (String s: birthVersion.keySet()) {
+//			double location = mostRecentLocation.get(s); 
+//			if (mostRecentVersion.get(s) >= 29) {
+//				if (locationVSAliveFrequency.containsKey(location)) {
+//					int v = locationVSAliveFrequency.get(location);
+//					locationVSAliveFrequency.put(location, v + 1);
+//				}
+//				else locationVSAliveFrequency.put(location, 1);
+//			}
+//			
+//			if (locationFrequency.containsKey(location)) {
+//				int v = locationFrequency.get(location);
+//				locationFrequency.put(location, v + 1);
+//			}
+//			else locationFrequency.put(location, 1);		
+//		}
+//		
+//		System.out.println("Last Location VS Alive Percentage");
+//		for (Double d: locationVSAliveFrequency.keySet()) {
+//			System.out.println(d + "\t" + locationVSAliveFrequency.get(d) * 100.0 / locationFrequency.get(d));
+//		}
+//	}
+//	
+//	public void getAgeVSDeathPercentage() {
+//		int deathFrequencey[] = new int[50];
+//		int nDeadNodes = 0;
+//			
+//		for (String s: birthVersion.keySet()) {
+//			int age = mostRecentVersion.get(s) - birthVersion.get(s) + 1;
+//			/*##########################################################*/
+//			if (mostRecentVersion.get(s) < 29) { // hard code
+//				++nDeadNodes;
+//				deathFrequencey[age]++;
+//			}
+//		}
+//		
+//		System.out.println("Age VS Death Percentage");
+//		for (int i = 1; i < 31; ++i) {
+//			System.out.println(i + "\t" + deathFrequencey[i] * 100.0 / nDeadNodes);
+//		}
+//	}
+//	
+//	public void getLastLocationVSAverageAge() {
+//		Map<Double, List<Integer>> locationVSAges = new TreeMap();
+//		
+//		for (String s: birthVersion.keySet()) {
+//			if (mostRecentVersion.get(s) < 29) continue; // consider live nodes only
+//			
+//			int age = mostRecentVersion.get(s) - birthVersion.get(s) + 1;
+//			double location = mostRecentLocation.get(s);
+//			if (locationVSAges.containsKey(location)) {
+//				locationVSAges.get(location).add(age);
+//			}
+//			else {
+//				List<Integer> ages = new ArrayList();
+//				ages.add(age);
+//				locationVSAges.put(location, ages);
+//			}
+//		}
+//		
+//		for (double d: locationVSAges.keySet()) {
+////			AVERAGE
+//			double sum = 0;
+//			for (int i: locationVSAges.get(d)) {
+//				sum += i;
+//			}
+//			double avg = sum / locationVSAges.get(d).size();
+//			System.out.println(d + "\t" + avg);
+//			
+////			MEDIAN
+////			List<Integer> ages = locationVSAges.get(d);
+////			Collections.sort(ages);
+////			double median = ages.get(ages.size() / 2);
+////			System.out.println(d + "\t" + median);
+//		}
+//	}
+//	
+//	public void getAgeVSLastLocation() {
+//		Map<Double, Integer> locationAgeMap = new HashMap();
+//		for (String s: birthVersion.keySet()) {
+//			int age = mostRecentVersion.get(s) - birthVersion.get(s) + 1;
+//			double location = mostRecentLocation.get(s);
+//			// hard code
+//			if (mostRecentVersion.get(s) >= 29 && age > 20) { 
+//				System.out.println(age + "\t" + location);				
+//			}	
+//		}
+//	}
 	
 	// transient and stable distribution
 	// extreme life-span distribution with location
@@ -278,8 +266,8 @@ public class AgeAnalysis {
 //			if (age > 1 ) continue; // get the min aged nodes
 //			if (age < 40) continue; // get the max aged nodes
 			
-//			if (age < 35) continue; // get the stable nodes
-			if (age > 5) continue; // get the transient nodes
+			if (age < 39) continue; // get the stable nodes
+//			if (age > 2) continue; // get the transient nodes
 			
 //			System.out.println(location);
 			
@@ -328,113 +316,124 @@ public class AgeAnalysis {
 		}
 		
 		for (double d: locationDispersionCount.keySet()) {
-//			System.out.println(d + "\t" + locationDispersionCount.get(d) * 100.0 / locationFrequency.get(d));
-			
+//			System.out.println(d + "\t" + locationDispersionCount.get(d) * 100.0 / locationFrequency.get(d));			
 			System.out.println(d + "\t" + locationAverageDispersion.get(d) / locationDispersionCount.get(d));
 		}
 	}
 	
-	public void getClusterAgeDistribution() { // visually separated clusters
-		double count1 = 0;
-		double count2 = 0;
-		
-		Map<Integer, Integer> ageHistogram = new TreeMap();
-		for (String s: birthVersion.keySet()) {			
-			int a = mostRecentVersion.get(s) - birthVersion.get(s) + 1; // age
-//			if (a < 40) continue; // consider live nodes only
-
-			double m = mostRecentLocation.get(s);
-			double g = mostRecentGenerality.get(s);
-			double c = mostRecentComplexity.get(s);
-			
-			if (g > 0.25) continue;
-			if (c > 0.05) continue;
-			
-			if (mostRecentVersion.get(s) >= 29) ++count1;
-			if (a == 40) ++count2;
-			
-//			System.out.println(s);
-			
-//			++count;
-			
-			if (ageHistogram.containsKey(a)) {
-				int f = ageHistogram.get(a);
-				ageHistogram.put(a, f + 1);
-			}
-			else {
-				ageHistogram.put(a, 1);
-			}
-		}
-		
-		System.out.println(count1 + "\t" + count2);
-		
-//		in percentage
-//		for (int i: ageHistogram.keySet()) {
-//			System.out.println(i + "\t" + ageHistogram.get(i) * 100.0 / count);
+//	public void getClusterAgeDistribution() { // visually separated clusters
+//		double count1 = 0;
+//		double count2 = 0;
+//		
+//		Map<Integer, Integer> ageHistogram = new TreeMap();
+//		for (String s: birthVersion.keySet()) {			
+//			int a = mostRecentVersion.get(s) - birthVersion.get(s) + 1; // age
+////			if (a < 40) continue; // consider live nodes only
+//
+//			double m = mostRecentLocation.get(s);
+//			double g = mostRecentGenerality.get(s);
+//			double c = mostRecentComplexity.get(s);
+//			
+//			if (g > 0.25) continue;
+//			if (c > 0.05) continue;
+//			
+//			if (mostRecentVersion.get(s) >= 29) ++count1;
+//			if (a == 40) ++count2;
+//			
+////			System.out.println(s);
+//			
+////			++count;
+//			
+//			if (ageHistogram.containsKey(a)) {
+//				int f = ageHistogram.get(a);
+//				ageHistogram.put(a, f + 1);
+//			}
+//			else {
+//				ageHistogram.put(a, 1);
+//			}
 //		}
-	}
+//		
+//		System.out.println(count1 + "\t" + count2);
+//		
+////		in percentage
+////		for (int i: ageHistogram.keySet()) {
+////			System.out.println(i + "\t" + ageHistogram.get(i) * 100.0 / count);
+////		}
+//	}
 	
-	// done manually
-	// visually separated clusters
-	public void getClusterLifeTimeDistribution() { // fig:clusters-lifespan, fig:clusters-persistence
-		List<Integer> lifeTimeListQuad1 = new ArrayList();
-		List<Integer> lifeTimeListQuad2 = new ArrayList();
-		List<Integer> lifeTimeListQuad3 = new ArrayList();
-		List<Integer> lifeTimeListQuad4 = new ArrayList();
+	// visually separated clusters // actually going to use the mean of 1 dimensional distributions
+	public void getClusterLifeTimeDistribution() throws Exception { // fig:cluster-lifespan, fig:cluster-persistence
+		PrintWriter pwts = new PrintWriter(new File("Results//cluster-transient-stable.txt"));
+		PrintWriter pwls = new PrintWriter(new File("Results//cluster-life-span.txt"));
 		
-		double p1 = 0, p2 = 0, p3 = 0, p4 = 0;
+		List<Integer> lifeSpanGC = new ArrayList();
+		List<Integer> lifeSpangC = new ArrayList();
+		List<Integer> lifeSpangc = new ArrayList();
+		List<Integer> lifeSpanGc = new ArrayList();
+		
+		double sGC = 0, sgC = 0, sgc = 0, sGc = 0; // stable node counters
+		double tGC = 0, tgC = 0, tgc = 0, tGc = 0; // transient node counters
+		int transientAge = 3;
+		int stableAge = 38;
+		
+		double generalitySeparator, complexitySeparator;
+		double gS = 0, cS = 0;
+		for (String s: birthVersion.keySet()) {
+			gS += mostRecentGenerality.get(s);
+			cS += mostRecentComplexity.get(s);
+		}
+		generalitySeparator = gS / birthVersion.size();
+		complexitySeparator = cS / birthVersion.size();
 		
 		for (String s: birthVersion.keySet()) {			
-			int lifeTime = mostRecentVersion.get(s) - birthVersion.get(s) + 1; // age
+			int lifeTime = mostRecentVersion.get(s) - birthVersion.get(s) + 1; // life-span
 			double m = mostRecentLocation.get(s);
-			double g = mostRecentGenerality.get(s);
+			double g = mostRecentGenerality.get(s); // ? are you sure
 			double c = mostRecentComplexity.get(s);
 			
-			if (g > 0.250 && c > 0.090) { 
-				lifeTimeListQuad1.add(lifeTime);
-				if (lifeTime > 39) ++p1;
-				continue; 
+			if (g > generalitySeparator && c > complexitySeparator) { 
+				lifeSpanGC.add(lifeTime);
+				if (lifeTime >= stableAge) ++sGC;
+				else if (lifeTime <= transientAge) ++tGC;				 
 			}
-			
-			if (g < 0.250 && c > 0.055) { 
-				lifeTimeListQuad2.add(lifeTime); 
-				if (lifeTime > 39) ++p2;
-				continue; 
+			else if (g <= generalitySeparator && c > complexitySeparator) { 
+				lifeSpangC.add(lifeTime); 
+				if (lifeTime >= stableAge) ++sgC;
+				else if (lifeTime <= transientAge) ++tgC;				 
 			}
-			
-			if (g < 0.250 && c < 0.055) { 
-				lifeTimeListQuad3.add(lifeTime);
-				if (lifeTime > 39) ++p3;
-				continue; 
+			else if (g <= generalitySeparator && c <= complexitySeparator) { 
+				lifeSpangc.add(lifeTime);
+				if (lifeTime >= stableAge) ++sgc;
+				else if (lifeTime <= transientAge) ++tgc;				 
 			}
-			
-			if (g > 0.250 && c < 0.090) { 
-				lifeTimeListQuad4.add(lifeTime);
-				if (lifeTime > 39) ++p4;
-				continue; 
+			else if (g > generalitySeparator && c <= complexitySeparator) { 
+				lifeSpanGc.add(lifeTime);
+				if (lifeTime >= stableAge) ++sGc;
+				else if (lifeTime <= transientAge) ++tGc;				 
 			}
 		}
 		
 		// percentage of persistent nodes
-		System.out.println(p1 * 100.0 / lifeTimeListQuad1.size());
-		System.out.println(p2 * 100.0 / lifeTimeListQuad2.size());
-		System.out.println(p3 * 100.0 / lifeTimeListQuad3.size());
-		System.out.println(p4 * 100.0 / lifeTimeListQuad4.size());
+		pwts.println((sGC * 100.0 / lifeSpanGC.size()) + "\t" + (tGC * 100.0 / lifeSpanGC.size()));
+		pwts.println((sgC * 100.0 / lifeSpangC.size()) + "\t" + (tgC * 100.0 / lifeSpangC.size()));
+		pwts.println((sgc * 100.0 / lifeSpangc.size()) + "\t" + (tgc * 100.0 / lifeSpangc.size()));
+		pwts.println((sGc * 100.0 / lifeSpanGc.size()) + "\t" + (tGc * 100.0 / lifeSpanGc.size()));
 		
+		// life-span percentiles
+		Object a[] = lifeSpanGC.toArray();
+		getPercentiles("GC", a, pwls);
+		a = lifeSpangC.toArray();
+		getPercentiles("gC", a, pwls);
+		a = lifeSpangc.toArray();
+		getPercentiles("gc", a, pwls);
+		a = lifeSpanGc.toArray();
+		getPercentiles("Gc", a, pwls);
 		
-		/*
-		Object a[] = lifeTimeListQuad1.toArray();
-		getPercentiles("Quad 1", a);
-		a = lifeTimeListQuad2.toArray();
-		getPercentiles("Quad 2", a);
-		a = lifeTimeListQuad3.toArray();
-		getPercentiles("Quad 3", a);
-		a = lifeTimeListQuad4.toArray();
-		getPercentiles("Quad 4", a);
-		*/
+		pwts.close();
+		pwls.close();
 	}
 	
-	void getPercentiles(String id, Object a[]) {
+	void getPercentiles(String id, Object a[], PrintWriter pw) {
 		double b[] = new double[a.length];
 		for (int i = 0; i < a.length; ++i) {
 			b[i] = (int)a[i];
@@ -442,10 +441,11 @@ public class AgeAnalysis {
 		double q1 = StatUtils.percentile(b, 25.0);
 		double qm = StatUtils.percentile(b, 50.0);
 		double q3 = StatUtils.percentile(b, 75.0);
-		System.out.println(id + "\t" + q1 + "\t" + qm + "\t" + q3);
+		pw.println(id + "\t" + (int)q1 + "\t" + (int)qm + "\t" + (int)q3);
 	}
 	
-	public void getLocationLifeTimeDistribution() { // fig:loc-vs-evo-age
+	public void getLocationLifeTimeDistribution() throws Exception { // fig:loc-vs-evo-age
+		PrintWriter pw = new PrintWriter(new File("Results//loc-vs-evo-age.txt"));
 		Map<Double, List<Integer>> lifeSpanLocationMap = new TreeMap();
 		
 		for (String s: birthVersion.keySet()) {			
@@ -464,9 +464,15 @@ public class AgeAnalysis {
 		
 		for (double d: lifeSpanLocationMap.keySet()) {
 			Object a[] = lifeSpanLocationMap.get(d).toArray();
-			getPercentiles("Location " + d, a);
+			double b[] = new double[a.length];
+			for (int i = 0; i < a.length; ++i) {
+				b[i] = (Integer)a[i];
+			}
+			double q1 = StatUtils.percentile(b, 25.0);
+			double qm = StatUtils.percentile(b, 50.0);
+			double q3 = StatUtils.percentile(b, 75.0);
+			pw.println(d + "\t" + q1 + "\t" + qm + "\t" + q3);
 		}
+		pw.close();
 	}
 }
-
-

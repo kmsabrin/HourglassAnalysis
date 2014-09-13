@@ -176,7 +176,7 @@ public class CallDAG {
 				}
 			}
 		}
-		System.out.println(k + " cycle edges removed!");
+//		System.out.println(k + " cycle edges removed!");
 	}
 	
 	public void loadDegreeMetric() {

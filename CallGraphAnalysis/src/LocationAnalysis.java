@@ -72,48 +72,49 @@ public class LocationAnalysis {
 		System.out.println("Violation Metric: " + violatingPair / totalPair);
 	}
 	
-	public void getClusterLocationDistribution(CallDAG callDAG) { // visually separated clusters
-		double generalitySeparation = 0.2;
-		double complexitySeparation = 0.05;
-		double count = 0;
-		
-		Map<Double, Integer> locHistogram = new TreeMap();
-		for (String s: callDAG.location.keySet()) {
-			double m = callDAG.location.get(s);
-			double g = callDAG.generality.get(s);
-			double c = callDAG.complexity.get(s);
+	public void getClusterLocationDistribution() throws Exception { // mean separated clusters
+		int versions[] = new int[] { 0, 9, 19, 29, 39 };
 
-//			if (g > generalitySeparation && c > complexitySeparation) continue;
-//			if (g < generalitySeparation && c > complexitySeparation) continue;
-//			if (g < generalitySeparation && c < complexitySeparation) continue;
-//			if (g > generalitySeparation && c < complexitySeparation) continue;
-			
-			if (g > 0.2) continue;
-			if (c > 0.015) continue;
-			
-//			System.out.println(s);
-			
-			++count;
-			
-			if (locHistogram.containsKey(m)) {
-				int f = locHistogram.get(m);
-				locHistogram.put(m, f + 1);
+		for (int i : versions) {
+			CallDAG callDAG = new CallDAG("callGraphs//full.graph-2.6." + i);
+
+			double generalitySeparator, complexitySeparator;
+			double gS = 0, cS = 0;
+			for (String s: callDAG.location.keySet()) {
+				gS += callDAG.generality.get(s);
+				cS += callDAG.complexity.get(s);
 			}
-			else {
-				locHistogram.put(m, 1);
+			generalitySeparator = gS / callDAG.location.size();
+			complexitySeparator = cS / callDAG.location.size();
+			
+			PrintWriter pwGC = new PrintWriter(new File("Results//cluster1-GC-locations-v" + i + ".txt"));
+			PrintWriter pwgC = new PrintWriter(new File("Results//cluster2-gC-locations-v" + i + ".txt"));
+			PrintWriter pwgc = new PrintWriter(new File("Results//cluster3-gc-locations-v" + i + ".txt"));
+			PrintWriter pwGc = new PrintWriter(new File("Results//cluster4-Gc-locations-v" + i + ".txt"));
+			
+			for (String s: callDAG.location.keySet()) {			
+				double m = callDAG.location.get(s);
+				double g = callDAG.generality.get(s);
+				double c = callDAG.complexity.get(s);
+				
+				if (g > generalitySeparator && c > complexitySeparator) { 
+					pwGC.println(m);
+				}
+				else if (g <= generalitySeparator && c > complexitySeparator) { 
+					pwgC.println(m);				
+				}
+				else if (g <= generalitySeparator && c <= complexitySeparator) { 
+					pwgc.println(m);					
+				}
+				else if (g > generalitySeparator && c <= complexitySeparator) {
+					pwGc.println(m);				
+				}
 			}
-		}
-		
-		System.out.println(count);
-//		in percentage
-		for (double d = 0; d <= 100; d++) {
-//			System.out.println(d + "\t" + locHistogram.get(d) * 100.0 / count);
-//			System.out.println(d / 100.0);
-			double v = 0;
-			if (locHistogram.containsKey(d / 100.0)) {
-				v = locHistogram.get(d / 100.0);
-			}
-			System.out.println(v * 100.0 / count);
+			
+			pwGC.close();
+			pwgC.close();
+			pwgc.close();
+			pwGc.close();
 		}
 	}
 	
