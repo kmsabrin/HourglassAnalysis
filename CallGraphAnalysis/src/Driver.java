@@ -2,8 +2,8 @@
 public class Driver {
 	public static void main(String[] args) throws Exception {		
 /*****************************************************************************/
-//		String versionNum = "v26g4";
-//		CallDAG callDAG = new CallDAG("other_callGraphs//full.graph-2.6.26g4");
+		String versionNum = "v15";
+		CallDAG callDAG = new CallDAG("callGraphs//full.graph-2.6.15");
 //		System.out.println("nFunctions: " + callDAG.functions.size());
 //		System.out.println("nEdges: " + callDAG.nEdges);
 //		int nRoots = 0, nLeaves = 0;
@@ -22,12 +22,12 @@ public class Driver {
 		GeneralityAnalysis generalityAnalysis = new GeneralityAnalysis();
 		EvolutionAnalysis evolutionaryAnalysis = new EvolutionAnalysis();
 		DiameterAnalysis diameterAnalysis = new DiameterAnalysis();
-//		RandomNetworkGenerator randomNetworkGenerator = new RandomNetworkGenerator(callDAG);
+		RandomNetworkGenerator randomNetworkGenerator = new RandomNetworkGenerator(callDAG);
 /*****************************************************************************/
 		
 /*****************************************************************************/
-//		degreeAnalysis.getInDegreeCCDF(callDAG);
-//		degreeAnalysis.getOutDegreeCCDF(callDAG);
+//		degreeAnalysis.getInDegreeCCDF(callDAG, versionNum);
+//		degreeAnalysis.getOutDegreeCCDF(callDAG, versionNum);
 //		degreeAnalysis.getLocationVSAvgInDegree(callDAG, versionNum);
 //		degreeAnalysis.getLocationVSAvgOutDegree(callDAG, versionNum);
 //		degreeAnalysis.getIndegreeVsOutDegree(callDAG);
@@ -78,7 +78,7 @@ public class Driver {
 //		evolutionaryAnalysis.getLocationVsSizeTrend();
 //		evolutionaryAnalysis.getNetworkGrwothTrend();
 //		evolutionaryAnalysis.getClusterSizeTrend();
-		evolutionaryAnalysis.getGenCmpScatterForAllVersions();
+//		evolutionaryAnalysis.getGenCmpScatterForAllVersions();
 /*****************************************************************************/
 
 /*****************************************************************************/		
@@ -98,11 +98,12 @@ public class Driver {
 /*****************************************************************************/		
 //		ClusterAnalysis clusterAnalysis = new ClusterAnalysis(0.03, 30);
 //		clusterAnalysis.getClusters(callDAG);
+//		ClusterAnalysis.demonstrateClusters();
 /*****************************************************************************/		
 		
 /*****************************************************************************/		
-//		String randVersionNum = versionNum + "r3";
-//		randomNetworkGenerator.generateRandomNetwork(randVersionNum);
+		String randVersionNum = versionNum + "rX";
+		randomNetworkGenerator.generateRandomNetwork(randVersionNum);
 //		randomNetworkGenerator.callDAG.loadLocationMetric(); //		degree already loaded
 //		randomNetworkGenerator.callDAG.loadGeneralityMetric(); 
 //		randomNetworkGenerator.callDAG.loadComplexityMetric();

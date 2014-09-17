@@ -154,7 +154,8 @@ public class LocationAnalysis {
 		}
 	}
 	
-	public static void getWineGlassGroupsGrowth() {
+	public static void getWineGlassGroupsGrowth() throws Exception {
+		PrintWriter pw = new PrintWriter(new File("Results//wineglass-fractions.txt"));
 		for (int i = 0; i < 40; i++) {
 			CallDAG callDAG = new CallDAG("callGraphs//full.graph-2.6." + i);
 
@@ -167,7 +168,9 @@ public class LocationAnalysis {
 				else ++nNeck;
 			}
 			
-			System.out.println((nBase / sz) + "\t" + (nNeck / sz) + "\t" + (nCup / sz) + "\t" + "v2.6." + i);
+			pw.println((nBase / sz) + "\t" + (nNeck / sz) + "\t" + (nCup / sz) + "\t" + "v2.6." + i);
 		}
+		
+		pw.close();
 	}
 }

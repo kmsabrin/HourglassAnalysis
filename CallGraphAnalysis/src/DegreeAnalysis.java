@@ -66,7 +66,8 @@ public class DegreeAnalysis {
 	}
 	
 	void getInDegreeCCDF(CallDAG callDAG, String filePath) throws Exception {		
-		PrintWriter pw = new PrintWriter(new File("Results//indeg-CCDF-" + filePath + ".txt"));
+		PrintWriter pw1 = new PrintWriter(new File("Results//indeg-CCDF-log-log-" + filePath + ".txt"));
+		PrintWriter pw2 = new PrintWriter(new File("Results//indeg-CCDF-" + filePath + ".txt"));
 		Map<Integer, Integer> inDegreeHistogram = new TreeMap();
 		Map<Integer, Double> inDegreeCDF = new TreeMap();
 		
@@ -96,14 +97,19 @@ public class DegreeAnalysis {
 		
 		// CCDF: Complementary Cumulative Distribution Function
 		for (int i: inDegreeCDF.keySet()) {
-			pw.println(i + "\t" + (1.0 - inDegreeCDF.get(i)));
+			pw1.println(Math.log10(i+0.1) + "\t" + Math.log10((1.0 - inDegreeCDF.get(i)+0.001)));
+			pw2.println(i + "\t" + (1.0 - inDegreeCDF.get(i)));
+
 		}
 		
-		pw.close();
+		pw1.close();
+		pw2.close();
 	}
 	
 	void getOutDegreeCCDF(CallDAG callDAG, String filePath) throws Exception {					
-		PrintWriter pw = new PrintWriter(new File("Results//outdeg-CCDF-" + filePath + ".txt"));
+		PrintWriter pw1 = new PrintWriter(new File("Results//outdeg-CCDF-log-log-" + filePath + ".txt"));
+		PrintWriter pw2 = new PrintWriter(new File("Results//outdeg-CCDF-" + filePath + ".txt"));
+		
 		Map<Integer, Integer> outDegreeHistogram = new TreeMap();
 		Map<Integer, Double> outDegreeCDF = new TreeMap();
 		
@@ -133,10 +139,13 @@ public class DegreeAnalysis {
 		
 		// CCDF: Complementary Cumulative Distribution Function
 		for (int i: outDegreeCDF.keySet()) {
-			pw.println(i + "\t" + (1.0 - outDegreeCDF.get(i)));
+			pw1.println(Math.log10(i+0.1) + "\t" + Math.log10((1.0 - outDegreeCDF.get(i)+0.001)));
+			pw2.println(i + "\t" + (1.0 - outDegreeCDF.get(i)));
+
 		}
 		
-		pw.close();
+		pw1.close();
+		pw2.close();
 	}
 		
 	public void getLocationVSAvgOutDegree(CallDAG callDAG, String filePath) throws Exception {

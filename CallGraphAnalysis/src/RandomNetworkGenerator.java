@@ -14,14 +14,16 @@ public class RandomNetworkGenerator {
 	CallDAG callDAG;
 	Map<String, Integer> functionLevel;
 	Set<String> visited;
-	boolean isCycle;
+	Set<String> cycleVisited;
+	boolean hasCycle;
 	String randomVersionNumber;
 	
 	public RandomNetworkGenerator(CallDAG callDAG) {
 		this.callDAG = callDAG;
 		functionLevel = new HashMap();
 		visited = new HashSet();
-		isCycle = false;
+		cycleVisited = new HashSet();
+		hasCycle = false;
 	}
 	
 	public void getFunctionLevelTraverse(String function) {
@@ -96,11 +98,11 @@ public class RandomNetworkGenerator {
 	
 	public void cycleCheckTraverse(String node, String target, int targetLevel) {
 		if (node.equals(target)) { // target Found, cycle Exists
-			isCycle = true;
+			hasCycle = true;
 			return;
 		}
 		
-		if (isCycle) return; // target Already Found
+		if (hasCycle) return; // target Already Found
 		if (visited.contains(node)) return; // already Traversed
 		visited.add(node);
 		
@@ -114,8 +116,37 @@ public class RandomNetworkGenerator {
 	
 	public void cycleCheck(String source, String target, int targetLevel) {
 		visited.clear();
-		isCycle = false;
+		hasCycle = false;
 		cycleCheckTraverse(source, target, targetLevel);
+	}
+	
+	public void cycleCheckFullTraverse(String node) {
+		if (!callDAG.callTo.containsKey(node) || visited.contains(node))
+			return;
+
+		visited.add(node);
+		cycleVisited.add(node); // cycle check
+
+		for (String s : callDAG.callTo.get(node)) {
+			if (cycleVisited.contains(s)) {
+				hasCycle = true;
+				continue;
+			}
+			cycleCheckFullTraverse(s);
+		}
+		
+		cycleVisited.remove(node);
+	}
+	
+	public void cycleCheckFull() {
+		visited.clear();
+		cycleVisited.clear();
+		hasCycle = false;
+		for (String s: callDAG.functions) {
+			if (!visited.contains(s)) {
+				cycleCheckFullTraverse(s);
+			}
+		}
 	}
 	
 	public void chooseEdgePairsAndSwap() throws Exception {
@@ -128,7 +159,7 @@ public class RandomNetworkGenerator {
 		PrintWriter pw = new PrintWriter(new File("Results//random-level-medians-" + randomVersionNumber + ".txt"));
 		PrintWriter pw2 = new PrintWriter(new File("Results//rewiring-events-" + randomVersionNumber + ".txt"));		
 		
-		while(kount < callDAG.nEdges * 10) {
+		while(kount < callDAG.nEdges * 2) {
 //		while(kount < 1000) {
 			Random random = new Random(System.nanoTime());
 			int rs1, rs2; // random_index_source_1 = rs1, random_index_source_2 = rs2
@@ -176,14 +207,14 @@ public class RandomNetworkGenerator {
 			if (ls1 <= lt2) {
 //				check if s1 is reachable from t2
 				cycleCheck(ft2, fs1, ls1);
-				if (isCycle) {
+				if (hasCycle) {
 					continue;
 				}
 			}
 			else if (ls2 <= lt1) {
 //				check if s2 is reachable from t1
 				cycleCheck(ft1, fs2, ls2);
-				if (isCycle) {
+				if (hasCycle) {
 					continue;
 				}
 			}
@@ -265,5 +296,7 @@ public class RandomNetworkGenerator {
 		randomVersionNumber = rVN;
 		getFunctionLevel();
 		chooseEdgePairsAndSwap();
+		cycleCheckFull();
+		System.out.println("Cycle check: " + hasCycle);
 	}
 }

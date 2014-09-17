@@ -25,6 +25,10 @@ public class AgeAnalysis {
 		mostRecentLocation = new HashMap();
 		mostRecentComplexity = new HashMap();
 		mostRecentGenerality = new HashMap();
+		
+		/****
+		 * Think about using avgLocation, avgComplexity and avgGenerality
+		 */
 
 		// be careful with versions used for calculation check the hard codes (i.e 40) for number of versions used
 		Set<String> totalFunction = new HashSet();
@@ -379,7 +383,7 @@ public class AgeAnalysis {
 		double generalitySeparator, complexitySeparator;
 		double gS = 0, cS = 0;
 		for (String s: birthVersion.keySet()) {
-			gS += mostRecentGenerality.get(s);
+			gS += mostRecentGenerality.get(s); //
 			cS += mostRecentComplexity.get(s);
 		}
 		generalitySeparator = gS / birthVersion.size();
