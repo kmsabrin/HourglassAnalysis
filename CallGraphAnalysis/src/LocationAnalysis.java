@@ -73,10 +73,10 @@ public class LocationAnalysis {
 	}
 	
 	public void getClusterLocationDistribution() throws Exception { // mean separated clusters
-		int versions[] = new int[] { 0, 9, 19, 29, 39 };
+		int versions[] = new int[] { 1, 9, 19, 29, 39 }; // change for different network
 
 		for (int i : versions) {
-			CallDAG callDAG = new CallDAG("callGraphs//full.graph-2.6." + i);
+			CallDAG callDAG = new CallDAG(Driver.networkPath + i);
 
 			double generalitySeparator, complexitySeparator;
 			double gS = 0, cS = 0;
@@ -142,8 +142,8 @@ public class LocationAnalysis {
 	
 	public void getLeafAnomalyForMcount() {
 //		difference in number of leaves for without(v26)/with(v27) mcount
-		CallDAG callDAGv26 = new CallDAG("callGraphs//full.graph-2.6.26g3");
-		CallDAG callDAGv27 = new CallDAG("callGraphs//full.graph-2.6.27g3");
+		CallDAG callDAGv26 = new CallDAG("kernel_callgraphs//full.graph-2.6.26g3");
+		CallDAG callDAGv27 = new CallDAG("kernel_callgraphs//full.graph-2.6.27g3");
 		
 		for (String s: callDAGv26.location.keySet()) {
 			double loc26 = callDAGv26.location.get(s);
@@ -155,9 +155,10 @@ public class LocationAnalysis {
 	}
 	
 	public static void getWineGlassGroupsGrowth() throws Exception {
-		PrintWriter pw = new PrintWriter(new File("Results//wineglass-fractions.txt"));
-		for (int i = 0; i < 40; i++) {
-			CallDAG callDAG = new CallDAG("callGraphs//full.graph-2.6." + i);
+		// CUSTOMIZED FOR DIFFERENT NETWORK
+		PrintWriter pw = new PrintWriter(new File("Results//" + Driver.networkUsed + "-wineglass-fractions.txt"));
+		for (int i = Driver.versiontStart; i < Driver.versionEnd; i++) {
+			CallDAG callDAG = new CallDAG(Driver.networkPath + i);
 
 			double nBase = 0, nNeck = 0, nCup = 0, sz = callDAG.location.size();
 			
@@ -168,7 +169,7 @@ public class LocationAnalysis {
 				else ++nNeck;
 			}
 			
-			pw.println((nBase / sz) + "\t" + (nNeck / sz) + "\t" + (nCup / sz) + "\t" + "v2.6." + i);
+			pw.println((nBase / sz) + "\t" + (nNeck / sz) + "\t" + (nCup / sz) + "\t" + Driver.networkUsed + i);
 		}
 		
 		pw.close();

@@ -1,9 +1,21 @@
 
 public class Driver {
+	
+//	static String networkPath = "kernel_callgraphs//full.graph-2.6.";
+//	static String networkUsed = "kernel";
+//	static int versiontStart = 0;
+//	static int versionEnd = 40;
+	
+	static String networkPath = "openssh_callgraphs//full.graph-openssh-";
+	static String networkUsed = "ssh";
+	static int versiontStart = 1;
+	static int versionEnd = 40;
+	
 	public static void main(String[] args) throws Exception {		
 /*****************************************************************************/
-		String versionNum = "v15";
-		CallDAG callDAG = new CallDAG("callGraphs//full.graph-2.6.15");
+//		String version = "29";
+//		String versionNum = networkUsed + version;
+//		CallDAG callDAG = new CallDAG(Driver.networkPath + version);
 //		System.out.println("nFunctions: " + callDAG.functions.size());
 //		System.out.println("nEdges: " + callDAG.nEdges);
 //		int nRoots = 0, nLeaves = 0;
@@ -15,14 +27,14 @@ public class Driver {
 /*****************************************************************************/
 
 /*****************************************************************************/
-//		AgeAnalysis ageAnalysis = new AgeAnalysis();
+		AgeAnalysis ageAnalysis = new AgeAnalysis();
 		DegreeAnalysis degreeAnalysis = new DegreeAnalysis();		
 		LocationAnalysis locationAnalysis = new LocationAnalysis();
 		PersistenceAnalysis persistenceAnalysis = new PersistenceAnalysis();
 		GeneralityAnalysis generalityAnalysis = new GeneralityAnalysis();
 		EvolutionAnalysis evolutionaryAnalysis = new EvolutionAnalysis();
 		DiameterAnalysis diameterAnalysis = new DiameterAnalysis();
-		RandomNetworkGenerator randomNetworkGenerator = new RandomNetworkGenerator(callDAG);
+//		RandomNetworkGenerator randomNetworkGenerator = new RandomNetworkGenerator(callDAG);
 /*****************************************************************************/
 		
 /*****************************************************************************/
@@ -30,11 +42,12 @@ public class Driver {
 //		degreeAnalysis.getOutDegreeCCDF(callDAG, versionNum);
 //		degreeAnalysis.getLocationVSAvgInDegree(callDAG, versionNum);
 //		degreeAnalysis.getLocationVSAvgOutDegree(callDAG, versionNum);
-//		degreeAnalysis.getIndegreeVsOutDegree(callDAG);
-//		degreeAnalysis.getInDegreeDistribution(callDAG, versionNum);
-//		degreeAnalysis.getOutDegreeDistribution(callDAG, versionNum);
+//		degreeAnalysis.getIndegreeVsOutDegree(callDAG, versionNum);
 //		degreeAnalysis.getIndegreeVsOutDegreeCorrelationCoefficient(callDAG);
 //		degreeAnalysis.getSpearmanCoefficientForAllVersions();
+//
+//		degreeAnalysis.getInDegreeDistribution(callDAG, versionNum);
+//		degreeAnalysis.getOutDegreeDistribution(callDAG, versionNum);
 /*****************************************************************************/
 		
 /*****************************************************************************/
@@ -43,12 +56,17 @@ public class Driver {
 //		locationAnalysis.getClusterLocationDistribution();
 //		locationAnalysis.getLeafCallerLocationHistogram(callDAG);
 //		locationAnalysis.getLocationHistogramForEachVersion();
-//		locationAnalysis.getLeafAnomalyForMcount();
-//		locationAnalysis.getWineGlassGroupsGrowth();
+//		locationAnalysis.getLeafAnomalyForMcount(); // CUSTOMIZED FOR DIFFERENT NETWORK
+//		locationAnalysis.getWineGlassGroupsGrowth(); // CUSTOMIZED FOR DIFFERENT NETWORK
 //		locationAnalysis.getCallViolationMetric(callDAG);
 /*****************************************************************************/
 
 /*****************************************************************************/		
+//		ageAnalysis.getClusterLifeTimeDistribution(); // CHANGE FOR DIFFERENT NETWORKS
+//		ageAnalysis.getLocationLifeTimeDistribution();
+//		ageAnalysis.getLocationVSNumNodesWithAgeX(); // CHANGE FOR DIFFERENT NETWORKS
+//		ageAnalysis.getlocationDispersion();
+//		
 //		ageAnalysis.getLastLocationVSAverageAge();
 //		ageAnalysis.getAgeHistogram();
 //		ageAnalysis.getLastLocationVSDeathPercentage();
@@ -56,29 +74,25 @@ public class Driver {
 //		ageAnalysis.getLocationModeVSAge(); /* ?!? */
 //		ageAnalysis.getAgeVSLastLocation();
 //		ageAnalysis.getLastLocationVSAlivePercentage();
-//		ageAnalysis.getlocationDispersion();
-//		ageAnalysis.getLocationVSNumNodesWithAgeX();
 //		ageAnalysis.getClusterAgeDistribution();
-//		ageAnalysis.getClusterLifeTimeDistribution();
-//		ageAnalysis.getLocationLifeTimeDistribution();
 /*****************************************************************************/
 
 /*****************************************************************************/		
-//		CallDAG callDAGFrom = new CallDAG("callGraphs//full.graph-2.6.26");
-//		CallDAG callDAGTo = new CallDAG("callGraphs//full.graph-2.6.27");
+//		CallDAG callDAGFrom = new CallDAG("kernel_callgraphs//full.graph-2.6.26");
+//		CallDAG callDAGTo = new CallDAG("kernel_callgraphs//full.graph-2.6.27");
 //		persistenceAnalysis.getContiguousFunctionPersistance(callDAGFrom, callDAGTo);
 /*****************************************************************************/
 
 /*****************************************************************************/		
 //		evolutionaryAnalysis.getAverageGeneralityPerLocationForEachVersion();
-//		evolutionaryAnalysis.getEvolutionaryDeathBirthTrend();
-//		evolutionaryAnalysis.getLocationHistogramForEachVersion();
-//		evolutionaryAnalysis.getViolationMetricForEachVersion();
-//		evolutionaryAnalysis.getNumClustersForEachVersion();
-//		evolutionaryAnalysis.getLocationVsSizeTrend();
-//		evolutionaryAnalysis.getNetworkGrwothTrend();
-//		evolutionaryAnalysis.getClusterSizeTrend();
 //		evolutionaryAnalysis.getGenCmpScatterForAllVersions();
+//		evolutionaryAnalysis.getViolationMetricForEachVersion();
+//		evolutionaryAnalysis.getLocationHistogramForEachVersion();
+//		evolutionaryAnalysis.getEvolutionaryDeathBirthTrend(); // CUSTOMIZED FOR DIFFERENT NETWORK
+//		evolutionaryAnalysis.getLocationVsSizeTrend();// CUSTOMIZED FOR DIFFERENT NETWORK
+//		evolutionaryAnalysis.getNetworkGrowthTrend();
+//		evolutionaryAnalysis.getNumClustersForEachVersion();
+//		evolutionaryAnalysis.getClusterSizeTrend();
 /*****************************************************************************/
 
 /*****************************************************************************/		
@@ -87,7 +101,7 @@ public class Driver {
 //		generalityAnalysis.getLocationVSAvgGenerality(callDAG, versionNum);
 //		generalityAnalysis.getLocationVSAvgComplexity(callDAG, versionNum);
 //		generalityAnalysis.getGeneralityVSComplexity(callDAG, versionNum);
-//		generalityAnalysis.getCentralNodes(callDAG);
+//		generalityAnalysis.getCentralNodes(callDAG); // CUSTOMIZED FOR DIFFERENT NETWORK
 /*****************************************************************************/
 
 /*****************************************************************************/		
@@ -96,14 +110,15 @@ public class Driver {
 /*****************************************************************************/
 
 /*****************************************************************************/		
-//		ClusterAnalysis clusterAnalysis = new ClusterAnalysis(0.03, 30);
+//		ClusterAnalysis clusterAnalysis = new ClusterAnalysis();
+//		ClusterAnalysis.demonstrateClustersForVersionX();
+//
 //		clusterAnalysis.getClusters(callDAG);
-//		ClusterAnalysis.demonstrateClusters();
 /*****************************************************************************/		
 		
 /*****************************************************************************/		
-		String randVersionNum = versionNum + "rX";
-		randomNetworkGenerator.generateRandomNetwork(randVersionNum);
+//		String randVersionNum = versionNum + "rX";
+//		randomNetworkGenerator.generateRandomNetwork(randVersionNum);
 //		randomNetworkGenerator.callDAG.loadLocationMetric(); //		degree already loaded
 //		randomNetworkGenerator.callDAG.loadGeneralityMetric(); 
 //		randomNetworkGenerator.callDAG.loadComplexityMetric();

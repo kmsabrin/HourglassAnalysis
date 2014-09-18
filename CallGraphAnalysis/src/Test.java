@@ -82,8 +82,8 @@ public class Test {
 //		RandomNetworkGenerator randomeNetworkGenerator = new RandomNetworkGenerator(test.callDAG);
 //		randomeNetworkGenerator.generateRandomNetwork("Test");
 		
-		ClusterAnalysis clusterAnalysis = new ClusterAnalysis(0.05, 1);
-		clusterAnalysis.getClusters(test.callDAG);
+//		ClusterAnalysis clusterAnalysis = new ClusterAnalysis(0.05, 1);
+//		clusterAnalysis.getClusters(test.callDAG);
 	}
 }
 

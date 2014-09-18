@@ -94,7 +94,8 @@ public class GeneralityAnalysis {
 		pw.close();
 	}
 	
-	public void getCentralNodes(CallDAG callDAG) {
+	public void getCentralNodes(CallDAG callDAG) { 
+		// CUSTOMIZED FOR DIFFERENT NETWORK
 		for (String s: callDAG.functions) {
 			if (callDAG.generality.get(s) > 0.30 && callDAG.complexity.get(s) > 0.1) {
 				System.out.println(s + "\t" + callDAG.location.get(s));

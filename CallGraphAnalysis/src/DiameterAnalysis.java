@@ -58,8 +58,8 @@ public class DiameterAnalysis {
 	}
 	
 	public void getEffectiveDiameterForAllVersions() {
-		for (int i = 0; i < 40; i++) {
-			CallDAG callDAG = new CallDAG("callGraphs//full.graph-2.6." + i);
+		for (int i = Driver.versiontStart; i < Driver.versionEnd; i++) {
+			CallDAG callDAG = new CallDAG(Driver.networkPath + i);
 			getEffectiveDiameter(callDAG);
 		}
 	}

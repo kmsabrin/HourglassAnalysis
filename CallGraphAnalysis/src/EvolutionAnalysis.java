@@ -3,57 +3,49 @@ import java.io.PrintWriter;
 import java.util.HashSet;
 import java.util.Set;
 
-public class EvolutionAnalysis {
-
-	public static void getAverageGeneralityPerLocationForEachVersion() throws Exception {
-		for (int i = 0; i < 40; i += 12) {
-			CallDAG callDAG = new CallDAG("callGraphs//full.graph-2.6." + i);
+public class EvolutionAnalysis {	
+	public static void getAverageGenCmpPerLocationForEachVersion() throws Exception {
+		for (int i = Driver.versiontStart; i < Driver.versionEnd; i += 12) {
+			CallDAG callDAG = new CallDAG(Driver.networkPath + i);
 			GeneralityAnalysis generalityAnalysis = new GeneralityAnalysis();			
 //			generalityAnalysis.getLocationVSAvgGenerality(callDAG, "v" + i);
 			generalityAnalysis.getLocationVSAvgComplexity(callDAG, "v" + i);
 		}
 	}
 	
-	public void getClusterSizeTrend() throws Exception {
-		PrintWriter pw = new PrintWriter(new File("Results//cluster-vs-network-growth.txt"));
-
-		for (int i = 0; i < 40; ++i) {
-			CallDAG callDAG = new CallDAG("callGraphs//full.graph-2.6." + i);
-
-			double generalitySeparator, complexitySeparator;
-			double gS = 0, cS = 0;
-			for (String s: callDAG.location.keySet()) {
-				gS += callDAG.generality.get(s);
-				cS += callDAG.complexity.get(s);
-			}
-			generalitySeparator = gS / callDAG.location.size();
-			complexitySeparator = cS / callDAG.location.size();
-			
-			int kGC = 0, kgC = 0, kgc = 0, kGc = 0;
-			for (String s: callDAG.location.keySet()) {			
-				double m = callDAG.location.get(s);
-				double g = callDAG.generality.get(s);
-				double c = callDAG.complexity.get(s);
-				
-				if (g > generalitySeparator && c > complexitySeparator) kGC++;
-				else if (g <= generalitySeparator && c > complexitySeparator) kgC++;
-				else if (g <= generalitySeparator && c <= complexitySeparator) kgc++;
-				else if (g > generalitySeparator && c <= complexitySeparator) kGc++;
-			}
-			
-			pw.println(i + "\t" + callDAG.location.size() + "\t" + kGC + "\t" + kgC + "\t" + kgc + "\t" + kGc);
+	public void getGenCmpScatterForAllVersions() throws Exception {
+		for (int i = Driver.versiontStart; i < Driver.versionEnd; ++i) {
+			String versionNum = Driver.networkUsed + i;
+			CallDAG callDAG = new CallDAG(Driver.networkPath + i);
+			GeneralityAnalysis genAnalysis = new GeneralityAnalysis();
+			genAnalysis.getGeneralityVSComplexity(callDAG, versionNum);
 		}
-		
-		pw.close();
+	}
+
+	public void getLocationHistogramForEachVersion() throws Exception { // fig:loc-vs-evo-siz
+		for (int i = Driver.versiontStart; i < Driver.versionEnd; ) {
+			CallDAG callDAG = new CallDAG(Driver.networkPath + i);
+			LocationAnalysis locationAnalysis = new LocationAnalysis();
+			locationAnalysis.getLocationHistogram(callDAG, Driver.networkUsed + i);
+		}
 	}
 	
+	public void getViolationMetricForEachVersion() { // tab:loc-viol
+		for (int i = Driver.versiontStart; i < Driver.versionEnd; ++i) {
+			CallDAG callDAG = new CallDAG(Driver.networkPath + i);
+			LocationAnalysis locationAnalysis = new LocationAnalysis();
+			locationAnalysis.getCallViolationMetric(callDAG);
+		}
+	}
+	
+	
 	public void getEvolutionaryDeathBirthTrend() throws Exception {
-		PrintWriter pwD = new PrintWriter(new File("Results//evo-death.txt"));
-		PrintWriter pwB = new PrintWriter(new File("Results//evo-birth.txt"));
-		CallDAG callDAGFrom = new CallDAG("callGraphs//full.graph-2.6.0");
+		PrintWriter pwD = new PrintWriter(new File("Results//" + Driver.networkUsed + "-evo-death.txt"));
+		PrintWriter pwB = new PrintWriter(new File("Results//" + Driver.networkUsed + "-evo-birth.txt"));
+		CallDAG callDAGFrom = new CallDAG("kernel_callgraphs//full.graph-2.6.0"); // change for different networks
 		
-		for (int i = 1; i < 40; ++i) {
-			CallDAG callDAGTo = new CallDAG("callGraphs//full.graph-2.6." + i);
+		for (int i = Driver.versiontStart + 1; i < 40; ++i) {
+			CallDAG callDAGTo = new CallDAG(Driver.networkPath + i);
 			
 			Set<String> sF = new HashSet(callDAGFrom.functions);
 			Set<String> sT = new HashSet(callDAGTo.functions);
@@ -92,41 +84,16 @@ public class EvolutionAnalysis {
 		pwD.close();
 		pwB.close();
 	}
-	
-	public void getLocationHistogramForEachVersion() throws Exception { // fig:loc-vs-evo-siz
-		for (int i = 0; i < 40; ) {
-			CallDAG callDAG = new CallDAG("callGraphs//full.graph-2.6." + i);
-			LocationAnalysis locationAnalysis = new LocationAnalysis();
-			locationAnalysis.getLocationHistogram(callDAG, "v" + i);
-		}
-	}
-	
-	public void getViolationMetricForEachVersion() { // tab:loc-viol
-		for (int i = 0; i < 40; ++i) {
-			CallDAG callDAG = new CallDAG("callGraphs//full.graph-2.6." + i);
-			LocationAnalysis locationAnalysis = new LocationAnalysis();
-			locationAnalysis.getCallViolationMetric(callDAG);
-		}
-	}
-	
-	public void getNumClustersForEachVersion() throws Exception {
-		for (int i = 0; i < 40; ++i) {
-			System.out.print("Version 2.6." + i + "\t");
-			CallDAG callDAG = new CallDAG("callGraphs//full.graph-2.6." + i);
-			ClusterAnalysis clusterAnalysis = new ClusterAnalysis(0.03,  30);
-			clusterAnalysis.getClusters(callDAG);
-		}
-	}
-	
+		
 	public void getLocationVsSizeTrend() throws Exception { // fig:loc-vs-evo-siz
-		PrintWriter pw = new PrintWriter(new File("Results//loc-vs-evo-siz.txt"));
+		PrintWriter pw = new PrintWriter(new File("Results//" + Driver.networkUsed + "-loc-vs-evo-siz.txt"));
 		int nVersions = 5;
-		int sample[] = new int[]{0, 9, 19, 29, 39};
+		int sample[] = new int[]{1, 9, 19, 29, 39}; // change for different network
 		int result[][] = new int[101][nVersions];
 		
 		int j = 0;
 		for (int i: sample) {
-			CallDAG callDAG = new CallDAG("callGraphs//full.graph-2.6." + i);
+			CallDAG callDAG = new CallDAG(Driver.networkPath + i);
 			for (String f: callDAG.functions) {
 				double location = callDAG.location.get(f);
 				int loc = (int)(location * 100);
@@ -146,24 +113,58 @@ public class EvolutionAnalysis {
 		pw.close();
 	}
 	
-	public void getNetworkGrwothTrend() throws Exception { //
-		PrintWriter pw = new PrintWriter(new File("Results//network-growth.txt"));
-		for (int i = 0; i < 40; ++i) {
+	public void getNetworkGrowthTrend() throws Exception { //
+		PrintWriter pw = new PrintWriter(new File("Results//" + Driver.networkUsed + "-network-growth.txt"));
+		for (int i = Driver.versiontStart; i < Driver.versionEnd; ++i) {
 			pw.print(i);
-			CallDAG callDAG = new CallDAG("callGraphs//full.graph-2.6." + i);
+			CallDAG callDAG = new CallDAG(Driver.networkPath + i);
 			pw.print("\t" + callDAG.functions.size());
 			pw.println("\t" + callDAG.nEdges);
 		}
 		pw.close();
 	}
 	
-	public void getGenCmpScatterForAllVersions() throws Exception {
-		for (int i = 0; i < 40; ++i) {
-			String versionNum = "v" + i;
-			CallDAG callDAG = new CallDAG("callGraphs//full.graph-2.6." + i);
-			GeneralityAnalysis genAnalysis = new GeneralityAnalysis();
-			genAnalysis.getGeneralityVSComplexity(callDAG, versionNum);
-		}
+	public void getClusterSizeTrend() throws Exception {
+		PrintWriter pw = new PrintWriter(new File("Results//" + Driver.networkUsed + "-cluster-vs-network-growth.txt"));
 
+		for (int i = Driver.versiontStart; i < Driver.versionEnd; ++i) {
+			CallDAG callDAG = new CallDAG(Driver.networkPath + i);
+
+			double generalitySeparator, complexitySeparator;
+			double gS = 0, cS = 0;
+			for (String s: callDAG.location.keySet()) {
+				gS += callDAG.generality.get(s);
+				cS += callDAG.complexity.get(s);
+			}
+			generalitySeparator = gS / callDAG.location.size();
+			complexitySeparator = cS / callDAG.location.size();
+			
+			int kGC = 0, kgC = 0, kgc = 0, kGc = 0;
+			for (String s: callDAG.location.keySet()) {			
+				double m = callDAG.location.get(s);
+				double g = callDAG.generality.get(s);
+				double c = callDAG.complexity.get(s);
+				
+				if (g > generalitySeparator && c > complexitySeparator) kGC++;
+				else if (g <= generalitySeparator && c > complexitySeparator) kgC++;
+				else if (g <= generalitySeparator && c <= complexitySeparator) kgc++;
+				else if (g > generalitySeparator && c <= complexitySeparator) kGc++;
+			}
+			
+			pw.println(i + "\t" + callDAG.location.size() + "\t" + kGC + "\t" + kgC + "\t" + kgc + "\t" + kGc);
+		}
+		
+		pw.close();
 	}
+	
+	
+//	public void getNumClustersForEachVersion() throws Exception {
+//		for (int i = Driver.versiontStart; i < Driver.versionEnd; ++i) {
+//			System.out.print(Driver.networkUsed + i + "\t");
+//			CallDAG callDAG = new CallDAG(Driver.networkPath + i);
+//			ClusterAnalysis clusterAnalysis = new ClusterAnalysis(0.03,  30);
+//			clusterAnalysis.getClusters(callDAG);
+//		}
+//	}
+
 }

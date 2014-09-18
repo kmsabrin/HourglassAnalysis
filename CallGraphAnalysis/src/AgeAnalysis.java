@@ -30,11 +30,10 @@ public class AgeAnalysis {
 		 * Think about using avgLocation, avgComplexity and avgGenerality
 		 */
 
-		// be careful with versions used for calculation check the hard codes (i.e 40) for number of versions used
 		Set<String> totalFunction = new HashSet();
 		Set<String> rebornFunction = new HashSet();
-		for (int i = 0; i < 40; ++i) {
-			CallDAG callDAG = new CallDAG("callGraphs//full.graph-2.6." + i);		
+		for (int i = Driver.versiontStart; i < Driver.versionEnd; ++i) {	
+			CallDAG callDAG = new CallDAG(Driver.networkPath + i);
 			for (String s: callDAG.functions) {
 				if (!birthVersion.containsKey(s)) {
 					birthVersion.put(s, i);
@@ -59,26 +58,26 @@ public class AgeAnalysis {
 //		System.out.println("nFunctions: " + totalFunction.size() + " nRebornFunctions: " + rebornFunction.size());
 	}
 		
-	public void getAgeHistogram() {
-		int ages[] = new int[50];
-		int cumulativeHistogram[] = new int[50];
-			
-		for (String s: birthVersion.keySet()) {
-			int age = mostRecentVersion.get(s) - birthVersion.get(s) + 1;
-//			if (age >= 39 )
-				ages[age]++;
-		}		
-		
-//		for (int i = 1; i < 31; ++i) {
-//			System.out.println(i +"\t" + ages[i] * 100.0 / birthVersion.size());
+//	public void getAgeHistogram() {
+//		int ages[] = new int[50];
+//		int cumulativeHistogram[] = new int[50];
+//			
+//		for (String s: birthVersion.keySet()) {
+//			int age = mostRecentVersion.get(s) - birthVersion.get(s) + 1;
+////			if (age >= 39 )
+//				ages[age]++;
+//		}		
+//		
+////		for (int i = 1; i < 31; ++i) {
+////			System.out.println(i +"\t" + ages[i] * 100.0 / birthVersion.size());
+////		}
+//		
+//		for (int i = 39; i >= 0; --i) {
+//			cumulativeHistogram[i] = cumulativeHistogram[i + 1] + ages[i + 1];
+//			System.out.println(i + "\t" + cumulativeHistogram[i]);
 //		}
-		
-		for (int i = 39; i >= 0; --i) {
-			cumulativeHistogram[i] = cumulativeHistogram[i + 1] + ages[i + 1];
-			System.out.println(i + "\t" + cumulativeHistogram[i]);
-		}
-	}
-	
+//	}
+//	
 //	public double getMode(List<Double> list) {
 //		Map<Double, Integer> count = new HashMap();
 //		for (Double d: list) {
@@ -250,9 +249,48 @@ public class AgeAnalysis {
 //			}	
 //		}
 //	}
+//	
+//	public void getClusterAgeDistribution() { // visually separated clusters
+//	double count1 = 0;
+//	double count2 = 0;
+//	
+//	Map<Integer, Integer> ageHistogram = new TreeMap();
+//	for (String s: birthVersion.keySet()) {			
+//		int a = mostRecentVersion.get(s) - birthVersion.get(s) + 1; // age
+////		if (a < 40) continue; // consider live nodes only
+//
+//		double m = mostRecentLocation.get(s);
+//		double g = mostRecentGenerality.get(s);
+//		double c = mostRecentComplexity.get(s);
+//		
+//		if (g > 0.25) continue;
+//		if (c > 0.05) continue;
+//		
+//		if (mostRecentVersion.get(s) >= 29) ++count1;
+//		if (a == 40) ++count2;
+//		
+////		System.out.println(s);
+//		
+////		++count;
+//		
+//		if (ageHistogram.containsKey(a)) {
+//			int f = ageHistogram.get(a);
+//			ageHistogram.put(a, f + 1);
+//		}
+//		else {
+//			ageHistogram.put(a, 1);
+//		}
+//	}
+//	
+//	System.out.println(count1 + "\t" + count2);
+//	
+////	in percentage
+////	for (int i: ageHistogram.keySet()) {
+////		System.out.println(i + "\t" + ageHistogram.get(i) * 100.0 / count);
+////	}
+//}
 	
-	// transient and stable distribution
-	// extreme life-span distribution with location
+//	transient and stable distribution with location
 	public void getLocationVSNumNodesWithAgeX() { // fig:loc-vs-stable & fig:loc-vs-transient
 		Map<Double, Integer> locationVsNumNodesWithAgeX = new TreeMap();
 		Map<Double, Integer> locationFrequency = new HashMap(); // for percentage
@@ -267,11 +305,8 @@ public class AgeAnalysis {
 			}
 			else locationFrequency.put(location, 1);
 			
-//			if (age > 1 ) continue; // get the min aged nodes
-//			if (age < 40) continue; // get the max aged nodes
-			
-			if (age < 39) continue; // get the stable nodes
-//			if (age > 2) continue; // get the transient nodes
+//			if (age < 37) continue; // get the stable nodes
+			if (age > 3) continue; // get the transient nodes
 			
 //			System.out.println(location);
 			
@@ -325,50 +360,10 @@ public class AgeAnalysis {
 		}
 	}
 	
-//	public void getClusterAgeDistribution() { // visually separated clusters
-//		double count1 = 0;
-//		double count2 = 0;
-//		
-//		Map<Integer, Integer> ageHistogram = new TreeMap();
-//		for (String s: birthVersion.keySet()) {			
-//			int a = mostRecentVersion.get(s) - birthVersion.get(s) + 1; // age
-////			if (a < 40) continue; // consider live nodes only
-//
-//			double m = mostRecentLocation.get(s);
-//			double g = mostRecentGenerality.get(s);
-//			double c = mostRecentComplexity.get(s);
-//			
-//			if (g > 0.25) continue;
-//			if (c > 0.05) continue;
-//			
-//			if (mostRecentVersion.get(s) >= 29) ++count1;
-//			if (a == 40) ++count2;
-//			
-////			System.out.println(s);
-//			
-////			++count;
-//			
-//			if (ageHistogram.containsKey(a)) {
-//				int f = ageHistogram.get(a);
-//				ageHistogram.put(a, f + 1);
-//			}
-//			else {
-//				ageHistogram.put(a, 1);
-//			}
-//		}
-//		
-//		System.out.println(count1 + "\t" + count2);
-//		
-////		in percentage
-////		for (int i: ageHistogram.keySet()) {
-////			System.out.println(i + "\t" + ageHistogram.get(i) * 100.0 / count);
-////		}
-//	}
-	
-	// visually separated clusters // actually going to use the mean of 1 dimensional distributions
+	// mean separated clusters 
 	public void getClusterLifeTimeDistribution() throws Exception { // fig:cluster-lifespan, fig:cluster-persistence
-		PrintWriter pwts = new PrintWriter(new File("Results//cluster-transient-stable.txt"));
-		PrintWriter pwls = new PrintWriter(new File("Results//cluster-life-span.txt"));
+		PrintWriter pwts = new PrintWriter(new File("Results//" + Driver.networkUsed + "-cluster-transient-stable.txt"));
+		PrintWriter pwls = new PrintWriter(new File("Results//" + Driver.networkUsed + "-cluster-life-span.txt"));
 		
 		List<Integer> lifeSpanGC = new ArrayList();
 		List<Integer> lifeSpangC = new ArrayList();
@@ -377,6 +372,8 @@ public class AgeAnalysis {
 		
 		double sGC = 0, sgC = 0, sgc = 0, sGc = 0; // stable node counters
 		double tGC = 0, tgC = 0, tgc = 0, tGc = 0; // transient node counters
+		
+//		CHANGE FOR DIFFERENT NETWORKS
 		int transientAge = 3;
 		int stableAge = 38;
 		
@@ -449,7 +446,7 @@ public class AgeAnalysis {
 	}
 	
 	public void getLocationLifeTimeDistribution() throws Exception { // fig:loc-vs-evo-age
-		PrintWriter pw = new PrintWriter(new File("Results//loc-vs-evo-age.txt"));
+		PrintWriter pw = new PrintWriter(new File("Results//" + Driver.networkUsed + "-loc-vs-evo-age.txt"));
 		Map<Double, List<Integer>> lifeSpanLocationMap = new TreeMap();
 		
 		for (String s: birthVersion.keySet()) {			
