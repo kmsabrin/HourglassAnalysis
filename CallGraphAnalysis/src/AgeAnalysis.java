@@ -12,19 +12,33 @@ import org.apache.commons.math3.stat.StatUtils;
 
 public class AgeAnalysis {
 	Map<String, Integer> birthVersion;
-	Map<String, Integer> mostRecentVersion;
 	Map<String, Double> birthLocation;
-	Map<String, Double> mostRecentLocation;
-	Map<String, Double> mostRecentComplexity;
-	Map<String, Double> mostRecentGenerality;
+
+	Map<String, Integer> lastVersion;
+	Map<String, Double> lastLocation;
+	Map<String, Double> lastComplexity;
+	Map<String, Double> lastGenerality;
+
+	Map<String, Double> avgLocation;
+	Map<String, Double> avgComplexity;
+	Map<String, Double> avgGenerality;
+	
+	Map<String, Integer> functionPersistence;
 		
 	AgeAnalysis() {
 		birthVersion = new HashMap();
-		mostRecentVersion = new HashMap();
 		birthLocation = new HashMap();
-		mostRecentLocation = new HashMap();
-		mostRecentComplexity = new HashMap();
-		mostRecentGenerality = new HashMap();
+
+		lastVersion = new HashMap();
+		lastLocation = new HashMap();
+		lastComplexity = new HashMap();
+		lastGenerality = new HashMap();
+
+		avgLocation = new HashMap();
+		avgComplexity = new HashMap();
+		avgGenerality = new HashMap();
+
+		functionPersistence = new HashMap();
 		
 		/****
 		 * Think about using avgLocation, avgComplexity and avgGenerality
@@ -32,6 +46,7 @@ public class AgeAnalysis {
 
 		Set<String> totalFunction = new HashSet();
 		Set<String> rebornFunction = new HashSet();
+		
 		for (int i = Driver.versiontStart; i < Driver.versionEnd; ++i) {	
 			CallDAG callDAG = new CallDAG(Driver.networkPath + i);
 			for (String s: callDAG.functions) {
@@ -48,10 +63,35 @@ public class AgeAnalysis {
 //					rebornFunction.add(s);
 //				}
 				
-				mostRecentVersion.put(s, i);
-				mostRecentLocation.put(s, callDAG.location.get(s));
-				mostRecentComplexity.put(s, callDAG.complexity.get(s));
-				mostRecentGenerality.put(s, callDAG.generality.get(s));
+				lastVersion.put(s, i);
+				lastLocation.put(s, callDAG.location.get(s));
+				lastComplexity.put(s, callDAG.complexity.get(s));
+				lastGenerality.put(s, callDAG.generality.get(s));
+				
+				if (avgLocation.containsKey(s)) { // approximating average
+					double avgLoc = 0.5 * (callDAG.location.get(s) + avgLocation.get(s));
+					double avgGen = 0.5 * (callDAG.generality.get(s) + avgGenerality.get(s));
+					double avgCmp = 0.5 * (callDAG.complexity.get(s) + avgComplexity.get(s));
+					avgLoc = ((int)(avgLoc * 100.0)) / 100.0; // rounding down
+					avgGen = ((int)(avgGen * 100.0)) / 100.0; // rounding down
+					avgCmp = ((int)(avgCmp * 100.0)) / 100.0; // rounding down
+					avgLocation.put(s, avgLoc);
+					avgComplexity.put(s, avgCmp);
+					avgGenerality.put(s, avgGen);
+				}
+				else {
+					avgLocation.put(s, callDAG.location.get(s));
+					avgComplexity.put(s, callDAG.complexity.get(s));
+					avgGenerality.put(s, callDAG.generality.get(s));
+				}
+				
+				if (functionPersistence.containsKey(s)) {
+					int persistence = functionPersistence.get(s) + 1;
+					functionPersistence.put(s, persistence);
+				}
+				else {
+					functionPersistence.put(s, 1);
+				}
 			}
 		}
 		
@@ -291,24 +331,24 @@ public class AgeAnalysis {
 //}
 	
 //	transient and stable distribution with location
-	public void getLocationVSNumNodesWithAgeX() { // fig:loc-vs-stable & fig:loc-vs-transient
+	public void getLocationVsTransientStable() { // fig:loc-vs-stable & fig:loc-vs-transient
 		Map<Double, Integer> locationVsNumNodesWithAgeX = new TreeMap();
 		Map<Double, Integer> locationFrequency = new HashMap(); // for percentage
 		
 		for (String s: birthVersion.keySet()) {
-			int age = mostRecentVersion.get(s) - birthVersion.get(s) + 1;
-			double location = mostRecentLocation.get(s);
+			int persistence = functionPersistence.get(s);
+			double location = avgLocation.get(s);
 			
 			if (locationFrequency.containsKey(location)) {
 				int v = locationFrequency.get(location);
 				locationFrequency.put(location, v + 1);
 			}
-			else locationFrequency.put(location, 1);
+			else {
+				locationFrequency.put(location, 1);
+			}
 			
-//			if (age < 37) continue; // get the stable nodes
-			if (age > 3) continue; // get the transient nodes
-			
-//			System.out.println(location);
+//			if (persistence < 37) continue; // get the stable nodes
+			if (persistence > 3) continue; // get the transient nodes
 			
 			if (locationVsNumNodesWithAgeX.containsKey(location)) {
 				int v = locationVsNumNodesWithAgeX.get(location);
@@ -331,7 +371,7 @@ public class AgeAnalysis {
 		
 		for (String s: birthVersion.keySet()) {
 			double bLocation = birthLocation.get(s);
-			double rLocation = mostRecentLocation.get(s); 
+			double rLocation = lastLocation.get(s); 
 			if (bLocation != rLocation) {
 				double dispersion = Math.abs(bLocation - rLocation);
 				if (locationDispersionCount.containsKey(bLocation)) {
@@ -365,10 +405,10 @@ public class AgeAnalysis {
 		PrintWriter pwts = new PrintWriter(new File("Results//" + Driver.networkUsed + "-cluster-transient-stable.txt"));
 		PrintWriter pwls = new PrintWriter(new File("Results//" + Driver.networkUsed + "-cluster-life-span.txt"));
 		
-		List<Integer> lifeSpanGC = new ArrayList();
-		List<Integer> lifeSpangC = new ArrayList();
-		List<Integer> lifeSpangc = new ArrayList();
-		List<Integer> lifeSpanGc = new ArrayList();
+		List<Integer> persistenceGC = new ArrayList();
+		List<Integer> persistencegC = new ArrayList();
+		List<Integer> persistencegc = new ArrayList();
+		List<Integer> persistenceGc = new ArrayList();
 		
 		double sGC = 0, sgC = 0, sgc = 0, sGc = 0; // stable node counters
 		double tGC = 0, tgC = 0, tgc = 0, tGc = 0; // transient node counters
@@ -380,54 +420,54 @@ public class AgeAnalysis {
 		double generalitySeparator, complexitySeparator;
 		double gS = 0, cS = 0;
 		for (String s: birthVersion.keySet()) {
-			gS += mostRecentGenerality.get(s); //
-			cS += mostRecentComplexity.get(s);
+			gS += avgGenerality.get(s); //
+			cS += avgComplexity.get(s);
 		}
 		generalitySeparator = gS / birthVersion.size();
 		complexitySeparator = cS / birthVersion.size();
 		
 		for (String s: birthVersion.keySet()) {			
-			int lifeTime = mostRecentVersion.get(s) - birthVersion.get(s) + 1; // life-span
-			double m = mostRecentLocation.get(s);
-			double g = mostRecentGenerality.get(s); // ? are you sure
-			double c = mostRecentComplexity.get(s);
+			int persistence = functionPersistence.get(s);
+			double m = avgLocation.get(s);
+			double g = avgGenerality.get(s); // ? are you sure
+			double c = avgComplexity.get(s);
 			
 			if (g > generalitySeparator && c > complexitySeparator) { 
-				lifeSpanGC.add(lifeTime);
-				if (lifeTime >= stableAge) ++sGC;
-				else if (lifeTime <= transientAge) ++tGC;				 
+				persistenceGC.add(persistence);
+				if (persistence >= stableAge) ++sGC;
+				else if (persistence <= transientAge) ++tGC;				 
 			}
 			else if (g <= generalitySeparator && c > complexitySeparator) { 
-				lifeSpangC.add(lifeTime); 
-				if (lifeTime >= stableAge) ++sgC;
-				else if (lifeTime <= transientAge) ++tgC;				 
+				persistencegC.add(persistence); 
+				if (persistence >= stableAge) ++sgC;
+				else if (persistence <= transientAge) ++tgC;				 
 			}
 			else if (g <= generalitySeparator && c <= complexitySeparator) { 
-				lifeSpangc.add(lifeTime);
-				if (lifeTime >= stableAge) ++sgc;
-				else if (lifeTime <= transientAge) ++tgc;				 
+				persistencegc.add(persistence);
+				if (persistence >= stableAge) ++sgc;
+				else if (persistence <= transientAge) ++tgc;				 
 			}
 			else if (g > generalitySeparator && c <= complexitySeparator) { 
-				lifeSpanGc.add(lifeTime);
-				if (lifeTime >= stableAge) ++sGc;
-				else if (lifeTime <= transientAge) ++tGc;				 
+				persistenceGc.add(persistence);
+				if (persistence >= stableAge) ++sGc;
+				else if (persistence <= transientAge) ++tGc;				 
 			}
 		}
 		
 		// percentage of persistent nodes
-		pwts.println((sGC * 100.0 / lifeSpanGC.size()) + "\t" + (tGC * 100.0 / lifeSpanGC.size()));
-		pwts.println((sgC * 100.0 / lifeSpangC.size()) + "\t" + (tgC * 100.0 / lifeSpangC.size()));
-		pwts.println((sgc * 100.0 / lifeSpangc.size()) + "\t" + (tgc * 100.0 / lifeSpangc.size()));
-		pwts.println((sGc * 100.0 / lifeSpanGc.size()) + "\t" + (tGc * 100.0 / lifeSpanGc.size()));
+		pwts.println((sGC * 100.0 / persistenceGC.size()) + "\t" + (tGC * 100.0 / persistenceGC.size()));
+		pwts.println((sgC * 100.0 / persistencegC.size()) + "\t" + (tgC * 100.0 / persistencegC.size()));
+		pwts.println((sgc * 100.0 / persistencegc.size()) + "\t" + (tgc * 100.0 / persistencegc.size()));
+		pwts.println((sGc * 100.0 / persistenceGc.size()) + "\t" + (tGc * 100.0 / persistenceGc.size()));
 		
 		// life-span percentiles
-		Object a[] = lifeSpanGC.toArray();
+		Object a[] = persistenceGC.toArray();
 		getPercentiles("GC", a, pwls);
-		a = lifeSpangC.toArray();
+		a = persistencegC.toArray();
 		getPercentiles("gC", a, pwls);
-		a = lifeSpangc.toArray();
+		a = persistencegc.toArray();
 		getPercentiles("gc", a, pwls);
-		a = lifeSpanGc.toArray();
+		a = persistenceGc.toArray();
 		getPercentiles("Gc", a, pwls);
 		
 		pwts.close();
@@ -445,26 +485,26 @@ public class AgeAnalysis {
 		pw.println(id + "\t" + (int)q1 + "\t" + (int)qm + "\t" + (int)q3);
 	}
 	
-	public void getLocationLifeTimeDistribution() throws Exception { // fig:loc-vs-evo-age
-		PrintWriter pw = new PrintWriter(new File("Results//" + Driver.networkUsed + "-loc-vs-evo-age.txt"));
-		Map<Double, List<Integer>> lifeSpanLocationMap = new TreeMap();
+	public void getLocationVsPersistencePercentiles() throws Exception { // fig:loc-vs-evo-age
+		PrintWriter pw = new PrintWriter(new File("Results//" + Driver.networkUsed + "-loc-vs-evo-persistence.txt"));
+		Map<Double, List<Integer>> locationPersistenceMap = new TreeMap();
 		
 		for (String s: birthVersion.keySet()) {			
-			int lifeTime = mostRecentVersion.get(s) - birthVersion.get(s) + 1; // age (life-span)
-			double m = mostRecentLocation.get(s);
+			int persistence = functionPersistence.get(s);
+			double avgLoc = avgLocation.get(s);
 			
-			if (lifeSpanLocationMap.containsKey(m)) {
-				lifeSpanLocationMap.get(m).add(lifeTime);
+			if (locationPersistenceMap.containsKey(avgLoc)) {
+				locationPersistenceMap.get(avgLoc).add(persistence);
 			}
 			else {
 				List<Integer> list = new ArrayList();
-				list.add(lifeTime);
-				lifeSpanLocationMap.put(m, list);
+				list.add(persistence);
+				locationPersistenceMap.put(avgLoc, list);
 			}
 		}
 		
-		for (double d: lifeSpanLocationMap.keySet()) {
-			Object a[] = lifeSpanLocationMap.get(d).toArray();
+		for (double d: locationPersistenceMap.keySet()) {
+			Object a[] = locationPersistenceMap.get(d).toArray();
 			double b[] = new double[a.length];
 			for (int i = 0; i < a.length; ++i) {
 				b[i] = (Integer)a[i];

@@ -63,8 +63,8 @@ public class Driver {
 
 /*****************************************************************************/		
 //		ageAnalysis.getClusterLifeTimeDistribution(); // CHANGE FOR DIFFERENT NETWORKS
-//		ageAnalysis.getLocationLifeTimeDistribution();
-//		ageAnalysis.getLocationVSNumNodesWithAgeX(); // CHANGE FOR DIFFERENT NETWORKS
+//		ageAnalysis.getLocationVsPersistencePercentiles();
+		ageAnalysis.getLocationVsTransientStable(); // CHANGE FOR DIFFERENT NETWORKS
 //		ageAnalysis.getlocationDispersion();
 //		
 //		ageAnalysis.getLastLocationVSAverageAge();

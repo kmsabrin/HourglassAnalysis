@@ -320,7 +320,7 @@ public class CallDAG {
 				g = kount / greaterLocNode[loc];
 			}
 			
-			g = ((int) (g * 1000.0)) / 1000.0;
+			g = ((int) (g * 100.0)) / 100.0;
 			generality.put(s, g);
 		}
 	}
@@ -366,7 +366,7 @@ public class CallDAG {
 			if (loc != 0) {
 				c = kount / lessLocNode[loc];
 			}
-			c = ((int) (c * 1000.0)) / 1000.0;
+			c = ((int) (c * 100.0)) / 100.0;
 			complexity.put(s, c);
 		}
 	}
