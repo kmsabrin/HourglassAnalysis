@@ -38,13 +38,12 @@ public class EvolutionAnalysis {
 		}
 	}
 	
-	
 	public void getEvolutionaryDeathBirthTrend() throws Exception {
 		PrintWriter pwD = new PrintWriter(new File("Results//" + Driver.networkUsed + "-evo-death.txt"));
 		PrintWriter pwB = new PrintWriter(new File("Results//" + Driver.networkUsed + "-evo-birth.txt"));
-		CallDAG callDAGFrom = new CallDAG("kernel_callgraphs//full.graph-2.6.0"); // change for different networks
+		CallDAG callDAGFrom = new CallDAG(Driver.networkPath + Driver.versiontStart); 
 		
-		for (int i = Driver.versiontStart + 1; i < 40; ++i) {
+		for (int i = Driver.versiontStart + 1; i < Driver.versionEnd; ++i) {
 			CallDAG callDAGTo = new CallDAG(Driver.networkPath + i);
 			
 			Set<String> sF = new HashSet(callDAGFrom.functions);
@@ -86,7 +85,7 @@ public class EvolutionAnalysis {
 	}
 		
 	public void getLocationVsSizeTrend() throws Exception { // fig:loc-vs-evo-siz
-		PrintWriter pw = new PrintWriter(new File("Results//" + Driver.networkUsed + "-loc-vs-evo-siz.txt"));
+		PrintWriter pw = new PrintWriter(new File("Results//" + Driver.networkUsed + "-loc-vs-evo-size.txt"));
 		int nVersions = 5;
 		int sample[] = new int[]{1, 9, 19, 29, 39}; // change for different network
 		int result[][] = new int[101][nVersions];

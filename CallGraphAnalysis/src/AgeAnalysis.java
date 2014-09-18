@@ -364,7 +364,7 @@ public class AgeAnalysis {
 		}
 	}
 	
-	public void getlocationDispersion() {
+	public void getLocationDispersion() {
 		Map<Double, Integer> locationDispersionCount = new TreeMap();
 		Map<Double, Integer> locationFrequency = new TreeMap();
 		Map<Double, Double> locationAverageDispersion = new TreeMap();
@@ -401,7 +401,7 @@ public class AgeAnalysis {
 	}
 	
 	// mean separated clusters 
-	public void getClusterLifeTimeDistribution() throws Exception { // fig:cluster-lifespan, fig:cluster-persistence
+	public void getClusterPersistencePercentiles() throws Exception { // fig:cluster-lifespan, fig:cluster-persistence
 		PrintWriter pwts = new PrintWriter(new File("Results//" + Driver.networkUsed + "-cluster-transient-stable.txt"));
 		PrintWriter pwls = new PrintWriter(new File("Results//" + Driver.networkUsed + "-cluster-life-span.txt"));
 		

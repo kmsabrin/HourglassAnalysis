@@ -1,21 +1,21 @@
 
 public class Driver {
 	
-//	static String networkPath = "kernel_callgraphs//full.graph-2.6.";
-//	static String networkUsed = "kernel";
-//	static int versiontStart = 0;
-//	static int versionEnd = 40;
-	
-	static String networkPath = "openssh_callgraphs//full.graph-openssh-";
-	static String networkUsed = "ssh";
-	static int versiontStart = 1;
+	static String networkPath = "kernel_callgraphs//full.graph-2.6.";
+	static String networkUsed = "kernel";
+	static int versiontStart = 0;
 	static int versionEnd = 40;
+	
+//	static String networkPath = "openssh_callgraphs//full.graph-openssh-";
+//	static String networkUsed = "ssh";
+//	static int versiontStart = 1;
+//	static int versionEnd = 40;
 	
 	public static void main(String[] args) throws Exception {		
 /*****************************************************************************/
-//		String version = "29";
-//		String versionNum = networkUsed + version;
-//		CallDAG callDAG = new CallDAG(Driver.networkPath + version);
+		String version = "9";
+		String versionNum = networkUsed + version;
+		CallDAG callDAG = new CallDAG(Driver.networkPath + version);
 //		System.out.println("nFunctions: " + callDAG.functions.size());
 //		System.out.println("nEdges: " + callDAG.nEdges);
 //		int nRoots = 0, nLeaves = 0;
@@ -63,8 +63,8 @@ public class Driver {
 
 /*****************************************************************************/		
 //		ageAnalysis.getClusterLifeTimeDistribution(); // CHANGE FOR DIFFERENT NETWORKS
-//		ageAnalysis.getLocationVsPersistencePercentiles();
-		ageAnalysis.getLocationVsTransientStable(); // CHANGE FOR DIFFERENT NETWORKS
+		ageAnalysis.getLocationVsPersistencePercentiles();
+//		ageAnalysis.getLocationVsTransientStable(); // CHANGE FOR DIFFERENT NETWORKS
 //		ageAnalysis.getlocationDispersion();
 //		
 //		ageAnalysis.getLastLocationVSAverageAge();
@@ -88,7 +88,7 @@ public class Driver {
 //		evolutionaryAnalysis.getGenCmpScatterForAllVersions();
 //		evolutionaryAnalysis.getViolationMetricForEachVersion();
 //		evolutionaryAnalysis.getLocationHistogramForEachVersion();
-//		evolutionaryAnalysis.getEvolutionaryDeathBirthTrend(); // CUSTOMIZED FOR DIFFERENT NETWORK
+//		evolutionaryAnalysis.getEvolutionaryDeathBirthTrend(); 
 //		evolutionaryAnalysis.getLocationVsSizeTrend();// CUSTOMIZED FOR DIFFERENT NETWORK
 //		evolutionaryAnalysis.getNetworkGrowthTrend();
 //		evolutionaryAnalysis.getNumClustersForEachVersion();

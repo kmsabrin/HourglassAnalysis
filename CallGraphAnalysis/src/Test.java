@@ -40,7 +40,7 @@ public class Test {
 		callDAG.callFrom.put("k", new HashSet<String>(Arrays.asList("j")));
 
 		callDAG.nEdges = 13;
-//		removeCycles(); // nop only ignore cycles
+		callDAG.removeCycles();
 		callDAG.loadDegreeMetric();
 		callDAG.loadLocationMetric(); // must load degree metric before
 		callDAG.loadGeneralityMetric(); // approximated
