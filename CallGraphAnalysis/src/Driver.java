@@ -1,19 +1,20 @@
 
 public class Driver {
 	
-	static String networkPath = "kernel_callgraphs//full.graph-2.6.";
-	static String networkUsed = "kernel";
-	static int versiontStart = 0;
+//	static String networkPath = "kernel_callgraphs//full.graph-2.6.";
+//	static String networkUsed = "kernel";
+//	static int versiontStart = 0;
+//	static int versionEnd = 40;
+	
+	static String networkPath = "openssh_callgraphs//full.graph-openssh-";
+	static String networkUsed = "ssh";
+	static int versiontStart = 1;
 	static int versionEnd = 40;
 	
-//	static String networkPath = "openssh_callgraphs//full.graph-openssh-";
-//	static String networkUsed = "ssh";
-//	static int versiontStart = 1;
-//	static int versionEnd = 40;
+	static String version = "29";
 	
 	public static void main(String[] args) throws Exception {		
 /*****************************************************************************/
-		String version = "9";
 		String versionNum = networkUsed + version;
 		CallDAG callDAG = new CallDAG(Driver.networkPath + version);
 //		System.out.println("nFunctions: " + callDAG.functions.size());
@@ -27,14 +28,14 @@ public class Driver {
 /*****************************************************************************/
 
 /*****************************************************************************/
-		AgeAnalysis ageAnalysis = new AgeAnalysis();
-		DegreeAnalysis degreeAnalysis = new DegreeAnalysis();		
-		LocationAnalysis locationAnalysis = new LocationAnalysis();
-		PersistenceAnalysis persistenceAnalysis = new PersistenceAnalysis();
-		GeneralityAnalysis generalityAnalysis = new GeneralityAnalysis();
-		EvolutionAnalysis evolutionaryAnalysis = new EvolutionAnalysis();
-		DiameterAnalysis diameterAnalysis = new DiameterAnalysis();
-//		RandomNetworkGenerator randomNetworkGenerator = new RandomNetworkGenerator(callDAG);
+//		AgeAnalysis ageAnalysis = new AgeAnalysis();
+//		DegreeAnalysis degreeAnalysis = new DegreeAnalysis();		
+//		LocationAnalysis locationAnalysis = new LocationAnalysis();
+//		PersistenceAnalysis persistenceAnalysis = new PersistenceAnalysis();
+//		GeneralityAnalysis generalityAnalysis = new GeneralityAnalysis();
+//		EvolutionAnalysis evolutionaryAnalysis = new EvolutionAnalysis();
+//		DiameterAnalysis diameterAnalysis = new DiameterAnalysis();
+		RandomNetworkGenerator randomNetworkGenerator = new RandomNetworkGenerator(callDAG);
 /*****************************************************************************/
 		
 /*****************************************************************************/
@@ -63,7 +64,7 @@ public class Driver {
 
 /*****************************************************************************/		
 //		ageAnalysis.getClusterLifeTimeDistribution(); // CHANGE FOR DIFFERENT NETWORKS
-		ageAnalysis.getLocationVsPersistencePercentiles();
+//		ageAnalysis.getLocationVsPersistencePercentiles();
 //		ageAnalysis.getLocationVsTransientStable(); // CHANGE FOR DIFFERENT NETWORKS
 //		ageAnalysis.getlocationDispersion();
 //		
@@ -117,18 +118,19 @@ public class Driver {
 /*****************************************************************************/		
 		
 /*****************************************************************************/		
-//		String randVersionNum = versionNum + "rX";
-//		randomNetworkGenerator.generateRandomNetwork(randVersionNum);
-//		randomNetworkGenerator.callDAG.loadLocationMetric(); //		degree already loaded
-//		randomNetworkGenerator.callDAG.loadGeneralityMetric(); 
-//		randomNetworkGenerator.callDAG.loadComplexityMetric();
-//		locationAnalysis.getLocationHistogram(randomNetworkGenerator.callDAG, randVersionNum);
-//		generalityAnalysis.getGeneralityVSComplexity(randomNetworkGenerator.callDAG, randVersionNum);
-//		generalityAnalysis.getLocationVSAvgComplexity(randomNetworkGenerator.callDAG, randVersionNum);
-//		generalityAnalysis.getLocationVSAvgGenerality(randomNetworkGenerator.callDAG, randVersionNum);
-//		degreeAnalysis.getLocationVSAvgInDegree(randomNetworkGenerator.callDAG, randVersionNum);
-//		degreeAnalysis.getLocationVSAvgOutDegree(randomNetworkGenerator.callDAG, randVersionNum);
-//		locationAnalysis.getCallViolationMetric(randomNetworkGenerator.callDAG);
+		String randVersionNum = versionNum + "rX";
+		randomNetworkGenerator.generateRandomNetwork(randVersionNum);
+//		randomNetworkGenerator.randomCallDAG.loadDegreeMetric();
+//		randomNetworkGenerator.randomCallDAG.loadLocationMetric(); 
+//		randomNetworkGenerator.randomCallDAG.loadGeneralityMetric(); 
+//		randomNetworkGenerator.randomCallDAG.loadComplexityMetric();
+//		locationAnalysis.getLocationHistogram(randomNetworkGenerator.randomCallDAG, randVersionNum);
+//		generalityAnalysis.getGeneralityVSComplexity(randomNetworkGenerator.randomCallDAG, randVersionNum);
+//		generalityAnalysis.getLocationVSAvgComplexity(randomNetworkGenerator.randomCallDAG, randVersionNum);
+//		generalityAnalysis.getLocationVSAvgGenerality(randomNetworkGenerator.randomCallDAG, randVersionNum);
+//		degreeAnalysis.getLocationVSAvgInDegree(randomNetworkGenerator.randomCallDAG, randVersionNum);
+//		degreeAnalysis.getLocationVSAvgOutDegree(randomNetworkGenerator.randomCallDAG, randVersionNum);
+//		locationAnalysis.getCallViolationMetric(randomNetworkGenerator.randomCallDAG);
 /*****************************************************************************/
 	}
 }

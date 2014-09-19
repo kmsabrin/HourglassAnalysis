@@ -11,15 +11,16 @@ import java.util.Set;
 import org.apache.commons.math3.stat.StatUtils;
 
 public class RandomNetworkGenerator {
-	CallDAG callDAG;
+	CallDAG randomCallDAG;
 	Map<String, Integer> functionLevel;
 	Set<String> visited;
 	Set<String> cycleVisited;
 	boolean hasCycle;
 	String randomVersionNumber;
+	int numOfIteration = 50;
 	
 	public RandomNetworkGenerator(CallDAG callDAG) {
-		this.callDAG = callDAG;
+		this.randomCallDAG = callDAG;
 		functionLevel = new HashMap();
 		visited = new HashSet();
 		cycleVisited = new HashSet();
@@ -27,7 +28,7 @@ public class RandomNetworkGenerator {
 	}
 	
 	public void getFunctionLevelTraverse(String function) {
-		if (!callDAG.callTo.containsKey(function)) { // is Leaf
+		if (!randomCallDAG.callTo.containsKey(function)) { // is Leaf
 			functionLevel.put(function, 1);
 			return;
 		}
@@ -37,7 +38,7 @@ public class RandomNetworkGenerator {
 		}
 				
 		int level = 1;
-		for (String f: callDAG.callTo.get(function)) {
+		for (String f: randomCallDAG.callTo.get(function)) {
 			getFunctionLevelTraverse(f);
 			int childLevel = functionLevel.get(f);
 			level = Math.max(level, childLevel + 1);
@@ -47,8 +48,8 @@ public class RandomNetworkGenerator {
 	}
 	
 	public void getFunctionLevel() {
-		for (String f: callDAG.functions) {
-			if (!callDAG.callFrom.containsKey(f)) { // is Root
+		for (String f: randomCallDAG.functions) {
+			if (!randomCallDAG.callFrom.containsKey(f)) { // is Root
 				getFunctionLevelTraverse(f);
 			}
 		}
@@ -59,7 +60,9 @@ public class RandomNetworkGenerator {
 		
 		double a[] = new double[functionLevel.values().size()];
 		int j = 0;
-		for (int i : functionLevel.values()) a[j++] = i;
+		for (int i : functionLevel.values()) {
+			a[j++] = i;
+		}
 		System.out.println("Intial Median Level: " + StatUtils.percentile(a, 50.0));
 	}
 	
@@ -73,7 +76,7 @@ public class RandomNetworkGenerator {
 		}
 		
 		int level = 1;
-		for (String f: callDAG.callTo.get(function)) {
+		for (String f: randomCallDAG.callTo.get(function)) {
 			updateFunctionLevelWithCutOffTraverse(f, cutOffLevel);
 			int childLevel = functionLevel.get(f);
 			level = Math.max(level, childLevel + 1);
@@ -85,8 +88,8 @@ public class RandomNetworkGenerator {
 	
 	public void updateFunctionLevelWithCutOff(int cutOffLevel) {
 		visited = new HashSet();
-		for (String f: callDAG.functions) {
-			if (!callDAG.callFrom.containsKey(f)) { // is Root
+		for (String f: randomCallDAG.functions) {
+			if (!randomCallDAG.callFrom.containsKey(f)) { // is Root
 				updateFunctionLevelWithCutOffTraverse(f, cutOffLevel);
 			}
 		}
@@ -107,9 +110,9 @@ public class RandomNetworkGenerator {
 		visited.add(node);
 		
 		if (functionLevel.containsKey(node) && functionLevel.get(node) <= targetLevel) return; // below the Target Level
-		if (!callDAG.callTo.containsKey(node)) return; // a leaf
+		if (!randomCallDAG.callTo.containsKey(node)) return; // a leaf
 		
-		for (String f: callDAG.callTo.get(node)) {
+		for (String f: randomCallDAG.callTo.get(node)) {
 			cycleCheckTraverse(f, target, targetLevel);
 		}
 	}
@@ -121,13 +124,13 @@ public class RandomNetworkGenerator {
 	}
 	
 	public void cycleCheckFullTraverse(String node) {
-		if (!callDAG.callTo.containsKey(node) || visited.contains(node))
+		if (!randomCallDAG.callTo.containsKey(node) || visited.contains(node))
 			return;
 
 		visited.add(node);
 		cycleVisited.add(node); // cycle check
 
-		for (String s : callDAG.callTo.get(node)) {
+		for (String s : randomCallDAG.callTo.get(node)) {
 			if (cycleVisited.contains(s)) {
 				hasCycle = true;
 				continue;
@@ -142,7 +145,7 @@ public class RandomNetworkGenerator {
 		visited.clear();
 		cycleVisited.clear();
 		hasCycle = false;
-		for (String s: callDAG.functions) {
+		for (String s: randomCallDAG.functions) {
 			if (!visited.contains(s)) {
 				cycleCheckFullTraverse(s);
 			}
@@ -152,16 +155,15 @@ public class RandomNetworkGenerator {
 	public void chooseEdgePairsAndSwap() throws Exception {
 		int nFunctions = functionLevel.size();
 		Object[] functionNames = functionLevel.keySet().toArray();
-//		Random random = new Random(1221388376679119L); //113355, 335577, 557789
+		Random random = new Random(System.nanoTime()); 
 		int kount = 0;
 		int nAttempts = 0;
 		int nEventA = 0, nEventB = 0;
-		PrintWriter pw = new PrintWriter(new File("Results//random-level-medians-" + randomVersionNumber + ".txt"));
+		PrintWriter pw1 = new PrintWriter(new File("Results//random-level-medians-" + randomVersionNumber + ".txt"));
 		PrintWriter pw2 = new PrintWriter(new File("Results//rewiring-events-" + randomVersionNumber + ".txt"));		
 		
-		while(kount < callDAG.nEdges * 2) {
-//		while(kount < 1000) {
-			Random random = new Random(System.nanoTime());
+		while(kount < randomCallDAG.nEdges * numOfIteration) {
+//			Random random = new Random(System.nanoTime());
 			int rs1, rs2; // random_index_source_1 = rs1, random_index_source_2 = rs2
 			String fs1, fs2; // function-name_source_1 = fs1, function-name_source_2 = fs2
 			int ls1, ls2; // level_source_1 = ls1, level_source_2 = ls2
@@ -170,19 +172,19 @@ public class RandomNetworkGenerator {
 				rs1 = random.nextInt(nFunctions);
 				fs1 = (String)functionNames[rs1];
 			} 
-			while (!callDAG.callTo.containsKey(fs1));	
+			while (!randomCallDAG.callTo.containsKey(fs1));	
 			
 			do {
 				rs2 = random.nextInt(nFunctions);
 				fs2 = (String)functionNames[rs2];	
 			} 
-			while (!callDAG.callTo.containsKey(fs2));
+			while (!randomCallDAG.callTo.containsKey(fs2));
 						
-			ls1 = functionLevel.get(fs1); 
+			ls1 = functionLevel.get(fs1);
 			ls2 = functionLevel.get(fs2);
 						
-			List<String> callToListS1 = new ArrayList(callDAG.callTo.get(fs1));
-			List<String> callToListS2 = new ArrayList(callDAG.callTo.get(fs2));
+			List<String> callToListS1 = new ArrayList(randomCallDAG.callTo.get(fs1));
+			List<String> callToListS2 = new ArrayList(randomCallDAG.callTo.get(fs2));
 			
 			int rt1, rt2; // random_index_target_1 = rt1, random_index_target_2 = rt2
 			String ft1, ft2; // function-name_target_1 = ft1, function-name_target_2 = ft2
@@ -197,7 +199,7 @@ public class RandomNetworkGenerator {
 			lt2 = functionLevel.get(ft2);
 			
 //			check if already exists, then no swap, start over
-			if (callDAG.callTo.get(fs1).contains(ft2) || callDAG.callTo.get(fs2).contains(ft1)) {
+			if (randomCallDAG.callTo.get(fs1).contains(ft2) || randomCallDAG.callTo.get(fs2).contains(ft1)) {
 				continue;
 			}
 			
@@ -228,21 +230,21 @@ public class RandomNetworkGenerator {
 			else ++nEventB;
 			
 //			should the callTo/callFrom be made Set! (done!)
-			callDAG.callTo.get(fs1).remove(ft1);
-			callDAG.callTo.get(fs1).add(ft2);
+			randomCallDAG.callTo.get(fs1).remove(ft1);
+			randomCallDAG.callTo.get(fs1).add(ft2);
 			
-			callDAG.callTo.get(fs2).remove(ft2);
-			callDAG.callTo.get(fs2).add(ft1);
+			randomCallDAG.callTo.get(fs2).remove(ft2);
+			randomCallDAG.callTo.get(fs2).add(ft1);
 			
-			callDAG.callFrom.get(ft1).remove(fs1);
-			callDAG.callFrom.get(ft1).add(fs2);
+			randomCallDAG.callFrom.get(ft1).remove(fs1);
+			randomCallDAG.callFrom.get(ft1).add(fs2);
 			
-			callDAG.callFrom.get(ft2).remove(fs2);
-			callDAG.callFrom.get(ft2).add(fs1);
+			randomCallDAG.callFrom.get(ft2).remove(fs2);
+			randomCallDAG.callFrom.get(ft2).add(fs1);
 		
 			// level propagation
 			int updatedls1 = 1; // updated_level_source_1 = updatedls1
-			for (String s: callDAG.callTo.get(fs1)) {
+			for (String s: randomCallDAG.callTo.get(fs1)) {
 				updatedls1 = Math.max(updatedls1, functionLevel.get(s) + 1);
 			}
 			
@@ -252,7 +254,7 @@ public class RandomNetworkGenerator {
 			}
 			
 			int updatedls2 = 1; // updated_level_source_2 = updatedls2
-			for (String s: callDAG.callTo.get(fs2)) {
+			for (String s: randomCallDAG.callTo.get(fs2)) {
 				updatedls2 = Math.max(updatedls2, functionLevel.get(s) + 1);
 			}
 			
@@ -266,13 +268,13 @@ public class RandomNetworkGenerator {
 				double a[] = new double[functionLevel.values().size()];
 				int j = 0;
 				for (int i : functionLevel.values()) a[j++] = i;
-				pw.println("Random Median of Levels: " + StatUtils.percentile(a, 50.0));
+				pw1.println("Random Median of Levels: " + StatUtils.percentile(a, 50.0));
 				pw2.println(nAttempts + "\t" + nEventA + "\t" + nEventB);
 				nAttempts = nEventA = nEventB = 0;
 			}
 		}
 		
-		pw.close();
+		pw1.close();
 		pw2.close();
 		
 //		for (String f: functionLevel.keySet()) {
@@ -292,11 +294,50 @@ public class RandomNetworkGenerator {
 //		}
 	}
 	
+	public void checkRandomDAGValidity() {
+		cycleCheckFull();
+		if (hasCycle) System.out.println("Cycle Found Error!");
+		
+		CallDAG originalCallDAG = new CallDAG(Driver.networkPath + Driver.version);
+		
+		for (String f: originalCallDAG.functions) {
+			if(!randomCallDAG.functions.contains(f)) {
+				System.out.println("Function Vanished # Error!");
+			}
+			
+			if(randomCallDAG.callFrom.containsKey(f)) {
+				if(randomCallDAG.callFrom.get(f).size() != originalCallDAG.callFrom.get(f).size()) { 
+					System.out.println("Indegree Destroyed (1) # Error!");
+				}
+			}
+			else {
+				if(originalCallDAG.callFrom.containsKey(f)) {
+					System.out.println("Indegree Destryed (2) # Error!");
+				}
+			}
+			
+			if(randomCallDAG.callTo.containsKey(f)) {
+				if(randomCallDAG.callTo.get(f).size() != originalCallDAG.callTo.get(f).size()) {
+					System.out.println("Outdegree Destryoed (1) # Error!");
+				}
+			}
+			else {
+				if(originalCallDAG.callTo.containsKey(f)) {
+					System.out.println("Outdegree Destryed (2) # Error!");
+				}
+			}
+			
+//			if(randomCallDAG.inDegree.get(f) != originalCallDAG.inDegree.get(f)) System.out.println("Error!");
+//			if(randomCallDAG.outDegree.get(f) != originalCallDAG.outDegree.get(f)) System.out.println("Error!");
+		}
+		
+		System.out.println("OK !!!");
+	}
+	
 	public void generateRandomNetwork(String rVN) throws Exception {
 		randomVersionNumber = rVN;
 		getFunctionLevel();
 		chooseEdgePairsAndSwap();
-		cycleCheckFull();
-		System.out.println("Cycle check: " + hasCycle);
+		checkRandomDAGValidity();
 	}
 }
