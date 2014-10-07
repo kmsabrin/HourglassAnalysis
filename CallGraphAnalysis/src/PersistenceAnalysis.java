@@ -15,9 +15,6 @@ public class PersistenceAnalysis {
 		System.out.println(s2.size());
 		System.out.println(s3.size());
 		System.out.println("Function Removed:" + (s1.size() - s3.size()));
-		System.out.println("Function Added:" + (s2.size() - s3.size()));
-		
+		System.out.println("Function Added:" + (s2.size() - s3.size()));		
 	}
-	
-
 }

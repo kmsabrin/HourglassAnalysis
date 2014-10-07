@@ -181,6 +181,7 @@ public class DegreeAnalysis {
 		PrintWriter pw = new PrintWriter(new File("Results//loc-vs-avg-indeg-" + filePath + ".txt"));
 //		getting average fanIN per location
 		Map<Double, List<Integer>> result = new TreeMap();
+		
 		for (String s: callDAG.location.keySet()) {
 			double m = callDAG.location.get(s); 
 			

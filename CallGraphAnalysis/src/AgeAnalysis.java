@@ -43,7 +43,6 @@ public class AgeAnalysis {
 		/****
 		 * Think about using avgLocation, avgComplexity and avgGenerality
 		 */
-
 		Set<String> totalFunction = new HashSet();
 		Set<String> rebornFunction = new HashSet();
 		

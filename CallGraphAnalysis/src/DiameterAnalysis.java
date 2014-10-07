@@ -40,6 +40,7 @@ public class DiameterAnalysis {
 		List<Integer> d = new ArrayList();
 		visited = new HashSet();
 		maxDepthToLeaf = new HashMap();
+
 		for (String s: callDAG.functions) {
 			if (!callDAG.callFrom.containsKey(s)) { // is a root
 				int maxD = getMaxLeafDepth(s, 0, callDAG); 

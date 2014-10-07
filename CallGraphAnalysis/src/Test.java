@@ -64,6 +64,7 @@ public class Test {
 //		for (String s: test.callDAG.location.keySet()) {
 //			System.out.println(s + "  " + test.callDAG.location.get(s));
 //		}
+		
 //		LocationAnalysis locationAnalysis = new LocationAnalysis();
 //		locationAnalysis.getLocationHistogram(test.callDAG);
 //		locationAnalysis.getLocationVsCallDirection(test.callDAG);

@@ -102,8 +102,8 @@ public class CallDAG {
 					String callT = tokens[2].substring(0, tokens[2].length() - 1); // for cobjdump
 
 //					for running community detection on random DAGs
-//					String callT = tokens[2]; // for cobjdump
-					
+//					String callT = tokens[2]; 
+			
 					/******************/
 					/******************/
 					if (callT.equals("mcount")) 

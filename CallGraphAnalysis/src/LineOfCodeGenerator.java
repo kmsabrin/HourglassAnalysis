@@ -5,6 +5,7 @@ import java.util.List;
 public class LineOfCodeGenerator {
 	static List<String> sourceFilePath = new ArrayList();
 
+	// directory traverse
 	public static void showFiles(File[] files) {
 	    for (File file : files) {
 	        if (file.isDirectory()) {

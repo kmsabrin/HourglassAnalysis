@@ -198,6 +198,5 @@ public class ModularityAnalysis {
 		}
 		
 		pw.println("Total nodes used: " + nodesUsed + " out of " + callDAG.functions.size());
-		
 	}
 }

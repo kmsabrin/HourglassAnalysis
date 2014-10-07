@@ -65,7 +65,7 @@ public class ClusterAnalysis {
 		complexitySeparator = cS / callDAG.functions.size();
 		
 		generalitySeparator = 0.3;
-		complexitySeparator = 0.065;
+		complexitySeparator = 0.065; // hard code
 		
 		PrintWriter pwGC = new PrintWriter(new File("Results//v33-gen-cmp-cluster1-GC.txt"));
 		PrintWriter pwgC = new PrintWriter(new File("Results//v33-gen-cmp-cluster2-gC.txt"));

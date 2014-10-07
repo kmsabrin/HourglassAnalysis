@@ -1,9 +1,7 @@
 import java.io.File;
 import java.io.PrintWriter;
 
-
-public class Driver {
-	
+public class Driver {	
 	static String networkPath = "kernel_callgraphs//full.graph-2.6.";
 	static String networkUsed = "kernel";
 	static int versiontStart = 0;

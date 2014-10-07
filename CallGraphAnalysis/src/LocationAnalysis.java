@@ -29,6 +29,7 @@ public class LocationAnalysis {
 //			pw.println(d + "\t" + locHistogram.get(d)); // actual histogram
 //		}
 		pw.close();
+
 		return locHistogram;
 	}
 	

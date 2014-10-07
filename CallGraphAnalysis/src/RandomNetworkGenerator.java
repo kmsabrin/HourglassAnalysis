@@ -159,6 +159,7 @@ public class RandomNetworkGenerator {
 		int kount = 0;
 		int nAttempts = 0;
 		int nEventA = 0, nEventB = 0;
+		
 		PrintWriter pw1 = new PrintWriter(new File("Results//random-level-medians-" + randomVersionNumber + ".txt"));
 		PrintWriter pw2 = new PrintWriter(new File("Results//rewiring-events-" + randomVersionNumber + ".txt"));		
 		

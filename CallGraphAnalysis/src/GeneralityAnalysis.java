@@ -46,8 +46,7 @@ public class GeneralityAnalysis {
 			double sum = 0;
 			for (double e: locationVSGenerality.get(d)) {
 				sum += e;
-			}
-			
+			}			
 			double avg = sum / locationVSGenerality.get(d).size();
 			pw.println(d + "\t" + avg); 
 		}

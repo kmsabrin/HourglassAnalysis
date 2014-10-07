@@ -135,6 +135,7 @@ public class EvolutionAnalysis {
 				gS += callDAG.generality.get(s);
 				cS += callDAG.complexity.get(s);
 			}
+			
 			generalitySeparator = gS / callDAG.location.size();
 			complexitySeparator = cS / callDAG.location.size();
 			
