@@ -1,4 +1,5 @@
 import java.io.File;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -7,6 +8,9 @@ import java.util.Set;
 
 public class CallDAG {
 	int nEdges;
+	double nRoots;
+	double nLeaves;
+
 	Set<String> functions;
 	Map<String, Set<String>> callFrom; // who called me // reverse adjacency list
 	Map<String, Set<String>> callTo; // who I called // adjacency list
@@ -21,15 +25,22 @@ public class CallDAG {
 	Map<String, Double> generality;
 	Map<String, Double> complexity;
 	
+	Map<String, Double> moduleGenerality;
+	Map<String, Double> moduleComplexity;
+	
 	Map<String, Integer> outDegree;
 	Map<String, Integer> inDegree;
 
 	Set<String> visited;
 	Map<String, String> cycleEdges;
 	Set<String> cycleVisited;
-	double kount;
+	double reachableKount;
+	double moduleKount;
+		
+	Map<String, Integer> functionID;
+	Map<Integer, String> IDFunction;
 	
-	CallDAG() { // for test graph
+	CallDAG() { 
 		functions = new HashSet();
 		callFrom = new HashMap();
 		callTo = new HashMap();
@@ -45,34 +56,31 @@ public class CallDAG {
 		numOfReachableNodes = new HashMap();
 		generality = new HashMap();
 		complexity = new HashMap();
+		moduleGenerality = new HashMap();
+		moduleComplexity = new HashMap();
 		
 		outDegree = new HashMap();
 		inDegree = new HashMap();
+		
+		functionID = new HashMap();
+		IDFunction = new HashMap();
 	}
 	
 	CallDAG(String callGraphFileName) {
-		functions = new HashSet();
-		callFrom = new HashMap();
-		callTo = new HashMap();
-		
-		cycleEdges = new HashMap();
-		
-		numOfPath = new HashMap();
-		sumOfPath = new HashMap();
-		avgLeafDepth = new HashMap();
-		avgRootDepth = new HashMap();
-		location = new HashMap();
-		
-		numOfReachableNodes = new HashMap();
-		generality = new HashMap();
-		complexity = new HashMap();
-		
-		outDegree = new HashMap();
-		inDegree = new HashMap();
-		
+		this();
+			
 		// load & initialize the attributes of the call graph
 		loadCallGraph(callGraphFileName);
+		
+		for (String s: functions) {
+			if (!callFrom.containsKey(s)) ++nRoots;
+			if (!callTo.containsKey(s)) ++nLeaves;
+		}
+
 		removeCycles(); // or should I only ignore cycles?
+		
+		assignFunctionID();
+		
 		loadDegreeMetric();
 		loadLocationMetric(); // must load degree metric before
 		loadGeneralityMetric(); 
@@ -92,6 +100,9 @@ public class CallDAG {
 				if (tokens[1].equals("->")) {
 					String callF = tokens[0];
 					String callT = tokens[2].substring(0, tokens[2].length() - 1); // for cobjdump
+
+//					for running community detection on random DAGs
+//					String callT = tokens[2]; // for cobjdump
 					
 					/******************/
 					/******************/
@@ -198,6 +209,23 @@ public class CallDAG {
 		}		
 	}
 	
+	public void assignFunctionID() {
+		PrintWriter pw = null;
+		try {
+			pw = new PrintWriter("Results/index.txt");
+		} catch(Exception e) {}
+		
+		int k = 0;
+		for (String s: functions) {
+			pw.println(k + "\t" + k);
+			functionID.put(s, k);
+			IDFunction.put(k, s);
+			++k;
+		}
+		
+		pw.close();
+	}
+	
 	public void leafPath(String node) {
 		if (numOfPath.containsKey(node)) { // node already traversed
 			return;
@@ -284,9 +312,10 @@ public class CallDAG {
 		}
 		
 		visited.add(node);
-		++kount;
-		
+		++reachableKount;
+				
 		if (!callFrom.containsKey(node)) { // is a root
+			++moduleKount;
 			return;
 		}
 		
@@ -310,35 +339,43 @@ public class CallDAG {
 		}
 		
 		for (String s : functions) {
-			kount = -1.0; // for excluding itself, note kount is global
+			reachableKount = -1.0; // for excluding itself, note kount is global
+			moduleKount = 0;
 			visited = new HashSet();
 			reachableUpwardsNodes(s); // how many nodes are using her
 			
 			double g = 0;
 			int loc = Math.max((int)(location.get(s) * 100), 0);
 			if (loc < 100) {
-				g = kount / greaterLocNode[loc];
+				g = reachableKount / greaterLocNode[loc];
 			}
 			
 			g = ((int) (g * 100.0)) / 100.0;
 			generality.put(s, g);
+			
+			double mG = moduleKount / nRoots;
+			mG = ((int) (mG * 100.0)) / 100.0;
+			moduleGenerality.put(s, mG);
 		}
 	}
 	
-	public void reachableDownwardsNodes(String node) { // towards leaves
+	public void reachableDownwardsNodes(String node, String source, PrintWriter pw) { // towards leaves
 		if (visited.contains(node)) { // node already traversed
 			return;
 		}
 		
 		visited.add(node);
-		++kount;
+		++reachableKount;
 		
+		if (!node.equals(source)) pw.println(functionID.get(source) + " " + functionID.get(node));
+			
 		if (!callTo.containsKey(node)) { // is a leaf
+			++moduleKount;
 			return;
 		}
 		
 		for (String s : callTo.get(node)) {
-			reachableDownwardsNodes(s);
+			reachableDownwardsNodes(s, source, pw);
 		}
 	}
 	
@@ -356,18 +393,30 @@ public class CallDAG {
 			lessLocNode[i] = lessLocNode[i - 1] + locCount[i - 1];
 		}
 		
+		PrintWriter pw = null;
+		try {
+			pw = new PrintWriter(new File("Results//complete-DAG.txt"));
+		}catch (Exception e) {}
+
 		for (String s : functions) {
-			kount = -1.0; // for excluding itself
+			reachableKount = -1.0; // for excluding itself
+			moduleKount = 0;
 			visited = new HashSet();
-			reachableDownwardsNodes(s);
+			reachableDownwardsNodes(s, s, pw);
 			
 			int loc = (int)(location.get(s) * 100);
 			double c = 0;
 			if (loc != 0) {
-				c = kount / lessLocNode[loc];
+				c = reachableKount / lessLocNode[loc];
 			}
 			c = ((int) (c * 100.0)) / 100.0;
 			complexity.put(s, c);
+			
+			double mC = moduleKount / nLeaves;
+			mC = ((int) (mC * 100.0)) / 100.0;
+			moduleComplexity.put(s, mC);
 		}
+		
+		pw.close();
 	}
 }

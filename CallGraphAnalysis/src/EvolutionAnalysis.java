@@ -8,8 +8,8 @@ public class EvolutionAnalysis {
 		for (int i = Driver.versiontStart; i < Driver.versionEnd; i += 12) {
 			CallDAG callDAG = new CallDAG(Driver.networkPath + i);
 			GeneralityAnalysis generalityAnalysis = new GeneralityAnalysis();			
-//			generalityAnalysis.getLocationVSAvgGenerality(callDAG, "v" + i);
-			generalityAnalysis.getLocationVSAvgComplexity(callDAG, "v" + i);
+//			generalityAnalysis.getLocationVsAvgGenerality(callDAG, "v" + i);
+			generalityAnalysis.getLocationVsAvgComplexity(callDAG, "v" + i);
 		}
 	}
 	
@@ -18,7 +18,7 @@ public class EvolutionAnalysis {
 			String versionNum = Driver.networkUsed + i;
 			CallDAG callDAG = new CallDAG(Driver.networkPath + i);
 			GeneralityAnalysis genAnalysis = new GeneralityAnalysis();
-			genAnalysis.getGeneralityVSComplexity(callDAG, versionNum);
+			genAnalysis.getGeneralityVsComplexity(callDAG, versionNum);
 		}
 	}
 

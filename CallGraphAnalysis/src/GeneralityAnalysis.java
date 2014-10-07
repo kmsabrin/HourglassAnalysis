@@ -24,7 +24,7 @@ public class GeneralityAnalysis {
 		pw.close();
 	}
 	
-	public void getLocationVSAvgGenerality(CallDAG callDAG, String filePath) throws Exception {
+	public void getLocationVsAvgGenerality(CallDAG callDAG, String filePath) throws Exception {
 		PrintWriter pw = new PrintWriter(new File("Results//loc-vs-avg-gen-" + filePath + ".txt"));
 		Map<Double, List<Double>> locationVSGenerality = new TreeMap();
 		
@@ -55,7 +55,7 @@ public class GeneralityAnalysis {
 		pw.close();
 	}
 	
-	public void getLocationVSAvgComplexity(CallDAG callDAG, String filePath) throws Exception {
+	public void getLocationVsAvgComplexity(CallDAG callDAG, String filePath) throws Exception {
 		PrintWriter pw = new PrintWriter(new File("Results//loc-vs-avg-cmp-" + filePath + ".txt"));
 		Map<Double, List<Double>> locationVSComplexity = new TreeMap();
 		
@@ -86,7 +86,7 @@ public class GeneralityAnalysis {
 		pw.close();
 	}
 	
-	public void getGeneralityVSComplexity(CallDAG callDAG, String filePath) throws Exception {
+	public void getGeneralityVsComplexity(CallDAG callDAG, String filePath) throws Exception {
 		PrintWriter pw = new PrintWriter(new File("Results//gen-vs-cmp-" + filePath + ".txt"));
 		for (String s: callDAG.functions) {
 			pw.println(callDAG.generality.get(s) + "\t" + callDAG.complexity.get(s));

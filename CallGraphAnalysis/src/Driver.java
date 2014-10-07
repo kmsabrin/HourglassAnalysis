@@ -1,30 +1,29 @@
+import java.io.File;
+import java.io.PrintWriter;
+
 
 public class Driver {
 	
-//	static String networkPath = "kernel_callgraphs//full.graph-2.6.";
-//	static String networkUsed = "kernel";
-//	static int versiontStart = 0;
-//	static int versionEnd = 40;
-	
-	static String networkPath = "openssh_callgraphs//full.graph-openssh-";
-	static String networkUsed = "ssh";
-	static int versiontStart = 1;
+	static String networkPath = "kernel_callgraphs//full.graph-2.6.";
+	static String networkUsed = "kernel";
+	static int versiontStart = 0;
 	static int versionEnd = 40;
 	
-	static String version = "29";
+//	static String networkPath = "openssh_callgraphs//full.graph-openssh-";
+//	static String networkUsed = "ssh";
+//	static int versiontStart = 1;
+//	static int versionEnd = 40;
 	
+	static String version = "1";
+
 	public static void main(String[] args) throws Exception {		
 /*****************************************************************************/
 		String versionNum = networkUsed + version;
 		CallDAG callDAG = new CallDAG(Driver.networkPath + version);
-//		System.out.println("nFunctions: " + callDAG.functions.size());
-//		System.out.println("nEdges: " + callDAG.nEdges);
-//		int nRoots = 0, nLeaves = 0;
-//		for (String s: callDAG.functions) {
-//			if (!callDAG.callFrom.containsKey(s)) ++nRoots;
-//			if (!callDAG.callTo.containsKey(s)) ++nLeaves;
-//		}
-//		System.out.println("Roots: " + nRoots + " Leaves: " + nLeaves);
+		System.out.println("nFunctions: " + callDAG.functions.size());
+		System.out.println("nEdges: " + callDAG.nEdges);
+		System.out.println("Roots: " + callDAG.nRoots + " Leaves: " + callDAG.nLeaves);
+//		getCallDAGSIF(callDAG, versionNum);
 /*****************************************************************************/
 
 /*****************************************************************************/
@@ -35,7 +34,8 @@ public class Driver {
 //		GeneralityAnalysis generalityAnalysis = new GeneralityAnalysis();
 //		EvolutionAnalysis evolutionaryAnalysis = new EvolutionAnalysis();
 //		DiameterAnalysis diameterAnalysis = new DiameterAnalysis();
-		RandomNetworkGenerator randomNetworkGenerator = new RandomNetworkGenerator(callDAG);
+		ModularityAnalysis modularityAnalysis  = new ModularityAnalysis();
+//		RandomNetworkGenerator randomNetworkGenerator = new RandomNetworkGenerator(callDAG);
 /*****************************************************************************/
 		
 /*****************************************************************************/
@@ -99,15 +99,23 @@ public class Driver {
 /*****************************************************************************/		
 //		generalityAnalysis.getGeneralityHistogram(callDAG, versionNum);
 //		generalityAnalysis.getComplexityHistogram(callDAG, versionNum);
-//		generalityAnalysis.getLocationVSAvgGenerality(callDAG, versionNum);
-//		generalityAnalysis.getLocationVSAvgComplexity(callDAG, versionNum);
-//		generalityAnalysis.getGeneralityVSComplexity(callDAG, versionNum);
+//		generalityAnalysis.getLocationVsAvgGenerality(callDAG, versionNum);
+//		generalityAnalysis.getLocationVsAvgComplexity(callDAG, versionNum);
+//		generalityAnalysis.getGeneralityVsComplexity(callDAG, versionNum);
 //		generalityAnalysis.getCentralNodes(callDAG); // CUSTOMIZED FOR DIFFERENT NETWORK
 /*****************************************************************************/
 
 /*****************************************************************************/		
 //		diameterAnalysis.getEffectiveDiameter(callDAG);
 //		diameterAnalysis.getEffectiveDiameterForAllVersions();
+/*****************************************************************************/
+
+/*****************************************************************************/		
+//		modularityAnalysis.getModuleGeneralityVsComplexity(callDAG, versionNum);
+//		modularityAnalysis.getInfo();
+//		modularityAnalysis.getAvgModuleGeneralityVsLocation(callDAG, versionNum);
+//		modularityAnalysis.getRandomModularNetwork();
+		modularityAnalysis.getWalktrapModules(callDAG);
 /*****************************************************************************/
 
 /*****************************************************************************/		
@@ -118,8 +126,8 @@ public class Driver {
 /*****************************************************************************/		
 		
 /*****************************************************************************/		
-		String randVersionNum = versionNum + "rX";
-		randomNetworkGenerator.generateRandomNetwork(randVersionNum);
+//		String randVersionNum = versionNum + "rX";
+//		randomNetworkGenerator.generateRandomNetwork(randVersionNum);
 //		randomNetworkGenerator.randomCallDAG.loadDegreeMetric();
 //		randomNetworkGenerator.randomCallDAG.loadLocationMetric(); 
 //		randomNetworkGenerator.randomCallDAG.loadGeneralityMetric(); 
@@ -132,5 +140,17 @@ public class Driver {
 //		degreeAnalysis.getLocationVSAvgOutDegree(randomNetworkGenerator.randomCallDAG, randVersionNum);
 //		locationAnalysis.getCallViolationMetric(randomNetworkGenerator.randomCallDAG);
 /*****************************************************************************/
+	}
+	
+	public static void getCallDAGSIF(CallDAG callDAG, String versionNum) throws Exception {
+		PrintWriter pw = new PrintWriter(new File("module-callDAG-" + versionNum + ".txt"));
+		for (String s: callDAG.functions) {
+			if (callDAG.callTo.containsKey(s)) {
+				for (String r: callDAG.callTo.get(s)) {
+					pw.println(callDAG.functionID.get(s) + "\t" + callDAG.functionID.get(r));
+				}
+			}
+		}
+		pw.close();
 	}
 }

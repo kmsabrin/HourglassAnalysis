@@ -347,8 +347,8 @@ public class AgeAnalysis {
 				locationFrequency.put(location, 1);
 			}
 			
-//			if (persistence < 37) continue; // get the stable nodes
-			if (persistence > 3) continue; // get the transient nodes
+			if (persistence < 38) continue; // get the stable nodes
+//			if (persistence > 2) continue; // get the transient nodes
 			
 			if (locationVsNumNodesWithAgeX.containsKey(location)) {
 				int v = locationVsNumNodesWithAgeX.get(location);
@@ -460,7 +460,7 @@ public class AgeAnalysis {
 		pwts.println((sgc * 100.0 / persistencegc.size()) + "\t" + (tgc * 100.0 / persistencegc.size()));
 		pwts.println((sGc * 100.0 / persistenceGc.size()) + "\t" + (tGc * 100.0 / persistenceGc.size()));
 		
-		// life-span percentiles
+		// persistence percentiles
 		Object a[] = persistenceGC.toArray();
 		getPercentiles("GC", a, pwls);
 		a = persistencegC.toArray();

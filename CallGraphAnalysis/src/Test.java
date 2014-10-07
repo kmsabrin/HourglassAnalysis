@@ -40,6 +40,10 @@ public class Test {
 		callDAG.callFrom.put("k", new HashSet<String>(Arrays.asList("j")));
 
 		callDAG.nEdges = 13;
+		for (String s: callDAG.functions) {
+			if (!callDAG.callFrom.containsKey(s)) ++callDAG.nRoots;
+			if (!callDAG.callTo.containsKey(s)) ++callDAG.nLeaves;
+		}
 		callDAG.removeCycles();
 		callDAG.loadDegreeMetric();
 		callDAG.loadLocationMetric(); // must load degree metric before
@@ -69,7 +73,9 @@ public class Test {
 			System.out.print(s);
 			System.out.print("\t Location " + test.callDAG.location.get(s));
 			System.out.print("\t Generality " + test.callDAG.generality.get(s));
-			System.out.println("\t Complexity " + test.callDAG.complexity.get(s));
+			System.out.print("\t Complexity " + test.callDAG.complexity.get(s));
+			System.out.print("\t ModuleGenerality " + test.callDAG.moduleGenerality.get(s));
+			System.out.println("\t ModuleComplexity " + test.callDAG.moduleComplexity.get(s));
 		}
 		
 //		generalityAnalysis.getGeneralityHistogram(test.callDAG);
