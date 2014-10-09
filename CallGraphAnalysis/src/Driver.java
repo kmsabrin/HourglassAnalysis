@@ -16,16 +16,16 @@ public class Driver {
 
 	public static void main(String[] args) throws Exception {		
 /*****************************************************************************/
-		String versionNum = networkUsed + version;
-		CallDAG callDAG = new CallDAG(Driver.networkPath + version);
-		System.out.println("nFunctions: " + callDAG.functions.size());
-		System.out.println("nEdges: " + callDAG.nEdges);
-		System.out.println("Roots: " + callDAG.nRoots + " Leaves: " + callDAG.nLeaves);
+//		String versionNum = networkUsed + version;
+//		CallDAG callDAG = new CallDAG(Driver.networkPath + version);
+//		System.out.println("nFunctions: " + callDAG.functions.size());
+//		System.out.println("nEdges: " + callDAG.nEdges);
+//		System.out.println("Roots: " + callDAG.nRoots + " Leaves: " + callDAG.nLeaves);
 //		getCallDAGSIF(callDAG, versionNum);
 /*****************************************************************************/
 
 /*****************************************************************************/
-//		AgeAnalysis ageAnalysis = new AgeAnalysis();
+		AgeAnalysis ageAnalysis = new AgeAnalysis();
 //		DegreeAnalysis degreeAnalysis = new DegreeAnalysis();		
 //		LocationAnalysis locationAnalysis = new LocationAnalysis();
 //		PersistenceAnalysis persistenceAnalysis = new PersistenceAnalysis();
@@ -65,6 +65,7 @@ public class Driver {
 //		ageAnalysis.getLocationVsPersistencePercentiles();
 //		ageAnalysis.getLocationVsTransientStable(); // CHANGE FOR DIFFERENT NETWORKS
 //		ageAnalysis.getlocationDispersion();
+		ageAnalysis.getLocationVsAvgGeneralityDelta();
 //		
 //		ageAnalysis.getLastLocationVSAverageAge();
 //		ageAnalysis.getAgeHistogram();
@@ -113,7 +114,7 @@ public class Driver {
 //		modularityAnalysis.getInfo();
 //		modularityAnalysis.getAvgModuleGeneralityVsLocation(callDAG, versionNum);
 //		modularityAnalysis.getRandomModularNetwork();
-		modularityAnalysis.getWalktrapModules(callDAG);
+//		modularityAnalysis.getWalktrapModules(callDAG);
 /*****************************************************************************/
 
 /*****************************************************************************/		

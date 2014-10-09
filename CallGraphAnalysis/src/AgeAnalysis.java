@@ -13,6 +13,8 @@ import org.apache.commons.math3.stat.StatUtils;
 public class AgeAnalysis {
 	Map<String, Integer> birthVersion;
 	Map<String, Double> birthLocation;
+	Map<String, Double> birthComplexity;
+	Map<String, Double> birthGenerality;
 
 	Map<String, Integer> lastVersion;
 	Map<String, Double> lastLocation;
@@ -28,6 +30,8 @@ public class AgeAnalysis {
 	AgeAnalysis() {
 		birthVersion = new HashMap();
 		birthLocation = new HashMap();
+		birthComplexity = new HashMap();
+		birthGenerality = new HashMap();
 
 		lastVersion = new HashMap();
 		lastLocation = new HashMap();
@@ -51,7 +55,9 @@ public class AgeAnalysis {
 			for (String s: callDAG.functions) {
 				if (!birthVersion.containsKey(s)) {
 					birthVersion.put(s, i);
-					birthLocation.put(s, callDAG.location.get(s));					
+					birthLocation.put(s, callDAG.location.get(s));
+					birthGenerality.put(s, callDAG.generality.get(s));
+					birthComplexity.put(s, callDAG.complexity.get(s));
 				}
 					
 //				check for death followed by rebirth
@@ -513,6 +519,29 @@ public class AgeAnalysis {
 			double q3 = StatUtils.percentile(b, 75.0);
 			pw.println(d + "\t" + q1 + "\t" + qm + "\t" + q3);
 		}
+		pw.close();
+	}
+	
+	public void getLocationVsAvgGeneralityDelta() throws Exception {
+		PrintWriter pw = new PrintWriter(new File("Results//" + Driver.networkUsed + "-loc-vs-avg-delta-gen.txt"));
+		Map<Double, Double> locVsAvGenDelta = new TreeMap();
+		
+		for (String s: birthVersion.keySet()) {
+			double l = avgLocation.get(s);
+			double dg = lastGenerality.get(s) - birthGenerality.get(s); 
+			if (locVsAvGenDelta.containsKey(l)) {
+				double newDG = (dg + locVsAvGenDelta.get(l)) * 0.5; 
+				locVsAvGenDelta.put(l, newDG);
+			}
+			else {
+				locVsAvGenDelta.put(l, dg);
+			}
+		}
+		
+		for (Double d: locVsAvGenDelta.keySet()) {
+			pw.println(d + "\t" + locVsAvGenDelta.get(d));
+		}
+		
 		pw.close();
 	}
 }
