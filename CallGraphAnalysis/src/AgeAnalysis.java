@@ -540,8 +540,7 @@ public class AgeAnalysis {
 		
 		for (Double d: locVsAvGenDelta.keySet()) {
 			pw.println(d + "\t" + locVsAvGenDelta.get(d));
-		}
-		
+		}		
 		pw.close();
 	}
 }

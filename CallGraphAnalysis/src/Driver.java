@@ -114,6 +114,7 @@ public class Driver {
 //		modularityAnalysis.getInfo();
 //		modularityAnalysis.getAvgModuleGeneralityVsLocation(callDAG, versionNum);
 //		modularityAnalysis.getRandomModularNetwork();
+		
 		modularityAnalysis.getWalktrapModules(callDAG);
 		modularityAnalysis.getCommunityNetworkHeatMap(callDAG);
 		modularityAnalysis.getCommunityNetworkLayout(callDAG);

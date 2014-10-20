@@ -321,15 +321,13 @@ public class ModularityAnalysis {
 			}
 			
 			pw.print("C" + commID);
-			
 			for (double d = 0.0; d <= 1.0; d += 0.1) {
 				if (locationCounter.containsKey(d)) {
 					pw.print(" " + locationCounter.get(d));
 				}
 				else 
 					pw.print(" " + 0.0);
-			}
-			
+			}		
 			pw.println();
 			
 			System.out.println(
