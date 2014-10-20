@@ -16,16 +16,16 @@ public class Driver {
 
 	public static void main(String[] args) throws Exception {		
 /*****************************************************************************/
-//		String versionNum = networkUsed + version;
-//		CallDAG callDAG = new CallDAG(Driver.networkPath + version);
+		String versionNum = networkUsed + version;
+		CallDAG callDAG = new CallDAG(Driver.networkPath + version);
 //		System.out.println("nFunctions: " + callDAG.functions.size());
 //		System.out.println("nEdges: " + callDAG.nEdges);
 //		System.out.println("Roots: " + callDAG.nRoots + " Leaves: " + callDAG.nLeaves);
-//		getCallDAGSIF(callDAG, versionNum);
+//		getCallDAGVisual(callDAG, versionNum);
 /*****************************************************************************/
 
 /*****************************************************************************/
-		AgeAnalysis ageAnalysis = new AgeAnalysis();
+//		AgeAnalysis ageAnalysis = new AgeAnalysis();
 //		DegreeAnalysis degreeAnalysis = new DegreeAnalysis();		
 //		LocationAnalysis locationAnalysis = new LocationAnalysis();
 //		PersistenceAnalysis persistenceAnalysis = new PersistenceAnalysis();
@@ -65,7 +65,7 @@ public class Driver {
 //		ageAnalysis.getLocationVsPersistencePercentiles();
 //		ageAnalysis.getLocationVsTransientStable(); // CHANGE FOR DIFFERENT NETWORKS
 //		ageAnalysis.getlocationDispersion();
-		ageAnalysis.getLocationVsAvgGeneralityDelta();
+//		ageAnalysis.getLocationVsAvgGeneralityDelta();
 //		
 //		ageAnalysis.getLastLocationVSAverageAge();
 //		ageAnalysis.getAgeHistogram();
@@ -114,7 +114,10 @@ public class Driver {
 //		modularityAnalysis.getInfo();
 //		modularityAnalysis.getAvgModuleGeneralityVsLocation(callDAG, versionNum);
 //		modularityAnalysis.getRandomModularNetwork();
-//		modularityAnalysis.getWalktrapModules(callDAG);
+		modularityAnalysis.getWalktrapModules(callDAG);
+		modularityAnalysis.getCommunityNetworkHeatMap(callDAG);
+		modularityAnalysis.getCommunityNetworkLayout(callDAG);
+		modularityAnalysis.getCommunityLocationHistogram(callDAG);
 /*****************************************************************************/
 
 /*****************************************************************************/		
@@ -141,15 +144,18 @@ public class Driver {
 /*****************************************************************************/
 	}
 	
-	public static void getCallDAGSIF(CallDAG callDAG, String versionNum) throws Exception {
+	public static void getCallDAGVisual(CallDAG callDAG, String versionNum) throws Exception {
 		PrintWriter pw = new PrintWriter(new File("module-callDAG-" + versionNum + ".txt"));
+//		pw.println("digraph G {");
 		for (String s: callDAG.functions) {
 			if (callDAG.callTo.containsKey(s)) {
 				for (String r: callDAG.callTo.get(s)) {
-					pw.println(callDAG.functionID.get(s) + "\t" + callDAG.functionID.get(r));
+//					pw.println(callDAG.functionID.get(s) + "->" + callDAG.functionID.get(r) + ";");
+					pw.println(callDAG.functionID.get(s) + " " + callDAG.functionID.get(r));
 				}
 			}
 		}
+//		pw.println("}");
 		pw.close();
 	}
 }
