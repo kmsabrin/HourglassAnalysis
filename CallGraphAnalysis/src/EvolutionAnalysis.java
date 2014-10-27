@@ -1,6 +1,9 @@
 import java.io.File;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class EvolutionAnalysis {	
@@ -15,7 +18,7 @@ public class EvolutionAnalysis {
 	
 	public void getGenCmpScatterForAllVersions() throws Exception {
 		for (int i = Driver.versiontStart; i < Driver.versionEnd; ++i) {
-			String versionNum = Driver.networkUsed + i;
+			String versionNum = Driver.networkUsed + "-" + i;
 			CallDAG callDAG = new CallDAG(Driver.networkPath + i);
 			GeneralityAnalysis genAnalysis = new GeneralityAnalysis();
 			genAnalysis.getGeneralityVsComplexity(callDAG, versionNum);
@@ -157,7 +160,6 @@ public class EvolutionAnalysis {
 		pw.close();
 	}
 	
-	
 //	public void getNumClustersForEachVersion() throws Exception {
 //		for (int i = Driver.versiontStart; i < Driver.versionEnd; ++i) {
 //			System.out.print(Driver.networkUsed + i + "\t");
@@ -166,5 +168,157 @@ public class EvolutionAnalysis {
 //			clusterAnalysis.getClusters(callDAG);
 //		}
 //	}
-
+	
+	private double getJaccard(Set<String> s1, Set<String> s2) {
+		Set<String> capSet = new HashSet(s1);
+		Set<String> cupSet = new HashSet(s1);
+		
+		capSet.retainAll(s2);
+		cupSet.addAll(s2);
+		
+		return capSet.size() * 1.0 / cupSet.size();
+	}
+	
+	public void compareConsecutiveVersionFunctionsNeighborhood(String vA, String vB) throws Exception {
+		PrintWriter pw = new PrintWriter(new File("Results//" + Driver.networkUsed + "-" + vA + "-" + vB + "-module-cdf.txt"));
+		
+		CallDAG callDAGvA = new CallDAG(Driver.networkPath + vA);
+		ModularityAnalysis modularityAnalysisvA = new ModularityAnalysis();
+		modularityAnalysisvA.getWalktrapModules(callDAGvA, Driver.networkUsed + "-" + vA);
+		
+		CallDAG callDAGvB = new CallDAG(Driver.networkPath + vB);		
+		ModularityAnalysis modularityAnalysisvB = new ModularityAnalysis();
+		modularityAnalysisvB.getWalktrapModules(callDAGvB, Driver.networkUsed + "-" + vB);
+		
+		Set<String> vAFunctions = new HashSet();
+		Set<String> vBFunctions = new HashSet();
+		
+		for (String s: modularityAnalysisvA.communities.keySet()) {
+			vAFunctions.addAll(modularityAnalysisvA.communities.get(s));
+		}
+		
+		for (String s: modularityAnalysisvB.communities.keySet()) {
+			vBFunctions.addAll(modularityAnalysisvB.communities.get(s));
+		}
+		
+		double distanceHisto[] = new double[110];
+		double kount = 0;
+		for (String s: modularityAnalysisvA.communities.keySet()) {			
+			for (String r: modularityAnalysisvA.communities.get(s)) {
+				Set<String> funcRneighborhoodvA = new HashSet(modularityAnalysisvA.communities.get(s));		
+				Set<String> funcRneighborhoodvB = null;
+				for (String t: modularityAnalysisvB.communities.keySet()) {
+					if (modularityAnalysisvB.communities.get(t).contains(r)) {
+						funcRneighborhoodvB = new HashSet(modularityAnalysisvB.communities.get(t));
+						break;
+					}
+				}
+				
+				if (funcRneighborhoodvB == null) {
+					continue; // function R was removed in v-B
+				}
+								
+				// remove functions that were not present in both versions
+				List<String> stringList = new ArrayList();
+				for (String t: funcRneighborhoodvA) {
+					if (!vBFunctions.contains(t)) {
+						stringList.add(t);
+					}
+				}
+				funcRneighborhoodvA.removeAll(stringList);
+				
+				stringList = new ArrayList();
+				for (String t: funcRneighborhoodvB) {
+					if (!vAFunctions.contains(t)) {
+						stringList.add(t);
+					}
+				}
+				funcRneighborhoodvB.removeAll(stringList);
+				
+				double jaccardDistance = getJaccard(funcRneighborhoodvA, funcRneighborhoodvB);
+				int v = (int) (jaccardDistance * 100.0);
+				distanceHisto[v]++;
+				kount++;
+//				System.out.println(r + "\t" + jaccardDistance + "\t" + funcRneighborhoodvA.size() + "\t" + funcRneighborhoodvB.size());
+			}
+		}
+		
+		double sum = 0;
+		for (int i = 0; i <= 100; ++i) {
+			sum += distanceHisto[i];
+			pw.println( (i / 100.0) + "\t" + (sum / kount));
+		}
+		
+		pw.close();
+	}
+	
+	public void compareConsecutiveVersionModules(String vA, String vB) throws Exception {
+		PrintWriter pw = new PrintWriter(new File("Results//" + Driver.networkUsed + "-" + vA + "-" + vB + "-module-to-module.txt"));
+		
+		CallDAG callDAGvA = new CallDAG(Driver.networkPath + vA);
+		ModularityAnalysis modularityAnalysisvA = new ModularityAnalysis();
+		modularityAnalysisvA.getWalktrapModules(callDAGvA, Driver.networkUsed + "-" + vA);
+		
+		CallDAG callDAGvB = new CallDAG(Driver.networkPath + vB);		
+		ModularityAnalysis modularityAnalysisvB = new ModularityAnalysis();
+		modularityAnalysisvB.getWalktrapModules(callDAGvB, Driver.networkUsed + "-" + vB);
+		
+		Set<String> vAFunctions = new HashSet();
+		Set<String> vBFunctions = new HashSet();
+		
+		for (String s: modularityAnalysisvA.communities.keySet()) {
+			vAFunctions.addAll(modularityAnalysisvA.communities.get(s));
+		}
+		
+		for (String s: modularityAnalysisvB.communities.keySet()) {
+			vBFunctions.addAll(modularityAnalysisvB.communities.get(s));
+		}
+		
+		double diffHisto[] = new double[110];
+		double kount = 0;
+		for (String r: modularityAnalysisvA.communities.keySet()) {
+			
+			List<Double> distanceList = new ArrayList();
+			
+			for (String s: modularityAnalysisvB.communities.keySet()) {
+				Set<String> comRverA = new HashSet(modularityAnalysisvA.communities.get(r));
+				Set<String> comSverB = new HashSet(modularityAnalysisvB.communities.get(s));
+				
+				List<String> stringList = new ArrayList();
+				for (String t: comRverA) {
+					if (!vBFunctions.contains(t)) {
+						stringList.add(t);
+					}
+				}
+				comRverA.removeAll(stringList);
+				
+				stringList = new ArrayList();
+				for (String t: comSverB) {
+					if (!vAFunctions.contains(t)) {
+						stringList.add(t);
+					}
+				}
+				comSverB.removeAll(stringList);
+				
+				double jaccardDistance = getJaccard(comRverA, comSverB);
+				distanceList.add(jaccardDistance);
+			}
+			
+			Collections.sort(distanceList, Collections.reverseOrder());
+			
+			System.out.println(distanceList.get(0) + "\t" + distanceList.get(1));
+			
+			int v = (int) (((distanceList.get(0) - distanceList.get(1)) / distanceList.get(0)) * 100);
+			diffHisto[v]++;
+			kount++;
+		}
+		
+		double sum = 0;
+		for (int i = 0; i <= 100; ++i) {
+			sum += diffHisto[i];
+			pw.println(i + "\t" + (sum / kount));
+		}
+		
+		pw.close();
+	}
 }

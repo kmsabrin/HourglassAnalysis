@@ -5,23 +5,22 @@ public class Driver {
 	static String networkPath = "kernel_callgraphs//full.graph-2.6.";
 	static String networkUsed = "kernel";
 	static int versiontStart = 0;
-	static int versionEnd = 40;
+	static int versionEnd = 40; // last + 1
 	
 //	static String networkPath = "openssh_callgraphs//full.graph-openssh-";
 //	static String networkUsed = "ssh";
 //	static int versiontStart = 1;
 //	static int versionEnd = 40;
 	
-	static String version = "1";
+	static String version = "39";
 
 	public static void main(String[] args) throws Exception {		
 /*****************************************************************************/
-		String versionNum = networkUsed + version;
-		CallDAG callDAG = new CallDAG(Driver.networkPath + version);
+//		String versionNum = networkUsed + "-" + version;
+//		CallDAG callDAG = new CallDAG(Driver.networkPath + version);
 //		System.out.println("nFunctions: " + callDAG.functions.size());
 //		System.out.println("nEdges: " + callDAG.nEdges);
 //		System.out.println("Roots: " + callDAG.nRoots + " Leaves: " + callDAG.nLeaves);
-//		getCallDAGVisual(callDAG, versionNum);
 /*****************************************************************************/
 
 /*****************************************************************************/
@@ -30,9 +29,9 @@ public class Driver {
 //		LocationAnalysis locationAnalysis = new LocationAnalysis();
 //		PersistenceAnalysis persistenceAnalysis = new PersistenceAnalysis();
 //		GeneralityAnalysis generalityAnalysis = new GeneralityAnalysis();
-//		EvolutionAnalysis evolutionaryAnalysis = new EvolutionAnalysis();
+		EvolutionAnalysis evolutionaryAnalysis = new EvolutionAnalysis();
 //		DiameterAnalysis diameterAnalysis = new DiameterAnalysis();
-		ModularityAnalysis modularityAnalysis  = new ModularityAnalysis();
+//		ModularityAnalysis modularityAnalysis  = new ModularityAnalysis();
 //		RandomNetworkGenerator randomNetworkGenerator = new RandomNetworkGenerator(callDAG);
 /*****************************************************************************/
 		
@@ -93,6 +92,8 @@ public class Driver {
 //		evolutionaryAnalysis.getNetworkGrowthTrend();
 //		evolutionaryAnalysis.getNumClustersForEachVersion();
 //		evolutionaryAnalysis.getClusterSizeTrend();
+//		evolutionaryAnalysis.compareConsecutiveVersionFunctionsNeighborhood("0", "1");
+		evolutionaryAnalysis.compareConsecutiveVersionModules("0", "1");
 /*****************************************************************************/
 
 /*****************************************************************************/		
@@ -115,10 +116,11 @@ public class Driver {
 //		modularityAnalysis.getAvgModuleGeneralityVsLocation(callDAG, versionNum);
 //		modularityAnalysis.getRandomModularNetwork();
 		
-		modularityAnalysis.getWalktrapModules(callDAG);
-		modularityAnalysis.getCommunityNetworkHeatMap(callDAG);
-		modularityAnalysis.getCommunityNetworkLayout(callDAG);
-		modularityAnalysis.getCommunityLocationHistogram(callDAG);
+//		modularityAnalysis.getCallDAGforWalktrap(callDAG, versionNum);
+//		modularityAnalysis.getWalktrapModules(callDAG);
+//		modularityAnalysis.getCommunityNetworkHeatMap(callDAG);
+//		modularityAnalysis.getCommunityNetworkLayout(callDAG);
+//		modularityAnalysis.getCommunityLocationHistogram(callDAG);
 /*****************************************************************************/
 
 /*****************************************************************************/		
@@ -143,20 +145,5 @@ public class Driver {
 //		degreeAnalysis.getLocationVSAvgOutDegree(randomNetworkGenerator.randomCallDAG, randVersionNum);
 //		locationAnalysis.getCallViolationMetric(randomNetworkGenerator.randomCallDAG);
 /*****************************************************************************/
-	}
-	
-	public static void getCallDAGVisual(CallDAG callDAG, String versionNum) throws Exception {
-		PrintWriter pw = new PrintWriter(new File("module-callDAG-" + versionNum + ".txt"));
-//		pw.println("digraph G {");
-		for (String s: callDAG.functions) {
-			if (callDAG.callTo.containsKey(s)) {
-				for (String r: callDAG.callTo.get(s)) {
-//					pw.println(callDAG.functionID.get(s) + "->" + callDAG.functionID.get(r) + ";");
-					pw.println(callDAG.functionID.get(s) + " " + callDAG.functionID.get(r));
-				}
-			}
-		}
-//		pw.println("}");
-		pw.close();
 	}
 }
