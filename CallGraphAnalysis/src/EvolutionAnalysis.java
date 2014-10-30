@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 public class EvolutionAnalysis {	
 	public static void getAverageGenCmpPerLocationForEachVersion() throws Exception {
@@ -253,6 +254,30 @@ public class EvolutionAnalysis {
 	}
 	
 	public void compareConsecutiveVersionModules(String vA, String vB) throws Exception {
+		
+		class Info implements Comparable<Info> {
+			int size;
+			double dist;
+			
+			Info(int size, double dist) {
+				this.size = size;
+				this.dist = dist;
+			}
+			
+			public int compareTo(Info compareInfo) {
+				 
+				double compareQuantity = ((Info) compareInfo).dist; 
+		 
+				//ascending order
+//				return this.quantity - compareQuantity?;
+		 
+				//descending order
+				return  (int)(100 * (compareQuantity - this.dist));
+		 
+			}	
+		}
+		
+		
 		PrintWriter pw = new PrintWriter(new File("Results//" + Driver.networkUsed + "-" + vA + "-" + vB + "-module-to-module.txt"));
 		
 		CallDAG callDAGvA = new CallDAG(Driver.networkPath + vA);
@@ -276,9 +301,13 @@ public class EvolutionAnalysis {
 		
 		double diffHisto[] = new double[110];
 		double kount = 0;
+		
 		for (String r: modularityAnalysisvA.communities.keySet()) {
 			
 			List<Double> distanceList = new ArrayList();
+			Set<Info> tset = new TreeSet();
+		
+			int val = 0;
 			
 			for (String s: modularityAnalysisvB.communities.keySet()) {
 				Set<String> comRverA = new HashSet(modularityAnalysisvA.communities.get(r));
@@ -302,15 +331,29 @@ public class EvolutionAnalysis {
 				
 				double jaccardDistance = getJaccard(comRverA, comSverB);
 				distanceList.add(jaccardDistance);
+				
+				tset.add(new Info(comSverB.size(), jaccardDistance));
+				val = comRverA.size();
 			}
 			
 			Collections.sort(distanceList, Collections.reverseOrder());
 			
-			System.out.println(distanceList.get(0) + "\t" + distanceList.get(1));
+//			System.out.println(distanceList.get(0) + "\t" + distanceList.get(1));
 			
 			int v = (int) (((distanceList.get(0) - distanceList.get(1)) / distanceList.get(0)) * 100);
 			diffHisto[v]++;
 			kount++;
+			
+			if (v < 80) {
+				System.out.println(val + "\t" + distanceList.get(0) + "\t" + distanceList.get(1));
+				int idx = 0; 
+				for (Info ifo: tset) {
+					++idx;
+					if (idx > 2) break;
+					System.out.print("\t" + ifo.dist + "\t" + ifo.size);
+				}
+				System.out.println();
+			}
 		}
 		
 		double sum = 0;

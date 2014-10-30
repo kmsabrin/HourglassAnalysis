@@ -25,7 +25,11 @@ public class CallDAG {
 	Map<String, Double> generality;
 	Map<String, Double> complexity;
 	
-	Map<String, Double> moduleGenerality;
+	/* ASSUMING EACH ROOT IS A STARTING A MODULE 
+	 * GENERALITY IS DEFINED AS HOW MANY MODULES 
+	 * ARE USING A NODE AND SIMILARLY FOR CMPLXT
+	 */
+	Map<String, Double> moduleGenerality; 
 	Map<String, Double> moduleComplexity;
 	
 	Map<String, Integer> outDegree;

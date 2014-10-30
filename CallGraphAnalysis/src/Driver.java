@@ -12,7 +12,7 @@ public class Driver {
 //	static int versiontStart = 1;
 //	static int versionEnd = 40;
 	
-	static String version = "39";
+	static String version = "1";
 
 	public static void main(String[] args) throws Exception {		
 /*****************************************************************************/
@@ -25,13 +25,13 @@ public class Driver {
 
 /*****************************************************************************/
 //		AgeAnalysis ageAnalysis = new AgeAnalysis();
-//		DegreeAnalysis degreeAnalysis = new DegreeAnalysis();		
-//		LocationAnalysis locationAnalysis = new LocationAnalysis();
-//		PersistenceAnalysis persistenceAnalysis = new PersistenceAnalysis();
-//		GeneralityAnalysis generalityAnalysis = new GeneralityAnalysis();
+		DegreeAnalysis degreeAnalysis = new DegreeAnalysis();		
+		LocationAnalysis locationAnalysis = new LocationAnalysis();
+		PersistenceAnalysis persistenceAnalysis = new PersistenceAnalysis();
+		GeneralityAnalysis generalityAnalysis = new GeneralityAnalysis();
 		EvolutionAnalysis evolutionaryAnalysis = new EvolutionAnalysis();
-//		DiameterAnalysis diameterAnalysis = new DiameterAnalysis();
-//		ModularityAnalysis modularityAnalysis  = new ModularityAnalysis();
+		DiameterAnalysis diameterAnalysis = new DiameterAnalysis();
+		ModularityAnalysis modularityAnalysis  = new ModularityAnalysis();
 //		RandomNetworkGenerator randomNetworkGenerator = new RandomNetworkGenerator(callDAG);
 /*****************************************************************************/
 		
@@ -93,7 +93,7 @@ public class Driver {
 //		evolutionaryAnalysis.getNumClustersForEachVersion();
 //		evolutionaryAnalysis.getClusterSizeTrend();
 //		evolutionaryAnalysis.compareConsecutiveVersionFunctionsNeighborhood("0", "1");
-		evolutionaryAnalysis.compareConsecutiveVersionModules("0", "1");
+		evolutionaryAnalysis.compareConsecutiveVersionModules("20", "21");
 /*****************************************************************************/
 
 /*****************************************************************************/		
@@ -117,10 +117,10 @@ public class Driver {
 //		modularityAnalysis.getRandomModularNetwork();
 		
 //		modularityAnalysis.getCallDAGforWalktrap(callDAG, versionNum);
-//		modularityAnalysis.getWalktrapModules(callDAG);
+//		modularityAnalysis.getWalktrapModules(callDAG, versionNum);
 //		modularityAnalysis.getCommunityNetworkHeatMap(callDAG);
 //		modularityAnalysis.getCommunityNetworkLayout(callDAG);
-//		modularityAnalysis.getCommunityLocationHistogram(callDAG);
+//		modularityAnalysis.getCommunityLocationHistogram(callDAG, versionNum);
 /*****************************************************************************/
 
 /*****************************************************************************/		

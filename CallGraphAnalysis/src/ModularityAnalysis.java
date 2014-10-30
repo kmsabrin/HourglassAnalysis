@@ -12,9 +12,14 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.apache.commons.math3.stat.StatUtils;
+
 public class ModularityAnalysis {
 	
 	Map<String, Set<String>> communities;
+	Map<String, Double> communitiesInDeg;
+	Map<String, Double> communitiesOutDeg;
+	int nCommunityNetoworkEdge;
 	static int nCommunitySizeThreshold = 10;
 	
 	public void getModuleGeneralityVsComplexity(CallDAG callDAG, String filePath) throws Exception {
@@ -48,38 +53,41 @@ public class ModularityAnalysis {
 		pw.close();
 	}
 	
-//	public void getInfo() throws Exception {
-//		PrintWriter pw = new PrintWriter(new File("Results//module-core-percentage.txt"));
-//
-//		for (int i = Driver.versiontStart; i < Driver.versionEnd; ++i) {
-//			String versionNum = Driver.networkUsed + i;
-//			CallDAG callDAG = new CallDAG(Driver.networkPath + i);
-//			
-//			double a[] = new double[callDAG.moduleGenerality.size()];
-//			int index  = 0;
-//			for (String s: callDAG.moduleGenerality.keySet()) {
-//				a[index++] = callDAG.moduleGenerality.get(s);
-//			}
-//	
-//			double coreCutOff = StatUtils.percentile(a, 75.0);
-//			
-//			double coreCount = 0;
-//			PrintWriter pw2 = new PrintWriter(new File("Results//module-core-location-hist-" + versionNum + ".txt"));
-//			for (String s: callDAG.functions) {
-//				if (callDAG.moduleGenerality.get(s) > coreCutOff) {
-//					// core node
-//					++coreCount;
-//					pw2.println(callDAG.location.get(s));
-//				}
-//			}
-//			
-//			pw2.close();
-//			
-//			pw.println(coreCount / (callDAG.functions.size() * 1.0));
-//		}
-//		
-//		pw.close();
-//	}
+	public void doCentralityAnalysisWithModuleGenerality() throws Exception {
+		PrintWriter pw = new PrintWriter(new File("Results//module-core-percentage.txt"));
+
+		for (int i = Driver.versiontStart; i < Driver.versionEnd; ++i) {
+			String versionNum = Driver.networkUsed + i;
+			CallDAG callDAG = new CallDAG(Driver.networkPath + i);
+			
+			double a[] = new double[callDAG.moduleGenerality.size()];
+			int index  = 0;
+			for (String s: callDAG.moduleGenerality.keySet()) {
+				a[index++] = callDAG.moduleGenerality.get(s);
+			}
+	
+			double coreCutOff = StatUtils.percentile(a, 75.0);
+			
+			double coreCount = 0;
+			PrintWriter pw2 = new PrintWriter(new File("Results//module-core-location-hist-" + versionNum + ".txt"));
+			for (String s: callDAG.functions) {
+				if (callDAG.moduleGenerality.get(s) > coreCutOff) {
+					// core node
+					++coreCount;
+					pw2.println(callDAG.location.get(s));
+				}
+			}
+			
+			pw2.close();
+			
+			pw.println(coreCount / (callDAG.functions.size() * 1.0));
+		}
+		
+		pw.close();
+	}
+	
+	
+	/* GENERATE RANDOM MODULAR NETWORK TO TEST WALK-TRAP COMMUNITY DETECTION ALGORITHM'S EFFECTIVENESS */
 	
 	public void getRandomModularNetwork() throws Exception {
 		PrintWriter pw = new PrintWriter(new File("Results//random-modular-network_100x100.txt"));
@@ -164,11 +172,20 @@ public class ModularityAnalysis {
 //		CallDAG callDAG = new CallDAG("Results//random-modular-network.txt");
 	}
 	
+	
+	/*********************************************************************************************************************/
+	/************************************* WALK TRAP COMMUNITY DETECTION ALGORITHM ***************************************/
+	/****************** ANALYSIS OF COMMUNITY NETWORK GENERATED WITH WALK TRAP ALGORITHM *********************************/
+	/*********************************************************************************************************************/
+	
 	public void getWalktrapModules(CallDAG callDAG, String versionNum) throws Exception {	
 		Scanner scanner = new Scanner(new File("module_graphs//w10-" + versionNum + ".txt"));
 		PrintWriter pw = new PrintWriter(new File("Results//communities-" + versionNum + ".txt"));
+		
 		communities = new TreeMap();
-
+		communitiesInDeg = new HashMap();
+		communitiesOutDeg = new HashMap();
+		
 		int communityID = 1;
 		while (scanner.hasNextLine()) {
 			String str = scanner.nextLine();
@@ -192,30 +209,58 @@ public class ModularityAnalysis {
 			communities.put(cID, communityFunctions);
 			++communityID;
 		}
+		
+		nCommunityNetoworkEdge = 0;
+		for (String s: communities.keySet()) {
+			Set<String> currentComm = communities.get(s);
+			double inDeg = 0, outDeg = 0;
+			for (String r: currentComm) {
+				if (callDAG.callTo.containsKey(r)) {
+					for (String t: callDAG.callTo.get(r)) {
+						if (!currentComm.contains(t)) ++outDeg;
+					}
+				}
+				if (callDAG.callFrom.containsKey(r)) {
+					for (String t: callDAG.callFrom.get(r)) {
+						if (!currentComm.contains(t)) ++inDeg;
+					}
+				}
+			}
+			communitiesInDeg.put(s, inDeg);
+			communitiesOutDeg.put(s, outDeg);
+			nCommunityNetoworkEdge += outDeg;
+		}
 
 		System.out.println("nCommunities: " + (communityID - 1));
 		scanner.close();
 		pw.close();
 	}
 	
-	public double getCommunityDistanceMetric(Set<String> communityFrom, Set<String> communityTo, CallDAG callDAG) {
-		double dist = 0;
-		double nOutgoingEdge = 0;
-		double nComToOutgoingEdge = 0;
-		double nInCommunityEdge = 0;
+	public double getCommunityDistanceMetric(String comXID, String comYID, CallDAG callDAG) {
+		Set<String> comX = communities.get(comXID);
+		Set<String> comY = communities.get(comYID);
 		
-		for (String s: communityFrom) {
-			if (!callDAG.callTo.containsKey(s)) continue; // why this is not handled by Java?
-			
-			for (String r: callDAG.callTo.get(s)) {
-				if (communityFrom.contains(r)) ++nInCommunityEdge;
-				else ++nOutgoingEdge;
-				
-				if (communityTo.contains(r)) ++nComToOutgoingEdge;
+		double nComXOutgoingEdge = communitiesOutDeg.get(comXID);
+		double nComYIncomingEdge = communitiesInDeg.get(comYID);
+		double nComYOutgoingEdge = communitiesOutDeg.get(comYID);
+		double nComXToComYEdge = 0;
+		
+		double dist = 0;
+
+		for (String s: comX) {
+			if (!callDAG.callTo.containsKey(s)) continue; // why this is not handled by Java?			
+			for (String r: callDAG.callTo.get(s)) {				
+				if (comY.contains(r)) ++nComXToComYEdge;
 			}
 		}
 		
-		dist = nComToOutgoingEdge / nInCommunityEdge;
+		if (nComXOutgoingEdge > 0 && nComYIncomingEdge > 0) {
+			double expecedtedXYEdge = nComXOutgoingEdge * nComYIncomingEdge / (nCommunityNetoworkEdge - nComYOutgoingEdge); 
+			dist = nComXToComYEdge / expecedtedXYEdge;		
+//			dist = nComXToComYEdge / (nComXOutgoingEdge * nComYInComingEdge);
+		}
+		
+//		return dist * callDAG.nEdges;
 		return dist;
 	}
 	
@@ -223,27 +268,13 @@ public class ModularityAnalysis {
 		PrintWriter pw = new PrintWriter(new File("Results//communities_heat_map.txt"));
 		
 		for (String s: communities.keySet()) {
-			pw.print("\t" + s);
-		}
-		pw.println();
-		
-		for (String s: communities.keySet()) {
-			pw.print(s);
-			double d = 0;
-			int index = 0;
 			for (String r: communities.keySet()) {
+				double d = 0;
 				if (!s.equals(r)) {
-					d = getCommunityDistanceMetric(communities.get(s), communities.get(r), callDAG);
+					d = getCommunityDistanceMetric(s, r, callDAG);
 				}
-				else d = 0;
-
-				pw.print("\t" + String.format( "%.4f", d ));
-				
-				++index;
-//				pw.print(String.format( "%.4f", d ));
-//				if (index < communities.keySet().size()) pw.print("\t");
-			}
-			
+				pw.print(String.format( "%.4f", d ) + "\t");
+			}			
 			pw.println();
 		}
 		
@@ -260,7 +291,7 @@ public class ModularityAnalysis {
 			double d = 0;
 			for (String r: communities.keySet()) {
 				if (!s.equals(r)) {
-					d = getCommunityDistanceMetric(communities.get(s), communities.get(r), callDAG);
+					d = getCommunityDistanceMetric(s, r, callDAG);
 					
 					if (communityGenerality.containsKey(r)) {
 						double v = communityGenerality.get(r) + d;
@@ -286,8 +317,8 @@ public class ModularityAnalysis {
 		pw.close();
 	}
 		
-	public void getCommunityLocationHistogram(CallDAG callDAG) throws Exception {		
-		Scanner scanner = new Scanner(new File("test5.txt"));
+	public void getCommunityLocationHistogram(CallDAG callDAG, String versionNum) throws Exception {		
+		Scanner scanner = new Scanner(new File("module_graphs//w10-" + versionNum + ".txt"));
 		PrintWriter pw = new PrintWriter(new File("Results//com_loc_histo.txt"));
 
 		int commID = 0;
@@ -334,7 +365,7 @@ public class ModularityAnalysis {
 				
 				if (v > maxHeight) maxHeight = v;
 				
-				pw.println((l / 10000.0) + "\t" + (yStep + v));
+				pw.println(l + "\t" + (yStep + v));
 			}
 					
 			yStep += maxHeight + 500;
