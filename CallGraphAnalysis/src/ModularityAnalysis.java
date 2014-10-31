@@ -20,7 +20,7 @@ public class ModularityAnalysis {
 	Map<String, Double> communitiesInDeg;
 	Map<String, Double> communitiesOutDeg;
 	int nCommunityNetoworkEdge;
-	static int nCommunitySizeThreshold = 10;
+	static int nCommunitySizeThreshold = 5;
 	
 	public void getModuleGeneralityVsComplexity(CallDAG callDAG, String filePath) throws Exception {
 		PrintWriter pw = new PrintWriter(new File("Results//module-gen-vs-cmp-" + filePath + ".txt"));
@@ -179,7 +179,7 @@ public class ModularityAnalysis {
 	/*********************************************************************************************************************/
 	
 	public void getWalktrapModules(CallDAG callDAG, String versionNum) throws Exception {	
-		Scanner scanner = new Scanner(new File("module_graphs//w10-" + versionNum + ".txt"));
+		Scanner scanner = new Scanner(new File("module_graphs//w5-" + versionNum + ".txt"));
 		PrintWriter pw = new PrintWriter(new File("Results//communities-" + versionNum + ".txt"));
 		
 		communities = new TreeMap();
@@ -198,12 +198,25 @@ public class ModularityAnalysis {
 			String cID = "C" + communityID;
 			
 			pw.print(cID);
+			
+			double avgModGen = 0;
+			double avgLoc = 0;
 			for(String r: val) {
 				int id = Integer.parseInt(r);
 				String f = callDAG.IDFunction.get(id);
 				communityFunctions.add(f);
 				pw.print("\t" + f);
+				
+				double loc = callDAG.location.get(f);
+				double modGen = callDAG.generality.get(f); 
+//				if (loc > 0.3 && loc < 0.5 && modGen > 0.1) {
+//					System.out.print(f + "\t");
+//				}
+				avgModGen += modGen;
+				avgLoc += loc;
 			}
+			System.out.print((avgModGen / communityFunctions.size()) + "\t" + (avgLoc / communityFunctions.size()));
+			System.out.println("\t" + communityFunctions.size() + "\t" + cID);
 			pw.println();
 			
 			communities.put(cID, communityFunctions);
@@ -386,6 +399,80 @@ public class ModularityAnalysis {
 		System.out.println("nCommunities: " + commID);
 		pw.close();
 	}
+	
+	public void getCommunityAnalysisJavaDraw(CallDAG callDAG, String versionNum) throws Exception {		
+		Scanner scanner = new Scanner(new File("module_graphs//w5-" + versionNum + ".txt"));
+		PrintWriter pw = new PrintWriter(new File("Results//com_java_draw.txt"));
+
+		List<String> communityList = new ArrayList();		
+		while (scanner.hasNextLine()) {
+			String str = scanner.nextLine();
+			str = str.substring(str.indexOf('{') + 1, str.indexOf('}'));
+			communityList.add(str);
+		}
+		
+		Collections.sort(communityList, new Comparator<String>() {
+			public int compare(String left, String right) {
+				return right.length() - left.length();
+			}
+		});
+		
+		double xStep = 70; // java canvas
+		
+		for (String str: communityList) {
+			String val[] = str.split(",");	
+			double loc[] = new double[val.length];	
+			double gen[] = new double[val.length];
+			
+			if (loc.length < nCommunitySizeThreshold) continue;			
+
+			int i = 0;
+			for(String r: val) {
+				int id = Integer.parseInt(r);
+				String f = callDAG.IDFunction.get(id);
+				int l = (int)(callDAG.location.get(f) * 100) / 10;
+				loc[i] = callDAG.location.get(f);
+				gen[i] = callDAG.generality.get(f);
+				++i;
+			}
+			
+//			double xMin = xStep;
+//			double xMax = xStep + locations.length * 0.065;
+//			pw.print(xMin + "\t");
+//			pw.print(xMax + "\t");
+			
+			double radius = Math.log10(loc.length) * 1.926;
+//			double radius = loc.length * 0.035;
+			double xMid = xStep + radius;
+
+			double yMin = StatUtils.percentile(loc, 75.0);
+			double yMid = StatUtils.percentile(loc, 50.0);
+			double yMax = StatUtils.percentile(loc, 25.0);
+			yMin = 500 - ((yMin / 0.01) * 4.5);
+			yMid = 500 - ((yMid / 0.01) * 4.5);
+			yMax = 500 - ((yMax / 0.01) * 4.5);
+			
+			double avgGen = StatUtils.mean(gen);
+			
+			if (avgGen < 0.02 && radius < 1.5) continue;
+			
+			xStep = (xMid + radius) + 0.5;
+
+			pw.print(xMid + "\t");
+			pw.print(radius + "\t");
+
+			pw.print(yMin + "\t");
+			pw.print(yMid + "\t");
+			pw.print(yMax + "\t");
+
+			pw.println(avgGen + "\t");
+			
+			pw.println();
+		}
+		
+		pw.close();
+	}
+
 	
 	public static void getCallDAGforWalktrap(CallDAG callDAG, String versionNum) throws Exception {
 		PrintWriter pw = new PrintWriter(new File("module_graphs//module-callDAG-" + versionNum + ".txt"));

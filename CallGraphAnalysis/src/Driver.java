@@ -16,8 +16,8 @@ public class Driver {
 
 	public static void main(String[] args) throws Exception {		
 /*****************************************************************************/
-//		String versionNum = networkUsed + "-" + version;
-//		CallDAG callDAG = new CallDAG(Driver.networkPath + version);
+		String versionNum = networkUsed + "-" + version;
+		CallDAG callDAG = new CallDAG(Driver.networkPath + version);
 //		System.out.println("nFunctions: " + callDAG.functions.size());
 //		System.out.println("nEdges: " + callDAG.nEdges);
 //		System.out.println("Roots: " + callDAG.nRoots + " Leaves: " + callDAG.nLeaves);
@@ -93,7 +93,7 @@ public class Driver {
 //		evolutionaryAnalysis.getNumClustersForEachVersion();
 //		evolutionaryAnalysis.getClusterSizeTrend();
 //		evolutionaryAnalysis.compareConsecutiveVersionFunctionsNeighborhood("0", "1");
-		evolutionaryAnalysis.compareConsecutiveVersionModules("20", "21");
+//		evolutionaryAnalysis.compareConsecutiveVersionModules("20", "21");
 /*****************************************************************************/
 
 /*****************************************************************************/		
@@ -121,6 +121,7 @@ public class Driver {
 //		modularityAnalysis.getCommunityNetworkHeatMap(callDAG);
 //		modularityAnalysis.getCommunityNetworkLayout(callDAG);
 //		modularityAnalysis.getCommunityLocationHistogram(callDAG, versionNum);
+		modularityAnalysis.getCommunityAnalysisJavaDraw(callDAG, versionNum);
 /*****************************************************************************/
 
 /*****************************************************************************/		

@@ -12,8 +12,8 @@ public class CallDAG {
 	double nLeaves;
 
 	Set<String> functions;
-	Map<String, Set<String>> callFrom; // who called me // reverse adjacency list
-	Map<String, Set<String>> callTo; // who I called // adjacency list
+	Map<String, Set<String>> callFrom; // who called me i.e reverse adjacency list
+	Map<String, Set<String>> callTo; // who I called i.e adjacency list
 
 	Map<String, Double> numOfPath;
 	Map<String, Double> sumOfPath;
