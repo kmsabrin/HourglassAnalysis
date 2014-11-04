@@ -436,12 +436,7 @@ public class ModularityAnalysis {
 				++i;
 			}
 			
-//			double xMin = xStep;
-//			double xMax = xStep + locations.length * 0.065;
-//			pw.print(xMin + "\t");
-//			pw.print(xMax + "\t");
-			
-			double radius = Math.log10(loc.length) * 1.926;
+			double radius = Math.log10(loc.length) * 1.926; //HARD CODE
 //			double radius = loc.length * 0.035;
 			double xMid = xStep + radius;
 
@@ -454,7 +449,7 @@ public class ModularityAnalysis {
 			
 			double avgGen = StatUtils.mean(gen);
 			
-			if (avgGen < 0.02 && radius < 1.5) continue;
+			if (avgGen < 0.02 && radius < 1.5) continue; // HARD CODE
 			
 			xStep = (xMid + radius) + 0.5;
 
@@ -466,6 +461,8 @@ public class ModularityAnalysis {
 			pw.print(yMax + "\t");
 
 			pw.println(avgGen + "\t");
+			
+			pw.print(loc.length);
 			
 			pw.println();
 		}

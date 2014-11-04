@@ -21,6 +21,11 @@ public class Draw2D extends JFrame {
 	// Constants
 	public static final int CANVAS_WIDTH = 800;
 	public static final int CANVAS_HEIGHT = 600;
+	
+	public static final int xStart = 70;
+	public static final int yStart = 50;
+	public static final int xEnd = 765;
+	public static final int yEnd = 500;
 
 	// Declare an instance the drawing canvas (extends JPanel)
 	private DrawCanvas canvas;
@@ -33,8 +38,7 @@ public class Draw2D extends JFrame {
 		// Set the Drawing JPanel as the JFrame's content-pane
 		Container cp = getContentPane();
 		cp.add(canvas);
-		// or
-		// setContentPane(canvas);
+		// or setContentPane(canvas);
 
 		this.setDefaultCloseOperation(EXIT_ON_CLOSE); // Handle the CLOSE button
 		this.pack(); // Either pack() the components; or setSize()
@@ -52,7 +56,7 @@ public class Draw2D extends JFrame {
 		public void paintComponent(Graphics g) {
 			BufferedImage bImg = new BufferedImage(CANVAS_WIDTH, CANVAS_HEIGHT, BufferedImage.TYPE_INT_RGB);
 			Graphics2D g2 = (Graphics2D)g;
-//		    g2 = bImg.createGraphics();
+		    g2 = bImg.createGraphics();
 			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 			
 			super.paintComponent(g2); // paint parent's background
@@ -60,10 +64,12 @@ public class Draw2D extends JFrame {
 			setBackground(Color.WHITE); // set background color for this JPanel
 						
 			g2.setColor(Color.GRAY);
-			g2.drawLine(70, 50 - 20, 70, 500 + 20);
-			g2.drawLine(70 - 20, 500 + 5, 750 + 25, 500 + 5);
+			g2.drawLine(xStart - 2, yStart - 20, xStart - 2, yEnd + 20);
+			g2.drawLine(xStart - 20, yEnd + 5, xEnd + 20, yEnd + 5);
 			
 			double genCut = 0.04999;
+			
+			int xIndex = 0;
 			
 			try {
 				Scanner scanner = new Scanner(new File("Results//com_java_draw.txt"));
@@ -77,6 +83,8 @@ public class Draw2D extends JFrame {
 					int yMax = (int)scanner.nextDouble();					
 					
 					double avgGen = scanner.nextDouble();
+					
+					int size = scanner.nextInt();
 
 					g2.setColor(Color.GRAY);
 					if (avgGen > genCut) {
@@ -84,19 +92,30 @@ public class Draw2D extends JFrame {
 					}
 					
 					g2.drawLine(xMid, yMin, xMid, yMax);					
-					g2.fillOval(xMid - radius, yMid - radius, 2 * radius, 2 * radius);					
+					g2.fillOval(xMid - radius, yMid - radius, 2 * radius, 2 * radius);
+					
+					if (xIndex % 5 == 0) {
+						g2.setColor(Color.BLACK);
+						g2.setFont(new Font("Monospaced", Font.PLAIN, 9));
+						g2.drawString(String.valueOf(size), xMid - 2, (yEnd + 5) + 10);
+						g2.drawLine(xMid, (yEnd + 5) - 2, xMid, (yEnd + 5) + 2);
+					}
+					++xIndex;
+					
 				}
 				
 				scanner.close();
 				
 //				Printing texts
 				g2.setColor(Color.BLACK);
-				g2.setFont(new Font("Monospaced", Font.PLAIN, 12));
-				g2.drawString("Communities", 370, 520);
-				g2.drawString("Communitie are sorted by descending size from left to right (also represented by circle size)", 90, 540);
-				g2.drawString("Red marked communities have large Mean Generality", 240, 560);
+				g2.setFont(new Font("Monospaced", Font.PLAIN, 10));
 				g2.drawString("1.0", 70 - 25, 55);
 				g2.drawString("0.0", 70 - 25, 500);
+				g2.setFont(new Font("Monospaced", Font.PLAIN, 11));
+				g2.drawString("Communities (v-2.6.1)", 365, (yEnd + 5) + 25);
+				g2.drawString("Communitie are sorted by descending size (also reprsented by circle area) from left to right", 100, (yEnd + 5) + 45);
+				g2.drawString("Red marked communities have large Mean Generality", 250, (yEnd + 5) + 58);
+				
 				
 //				ROTATED TEXT
 				g2.rotate(-Math.PI/2);
