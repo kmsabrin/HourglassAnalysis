@@ -400,26 +400,102 @@ public class ModularityAnalysis {
 		pw.close();
 	}
 	
-	public void getCommunityAnalysisJavaDraw(CallDAG callDAG, String versionNum) throws Exception {		
-		Scanner scanner = new Scanner(new File("module_graphs//w5-" + versionNum + ".txt"));
-		PrintWriter pw = new PrintWriter(new File("Results//com_java_draw.txt"));
-
-		List<String> communityList = new ArrayList();		
-		while (scanner.hasNextLine()) {
-			String str = scanner.nextLine();
-			str = str.substring(str.indexOf('{') + 1, str.indexOf('}'));
-			communityList.add(str);
-		}
-		
-		Collections.sort(communityList, new Comparator<String>() {
-			public int compare(String left, String right) {
-				return right.length() - left.length();
-			}
-		});
+	public void getDrawDataCommunityShape(CallDAG callDAG, List<String> communityList) throws Exception {
+		PrintWriter pw = new PrintWriter(new File("Results//community_shape_javadraw.txt"));
 		
 		double xStep = 70; // java canvas
 		
-		for (String str: communityList) {
+		boolean used[] = new boolean[communityList.size()];
+		int notUsedKnt = communityList.size();
+		
+		while (notUsedKnt > 0) {
+			boolean heightBits[] = new boolean[600];
+			double maxRadius = 0;
+			
+			for (int idx = 0; idx < communityList.size(); ++idx) {
+				if (used[idx]) continue;
+				String str = communityList.get(idx);
+				String val[] = str.split(",");
+				double loc[] = new double[val.length];
+				double gen[] = new double[val.length];
+
+//				if (loc.length < nCommunitySizeThreshold)
+//					continue;
+
+				int i = 0;
+				for (String r : val) {
+					int id = Integer.parseInt(r);
+					String f = callDAG.IDFunction.get(id);
+					int l = (int) (callDAG.location.get(f) * 100) / 10;
+					loc[i] = callDAG.location.get(f);
+					gen[i] = callDAG.generality.get(f);
+					++i;
+				}
+
+				double radius = Math.log10(loc.length) * 5.5; // HARD CODE
+				// double radius = loc.length * 0.035;
+				double xMid = xStep + radius;
+
+				double yMin = StatUtils.percentile(loc, 75.0);
+				double yMid = StatUtils.percentile(loc, 50.0);
+				double yMax = StatUtils.percentile(loc, 25.0);
+				yMin = 500 - ((yMin / 0.01) * 4.5);
+				yMid = 500 - ((yMid / 0.01) * 4.5);
+				yMax = 500 - ((yMax / 0.01) * 4.5);
+
+				boolean flg = true;
+				for (int k = (int)(yMid - radius); k <= (int)(yMid + radius); ++k) {
+					if (heightBits[k]) {
+						flg = false;
+						break;
+					}
+				}
+				if (!flg) continue;
+				
+				System.out.println("Using community " + notUsedKnt + " xStep " + xStep + " radius " + (int)radius + " yMid " + yMid);
+				notUsedKnt--;
+				used[idx] = true;
+				for (int k = (int)(yMid - radius); k <= (int)(yMid + radius); ++k) {
+					heightBits[k] = true;			
+				}
+				
+				if (radius > maxRadius) maxRadius = radius;
+				
+				double avgGen = StatUtils.mean(gen);
+//				if (avgGen < 0.02 && radius < 1.5)
+//					continue; // HARD CODE
+
+				if (loc.length < nCommunitySizeThreshold)
+					continue;
+				
+				pw.print(xMid + "\t");
+				pw.print(radius + "\t");
+
+				pw.print(yMin + "\t");
+				pw.print(yMid + "\t");
+				pw.print(yMax + "\t");
+
+				pw.print(avgGen + "\t");
+
+				pw.print(loc.length);
+
+				pw.println();
+			}
+			
+			System.out.println("One stripe complete");
+			xStep += 2 * maxRadius + 5;
+		}
+		
+		pw.close();
+	}
+	
+	public void getDrawDataCommunitySpread(CallDAG callDAG, List<String> communityList) throws Exception {
+		PrintWriter pw = new PrintWriter(new File("Results//community_spread_javadraw.txt"));
+		
+		double xStep = 70; // java canvas
+		
+		for (int idx = 0; idx < communityList.size(); ++idx) {
+			String str = communityList.get(idx);
 			String val[] = str.split(",");	
 			double loc[] = new double[val.length];	
 			double gen[] = new double[val.length];
@@ -427,6 +503,8 @@ public class ModularityAnalysis {
 			if (loc.length < nCommunitySizeThreshold) continue;			
 
 			int i = 0;
+			
+			
 			for(String r: val) {
 				int id = Integer.parseInt(r);
 				String f = callDAG.IDFunction.get(id);
@@ -460,7 +538,7 @@ public class ModularityAnalysis {
 			pw.print(yMid + "\t");
 			pw.print(yMax + "\t");
 
-			pw.println(avgGen + "\t");
+			pw.print(avgGen + "\t");
 			
 			pw.print(loc.length);
 			
@@ -468,6 +546,26 @@ public class ModularityAnalysis {
 		}
 		
 		pw.close();
+	}
+	
+	public void getCommunityAnalysisJavaDraw(CallDAG callDAG, String versionNum) throws Exception {		
+		Scanner scanner = new Scanner(new File("module_graphs//w5-" + versionNum + ".txt"));
+
+		List<String> communityList = new ArrayList();		
+		while (scanner.hasNextLine()) {
+			String str = scanner.nextLine();
+			str = str.substring(str.indexOf('{') + 1, str.indexOf('}'));
+			communityList.add(str);
+		}
+		
+		Collections.sort(communityList, new Comparator<String>() {
+			public int compare(String left, String right) {
+				return right.length() - left.length();
+			}
+		});
+		
+		getDrawDataCommunityShape(callDAG, communityList);
+		getDrawDataCommunitySpread(callDAG, communityList);
 	}
 
 	
