@@ -12,7 +12,7 @@ public class Driver {
 //	static int versiontStart = 1;
 //	static int versionEnd = 40;
 	
-	static String version = "1";
+	static String version = "21";
 
 	public static void main(String[] args) throws Exception {		
 /*****************************************************************************/
@@ -24,7 +24,6 @@ public class Driver {
 /*****************************************************************************/
 
 /*****************************************************************************/
-//		AgeAnalysis ageAnalysis = new AgeAnalysis();
 		DegreeAnalysis degreeAnalysis = new DegreeAnalysis();		
 		LocationAnalysis locationAnalysis = new LocationAnalysis();
 		PersistenceAnalysis persistenceAnalysis = new PersistenceAnalysis();
@@ -32,6 +31,7 @@ public class Driver {
 		EvolutionAnalysis evolutionaryAnalysis = new EvolutionAnalysis();
 		DiameterAnalysis diameterAnalysis = new DiameterAnalysis();
 		ModularityAnalysis modularityAnalysis  = new ModularityAnalysis();
+//		AgeAnalysis ageAnalysis = new AgeAnalysis();
 //		RandomNetworkGenerator randomNetworkGenerator = new RandomNetworkGenerator(callDAG);
 /*****************************************************************************/
 		
@@ -93,7 +93,7 @@ public class Driver {
 //		evolutionaryAnalysis.getNumClustersForEachVersion();
 //		evolutionaryAnalysis.getClusterSizeTrend();
 //		evolutionaryAnalysis.compareConsecutiveVersionFunctionsNeighborhood("0", "1");
-//		evolutionaryAnalysis.compareConsecutiveVersionModules("20", "21");
+//		evolutionaryAnalysis.compareConsecutiveVersionModules("30", "31");
 /*****************************************************************************/
 
 /*****************************************************************************/		
@@ -117,11 +117,12 @@ public class Driver {
 //		modularityAnalysis.getRandomModularNetwork();
 		
 //		modularityAnalysis.getCallDAGforWalktrap(callDAG, versionNum);
-//		modularityAnalysis.getWalktrapModules(callDAG, versionNum);
-//		modularityAnalysis.getCommunityNetworkHeatMap(callDAG);
-//		modularityAnalysis.getCommunityNetworkLayout(callDAG);
+		modularityAnalysis.getWalktrapModules(callDAG, versionNum);
+		modularityAnalysis.getCommunityNetworkStats(callDAG, versionNum);
+		
+//		modularityAnalysis.getCommunityNetworkLayoutDOTStyle(callDAG);
 //		modularityAnalysis.getCommunityLocationHistogram(callDAG, versionNum);
-		modularityAnalysis.getCommunityAnalysisJavaDraw(callDAG, versionNum);
+//		modularityAnalysis.getCommunityAnalysisJavaDraw(callDAG, versionNum);
 /*****************************************************************************/
 
 /*****************************************************************************/		

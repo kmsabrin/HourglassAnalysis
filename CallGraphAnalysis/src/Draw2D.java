@@ -52,6 +52,27 @@ public class Draw2D extends JFrame {
 	 */
 	private class DrawCanvas extends JPanel {
 		
+		public void drawCommunityEdges(Graphics2D g2) {
+			try {
+				Scanner scanner = new Scanner(new File("Results//community_edges_javadraw.txt"));
+				
+				while (scanner.hasNext()) {
+					int srcMidX = scanner.nextInt();
+					int srcMidY = scanner.nextInt();
+					
+					int dstMidX = scanner.nextInt();
+					int dstMidY = scanner.nextInt();
+					
+					double weight = scanner.nextDouble();					
+					
+					g2.setColor(Color.GRAY);
+															
+					g2.drawLine(srcMidX, srcMidY, dstMidX, dstMidY);
+				}
+			} 
+			catch(Exception e) {e.printStackTrace();}
+		}
+		
 		public void drawCommunityNetwork(Graphics2D g2) {
 			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 			setBackground(Color.WHITE); // set background color for this JPanel
@@ -96,6 +117,7 @@ public class Draw2D extends JFrame {
 					
 				}
 				
+//				drawCommunityEdges(g2);
 				scanner.close();
 				
 //				Printing texts
@@ -115,7 +137,6 @@ public class Draw2D extends JFrame {
 			catch(Exception e) {e.printStackTrace();}
 		}
 		
-		
 		public void drawCommunityLocations(Graphics2D g2) {
 			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 			setBackground(Color.WHITE); // set background color for this JPanel
@@ -124,7 +145,7 @@ public class Draw2D extends JFrame {
 			g2.drawLine(xStart - 2, yStart - 20, xStart - 2, yEnd + 20);
 			g2.drawLine(xStart - 20, yEnd + 5, xEnd + 20, yEnd + 5);
 			
-			double genCut = 0.04999;
+			double genCut = 0.03999;
 			
 			int xIndex = 0;
 			

@@ -277,8 +277,8 @@ public class EvolutionAnalysis {
 			}	
 		}
 		
-		
-		PrintWriter pw = new PrintWriter(new File("Results//" + Driver.networkUsed + "-" + vA + "-" + vB + "-module-to-module.txt"));
+		PrintWriter pw0 = new PrintWriter(new File("Results//" + Driver.networkUsed + "-" + vA + "-" + vB + "-module-to-module-closest-diff-cdf.txt"));
+		PrintWriter pw1 = new PrintWriter(new File("Results//" + Driver.networkUsed + "-" + vA + "-" + vB + "-module-to-module-closest-cdf.txt"));
 		
 		CallDAG callDAGvA = new CallDAG(Driver.networkPath + vA);
 		ModularityAnalysis modularityAnalysisvA = new ModularityAnalysis();
@@ -300,6 +300,7 @@ public class EvolutionAnalysis {
 		}
 		
 		double diffHisto[] = new double[110];
+		double closestHisto[] = new double[110];
 		double kount = 0;
 		
 		for (String r: modularityAnalysisvA.communities.keySet()) {
@@ -342,6 +343,7 @@ public class EvolutionAnalysis {
 			
 			int v = (int) (((distanceList.get(0) - distanceList.get(1)) / distanceList.get(0)) * 100);
 			diffHisto[v]++;
+			closestHisto[(int)(distanceList.get(0) * 100)]++;
 			kount++;
 			
 			if (v < 80) {
@@ -359,9 +361,17 @@ public class EvolutionAnalysis {
 		double sum = 0;
 		for (int i = 0; i <= 100; ++i) {
 			sum += diffHisto[i];
-			pw.println(i + "\t" + (sum / kount));
+			pw0.println(i + "\t" + (sum / kount));
 		}
 		
-		pw.close();
+		sum = 0;
+		for (int i = 0; i <= 100; ++i) {
+			sum += closestHisto[i];
+			pw1.println(i + "\t" + (sum / kount));
+		}
+		
+		pw0.close();
+		pw1.close();
+
 	}
 }
