@@ -73,7 +73,7 @@ public class Draw2D extends JFrame {
 			catch(Exception e) {e.printStackTrace();}
 		}
 		
-		public void drawCommunityNetwork(Graphics2D g2) {
+		public void drawCommunityShape(Graphics2D g2) {
 			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 			setBackground(Color.WHITE); // set background color for this JPanel
 						
@@ -82,8 +82,6 @@ public class Draw2D extends JFrame {
 			g2.drawLine(xStart - 20, yEnd + 15, xEnd + 20, yEnd + 15);
 			
 			double genCut = 0.03999;
-			
-			int xIndex = 0;
 			
 			try {
 				Scanner scanner = new Scanner(new File("Results//community_shape_javadraw.txt"));
@@ -113,8 +111,7 @@ public class Draw2D extends JFrame {
 //						g2.drawString(String.valueOf(size), xMid - 2, (yEnd + 5) + 10);
 //						g2.drawLine(xMid, (yEnd + 5) - 2, xMid, (yEnd + 5) + 2);
 //					}
-//					++xIndex;
-					
+//					++xIndex;					
 				}
 				
 //				drawCommunityEdges(g2);
@@ -137,7 +134,7 @@ public class Draw2D extends JFrame {
 			catch(Exception e) {e.printStackTrace();}
 		}
 		
-		public void drawCommunityLocations(Graphics2D g2) {
+		public void drawCommunitySpread(Graphics2D g2) {
 			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 			setBackground(Color.WHITE); // set background color for this JPanel
 						
@@ -211,10 +208,10 @@ public class Draw2D extends JFrame {
 			super.paintComponent(g2); // paint parent's background
 		
 			try {
-				drawCommunityNetwork(g2);
+				drawCommunityShape(g2);
 				ImageIO.write(bImg, "png", new File("community_shape.png"));
 				
-//				drawCommunityLocations(g2);
+//				drawCommunitySpread(g2);
 //				ImageIO.write(bImg, "png", new File("community_spread.png"));
 				
 			} catch (IOException e) { e.printStackTrace(); }

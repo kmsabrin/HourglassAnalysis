@@ -12,7 +12,7 @@ public class Driver {
 //	static int versiontStart = 1;
 //	static int versionEnd = 40;
 	
-	static String version = "21";
+	static String version = "1";
 
 	public static void main(String[] args) throws Exception {		
 /*****************************************************************************/
@@ -92,8 +92,11 @@ public class Driver {
 //		evolutionaryAnalysis.getNetworkGrowthTrend();
 //		evolutionaryAnalysis.getNumClustersForEachVersion();
 //		evolutionaryAnalysis.getClusterSizeTrend();
+		
 //		evolutionaryAnalysis.compareConsecutiveVersionFunctionsNeighborhood("0", "1");
 //		evolutionaryAnalysis.compareConsecutiveVersionModules("30", "31");
+//		evolutionaryAnalysis.getWalktrapCallDAGForEachVersion();
+//		evolutionaryAnalysis.getCommunityEvolutionData();
 /*****************************************************************************/
 
 /*****************************************************************************/		
@@ -114,14 +117,17 @@ public class Driver {
 //		modularityAnalysis.getModuleGeneralityVsComplexity(callDAG, versionNum);
 //		modularityAnalysis.getInfo();
 //		modularityAnalysis.getAvgModuleGeneralityVsLocation(callDAG, versionNum);
-//		modularityAnalysis.getRandomModularNetwork();
 		
-//		modularityAnalysis.getCallDAGforWalktrap(callDAG, versionNum);
+//		modularityAnalysis.getArtificialModularNetwork();		
+//		modularityAnalysis.getArtificialModularNetworkCommunityDetectionPerformance();
+
 		modularityAnalysis.getWalktrapModules(callDAG, versionNum);
-		modularityAnalysis.getCommunityNetworkStats(callDAG, versionNum);
+//		modularityAnalysis.getCallDAGforWalktrap(callDAG, versionNum);
+//		modularityAnalysis.getCommunityNetworkStats(callDAG, versionNum);
 		
 //		modularityAnalysis.getCommunityNetworkLayoutDOTStyle(callDAG);
 //		modularityAnalysis.getCommunityLocationHistogram(callDAG, versionNum);
+		
 //		modularityAnalysis.getCommunityAnalysisJavaDraw(callDAG, versionNum);
 /*****************************************************************************/
 

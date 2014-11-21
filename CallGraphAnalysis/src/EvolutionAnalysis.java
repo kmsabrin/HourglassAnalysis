@@ -2,12 +2,22 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeSet;
 
 public class EvolutionAnalysis {	
+	public static void getWalktrapCallDAGForEachVersion() throws Exception {
+		for (int i = Driver.versiontStart + 2; i < Driver.versionEnd; i++) {
+			CallDAG callDAG = new CallDAG(Driver.networkPath + i);
+			String versionNum = Driver.networkUsed + "-" + i;
+			ModularityAnalysis.getCallDAGforWalktrap(callDAG, versionNum);
+		}
+	}
+	
 	public static void getAverageGenCmpPerLocationForEachVersion() throws Exception {
 		for (int i = Driver.versiontStart; i < Driver.versionEnd; i += 12) {
 			CallDAG callDAG = new CallDAG(Driver.networkPath + i);
@@ -280,6 +290,8 @@ public class EvolutionAnalysis {
 		PrintWriter pw0 = new PrintWriter(new File("Results//" + Driver.networkUsed + "-" + vA + "-" + vB + "-module-to-module-closest-diff-cdf.txt"));
 		PrintWriter pw1 = new PrintWriter(new File("Results//" + Driver.networkUsed + "-" + vA + "-" + vB + "-module-to-module-closest-cdf.txt"));
 		
+		PrintWriter pw2 = new PrintWriter(new File("Results//" + Driver.networkUsed + "-" + vA + "-" + vB + "-community-matching.txt"));
+		
 		CallDAG callDAGvA = new CallDAG(Driver.networkPath + vA);
 		ModularityAnalysis modularityAnalysisvA = new ModularityAnalysis();
 		modularityAnalysisvA.getWalktrapModules(callDAGvA, Driver.networkUsed + "-" + vA);
@@ -309,10 +321,22 @@ public class EvolutionAnalysis {
 			Set<Info> tset = new TreeSet();
 		
 			int val = 0;
+			String vBMaxMatchId = "-";
+			double maxJaccardSimilarity = 0.0;
+			double maxSizeDelta = 0;
+			double maxLocDelta = 0;
+			double functionAdded = 0;
+			double functionRemoved = 0;
+			double medianLocationDispersion = 0;
 			
 			for (String s: modularityAnalysisvB.communities.keySet()) {
 				Set<String> comRverA = new HashSet(modularityAnalysisvA.communities.get(r));
 				Set<String> comSverB = new HashSet(modularityAnalysisvB.communities.get(s));
+				
+				int fA;
+				int fR;
+				int sizeDelta = comSverB.size() - comRverA.size();
+				double locDelta = modularityAnalysisvB.communitiesAvgLocation.get(s) - modularityAnalysisvA.communitiesAvgLocation.get(r);
 				
 				List<String> stringList = new ArrayList();
 				for (String t: comRverA) {
@@ -330,12 +354,22 @@ public class EvolutionAnalysis {
 				}
 				comSverB.removeAll(stringList);
 				
-				double jaccardDistance = getJaccard(comRverA, comSverB);
-				distanceList.add(jaccardDistance);
+				double jaccardSimilarity = getJaccard(comRverA, comSverB);
+				distanceList.add(jaccardSimilarity);
 				
-				tset.add(new Info(comSverB.size(), jaccardDistance));
+				if (jaccardSimilarity > maxJaccardSimilarity) {
+					maxJaccardSimilarity = jaccardSimilarity;
+					maxSizeDelta = sizeDelta;
+					maxLocDelta = locDelta;
+					vBMaxMatchId = s;
+				}
+				
+				
+				tset.add(new Info(comSverB.size(), jaccardSimilarity));
 				val = comRverA.size();
 			}
+			
+			pw2.println(r + " " + vBMaxMatchId + " " + maxJaccardSimilarity + " " + maxSizeDelta + " " + maxLocDelta);
 			
 			Collections.sort(distanceList, Collections.reverseOrder());
 			
@@ -372,6 +406,52 @@ public class EvolutionAnalysis {
 		
 		pw0.close();
 		pw1.close();
+		pw2.close();
 
+	}
+	
+	public void getCommunityEvolutionData() throws Exception {
+		
+//		CallDAG callDAGvA = new CallDAG(Driver.networkPath + "0");
+//		ModularityAnalysis modularityAnalysis = new ModularityAnalysis();
+//		modularityAnalysis.getWalktrapModules(callDAGvA, Driver.networkUsed + "-0");
+//		for (String s: modularityAnalysis.communities.keySet()) {
+//			System.out.println(s + "\t" + modularityAnalysis.communities.get(s).size());
+//		}
+		
+		String largeTen[] = { "C48", "C100", "C72", "C99", "C92", "C85", "C155", "C156", "C34", "C81" };
+
+		for (int k = 0; k < 10; ++k) {
+			PrintWriter pw = new PrintWriter(new File("Results//Com-" + k + "evo-data.txt"));
+			
+			for (int i = 0; i < 39; ++i) {
+				String vA = Integer.toString(i);
+				String vB = Integer.toString(i + 1);
+//				 compareConsecutiveVersionModules(Integer.toString(i), Integer.toString(i + 1));
+
+				Scanner scan = new Scanner(new File("Results//" + Driver.networkUsed + "-" + vA + "-" + vB + "-community-matching.txt"));
+
+				while (scan.hasNext()) {
+					String strFrom = scan.next();
+					String strTo = scan.next();					
+					double js = scan.nextDouble();
+					double dSz = scan.nextDouble();
+					double dML = scan.nextDouble();
+					
+					// System.out.println(strFrom + "--" + strTo + " " + i);
+					
+					if (!strFrom.equals(largeTen[k])) {	
+						continue;
+					}					
+					
+					pw.println(js + "\t" + dSz + "\t" + dML);
+					break;
+				}
+				
+				scan.close();
+			}
+			
+			pw.close();
+		}
 	}
 }
