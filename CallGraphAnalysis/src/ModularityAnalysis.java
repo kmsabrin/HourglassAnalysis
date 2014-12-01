@@ -116,16 +116,19 @@ public class ModularityAnalysis {
 		pw.close();
 	}
 	
+	/***************************************************************************************************/
 	/* GENERATE RANDOM MODULAR NETWORK TO TEST WALK-TRAP COMMUNITY DETECTION ALGORITHM'S EFFECTIVENESS */
+	/***************************************************************************************************/
 	
 	public void getArtificialModularNetwork() throws Exception {
-		PrintWriter pw = new PrintWriter(new File("Results//random-modular-network_100x100.txt"));
+		PrintWriter pw = new PrintWriter(new File("Results//random-modular-network_100x100-50n.txt"));
 
 		HashMap<Integer, HashSet<Integer>> adjacencyList = new HashMap();
 		
 		int blockSize = 100;
 		int nBlocks = 100;
 		int nNodes = blockSize * nBlocks;
+		double nInterModuleEdges = 0;
 				
 		for (int i = 0; i < nNodes; ++i) {
 			HashSet<Integer> hset = new HashSet();
@@ -136,7 +139,7 @@ public class ModularityAnalysis {
 		int kount;
 		for (int i = 0; i < nBlocks; ++i) {
 			Random rand = new Random(System.nanoTime());
-			kount = (int)(blockSize * 2.5);
+			kount = (int)(blockSize * 2.7);
 			while (kount-- > 0) {
 				int source = rand.nextInt(blockSize);
 				int target = rand.nextInt(blockSize);
@@ -149,6 +152,7 @@ public class ModularityAnalysis {
 				source += i * blockSize;
 				target += i * blockSize;
 				adjacencyList.get(source).add(target);
+				++nInterModuleEdges;
 			}
 		}
 				
@@ -167,8 +171,10 @@ public class ModularityAnalysis {
 			++precedence;
 		}
 		
-		// create inter-module edges
-		kount = nNodes / 5;
+//		create inter-module edges
+//		kount = nNodes / 5;
+		kount = (int)(nInterModuleEdges * 0.50); // percentage of inter-module edges as intra-module edges
+		
 		Random rand = new Random(System.nanoTime());
 		while (kount > 0) {
 			int source = rand.nextInt(nNodes);
@@ -202,13 +208,15 @@ public class ModularityAnalysis {
 	}
 	
 	public void getArtificialModularNetworkCommunityDetectionPerformance() throws Exception {
-		Scanner scanner = new Scanner(new File("module_graphs//random_50x200-w7_result.txt"));
+		Scanner scanner = new Scanner(new File("module_graphs//random_100x100-50n_w5_result.txt"));
 		
 		double averageJS = 0; // JS - Jaccard Similarity
 		int averageKnt = 0;
+		
+		ArrayList<Double> jSValueList = new ArrayList();
 
-		int blockSize = 50;
-		int nBlocks = 200;
+		int blockSize = 100;
+		int nBlocks = 100;
 		
 		scanner.nextLine(); // skip first line
 		while (scanner.hasNextLine()) {
@@ -217,7 +225,7 @@ public class ModularityAnalysis {
 			str = str.substring(str.indexOf('{') + 1, str.indexOf('}'));
 			String val[] = str.split(",");	
 		
-			if (val.length < (blockSize / 5)) continue; // wrong community
+			if (val.length < (blockSize / 5)) continue; // wrongly detected community, skip it
 			
 			HashSet<Integer> communityMembers = new HashSet();
 			for(String r: val) {
@@ -238,11 +246,20 @@ public class ModularityAnalysis {
 				if (jS > maxJS) maxJS = jS;
 			}
 			
+			jSValueList.add(maxJS);
 			averageJS += maxJS;
 			averageKnt++;
 		}
 		
-		System.out.println("Average Jaccard Similarity: " + (averageJS / averageKnt));
+
+		double jSValueArray[] = new double[jSValueList.size()];
+		int idx = 0;
+		for (double d: jSValueList) {
+			jSValueArray[idx++] = d;
+		}
+		
+		System.out.println("Average Jaccard Similarity: " + StatUtils.mean(jSValueArray));
+		System.out.println("Jaccard Similarity STD-DEV: " + Math.sqrt(StatUtils.variance(jSValueArray)));
 		System.out.println("Detected Communities: " + averageKnt);
 	}
 	
@@ -333,20 +350,131 @@ public class ModularityAnalysis {
 		System.out.println("nCommunities: " + (communityID - 1));
 		
 		getLeafStatistics(callDAG);
+//		getCommunityHistogram(callDAG);
+//		checkCommunityHourglassShape(callDAG, versionNum);
 		
 		scanner.close();
 		pw.close();
 	}
 	
+	public void checkCommunityHourglassShape(CallDAG callDAG, String versionNum) throws Exception {
+		PrintWriter pw = new PrintWriter(new File("Results//hmetric-" + versionNum + ".txt"));
+		
+		double hMetricFrequencies[] = new double[150];
+//		int hMetricCDF[] = new int[150];
+		
+		for (String s: communities.keySet()) {
+			TreeMap<Double, Integer> communityShape = new TreeMap();
+			for (String r: communities.get(s)) {
+				double loc = callDAG.location.get(r);
+				if (communityShape.containsKey(loc)) {
+					int v = communityShape.get(loc);
+					communityShape.put(loc, v + 1);
+				}
+				else {
+					communityShape.put(loc, 1);
+				}
+			}
+			
+			int minVal = 111111;
+			int minValIdx = 111111;
+			int values[] = new int[communityShape.size()];
+			int idx = 0;
+			for (double d: communityShape.keySet()) {
+				int v = communityShape.get(d);
+				values[idx] = v;
+				if (v <= minVal) {
+					minVal = v;
+					minValIdx = idx;
+				}
+				++idx;
+			}
+						
+			int a = 0, b = 0, k = 0;
+			for (int i = 0; i <= minValIdx; ++i) {
+				++k;
+				for (int j = i + 1; j <= minValIdx; ++j) {
+					if (values[j] <= values[i]) ++a;
+					else ++b;
+				}
+			}
+			double n = k * (k - 1.0) * 0.5;
+			if (n < 1) n = 1;
+			double x = (a - b) / n;
+			
+			a = b = k = 0;
+			for (int i = minValIdx; i < values.length; ++i) {
+				++k;
+				for (int j = i + 1; j < values.length; ++j) {
+					if (values[j] > values[i]) ++a;
+					else ++b;
+				}
+			}
+			n = k * (k - 1.0) * 0.5;
+			if (n < 1) n = 1;
+			double y = (a - b) / n;
+
+			double h = (x + y) / 2.0;
+			
+			int hInt = (int)(h * 100);
+			hMetricFrequencies[hInt]++;
+//			System.out.println(h + "\t" + communities.get(s).size());
+		}
+		
+		pw.println(0 + "\t" + hMetricFrequencies[0] / communities.keySet().size());
+		for (int i = 1; i <= 100; ++i) {
+			hMetricFrequencies[i] += hMetricFrequencies[i - 1];
+			pw.println(i / 100.0 + "\t" + hMetricFrequencies[i] / communities.keySet().size());
+		}
+		
+		pw.close();
+	}
+	
+	public void getCommunityHistogram(CallDAG callDAG) throws Exception {
+		PrintWriter pw0 = new PrintWriter(new File("Results//gnuplot.command.txt"));
+		TreeMap<Integer, ArrayList<String>> sizeSortedCommunities = new TreeMap();
+		
+		for (String s: communities.keySet()) {
+			int sz = communities.get(s).size() * -1;
+			if (sizeSortedCommunities.containsKey(sz)) {
+				sizeSortedCommunities.get(sz).add(s);
+			}
+			else {
+				ArrayList<String> aList = new ArrayList();
+				aList.add(s);
+				sizeSortedCommunities.put(sz, aList);
+			}
+		}
+		
+		int idx = 0;
+		for (int i: sizeSortedCommunities.keySet()) {
+			for (String s: sizeSortedCommunities.get(i)) {
+				PrintWriter pw = new PrintWriter(new File("Results//histo-community-" + idx + ".txt"));
+				for (String r: communities.get(s)) {
+					pw.println(callDAG.location.get(r));
+				}
+				pw.close();
+//				pw0.println("\"Module/histo-community-" + idx + ".txt\" u 1:(1./(" + communities.get(s).size() + "*10.)):(0.03) title \"c" + idx + "\" smooth kdensity w l, \\");
+				pw0.println("\"Module/histo-community-" + idx + ".txt\" u 1:(1./(" + communities.get(s).size() + "*10.)):(0.03) notitle smooth kdensity w l, \\");
+				++idx;
+				if (idx > 99) break;
+			}
+			if (idx > 99) break;
+		}
+		
+		pw0.close();
+	}
+	
 	public void getLeafStatistics(CallDAG callDAG) {
 		System.out.println("Total Leaves: " + callDAG.nLeaves);
 		int engulfed = 0;
+		int knt = 0;
 		for (String s: communities.keySet()) {
 			double communitySz = communities.get(s).size();
 			double leafCount = 0;
 			double GCCount = 0;
 			for (String r: communities.get(s)) {
-				if (callDAG.location.get(r) < 0.05) {
+				if (callDAG.location.get(r) < 0.1) {
 					leafCount++;
 				}
 				if (callDAG.generality.get(r) > 0.4 /*&& callDAG.complexity.get(r) > 0.00*/) {
@@ -362,13 +490,15 @@ public class ModularityAnalysis {
 			//System.out.println("Total GC nodes: " + GCCount);
 			
 			double leafRatio = leafCount / communitySz;			
-//			if (leafRatio > 0.33) {
+			if (leafRatio > 0.33) {
 //				System.out.println(leafRatio + "\t" + communitySz);
-//			}
-			System.out.println(leafCount + "\t" + GCCount + "\t" + communitySz);
+				++knt;
+			}
+//			System.out.println(leafCount + "\t" + GCCount + "\t" + communitySz);
 		}
 		
-		System.out.println("Engulfed into bigger community: " + engulfed);
+		System.out.println(knt * 1.0 / communities.keySet().size());
+//		System.out.println("Engulfed into bigger community: " + engulfed);
 	}
 	
 	public double getCommunityDistanceMetric(String comXID, String comYID, CallDAG callDAG) {
@@ -718,6 +848,31 @@ public class ModularityAnalysis {
 		pw.close();	
 	}
 	
+	public void getDataToDrawCommunityShape2(CallDAG callDAG, List<String> communityList) throws Exception {
+		PrintWriter pw = new PrintWriter(new File("Results//community_shape2_javadraw.txt"));
+
+		for (int idx = 0; idx < communityList.size(); ++idx) {
+			String str = communityList.get(idx);
+			String val[] = str.split(",");
+			double loc[] = new double[100 + 10];
+
+			for (String r : val) {
+				int id = Integer.parseInt(r);
+				String f = callDAG.IDFunction.get(id);
+				int l = (int) (callDAG.location.get(f) * 100);
+				loc[l]++;
+			}
+
+			for (int i = 0; i <= 100; ++i) {
+				pw.print(loc[i] + "\t");
+			}
+
+			pw.println();
+		}
+
+		pw.close();
+	}
+	
 	public void getDataToDrawCommunityShape(CallDAG callDAG, List<String> communityList) throws Exception {
 		PrintWriter pw = new PrintWriter(new File("Results//community_shape_javadraw.txt"));
 		
@@ -903,5 +1058,7 @@ public class ModularityAnalysis {
 		
 		getDataToDrawCommunityShape(callDAG, communityList);
 		getDataToDrawCommunitySpread(callDAG, communityList);
+		getDataToDrawCommunityShape2(callDAG, communityList);
+		
 	}
 }

@@ -73,6 +73,55 @@ public class Draw2D extends JFrame {
 			catch(Exception e) {e.printStackTrace();}
 		}
 		
+		public void drawCommunityShape2(Graphics2D g2) {
+			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+			setBackground(Color.WHITE); // set background color for this JPanel
+						
+			g2.setColor(Color.GRAY);
+			g2.drawLine(xStart - 10, yStart - 0, xStart - 10, yEnd + 20);
+			g2.drawLine(xStart - 20, yEnd + 15, xEnd + 20, yEnd + 15);
+			
+			try {
+				Scanner scanner = new Scanner(new File("Results//community_shape2_javadraw.txt"));				
+				int barHeight = (yEnd - yStart) / 91;
+//				System.out.println(barHeight);
+				int xStep = 70;
+				int knt = 0;
+				while (knt < 50 && scanner.hasNext()) {
+					int maxWidth = 0;
+					for (int i = 0; i <= 100; ++i) {
+						int width = (int)scanner.nextDouble();
+						if (width < 1) continue;
+						width = Math.max(1, width / 8);
+						if (width > maxWidth) maxWidth = width;
+						int x = xStep;
+						int y = yEnd - (i * barHeight);
+					
+						if (knt % 2 == 1) g2.setColor(Color.RED);
+						else g2.setColor(Color.BLUE);
+						g2.fillRect(x, y, width, barHeight);
+					}					
+					xStep += maxWidth + 5;
+					++knt;
+				}
+				
+				scanner.close();
+				
+//				Printing texts
+				g2.setColor(Color.BLACK);
+				g2.setFont(new Font("Monospaced", Font.PLAIN, 10));
+				g2.drawString("1.0", 70 - 35, 100);
+				g2.drawString("0.0", 70 - 35, 505);
+				g2.setFont(new Font("Monospaced", Font.PLAIN, 11));
+				g2.drawString("Communities Histogram (v-2.6.21)", 365, (yEnd + 5) + 25);
+								
+//				ROTATED TEXT
+				g2.rotate(-Math.PI/2);
+				g2.drawString("Location", -325, 55);
+			} 
+			catch(Exception e) {e.printStackTrace();}
+		}
+		
 		public void drawCommunityShape(Graphics2D g2) {
 			g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 			setBackground(Color.WHITE); // set background color for this JPanel
@@ -175,8 +224,7 @@ public class Draw2D extends JFrame {
 						g2.drawString(String.valueOf(size), xMid - 2, (yEnd + 5) + 10);
 						g2.drawLine(xMid, (yEnd + 5) - 2, xMid, (yEnd + 5) + 2);
 					}
-					++xIndex;
-					
+					++xIndex;			
 				}
 				
 				scanner.close();
@@ -208,11 +256,14 @@ public class Draw2D extends JFrame {
 			super.paintComponent(g2); // paint parent's background
 		
 			try {
-				drawCommunityShape(g2);
-				ImageIO.write(bImg, "png", new File("community_shape.png"));
+//				drawCommunityShape(g2);
+//				ImageIO.write(bImg, "png", new File("community_shape.png"));
 				
 //				drawCommunitySpread(g2);
 //				ImageIO.write(bImg, "png", new File("community_spread.png"));
+				
+				drawCommunityShape2(g2);
+				ImageIO.write(bImg, "png", new File("community_shape2.png"));
 				
 			} catch (IOException e) { e.printStackTrace(); }
 		}
