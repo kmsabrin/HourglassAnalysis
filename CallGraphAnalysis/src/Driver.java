@@ -12,7 +12,7 @@ public class Driver {
 //	static int versiontStart = 1;
 //	static int versionEnd = 40;
 	
-	static String version = "21";
+	static String version = "31";
 
 	public static void main(String[] args) throws Exception {		
 /*****************************************************************************/
@@ -121,14 +121,13 @@ public class Driver {
 //		modularityAnalysis.getArtificialModularNetwork();		
 //		modularityAnalysis.getArtificialModularNetworkCommunityDetectionPerformance();
 
-//		modularityAnalysis.getWalktrapModules(callDAG, versionNum);
+		modularityAnalysis.getWalktrapModules(callDAG, versionNum);
 //		modularityAnalysis.getCallDAGforWalktrap(callDAG, versionNum);
-//		modularityAnalysis.getCommunityNetworkStats(callDAG, versionNum);
 		
 //		modularityAnalysis.getCommunityNetworkLayoutDOTStyle(callDAG);
 //		modularityAnalysis.getCommunityLocationHistogram(callDAG, versionNum);
 		
-		modularityAnalysis.getCommunityAnalysisJavaDraw(callDAG, versionNum);
+//		modularityAnalysis.getCommunityAnalysisJavaDraw(callDAG, versionNum);
 /*****************************************************************************/
 
 /*****************************************************************************/		

@@ -1,6 +1,7 @@
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -12,7 +13,11 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeMap;
 
+import org.apache.commons.math3.distribution.BinomialDistribution;
 import org.apache.commons.math3.stat.StatUtils;
+
+import com.google.common.collect.Multimap;
+import com.google.common.collect.TreeMultimap;
 
 public class ModularityAnalysis {
 	
@@ -349,12 +354,188 @@ public class ModularityAnalysis {
 
 		System.out.println("nCommunities: " + (communityID - 1));
 		
-		getLeafStatistics(callDAG);
+//		getLeafStatistics(callDAG);
 //		getCommunityHistogram(callDAG);
 //		checkCommunityHourglassShape(callDAG, versionNum);
+//		getCommunityNetworkStats(callDAG, versionNum);
+		getNonrepresentativeCommunityNode(callDAG, versionNum);
+//		getNonrepresentativeCommunities(callDAG);
 		
 		scanner.close();
 		pw.close();
+	}
+	
+	public void getNonrepresentativeCommunityNode(CallDAG callDAG, String versionNum) throws Exception {
+		double nodeOutRatio[] = new double[callDAG.location.size() + 1];
+		double nodeInRatio[] = new double[callDAG.location.size() + 1];
+		Map<String, Double> nodeInRatioMap = new HashMap();
+		Map<String, Double> nodeOutRatioMap = new HashMap();
+		
+		int idx = 0;
+		for (String s: communities.keySet()) {
+			for (String r: communities.get(s)) {
+				double intraIn = 1, interIn = 0, intraOut = 1, interOut = 0;
+				
+				if (callDAG.callFrom.containsKey(r)) {
+					for (String p: callDAG.callFrom.get(r)) {
+						if (communities.get(s).contains(p)) {
+							++intraIn;
+						}
+						else {
+							++interIn;
+						}
+					}
+				}
+				
+				if (callDAG.callTo.containsKey(r)) {
+					for (String p: callDAG.callTo.get(r)) {
+						if (communities.get(s).contains(p)) {
+							++intraOut;
+						}
+						else {
+							++interOut;
+						}
+					}
+				}
+				
+				double inRatio = interIn / intraIn;
+				double outRatio = interOut / intraOut;
+				nodeInRatio[idx] = inRatio;
+				nodeOutRatio[idx] = outRatio;
+				++idx;
+				
+				nodeInRatioMap.put(r, inRatio);
+				nodeOutRatioMap.put(r, outRatio);
+//				System.out.println(ratio);
+			}
+		}
+		
+		// cut-off creation by distribution sampling
+		double sampleInRatio[] = new double[nodeInRatio.length * 3];
+		double sampleOutRatio[] = new double[nodeOutRatio.length * 3];
+		idx = 0;
+		Random random = new Random(System.nanoTime());
+		for (int i = 0; i < nodeInRatio.length * 3; ++i) {
+			int j = random.nextInt(nodeInRatio.length);
+			int k = random.nextInt(nodeOutRatio.length);
+			sampleInRatio[idx] = nodeInRatio[j];
+			sampleOutRatio[idx] = nodeOutRatio[k];
+			++idx;
+		}
+		
+		double iRatio90p = StatUtils.percentile(sampleInRatio, 90);
+		double oRatio90p = StatUtils.percentile(sampleOutRatio, 90);		
+		
+		// cut-off creation by distribution 
+//		double iRatio90p = StatUtils.percentile(nodeInRatio, 90);
+//		double oRatio90p = StatUtils.percentile(nodeOutRatio, 90);
+		
+		double cupInOutlier = 0;
+		double cupOutOutlier = 0;
+		double cupTotal = 0;
+		double neckInOutlier = 0;
+		double neckOutOutlier = 0;
+		double neckTotal = 0;
+		double baseInOutlier = 0;
+		double baseOutOutlier = 0;
+		double baseTotal = 0;
+		
+		for (String s : callDAG.location.keySet()) {
+			if (!nodeInRatioMap.containsKey(s))
+				continue;
+
+			double iRatio = nodeInRatioMap.get(s);
+			double oRatio = nodeOutRatioMap.get(s);
+			double loc = callDAG.location.get(s);
+
+			if (loc < 0.2) {
+				baseTotal++;
+				if (iRatio > iRatio90p) {
+					baseInOutlier++;
+				}
+				if (oRatio > oRatio90p) {
+					baseOutOutlier++;
+				}
+			} else if (loc > 0.8) {
+				cupTotal++;
+				if (iRatio > iRatio90p) {
+					cupInOutlier++;
+				}
+				if (oRatio > oRatio90p) {
+					cupOutOutlier++;
+				}
+			} else {
+				neckTotal++;
+				if (iRatio > iRatio90p) {
+					neckInOutlier++;
+				}
+				if (oRatio > oRatio90p) {
+					neckOutOutlier++;
+				}
+			}
+		}
+		
+		System.out.println("Base Inratio Outlier Percentage" + "\t" + baseInOutlier * 100.0 / baseTotal);
+		System.out.println("Neck Inratio Outlier Percentage" + "\t" + neckInOutlier * 100.0 / neckTotal);
+		System.out.println("Cup Inratio Outlier Percentage" + "\t" + cupInOutlier * 100.0 / cupTotal);
+		
+		System.out.println("Base Outratio Outlier Percentage" + "\t" + baseOutOutlier * 100.0 / baseTotal);
+		System.out.println("Neck Outratio Outlier Percentage" + "\t" + neckOutOutlier * 100.0 / neckTotal);
+		System.out.println("Cup Outratio Outlier Percentage" + "\t" + cupOutOutlier * 100.0 / cupTotal);
+		
+//		pw1.close();
+//		pw2.close();
+	}
+	
+	public void getNonrepresentativeCommunities(CallDAG callDAG) {
+		Multimap<Integer, String> sizeSortedCommunities = TreeMultimap.create();
+		
+		for (String s: communities.keySet()) {
+			sizeSortedCommunities.put(-1 * communities.get(s).size(), s);
+		}
+		
+		double largeMoudlesLocationDistribution[] = new double[100 + 1];
+		
+		int knt = 10;
+		double largeSampleKnt = 0;
+		for (int i: sizeSortedCommunities.keySet()) {
+			Collection<String> communityIds = sizeSortedCommunities.get(i);
+			
+			for (String s: communityIds) {
+				for (String r: communities.get(s)) {
+					int loc = (int)(callDAG.location.get(r) * 100);
+					largeMoudlesLocationDistribution[loc]++;
+				}
+				largeSampleKnt += communities.get(s).size();
+			}
+			
+			knt -= communityIds.size();
+			if (knt < 1) break;
+		}
+		
+		for (int i = 0; i < 101; ++i) {
+			largeMoudlesLocationDistribution[i] /= largeSampleKnt;
+		}
+		
+		for (String s: communities.keySet()) {
+			int individualSampleKnt = communities.get(s).size();
+			if (individualSampleKnt < 10) continue;
+			
+			int individualModuleLocationDistribution[] = new int[100 + 1];
+			for (String r: communities.get(s)) {
+				int loc = (int)(callDAG.location.get(r) * 100);
+				individualModuleLocationDistribution[loc]++;
+			}
+			
+			double avgFit = 0;
+			for (int i = 0; i < 101; ++i) {
+				BinomialDistribution binomialDistribution = new BinomialDistribution(individualSampleKnt, largeMoudlesLocationDistribution[i]);
+				avgFit += binomialDistribution.probability(individualModuleLocationDistribution[i]);
+			}
+			avgFit /= 101;
+			
+			System.out.println(avgFit);
+		}
 	}
 	
 	public void checkCommunityHourglassShape(CallDAG callDAG, String versionNum) throws Exception {
@@ -1057,8 +1238,8 @@ public class ModularityAnalysis {
 		});
 		
 		getDataToDrawCommunityShape(callDAG, communityList);
-		getDataToDrawCommunitySpread(callDAG, communityList);
 		getDataToDrawCommunityShape2(callDAG, communityList);
+		getDataToDrawCommunitySpread(callDAG, communityList);
 		
 	}
 }
