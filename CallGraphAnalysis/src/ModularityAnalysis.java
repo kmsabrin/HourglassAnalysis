@@ -20,7 +20,6 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.TreeMultimap;
 
 public class ModularityAnalysis {
-	
 	Map<String, Set<String>> communities;
 	Map<String, Double> communitiesInDeg;
 	Map<String, Double> communitiesOutDeg;
@@ -406,27 +405,34 @@ public class ModularityAnalysis {
 				
 				nodeInRatioMap.put(r, inRatio);
 				nodeOutRatioMap.put(r, outRatio);
-//				System.out.println(ratio);
+//				System.out.println(inRatio); // + "\t" + outRatio);
 			}
 		}
 		
-		// cut-off creation by distribution sampling
-		double sampleInRatio[] = new double[nodeInRatio.length * 3];
-		double sampleOutRatio[] = new double[nodeOutRatio.length * 3];
+//		cut-off creation by distribution sampling
+		double sampleInRatio[] = new double[nodeInRatio.length / 10];
+		double sampleOutRatio[] = new double[nodeOutRatio.length / 10];
 		idx = 0;
-		Random random = new Random(System.nanoTime());
-		for (int i = 0; i < nodeInRatio.length * 3; ++i) {
+		for (int i = 0; i < nodeInRatio.length / 10; ++i) {
+			Random random = new Random(System.nanoTime());
 			int j = random.nextInt(nodeInRatio.length);
 			int k = random.nextInt(nodeOutRatio.length);
 			sampleInRatio[idx] = nodeInRatio[j];
 			sampleOutRatio[idx] = nodeOutRatio[k];
 			++idx;
+			System.out.println(nodeInRatio[j]);// + "\t" + nodeOutRatio[k]);
 		}
 		
-		double iRatio90p = StatUtils.percentile(sampleInRatio, 90);
-		double oRatio90p = StatUtils.percentile(sampleOutRatio, 90);		
+		for (int i = 75; i <= 95; ++i) {
+//			System.out.print("iRatio" + i + "p = " + StatUtils.percentile(sampleInRatio, i)  + "\t");
+//			System.out.print("oRatio" + i + "p = " + StatUtils.percentile(sampleOutRatio, i) );
+//			System.out.println();
+		}
 		
-		// cut-off creation by distribution 
+		double iRatio90p = StatUtils.percentile(sampleInRatio, 91);
+		double oRatio90p = StatUtils.percentile(sampleOutRatio, 83);		
+		
+//		cut-off creation by distribution 
 //		double iRatio90p = StatUtils.percentile(nodeInRatio, 90);
 //		double oRatio90p = StatUtils.percentile(nodeOutRatio, 90);
 		
@@ -475,13 +481,13 @@ public class ModularityAnalysis {
 			}
 		}
 		
-		System.out.println("Base Inratio Outlier Percentage" + "\t" + baseInOutlier * 100.0 / baseTotal);
-		System.out.println("Neck Inratio Outlier Percentage" + "\t" + neckInOutlier * 100.0 / neckTotal);
-		System.out.println("Cup Inratio Outlier Percentage" + "\t" + cupInOutlier * 100.0 / cupTotal);
-		
-		System.out.println("Base Outratio Outlier Percentage" + "\t" + baseOutOutlier * 100.0 / baseTotal);
-		System.out.println("Neck Outratio Outlier Percentage" + "\t" + neckOutOutlier * 100.0 / neckTotal);
-		System.out.println("Cup Outratio Outlier Percentage" + "\t" + cupOutOutlier * 100.0 / cupTotal);
+//		System.out.println("Base Inratio Outlier Percentage" + "\t" + baseInOutlier * 100.0 / baseTotal);
+//		System.out.println("Neck Inratio Outlier Percentage" + "\t" + neckInOutlier * 100.0 / neckTotal);
+//		System.out.println("Cup Inratio Outlier Percentage" + "\t" + cupInOutlier * 100.0 / cupTotal);
+//		
+//		System.out.println("Base Outratio Outlier Percentage" + "\t" + baseOutOutlier * 100.0 / baseTotal);
+//		System.out.println("Neck Outratio Outlier Percentage" + "\t" + neckOutOutlier * 100.0 / neckTotal);
+//		System.out.println("Cup Outratio Outlier Percentage" + "\t" + cupOutOutlier * 100.0 / cupTotal);
 		
 //		pw1.close();
 //		pw2.close();
@@ -527,7 +533,7 @@ public class ModularityAnalysis {
 				individualModuleLocationDistribution[loc]++;
 			}
 			
-			double avgFit = 0;
+			double avgFit = 0; // resemblance metric
 			for (int i = 0; i < 101; ++i) {
 				BinomialDistribution binomialDistribution = new BinomialDistribution(individualSampleKnt, largeMoudlesLocationDistribution[i]);
 				avgFit += binomialDistribution.probability(individualModuleLocationDistribution[i]);

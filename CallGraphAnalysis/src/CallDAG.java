@@ -21,6 +21,9 @@ public class CallDAG {
 	Map<String, Double> avgRootDepth;
 	Map<String, Double> location;
 	
+	Map<String, Double> numOfLeafPath;
+	Map<String, Double> numOfRootPath;
+	
 	Map<String, Double> numOfReachableNodes;
 	Map<String, Double> generality;
 	Map<String, Double> complexity;
@@ -56,6 +59,9 @@ public class CallDAG {
 		avgLeafDepth = new HashMap();
 		avgRootDepth = new HashMap();
 		location = new HashMap();
+		
+		numOfLeafPath = new HashMap();
+		numOfRootPath = new HashMap();
 		
 		numOfReachableNodes = new HashMap();
 		generality = new HashMap();
@@ -292,6 +298,8 @@ public class CallDAG {
 			}
 		}
 		
+		numOfLeafPath.putAll(numOfPath);
+		
 //		reset data containers
 		numOfPath = new HashMap();
 		sumOfPath = new HashMap();
@@ -302,6 +310,8 @@ public class CallDAG {
 				rootPath(s);
 			}
 		}
+		
+		numOfRootPath.putAll(numOfPath);
 		
 		for (String s : functions) {
 			double m = avgLeafDepth.get(s) / (avgLeafDepth.get(s) + avgRootDepth.get(s));

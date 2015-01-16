@@ -55,6 +55,13 @@ public class Test {
 		Test test = new Test();
 		test.loadCallGraph();
 		
+//		for (String s: test.callDAG.numOfLeafPath.keySet()) {
+//			System.out.print(s + "\t" + "nLeafPath: " + test.callDAG.numOfLeafPath.get(s));
+//			System.out.println("\t" + "nRootPath: " + test.callDAG.numOfRootPath.get(s));
+//		}
+		CentralityAnalysis centralityAnalysis = new CentralityAnalysis();
+		centralityAnalysis.getLocationVsAvgCentrality(test.callDAG, "ToyDAG");
+		
 //		DegreeAnalysis degreeAnalysis = new DegreeAnalysis();
 //		degreeAnalysis.getInDegreeCCDF(test.callDAG);
 //		degreeAnalysis.getOutDegreeCCDF(test.callDAG);
@@ -69,15 +76,15 @@ public class Test {
 //		locationAnalysis.getLocationHistogram(test.callDAG);
 //		locationAnalysis.getLocationVsCallDirection(test.callDAG);
 		
-		GeneralityAnalysis generalityAnalysis = new GeneralityAnalysis();
-		for (String s: test.callDAG.functions) {
-			System.out.print(s);
-			System.out.print("\t Location " + test.callDAG.location.get(s));
-			System.out.print("\t Generality " + test.callDAG.generality.get(s));
-			System.out.print("\t Complexity " + test.callDAG.complexity.get(s));
-			System.out.print("\t ModuleGenerality " + test.callDAG.moduleGenerality.get(s));
-			System.out.println("\t ModuleComplexity " + test.callDAG.moduleComplexity.get(s));
-		}
+//		GeneralityAnalysis generalityAnalysis = new GeneralityAnalysis();
+//		for (String s: test.callDAG.functions) {
+//			System.out.print(s);
+//			System.out.print("\t Location " + test.callDAG.location.get(s));
+//			System.out.print("\t Generality " + test.callDAG.generality.get(s));
+//			System.out.print("\t Complexity " + test.callDAG.complexity.get(s));
+//			System.out.print("\t ModuleGenerality " + test.callDAG.moduleGenerality.get(s));
+//			System.out.println("\t ModuleComplexity " + test.callDAG.moduleComplexity.get(s));
+//		}
 		
 //		generalityAnalysis.getGeneralityHistogram(test.callDAG);
 //		generalityAnalysis.getLocationVSAvgGenerality(test.callDAG);

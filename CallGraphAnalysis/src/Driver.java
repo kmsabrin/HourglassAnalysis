@@ -31,6 +31,7 @@ public class Driver {
 		EvolutionAnalysis evolutionaryAnalysis = new EvolutionAnalysis();
 		DiameterAnalysis diameterAnalysis = new DiameterAnalysis();
 		ModularityAnalysis modularityAnalysis  = new ModularityAnalysis();
+		CentralityAnalysis centralityAnalysis = new CentralityAnalysis();
 //		AgeAnalysis ageAnalysis = new AgeAnalysis();
 //		RandomNetworkGenerator randomNetworkGenerator = new RandomNetworkGenerator(callDAG);
 /*****************************************************************************/
@@ -100,6 +101,10 @@ public class Driver {
 /*****************************************************************************/
 
 /*****************************************************************************/		
+		centralityAnalysis.getLocationVsAvgCentrality(callDAG, versionNum);
+/*****************************************************************************/
+				
+/*****************************************************************************/		
 //		generalityAnalysis.getGeneralityHistogram(callDAG, versionNum);
 //		generalityAnalysis.getComplexityHistogram(callDAG, versionNum);
 //		generalityAnalysis.getLocationVsAvgGenerality(callDAG, versionNum);
@@ -121,7 +126,7 @@ public class Driver {
 //		modularityAnalysis.getArtificialModularNetwork();		
 //		modularityAnalysis.getArtificialModularNetworkCommunityDetectionPerformance();
 
-		modularityAnalysis.getWalktrapModules(callDAG, versionNum);
+//		modularityAnalysis.getWalktrapModules(callDAG, versionNum);
 //		modularityAnalysis.getCallDAGforWalktrap(callDAG, versionNum);
 		
 //		modularityAnalysis.getCommunityNetworkLayoutDOTStyle(callDAG);
