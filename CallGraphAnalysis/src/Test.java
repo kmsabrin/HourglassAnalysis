@@ -59,7 +59,7 @@ public class Test {
 //			System.out.print(s + "\t" + "nLeafPath: " + test.callDAG.numOfLeafPath.get(s));
 //			System.out.println("\t" + "nRootPath: " + test.callDAG.numOfRootPath.get(s));
 //		}
-		CentralityAnalysis centralityAnalysis = new CentralityAnalysis();
+		CentralityAnalysis centralityAnalysis = new CentralityAnalysis(test.callDAG);
 		centralityAnalysis.getLocationVsAvgCentrality(test.callDAG, "ToyDAG");
 		
 //		DegreeAnalysis degreeAnalysis = new DegreeAnalysis();

@@ -31,7 +31,7 @@ public class Driver {
 		EvolutionAnalysis evolutionaryAnalysis = new EvolutionAnalysis();
 		DiameterAnalysis diameterAnalysis = new DiameterAnalysis();
 		ModularityAnalysis modularityAnalysis  = new ModularityAnalysis();
-		CentralityAnalysis centralityAnalysis = new CentralityAnalysis();
+		CentralityAnalysis centralityAnalysis = new CentralityAnalysis(callDAG);
 //		AgeAnalysis ageAnalysis = new AgeAnalysis();
 //		RandomNetworkGenerator randomNetworkGenerator = new RandomNetworkGenerator(callDAG);
 /*****************************************************************************/
@@ -101,7 +101,8 @@ public class Driver {
 /*****************************************************************************/
 
 /*****************************************************************************/		
-		centralityAnalysis.getLocationVsAvgCentrality(callDAG, versionNum);
+//		centralityAnalysis.getLocationVsAvgCentrality(callDAG, versionNum);
+		centralityAnalysis.getSamplePathKurtosis(callDAG);
 /*****************************************************************************/
 				
 /*****************************************************************************/		

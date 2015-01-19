@@ -1,7 +1,9 @@
 import java.io.File;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
@@ -41,6 +43,7 @@ public class CallDAG {
 	Set<String> visited;
 	Map<String, String> cycleEdges;
 	Set<String> cycleVisited;
+	List<String> cycleList;
 	double reachableKount;
 	double moduleKount;
 		
@@ -155,11 +158,20 @@ public class CallDAG {
 			return;
 
 		cycleVisited.add(node); // cycle check
-
+		cycleList.add(node);
+		
 		for (String s : callTo.get(node)) {
 			if (cycleVisited.contains(s)) {
 //				cycle found, recording edge for removal
 				cycleEdges.put(node, s);
+				
+				for (int i = 0; ; ++i) {
+					if (cycleList.get(i).equals(s)) {
+//						System.out.println(cycleList.size() - i);
+						break;
+					}
+				}
+				
 				continue;
 			}
 			removeCyclesTraverse(s);
@@ -167,6 +179,7 @@ public class CallDAG {
 
 		visited.add(node);
 		cycleVisited.remove(node);
+		cycleList.remove(node);
 	}
 
 	public void removeCycles() {
@@ -180,6 +193,7 @@ public class CallDAG {
 				if (!visited.contains(s)) {
 					cycleEdges = new HashMap();
 					cycleVisited = new HashSet();
+					cycleList = new ArrayList();
 					removeCyclesTraverse(s);
 					
 					for (String source : cycleEdges.keySet()) {
