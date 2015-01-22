@@ -102,7 +102,9 @@ public class Driver {
 
 /*****************************************************************************/		
 //		centralityAnalysis.getLocationVsAvgCentrality(callDAG, versionNum);
-		centralityAnalysis.getSamplePathKurtosis(callDAG);
+//		centralityAnalysis.getSamplePathKurtosis(callDAG, versionNum);
+		centralityAnalysis.getSamplePathHScore(callDAG, versionNum);
+//		CentralityAnalysis.testKurtosis();
 /*****************************************************************************/
 				
 /*****************************************************************************/		
