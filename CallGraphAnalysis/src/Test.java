@@ -59,8 +59,12 @@ public class Test {
 //			System.out.print(s + "\t" + "nLeafPath: " + test.callDAG.numOfLeafPath.get(s));
 //			System.out.println("\t" + "nRootPath: " + test.callDAG.numOfRootPath.get(s));
 //		}
+		
 		CentralityAnalysis centralityAnalysis = new CentralityAnalysis(test.callDAG);
-		centralityAnalysis.getLocationVsAvgCentrality(test.callDAG, "ToyDAG");
+//		centralityAnalysis.getLocationVsAvgCentrality(test.callDAG, "ToyDAG");
+//		centralityAnalysis.getSamplePathStatistics(test.callDAG, "ToyDAG");
+		centralityAnalysis.test(test.callDAG);
+//		centralityAnalysis.getSubtreeSizeCDF(test.callDAG, "ToyDAG");
 		
 //		DegreeAnalysis degreeAnalysis = new DegreeAnalysis();
 //		degreeAnalysis.getInDegreeCCDF(test.callDAG);

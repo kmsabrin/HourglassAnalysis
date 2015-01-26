@@ -1,11 +1,16 @@
 import java.io.File;
 import java.io.PrintWriter;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.apache.commons.math3.stat.StatUtils;
+import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
+import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 import org.apache.commons.math3.stat.descriptive.moment.Kurtosis;
 
 public class CentralityAnalysis {
@@ -13,64 +18,44 @@ public class CentralityAnalysis {
 	int index;
 	double nTotalPath;
 	Map<String, Double> nodeCentrality;
-	double nodePerLocation[];
+	Random random;
 	Set<String> visited;
+	
+	double minRootCentrality;
+	double maxRootCentrality;
 	
 	CentralityAnalysis(CallDAG callDAG) {
 		getCentralityValues(callDAG);
 	}
 	
-	void getCentralityValues(CallDAG callDAG) {
+	private void getCentralityValues(CallDAG callDAG) {
 		nTotalPath = 0;
-		nodePerLocation = new double[100 + 1];
-		for (String s: callDAG.numOfLeafPath.keySet()) {
+		for (String s: callDAG.location.keySet()) {
 			double nPath = callDAG.numOfLeafPath.get(s) * callDAG.numOfRootPath.get(s);
 			if (!callDAG.callFrom.containsKey(s)) { // is a root
 				nTotalPath += nPath;
-				nodePerLocation[(int)(callDAG.location.get(s) * 100)]++;
 			}
 		}
-				
+		
 		nodeCentrality = new TreeMap();
+		TreeSet<Double> sortedRootCentralities = new TreeSet();
 		for (String s: callDAG.location.keySet()) {
-			double loc = callDAG.location.get(s);
 			double nPath = callDAG.numOfLeafPath.get(s) * callDAG.numOfRootPath.get(s);
 			double centrality = nPath / nTotalPath;
 			nodeCentrality.put(s, centrality);
-		}
+			if (!callDAG.callFrom.containsKey(s)) sortedRootCentralities.add(centrality);
+		}		
+
+		minRootCentrality = sortedRootCentralities.first();
+		maxRootCentrality = sortedRootCentralities.last();
 	}
 	
-	void getLocationVsAvgCentrality(CallDAG callDAG, String filePath) throws Exception {		
-		PrintWriter pw = new PrintWriter(new File("Results//loc-vs-avg-centrality-" + filePath + ".txt"));
-		
-		Map<Double, Double> avgLocationCentrality = new TreeMap();
-		for (String s: callDAG.location.keySet()) {
-			double loc = callDAG.location.get(s);
-			double centrality = nodeCentrality.get(s);
-			
-			if (avgLocationCentrality.containsKey(loc)) {
-				double c = (avgLocationCentrality.get(loc) + centrality ) / 2.0;
-				avgLocationCentrality.put(loc, c);
-			}
-			else {
-				avgLocationCentrality.put(loc, centrality);
-			}			
-		}
-		
-		for (double d: avgLocationCentrality.keySet()) {
-			pw.println(d + "\t" + avgLocationCentrality.get(d));
-		}
-		
-		pw.close();
-	}
-	
-	void getLocationCentralityScatter(CallDAG callDAG, String filePath) throws Exception {		
+	// for average and scatter
+	void getLocationVsCentrality(CallDAG callDAG, String filePath) throws Exception {		
 		PrintWriter pw = new PrintWriter(new File("Results//loc-vs-centrality" + filePath + ".txt"));
 		
 		for (String s: nodeCentrality.keySet()) {
-			double loc = callDAG.location.get(s);
-			double centrality = nodeCentrality.get(s);
-			pw.println(loc + "\t" + centrality);
+			pw.println(callDAG.location.get(s) + "\t" + nodeCentrality.get(s));
 		}
 		
 		pw.close();
@@ -79,22 +64,8 @@ public class CentralityAnalysis {
 	void getCentralityCDF(CallDAG callDAG, String filePath) throws Exception {		
 		PrintWriter pw = new PrintWriter(new File("Results//centrality-cdf-" + filePath + ".txt"));
 		
-		Map<Double, Double> centralityFrequency = new TreeMap();
 		for (String s: callDAG.location.keySet()) {
-			double centrality = nodeCentrality.get(s);
-			if (centralityFrequency.containsKey(centrality)) {
-				double v = centralityFrequency.get(centrality);
-				centralityFrequency.put(centrality, v + 1.0);
-			}
-			else {
-				centralityFrequency.put(centrality, 1.0);
-			}
-		}
-		
-		double sum = 0;
-		for (double d: centralityFrequency.keySet()) {
-			sum += centralityFrequency.get(d);
-			pw.println(d + "\t" + (sum / callDAG.location.size()));
+			pw.println(nodeCentrality.get(s));	
 		}
 		
 		pw.close();
@@ -106,80 +77,91 @@ public class CentralityAnalysis {
 			return;
 		}
 		
-		visited.add(node);
-		values[index++] = nodeCentrality.get(node);
+		values[index++] = nodeCentrality.get(node);		
 		
-		boolean flag = false;
-		for (String s: callDAG.callTo.get(node)) {
-			if (visited.contains(s)) continue;
-			traverse(s, callDAG);
-			flag = true;
-			break;
-		}
-		
-		if (!flag) {
-			for (String s: callDAG.callTo.get(node)) {
-				traverse(s, callDAG);
-				break;
-			}
-		}
+		String functions[] = callDAG.callTo.get(node).toArray(new String[callDAG.callTo.get(node).size()]);
+		String s = functions[random.nextInt(functions.length)];
+		traverse(s, callDAG);
 	}
-	
-//	void plotSamplePath(CallDAG) {
-//	}
-	
-	void getSamplePathKurtosis(CallDAG callDAG, String filePath) throws Exception {
-		PrintWriter pw = new PrintWriter(new File("Results//path-kurtosis-cdf-" + filePath + ".txt"));
 		
-		double kSum = 0;
-		double smallPathKnt = 0;
-		visited = new HashSet();
-		double arr[][] = new double[20][20];
-		int idx = 0;
+	void getSamplePathStatistics(CallDAG callDAG, String filePath) throws Exception {
+		PrintWriter pw1 = new PrintWriter(new File("Results//path-hscore-cdf-" + filePath + ".txt"));
+		PrintWriter pw2 = new PrintWriter(new File("Results//path-centrality-range-cdf-" + filePath + ".txt"));
+		PrintWriter pw3 = new PrintWriter(new File("Results//path-kurtosis-cdf-" + filePath + ".txt"));
 		
-		for (String s: callDAG.location.keySet()) {
-			if (callDAG.callFrom.containsKey(s)) continue;
+		random = new Random(System.nanoTime());
+		int samplePathCount = 0;
+		int samplePathSize = 1*1000000;
+		double pathLength[] = new double[samplePathSize];
+		double pathHScore[] = new double[samplePathSize];
+		double pathCentralityRange[] = new double[samplePathSize];
+		double pathMaxCentrality[] = new double[samplePathSize];
+		
+		while (samplePathCount < samplePathSize) {
+			for (String s : callDAG.location.keySet()) {
+				if (callDAG.callFrom.containsKey(s))
+					continue;
+				
+				double rootCentralityScaled = (nodeCentrality.get(s) - minRootCentrality) / (maxRootCentrality - minRootCentrality);
+				if (random.nextDouble() > rootCentralityScaled)
+					continue;
+
+				values = new double[10000]; // max path length
+				index = 0;
+				traverse(s, callDAG);
+
+				if (index < 3)
+					continue; // avoid paths of less than 3 hops
+				double pathValues[] = Arrays.copyOfRange(values, 0, index); 
+				
+				/*****************************************/
+				/*********** get path H-Score ************/
+				/*****************************************/
+				double hScore = getHScore(pathValues);
+				pw1.println(hScore);
 			
-			values = new double[callDAG.location.size()];
-			index = 0;
-			traverse(s, callDAG);
+				/*****************************************/
+				/******* get path Centrality Range *******/
+				/*****************************************/
+				double maxCentrality = StatUtils.max(pathValues);
+				double centralityRange = Math.min(maxCentrality - pathValues[0], maxCentrality- pathValues[pathValues.length - 1]);
+				pw2.println(centralityRange);
 			
-			double weightValues[] = new double[index];
-			double weightFrequencies[] = new double[index];
-			int weightIndex = 0;
-			double minCentrality = StatUtils.min(values, 0, index);
-			double maxTimes = 0;
-			for (int i = 0; i < index; ++i) {
-				double f = values[i] / minCentrality;
-				weightValues[weightIndex] = i + 1;
-				weightFrequencies[weightIndex] = f;
-				++weightIndex;
-			}
-			double k = getKurtosis(weightValues, weightFrequencies);	
-			if (Double.isNaN(k)) continue;
-			if (Double.isInfinite(k)) continue;
-			pw.println(k);
+				/*****************************************/
+				pathLength[samplePathCount] = index;
+				pathHScore[samplePathCount] = hScore;
+				pathCentralityRange[samplePathCount] = centralityRange;
+				pathMaxCentrality[samplePathCount] = maxCentrality;
+				++samplePathCount;
 			
-//			kSum += k;
-			
-//			if (index == 11 && idx < 20) {
+				/*****************************************/
+				/********** get path Kurtosis ************/
+				/*****************************************/
+//				double weightValues[] = new double[index];
+//				double weightFrequencies[] = new double[index];
+//				int weightIndex = 0;
+//				double minCentrality = StatUtils.min(values, 0, index);
 //				for (int i = 0; i < index; ++i) {
-//					arr[idx][i] = values[i];
+//					double f = values[i] / minCentrality;
+//					weightValues[weightIndex] = i + 1;
+//					weightFrequencies[weightIndex] = f;
+//					++weightIndex;
 //				}
-//				idx++;
-//			}
+//				double k = getKurtosis(weightValues, weightFrequencies);
+//				if (!Double.isNaN(k) && !Double.isInfinite(k)) {
+//					pw3.println(k);
+//				}
+			}
 		}
 		
-//		System.out.println(idx);
-//		
-//		for (int j = 0; j < 11; ++j) {
-//			for (int i = 0; i < 20; ++i) {
-//				System.out.print(arr[i][j] + "\t");
-//			}
-//			System.out.println();
-//		}
+		System.out.println(new PearsonsCorrelation().correlation(pathLength, pathHScore));
+		System.out.println(new PearsonsCorrelation().correlation(pathLength, pathCentralityRange));
+		System.out.println(new PearsonsCorrelation().correlation(pathHScore, pathCentralityRange));
+		System.out.println(new PearsonsCorrelation().correlation(pathHScore, pathMaxCentrality));
 		
-//		System.out.println(visited.size() + "\t" + callDAG.location.size() + "\t" + smallPathKnt);
+		pw1.close();
+		pw2.close();
+		pw3.close();
 	}
 	
 	static double getKurtosis(double[] values, double frequencies[]) {
@@ -205,48 +187,6 @@ public class CentralityAnalysis {
 		return kurt2;
 	}
 	
-	void getSamplePathHScore(CallDAG callDAG, String filePath) throws Exception {
-		PrintWriter pw = new PrintWriter(new File("Results//path-hscore-cdf-" + filePath + ".txt"));
-		
-		visited = new HashSet();
-		for (String s: callDAG.location.keySet()) {
-			if (callDAG.callFrom.containsKey(s)) continue;
-			
-			values = new double[callDAG.location.size()];
-			index = 0;
-			traverse(s, callDAG);			
-			if (index < 3) continue; // avoid paths of less than 3 hops
-			
-			double hScore = getHScore(values);
-			if (Double.isInfinite(hScore) || Double.isNaN(hScore)) {
-				for (double d: values) {
-					System.out.println(d + "\t");
-				}
-				System.out.println();
-				continue;
-			}
-			pw.println(hScore);		
-		}
-	}
-	
-	void getSamplePathCentralityRange(CallDAG callDAG, String filePath) throws Exception {
-		PrintWriter pw = new PrintWriter(new File("Results//path-centrality-range-cdf-" + filePath + ".txt"));
-		
-		visited = new HashSet();
-		for (String s: callDAG.location.keySet()) {
-			if (callDAG.callFrom.containsKey(s)) continue;
-			
-			values = new double[callDAG.location.size()];
-			index = 0;
-			traverse(s, callDAG);			
-			if (index < 3) continue; // avoid paths of less than 3 hops
-			
-			double maxCentrality = StatUtils.max(values);
-			double centralityRange = Math.min(maxCentrality - values[0], maxCentrality - values[values.length - 1]);
-			pw.println(centralityRange);		
-		}
-	}
-	
 	static double getHScore(double[] values) {
 		int maxIndex = 0;
 		double maxCentrality = 0;
@@ -262,17 +202,17 @@ public class CentralityAnalysis {
 		double agree = 0, disagree = 0;
 		for (int i = 0; i <= maxIndex; ++i) {
 			for (int j = i + 1; j <= maxIndex; ++j) {
-				if (values[j] < values[i]) ++disagree;
+				if (values[j] < values[i]) {
+					++disagree;
+				}
 				else ++agree;
 			}
 		}
-		
 		double n = maxIndex + 1;
 		double nPairs = (n * (n - 1)) / 2;
-		double increasingScore = (agree - disagree) / nPairs;
-//		System.out.println(increasingScore);
+		double increasingScore = 1;
+		if (n > 1) increasingScore = (agree - disagree) / nPairs;
 
-		
 		// decreasing
 		agree = 0; disagree = 0;
 		for (int i = maxIndex; i < values.length; ++i) {
@@ -281,11 +221,10 @@ public class CentralityAnalysis {
 				else ++agree;
 			}
 		}
-		
 		n = values.length - maxIndex;
 		nPairs = (n * (n - 1)) / 2;
-		double decreasingScore = (agree - disagree) / nPairs;
-//		System.out.println(decreasingScore);
+		double decreasingScore = 1;
+		if (n > 1) decreasingScore = (agree - disagree) / nPairs;
 		
 		return (increasingScore + decreasingScore) / 2.0;
 	}
@@ -300,11 +239,59 @@ public class CentralityAnalysis {
 	}
 	
 	static void testHScore() {
-		double values1[] = {1, 2, 3, 1, 2, 1};
+//		double values1[] = {1, 2, 3, 2, 1};
+		double values1[] = {4.6213516589140647E-10,1.4219654823765308E-10,2.2779034562169096E-8,2.2913256043626685E-5,1.718494204546398E-5,0.06930266591684534};
 		System.out.println(getHScore(values1));
 	}
 	
-//	public static void main(String[] args) {
+	void subtreeSizeTraverse(String node, CallDAG callDAG) {
+		if (visited.contains(node)) return;
+		
+		if (!callDAG.callTo.containsKey(node)) {
+			visited.add(node);
+			index++;
+			return;
+		}
+		
+		visited.add(node);		
+		index++;
+		
+		for (String s: callDAG.callTo.get(node)) {
+			subtreeSizeTraverse(s, callDAG);
+		}		
+	}
+	
+	void getSubtreeSizeCDF(CallDAG callDAG, String filePath) throws Exception {
+		PrintWriter pw = new PrintWriter(new File("Results//subtree-size-cdf-" + filePath + ".txt"));
+		for (String s: callDAG.location.keySet()) {
+			if (callDAG.callFrom.containsKey(s)) continue;
+			index = 0;
+			visited = new HashSet();
+			subtreeSizeTraverse(s, callDAG);
+			pw.println(index);
+		}
+		pw.close();
+	}
+	
+	void test(CallDAG callDAG) {
+		double sum = 0;
+		System.out.println((int)callDAG.nRoots);
+		double values[] = new double[(int)callDAG.nRoots*2];
+		int indx = 0;
+		for (String s: callDAG.location.keySet()) {
+			if (callDAG.callFrom.containsKey(s)) continue;
+			sum += nodeCentrality.get(s);
+			values[indx++] = nodeCentrality.get(s);
+		}
+		System.out.println(indx);
+		System.out.println(StatUtils.min(values));
+		System.out.println(StatUtils.percentile(values, 0.25));
+		System.out.println(StatUtils.percentile(values, 0.55));
+		System.out.println(StatUtils.percentile(values, 0.75));
+		System.out.println(StatUtils.max(values));
+	}
+	
+	public static void main(String[] args) {
 //		CentralityAnalysis.testHScore();
-//	}
+	}
 }
