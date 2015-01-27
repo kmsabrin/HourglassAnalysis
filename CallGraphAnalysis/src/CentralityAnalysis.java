@@ -58,15 +58,20 @@ public class CentralityAnalysis {
 
 		minRootCentrality = sortedRootCentralities.first();
 		maxRootCentrality = sortedRootCentralities.last();
-		System.out.println(nTotalPath + "\t" + (nTotalPath * 0.000005));
+//		System.out.println(nTotalPath + "\t" + (nTotalPath * 0.000005));
 	}
 	
 	// for average and scatter
 	void getLocationVsCentrality(CallDAG callDAG, String filePath) throws Exception {		
-		PrintWriter pw = new PrintWriter(new File("Results//loc-vs-centrality" + filePath + ".txt"));
+		PrintWriter pw = new PrintWriter(new File("Results//loc-vs-centrality-" + filePath + ".txt"));
 		
 		for (String s: nodeCentrality.keySet()) {
-			pw.println(callDAG.location.get(s) + "\t" + nodeCentrality.get(s));
+			if (callDAG.callTo.containsKey(s) && callDAG.callFrom.containsKey(s)) {
+				pw.println(callDAG.location.get(s) + "\t" + nodeCentrality.get(s));
+			}
+			else {
+				pw.println(callDAG.location.get(s) + "\t" + 0.0);
+			}
 		}
 		
 		pw.close();
@@ -76,7 +81,12 @@ public class CentralityAnalysis {
 		PrintWriter pw = new PrintWriter(new File("Results//centrality-cdf-" + filePath + ".txt"));
 		
 		for (String s: callDAG.location.keySet()) {
-			pw.println(nodeCentrality.get(s));	
+			if (callDAG.callTo.containsKey(s) && callDAG.callFrom.containsKey(s)) {
+				pw.println(nodeCentrality.get(s));	
+			}
+			else {
+				pw.println(0.0);
+			}
 		}
 		
 		pw.close();
@@ -119,7 +129,6 @@ public class CentralityAnalysis {
 		random = new Random(System.nanoTime());
 		int samplePathCount = 0;
 		int samplePathSize = 1*1000000;
-//		int samplePathSize = 2*5;
 		double pathLength[] = new double[samplePathSize];
 		double pathHScore[] = new double[samplePathSize];
 		double pathCentralityRange[] = new double[samplePathSize];
@@ -130,6 +139,9 @@ public class CentralityAnalysis {
 				if (callDAG.callFrom.containsKey(s))
 					continue; // start from roots only to trace a path
 				
+				/* remember, the actual centrality values of roots and leaves is ZERO now, although they 
+				 * haven't been changed for use like below
+				 */
 				double rootCentralityScaled = (nodeCentrality.get(s) - minRootCentrality) / (maxRootCentrality - minRootCentrality);
 				if (random.nextDouble() > rootCentralityScaled)
 					continue; // choose root nodes where nodes with large path count has higher probability of getting selected
@@ -159,8 +171,6 @@ public class CentralityAnalysis {
 				/******* get path Centrality Range *******/
 				/*****************************************/
 				double maxCentrality = StatUtils.max(pathValues);
-//				double centralityRange = Math.min(maxCentrality - pathValues[0], maxCentrality- pathValues[pathValues.length - 1]);
-//				pw2.println(centralityRange);
 				pw2.println(maxCentrality);
 				
 				pw4.println(hScore + "\t" + maxCentrality);
@@ -331,11 +341,10 @@ public class CentralityAnalysis {
 		System.out.println(StatUtils.max(values));
 	}
 	
-	public static void main(String[] args) {
+//	public static void main(String[] args) {
 //		CentralityAnalysis.testHScore();
-		
-		int a[] = new int[]{1, 2, 3, 4, 5};
-		int b[] = Arrays.copyOfRange(a, 0, 4);
-		for (int i: b) System.out.println(i);
-	}
+//		int a[] = new int[]{1, 2, 3, 4, 5};
+//		int b[] = Arrays.copyOfRange(a, 0, 4);
+//		for (int i: b) System.out.println(i);
+//	}
 }

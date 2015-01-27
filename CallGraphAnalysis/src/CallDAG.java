@@ -165,12 +165,12 @@ public class CallDAG {
 //				cycle found, recording edge for removal
 				cycleEdges.put(node, s);
 				
-				for (int i = 0; ; ++i) {
-					if (cycleList.get(i).equals(s)) {
+//				for (int i = 0; ; ++i) {
+//					if (cycleList.get(i).equals(s)) {
 //						System.out.println(cycleList.size() - i);
-						break;
-					}
-				}
+//						break;
+//					}
+//				}
 				
 				continue;
 			}

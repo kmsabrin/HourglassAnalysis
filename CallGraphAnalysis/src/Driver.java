@@ -12,7 +12,7 @@ public class Driver {
 //	static int versiontStart = 1;
 //	static int versionEnd = 40;
 	
-	static String version = "31";
+	static String version = "11";
 
 	public static void main(String[] args) throws Exception {		
 /*****************************************************************************/
@@ -101,8 +101,8 @@ public class Driver {
 /*****************************************************************************/
 
 /*****************************************************************************/		
-//		centralityAnalysis.getCentralityCDF(callDAG, versionNum);
-//		centralityAnalysis.getLocationVsCentrality(callDAG, versionNum);
+		centralityAnalysis.getCentralityCDF(callDAG, versionNum);
+		centralityAnalysis.getLocationVsCentrality(callDAG, versionNum);
 //		centralityAnalysis.getSamplePathStatistics(callDAG, versionNum);
 //		centralityAnalysis.getSubtreeSizeCDF(callDAG, versionNum);
 //		centralityAnalysis.test(callDAG);
