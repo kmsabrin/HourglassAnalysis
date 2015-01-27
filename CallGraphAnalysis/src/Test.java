@@ -55,15 +55,17 @@ public class Test {
 		Test test = new Test();
 		test.loadCallGraph();
 		
-//		for (String s: test.callDAG.numOfLeafPath.keySet()) {
-//			System.out.print(s + "\t" + "nLeafPath: " + test.callDAG.numOfLeafPath.get(s));
-//			System.out.println("\t" + "nRootPath: " + test.callDAG.numOfRootPath.get(s));
-//		}
 		
 		CentralityAnalysis centralityAnalysis = new CentralityAnalysis(test.callDAG);
+
+		for (String s: test.callDAG.location.keySet()) {
+			System.out.println(s + "\t" + centralityAnalysis.nodeCentrality.get(s));
+		}
+		System.out.println();
+	
 //		centralityAnalysis.getLocationVsAvgCentrality(test.callDAG, "ToyDAG");
-//		centralityAnalysis.getSamplePathStatistics(test.callDAG, "ToyDAG");
-		centralityAnalysis.test(test.callDAG);
+		centralityAnalysis.getSamplePathStatistics(test.callDAG, "ToyDAG");
+//		centralityAnalysis.test(test.callDAG);
 //		centralityAnalysis.getSubtreeSizeCDF(test.callDAG, "ToyDAG");
 		
 //		DegreeAnalysis degreeAnalysis = new DegreeAnalysis();

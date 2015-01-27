@@ -119,8 +119,8 @@ public class CallDAG {
 			
 					/******************/
 					/******************/
-					if (callT.equals("mcount")) 
-						continue;
+//					if (callT.equals("mcount")) 
+//						continue;
 					
 					if (callF.equals(callT)) // loop
 						continue;

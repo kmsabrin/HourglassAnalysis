@@ -482,7 +482,7 @@ public class AgeAnalysis {
 	void getPercentiles(String id, Object a[], PrintWriter pw) {
 		double b[] = new double[a.length];
 		for (int i = 0; i < a.length; ++i) {
-			b[i] = (int)a[i];
+			b[i] = (Integer)a[i];
 		}
 		double q1 = StatUtils.percentile(b, 25.0);
 		double qm = StatUtils.percentile(b, 50.0);
