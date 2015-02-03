@@ -132,7 +132,7 @@ public class CallDAG {
 			
 					/******************/
 					/******************/
-//					if (callT.equals("mcount")) 
+//					if (callT.equals("mcount"))  // no more location metric!
 //						continue;
 					
 					if (callF.equals(callT)) // loop
@@ -464,7 +464,6 @@ public class CallDAG {
 	}
 	
 	public void loadCentralityMetric() {
-		nTotalPath = 0;
 		for (String s: location.keySet()) {
 			double nPath = 1;
 			

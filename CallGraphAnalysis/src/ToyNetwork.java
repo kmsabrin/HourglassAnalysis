@@ -1,10 +1,10 @@
 import java.util.Arrays;
 import java.util.HashSet;
 
-public class Test {	
+public class ToyNetwork {	
 	CallDAG callDAG;
 	
-	Test() {
+	ToyNetwork() {
 		callDAG = new CallDAG();
 	}
 	
@@ -54,7 +54,7 @@ public class Test {
 	}
 			
 	public static void main(String[] args) throws Exception {
-		Test test = new Test();
+		ToyNetwork test = new ToyNetwork();
 		test.loadCallGraph();
 		
 //		KCoreDecomposition kCoreDecompostion = new KCoreDecomposition();
