@@ -31,7 +31,8 @@ public class Driver {
 		EvolutionAnalysis evolutionaryAnalysis = new EvolutionAnalysis();
 		DiameterAnalysis diameterAnalysis = new DiameterAnalysis();
 		ModularityAnalysis modularityAnalysis  = new ModularityAnalysis();
-		CentralityAnalysis centralityAnalysis = new CentralityAnalysis(callDAG);
+		CentralityAnalysis centralityAnalysis = new CentralityAnalysis();
+		
 //		AgeAnalysis ageAnalysis = new AgeAnalysis();
 //		RandomNetworkGenerator randomNetworkGenerator = new RandomNetworkGenerator(callDAG);
 /*****************************************************************************/
@@ -101,8 +102,9 @@ public class Driver {
 /*****************************************************************************/
 
 /*****************************************************************************/		
-		centralityAnalysis.getCentralityCDF(callDAG, versionNum);
-		centralityAnalysis.getLocationVsCentrality(callDAG, versionNum);
+//		centralityAnalysis.getCentralityCDF(callDAG, versionNum);
+//		centralityAnalysis.getLocationVsCentrality(callDAG, versionNum);
+//		centralityAnalysis.getKernelBoundaryCentralityCDF(callDAG, versionNum);
 //		centralityAnalysis.getSamplePathStatistics(callDAG, versionNum);
 //		centralityAnalysis.getSubtreeSizeCDF(callDAG, versionNum);
 //		centralityAnalysis.test(callDAG);
@@ -149,10 +151,16 @@ public class Driver {
 /*****************************************************************************/		
 //		String randVersionNum = versionNum + "rX";
 //		randomNetworkGenerator.generateRandomNetwork(randVersionNum);
+//		randomNetworkGenerator.randomCallDAG.removeCycles();
 //		randomNetworkGenerator.randomCallDAG.loadDegreeMetric();
 //		randomNetworkGenerator.randomCallDAG.loadLocationMetric(); 
 //		randomNetworkGenerator.randomCallDAG.loadGeneralityMetric(); 
 //		randomNetworkGenerator.randomCallDAG.loadComplexityMetric();
+//		RandomNetworkGenerator.randomCallDAG.loadCentralityMetric();
+		
+//		centralityAnalysis.getCentralityCDF(randomNetworkGenerator.randomCallDAG, randVersionNum);
+//		centralityAnalysis.getLocationVsCentrality(randomNetworkGenerator.randomCallDAG, randVersionNum);
+//		centralityAnalysis.getSamplePathStatistics(randomNetworkGenerator.randomCallDAG, randVersionNum);
 //		locationAnalysis.getLocationHistogram(randomNetworkGenerator.randomCallDAG, randVersionNum);
 //		generalityAnalysis.getGeneralityVSComplexity(randomNetworkGenerator.randomCallDAG, randVersionNum);
 //		generalityAnalysis.getLocationVSAvgComplexity(randomNetworkGenerator.randomCallDAG, randVersionNum);

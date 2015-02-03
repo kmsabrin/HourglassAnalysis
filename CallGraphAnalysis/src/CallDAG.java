@@ -12,6 +12,7 @@ public class CallDAG {
 	int nEdges;
 	double nRoots;
 	double nLeaves;
+	double nTotalPath;
 
 	Set<String> functions;
 	Map<String, Set<String>> callFrom; // who called me i.e reverse adjacency list
@@ -36,6 +37,8 @@ public class CallDAG {
 	 */
 	Map<String, Double> moduleGenerality; 
 	Map<String, Double> moduleComplexity;
+	Map<String, Double> rootsReached; 
+	Map<String, Double> leavesReached;
 	
 	Map<String, Integer> outDegree;
 	Map<String, Integer> inDegree;
@@ -49,6 +52,9 @@ public class CallDAG {
 		
 	Map<String, Integer> functionID;
 	Map<Integer, String> IDFunction;
+	
+	HashMap<String, Double> nodeCentrality;
+	HashMap<String, Double> nodePathThrough;
 	
 	CallDAG() { 
 		functions = new HashSet();
@@ -71,12 +77,17 @@ public class CallDAG {
 		complexity = new HashMap();
 		moduleGenerality = new HashMap();
 		moduleComplexity = new HashMap();
+		rootsReached = new HashMap();
+		leavesReached = new HashMap();
 		
 		outDegree = new HashMap();
 		inDegree = new HashMap();
 		
 		functionID = new HashMap();
 		IDFunction = new HashMap();
+		
+		nodeCentrality = new HashMap();
+		nodePathThrough = new HashMap();
 	}
 	
 	CallDAG(String callGraphFileName) {
@@ -98,6 +109,7 @@ public class CallDAG {
 		loadLocationMetric(); // must load degree metric before
 		loadGeneralityMetric(); 
 		loadComplexityMetric();
+		loadCentralityMetric();
 	}
 
 	public void loadCallGraph(String fileName) {
@@ -113,6 +125,7 @@ public class CallDAG {
 				if (tokens[1].equals("->")) {
 					String callF = tokens[0];
 					String callT = tokens[2].substring(0, tokens[2].length() - 1); // for cobjdump
+//					String callT = tokens[2].substring(0, tokens[2].length()); // for cdepn
 
 //					for running community detection on random DAGs
 //					String callT = tokens[2]; 
@@ -381,6 +394,7 @@ public class CallDAG {
 			g = ((int) (g * 100.0)) / 100.0;
 			generality.put(s, g);
 			
+			rootsReached.put(s, moduleKount);
 			double mG = moduleKount / nRoots;
 			mG = ((int) (mG * 100.0)) / 100.0;
 			moduleGenerality.put(s, mG);
@@ -440,11 +454,40 @@ public class CallDAG {
 			c = ((int) (c * 100.0)) / 100.0;
 			complexity.put(s, c);
 			
+			leavesReached.put(s, moduleKount);
 			double mC = moduleKount / nLeaves;
 			mC = ((int) (mC * 100.0)) / 100.0;
 			moduleComplexity.put(s, mC);
 		}
 		
 		pw.close();
+	}
+	
+	public void loadCentralityMetric() {
+		nTotalPath = 0;
+		for (String s: location.keySet()) {
+			double nPath = 1;
+			
+//			P-Centrality
+//			nPath = callDAG.numOfLeafPath.get(s) * callDAG.numOfRootPath.get(s);
+//			nodePathThrough.put(s, nPath);
+//			if (!callDAG.callFrom.containsKey(s)) { // is a root
+//				nTotalPath += nPath;
+//			}
+			
+//			I-Centrality
+			nPath = rootsReached.get(s) * leavesReached.get(s);
+			nodePathThrough.put(s, nPath);
+			if (!callFrom.containsKey(s)) { // is a root
+				nTotalPath += nPath;
+			}
+		}
+		
+		for (String s: location.keySet()) {
+			double centrality = nodePathThrough.get(s) / nTotalPath;
+			nodeCentrality.put(s, centrality);
+		}		
+		
+//		System.out.println(nTotalPath);
 	}
 }

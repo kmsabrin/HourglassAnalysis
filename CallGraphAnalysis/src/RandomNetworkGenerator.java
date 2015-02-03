@@ -17,7 +17,7 @@ public class RandomNetworkGenerator {
 	Set<String> cycleVisited;
 	boolean hasCycle;
 	String randomVersionNumber;
-	int numOfIteration = 50;
+	int numOfIteration = 1;
 	
 	public RandomNetworkGenerator(CallDAG callDAG) {
 		this.randomCallDAG = callDAG;
@@ -58,6 +58,7 @@ public class RandomNetworkGenerator {
 //			System.out.println("Function: " + f + " Level: " + functionLevel.get(f));
 //		}
 		
+//		compute the median level of all nodes
 		double a[] = new double[functionLevel.values().size()];
 		int j = 0;
 		for (int i : functionLevel.values()) {
@@ -163,6 +164,7 @@ public class RandomNetworkGenerator {
 		PrintWriter pw1 = new PrintWriter(new File("Results//random-level-medians-" + randomVersionNumber + ".txt"));
 		PrintWriter pw2 = new PrintWriter(new File("Results//rewiring-events-" + randomVersionNumber + ".txt"));		
 		
+		System.out.println("Making " + (randomCallDAG.nEdges * numOfIteration) + " swaps");
 		while(kount < randomCallDAG.nEdges * numOfIteration) {
 //			Random random = new Random(System.nanoTime());
 			int rs1, rs2; // random_index_source_1 = rs1, random_index_source_2 = rs2
@@ -204,7 +206,7 @@ public class RandomNetworkGenerator {
 				continue;
 			}
 			
-			++nAttempts; // skipping the already existing edge attempts + leaf as source attempts			
+			++nAttempts; // skipping the already existing edge attempts and leaf chosen as source attempts			
 			
 //			cycle check
 			if (ls1 <= lt2) {
@@ -227,10 +229,11 @@ public class RandomNetworkGenerator {
 //			System.out.println("Swap count: " + kount);
 //			System.out.println("Swapped (" + fs1 + "," + ft1 + ") with (" + fs2 + "," + ft2 + ")");	
 
+//			these are being measured for statistical significance
 			if ((ls1 > lt2) && (ls2 > lt1)) ++nEventA;
 			else ++nEventB;
 			
-//			should the callTo/callFrom be made Set! (done!)
+//			should the callTo/callFrom be made Set! (fixed,done!)
 			randomCallDAG.callTo.get(fs1).remove(ft1);
 			randomCallDAG.callTo.get(fs1).add(ft2);
 			
@@ -264,6 +267,8 @@ public class RandomNetworkGenerator {
 				updateFunctionLevelWithCutOff(Math.min(updatedls2, ls2) + 1);
 			}
 			
+			
+//			level median updates computed
 			if (kount % 5000 == 0) {
 //				print level median
 				double a[] = new double[functionLevel.values().size()];

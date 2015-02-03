@@ -20,7 +20,7 @@ public class Test {
 		callDAG.functions.add("i");
 		callDAG.functions.add("j");
 		callDAG.functions.add("k");
-
+		
 		callDAG.callTo.put("a",  new HashSet<String>(Arrays.asList("b", "c")));
 		callDAG.callTo.put("b", new HashSet<String>(Arrays.asList("d", "f")));
 		callDAG.callTo.put("c", new HashSet<String>(Arrays.asList("d", "g", "e")));
@@ -28,18 +28,19 @@ public class Test {
 		callDAG.callTo.put("e", new HashSet<String>(Arrays.asList("h")));
 		callDAG.callTo.put("f", new HashSet<String>(Arrays.asList("i")));
 		callDAG.callTo.put("j", new HashSet<String>(Arrays.asList("e", "k")));
+		callDAG.callTo.put("k", new HashSet<String>(Arrays.asList("e")));
 
 		callDAG.callFrom.put("b", new HashSet<String>(Arrays.asList("a")));
 		callDAG.callFrom.put("c", new HashSet<String>(Arrays.asList("a")));
 		callDAG.callFrom.put("d", new HashSet<String>(Arrays.asList("b", "c")));
-		callDAG.callFrom.put("e", new HashSet<String>(Arrays.asList("c", "j")));
+		callDAG.callFrom.put("e", new HashSet<String>(Arrays.asList("c", "j", "k")));
 		callDAG.callFrom.put("f", new HashSet<String>(Arrays.asList("b", "d")));
 		callDAG.callFrom.put("g", new HashSet<String>(Arrays.asList("d", "c")));
 		callDAG.callFrom.put("h", new HashSet<String>(Arrays.asList("e")));
 		callDAG.callFrom.put("i", new HashSet<String>(Arrays.asList("f")));
 		callDAG.callFrom.put("k", new HashSet<String>(Arrays.asList("j")));
 
-		callDAG.nEdges = 13;
+		callDAG.nEdges = 14;
 		for (String s: callDAG.functions) {
 			if (!callDAG.callFrom.containsKey(s)) ++callDAG.nRoots;
 			if (!callDAG.callTo.containsKey(s)) ++callDAG.nLeaves;
@@ -49,22 +50,25 @@ public class Test {
 		callDAG.loadLocationMetric(); // must load degree metric before
 		callDAG.loadGeneralityMetric(); // approximated
 		callDAG.loadComplexityMetric();
+		callDAG.loadCentralityMetric();
 	}
 			
 	public static void main(String[] args) throws Exception {
 		Test test = new Test();
 		test.loadCallGraph();
 		
+//		KCoreDecomposition kCoreDecompostion = new KCoreDecomposition();
+//		kCoreDecompostion.getCores(test.callDAG);
 		
-		CentralityAnalysis centralityAnalysis = new CentralityAnalysis(test.callDAG);
-
-		for (String s: test.callDAG.location.keySet()) {
-			System.out.println(s + "\t" + centralityAnalysis.nodeCentrality.get(s));
-		}
-		System.out.println();
+//		CentralityAnalysis centralityAnalysis = new CentralityAnalysis();
+//
+//		for (String s: test.callDAG.location.keySet()) {
+//			System.out.println(s + "\t" + centralityAnalysis.nodeCentrality.get(s));
+//		}
+//		System.out.println();
 	
 //		centralityAnalysis.getLocationVsAvgCentrality(test.callDAG, "ToyDAG");
-		centralityAnalysis.getSamplePathStatistics(test.callDAG, "ToyDAG");
+//		centralityAnalysis.getSamplePathStatistics(test.callDAG, "ToyDAG");
 //		centralityAnalysis.test(test.callDAG);
 //		centralityAnalysis.getSubtreeSizeCDF(test.callDAG, "ToyDAG");
 		
