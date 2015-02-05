@@ -12,7 +12,7 @@ public class Driver {
 //	static int versiontStart = 1;
 //	static int versionEnd = 40;
 	
-	static String version = "11";
+	static String version = "31";
 
 	public static void main(String[] args) throws Exception {		
 /*****************************************************************************/
@@ -32,6 +32,12 @@ public class Driver {
 		DiameterAnalysis diameterAnalysis = new DiameterAnalysis();
 		ModularityAnalysis modularityAnalysis  = new ModularityAnalysis();
 		CentralityAnalysis centralityAnalysis = new CentralityAnalysis();
+		
+//		for (double i = 0.99; i > 0.8; i -= 0.01) {
+//			CoreAnalysis coreAnalysis = new CoreAnalysis(callDAG, i);
+//		}
+		CoreAnalysis coreAnalysis = new CoreAnalysis(callDAG, 0.95);
+		coreAnalysis.getWaistCentralityThreshold(callDAG, versionNum);
 		
 //		AgeAnalysis ageAnalysis = new AgeAnalysis();
 //		RandomNetworkGenerator randomNetworkGenerator = new RandomNetworkGenerator(callDAG);
@@ -169,5 +175,8 @@ public class Driver {
 //		degreeAnalysis.getLocationVSAvgOutDegree(randomNetworkGenerator.randomCallDAG, randVersionNum);
 //		locationAnalysis.getCallViolationMetric(randomNetworkGenerator.randomCallDAG);
 /*****************************************************************************/
+		
+/*****************************************************************************/		
+
 	}
 }

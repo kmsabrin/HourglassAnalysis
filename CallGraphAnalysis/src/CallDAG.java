@@ -53,7 +53,7 @@ public class CallDAG {
 	Map<String, Integer> functionID;
 	Map<Integer, String> IDFunction;
 	
-	HashMap<String, Double> nodeCentrality;
+	HashMap<String, Double> centrality;
 	HashMap<String, Double> nodePathThrough;
 	
 	CallDAG() { 
@@ -86,7 +86,7 @@ public class CallDAG {
 		functionID = new HashMap();
 		IDFunction = new HashMap();
 		
-		nodeCentrality = new HashMap();
+		centrality = new HashMap();
 		nodePathThrough = new HashMap();
 	}
 	
@@ -482,10 +482,17 @@ public class CallDAG {
 			}
 		}
 		
+//		int knt = 0;
 		for (String s: location.keySet()) {
-			double centrality = nodePathThrough.get(s) / nTotalPath;
-			nodeCentrality.put(s, centrality);
+			double cen = nodePathThrough.get(s) / nTotalPath;
+			centrality.put(s, cen);
+//			System.out.println(s + "\t" + cen);
+//			if (cen > 0.01) {
+//				System.out.println(s + "\t" + cen);
+//				++knt;
+//			}
 		}		
+//		System.out.println(knt);
 		
 //		System.out.println(nTotalPath);
 	}

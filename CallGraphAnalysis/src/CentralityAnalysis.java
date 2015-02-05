@@ -17,9 +17,9 @@ public class CentralityAnalysis {
 	void getLocationVsCentrality(CallDAG callDAG, String filePath) throws Exception {		
 		PrintWriter pw = new PrintWriter(new File("Results//loc-vs-centrality-" + filePath + ".txt"));
 		
-		for (String s: callDAG.nodeCentrality.keySet()) {
+		for (String s: callDAG.centrality.keySet()) {
 			if (callDAG.callTo.containsKey(s) && callDAG.callFrom.containsKey(s)) {
-				pw.println(callDAG.location.get(s) + "\t" + callDAG.nodeCentrality.get(s));
+				pw.println(callDAG.location.get(s) + "\t" + callDAG.centrality.get(s));
 			}
 			else {
 				pw.println(callDAG.location.get(s) + "\t" + 0.0);
@@ -34,7 +34,7 @@ public class CentralityAnalysis {
 		
 		for (String s: callDAG.location.keySet()) {
 			if (callDAG.callTo.containsKey(s) && callDAG.callFrom.containsKey(s)) {
-				pw.println(callDAG.nodeCentrality.get(s));	
+				pw.println(callDAG.centrality.get(s));	
 			}
 			else {
 				pw.println(0.0);
@@ -50,10 +50,10 @@ public class CentralityAnalysis {
 				
 		for (String s: callDAG.location.keySet()) {
 			if (!callDAG.callFrom.containsKey(s)) {
-				pw1.println(callDAG.nodeCentrality.get(s));	
+				pw1.println(callDAG.centrality.get(s));	
 			}
 			else if (!callDAG.callTo.containsKey(s)) {
-				pw2.println(callDAG.nodeCentrality.get(s));
+				pw2.println(callDAG.centrality.get(s));
 			}
 		}
 		
@@ -63,13 +63,13 @@ public class CentralityAnalysis {
 	
 	void traverse(String node, CallDAG callDAG) {
 		if (!callDAG.callTo.containsKey(node)) {
-			pathCentralityValues[pathHopCount] = callDAG.nodeCentrality.get(node);
+			pathCentralityValues[pathHopCount] = callDAG.centrality.get(node);
 			pathNodes[pathHopCount] = node;
 			++pathHopCount;
 			return;
 		}
 		
-		pathCentralityValues[pathHopCount] = callDAG.nodeCentrality.get(node);
+		pathCentralityValues[pathHopCount] = callDAG.centrality.get(node);
 		pathNodes[pathHopCount] = node;
 		++pathHopCount;
 		
@@ -264,8 +264,8 @@ public class CentralityAnalysis {
 		int indx = 0;
 		for (String s: callDAG.location.keySet()) {
 			if (callDAG.callFrom.containsKey(s)) continue;
-			sum += callDAG.nodeCentrality.get(s);
-			values[indx++] = callDAG.nodeCentrality.get(s);
+			sum += callDAG.centrality.get(s);
+			values[indx++] = callDAG.centrality.get(s);
 		}
 		System.out.println(indx);
 		System.out.println(StatUtils.min(values));

@@ -21,26 +21,45 @@ public class ToyNetwork {
 		callDAG.functions.add("j");
 		callDAG.functions.add("k");
 		
-		callDAG.callTo.put("a",  new HashSet<String>(Arrays.asList("b", "c")));
-		callDAG.callTo.put("b", new HashSet<String>(Arrays.asList("d", "f")));
-		callDAG.callTo.put("c", new HashSet<String>(Arrays.asList("d", "g", "e")));
-		callDAG.callTo.put("d", new HashSet<String>(Arrays.asList("f", "g")));
-		callDAG.callTo.put("e", new HashSet<String>(Arrays.asList("h")));
-		callDAG.callTo.put("f", new HashSet<String>(Arrays.asList("i")));
-		callDAG.callTo.put("j", new HashSet<String>(Arrays.asList("e", "k")));
-		callDAG.callTo.put("k", new HashSet<String>(Arrays.asList("e")));
+//		callDAG.callTo.put("a",  new HashSet<String>(Arrays.asList("b", "c")));
+//		callDAG.callTo.put("b", new HashSet<String>(Arrays.asList("d", "f")));
+//		callDAG.callTo.put("c", new HashSet<String>(Arrays.asList("d", "g", "e")));
+//		callDAG.callTo.put("d", new HashSet<String>(Arrays.asList("f", "g")));
+//		callDAG.callTo.put("e", new HashSet<String>(Arrays.asList("h")));
+//		callDAG.callTo.put("f", new HashSet<String>(Arrays.asList("i")));
+//		callDAG.callTo.put("j", new HashSet<String>(Arrays.asList("e", "k")));
+//		callDAG.callTo.put("k", new HashSet<String>(Arrays.asList("e")));
+//
+//		callDAG.callFrom.put("b", new HashSet<String>(Arrays.asList("a")));
+//		callDAG.callFrom.put("c", new HashSet<String>(Arrays.asList("a")));
+//		callDAG.callFrom.put("d", new HashSet<String>(Arrays.asList("b", "c")));
+//		callDAG.callFrom.put("e", new HashSet<String>(Arrays.asList("c", "j", "k")));
+//		callDAG.callFrom.put("f", new HashSet<String>(Arrays.asList("b", "d")));
+//		callDAG.callFrom.put("g", new HashSet<String>(Arrays.asList("d", "c")));
+//		callDAG.callFrom.put("h", new HashSet<String>(Arrays.asList("e")));
+//		callDAG.callFrom.put("i", new HashSet<String>(Arrays.asList("f")));
+//		callDAG.callFrom.put("k", new HashSet<String>(Arrays.asList("j")));
 
-		callDAG.callFrom.put("b", new HashSet<String>(Arrays.asList("a")));
-		callDAG.callFrom.put("c", new HashSet<String>(Arrays.asList("a")));
-		callDAG.callFrom.put("d", new HashSet<String>(Arrays.asList("b", "c")));
-		callDAG.callFrom.put("e", new HashSet<String>(Arrays.asList("c", "j", "k")));
-		callDAG.callFrom.put("f", new HashSet<String>(Arrays.asList("b", "d")));
-		callDAG.callFrom.put("g", new HashSet<String>(Arrays.asList("d", "c")));
-		callDAG.callFrom.put("h", new HashSet<String>(Arrays.asList("e")));
-		callDAG.callFrom.put("i", new HashSet<String>(Arrays.asList("f")));
-		callDAG.callFrom.put("k", new HashSet<String>(Arrays.asList("j")));
+		
+		callDAG.callTo.put("a", new HashSet<String>(Arrays.asList("d")));
+		callDAG.callTo.put("b", new HashSet<String>(Arrays.asList("d")));
+		callDAG.callTo.put("c", new HashSet<String>(Arrays.asList("f", "j")));
+		callDAG.callTo.put("d", new HashSet<String>(Arrays.asList("e", "f", "g")));
+		callDAG.callTo.put("e", new HashSet<String>(Arrays.asList("g")));
+		callDAG.callTo.put("f", new HashSet<String>(Arrays.asList("g", "k")));
+		callDAG.callTo.put("g", new HashSet<String>(Arrays.asList("h", "i")));
+		callDAG.callTo.put("j", new HashSet<String>(Arrays.asList("k")));
 
-		callDAG.nEdges = 14;
+		callDAG.callFrom.put("d", new HashSet<String>(Arrays.asList("a", "b")));
+		callDAG.callFrom.put("e", new HashSet<String>(Arrays.asList("d")));
+		callDAG.callFrom.put("f", new HashSet<String>(Arrays.asList("d", "c")));
+		callDAG.callFrom.put("g", new HashSet<String>(Arrays.asList("e", "d", "f")));
+		callDAG.callFrom.put("j", new HashSet<String>(Arrays.asList("c")));
+		callDAG.callFrom.put("k", new HashSet<String>(Arrays.asList("f", "j")));
+		callDAG.callFrom.put("h", new HashSet<String>(Arrays.asList("g")));
+		callDAG.callFrom.put("i", new HashSet<String>(Arrays.asList("g")));
+		
+//		callDAG.nEdges = 14;
 		for (String s: callDAG.functions) {
 			if (!callDAG.callFrom.containsKey(s)) ++callDAG.nRoots;
 			if (!callDAG.callTo.containsKey(s)) ++callDAG.nLeaves;
@@ -57,6 +76,9 @@ public class ToyNetwork {
 		ToyNetwork test = new ToyNetwork();
 		test.loadCallGraph();
 		
+		CoreAnalysis coreAnalysis = new CoreAnalysis(test.callDAG, 0.95);
+		coreAnalysis.getWaistCentralityThreshold(test.callDAG, "toyDAG");
+
 //		KCoreDecomposition kCoreDecompostion = new KCoreDecomposition();
 //		kCoreDecompostion.getCores(test.callDAG);
 		
