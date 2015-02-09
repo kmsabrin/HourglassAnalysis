@@ -37,7 +37,8 @@ public class Driver {
 //			CoreAnalysis coreAnalysis = new CoreAnalysis(callDAG, i);
 //		}
 		CoreAnalysis coreAnalysis = new CoreAnalysis(callDAG, 0.95);
-		coreAnalysis.getWaistCentralityThreshold(callDAG, versionNum);
+		coreAnalysis.getWaistCentralityThreshold_2(callDAG, versionNum);
+//		coreAnalysis.getCentralityVsCutProperty(callDAG, versionNum);
 		
 //		AgeAnalysis ageAnalysis = new AgeAnalysis();
 //		RandomNetworkGenerator randomNetworkGenerator = new RandomNetworkGenerator(callDAG);

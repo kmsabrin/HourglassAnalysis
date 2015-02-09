@@ -77,7 +77,8 @@ public class ToyNetwork {
 		test.loadCallGraph();
 		
 		CoreAnalysis coreAnalysis = new CoreAnalysis(test.callDAG, 0.95);
-		coreAnalysis.getWaistCentralityThreshold(test.callDAG, "toyDAG");
+		coreAnalysis.getWaistCentralityThreshold_2(test.callDAG, "toyDAG");
+//		coreAnalysis.getCentralityVsCutProperty(test.callDAG, "ToyDAG");
 
 //		KCoreDecomposition kCoreDecompostion = new KCoreDecomposition();
 //		kCoreDecompostion.getCores(test.callDAG);

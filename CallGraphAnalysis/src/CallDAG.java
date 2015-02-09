@@ -132,8 +132,8 @@ public class CallDAG {
 			
 					/******************/
 					/******************/
-//					if (callT.equals("mcount"))  // no more location metric!
-//						continue;
+					if (callT.equals("mcount"))  // no more location metric!
+						continue;
 					
 					if (callF.equals(callT)) // loop
 						continue;
@@ -463,6 +463,43 @@ public class CallDAG {
 		pw.close();
 	}
 	
+	public void resetAuxiliary() {
+		nTotalPath = 0;
+		cycleEdges = new HashMap();
+		
+		numOfPath = new HashMap();
+		sumOfPath = new HashMap();
+		avgLeafDepth = new HashMap();
+		avgRootDepth = new HashMap();
+		location = new HashMap();
+		
+		numOfLeafPath = new HashMap();
+		numOfRootPath = new HashMap();
+		
+		numOfReachableNodes = new HashMap();
+		generality = new HashMap();
+		complexity = new HashMap();
+		moduleGenerality = new HashMap();
+		moduleComplexity = new HashMap();
+		rootsReached = new HashMap();
+		leavesReached = new HashMap();
+		
+		outDegree = new HashMap();
+		inDegree = new HashMap();
+		
+		functionID = new HashMap();
+		IDFunction = new HashMap();
+		
+		centrality = new HashMap();
+		nodePathThrough = new HashMap();
+		
+		nRoots = nLeaves = 0;
+		for (String s: functions) {
+			if (!callFrom.containsKey(s)) ++nRoots;
+			if (!callTo.containsKey(s)) ++nLeaves;
+		}
+	}
+	
 	public void loadCentralityMetric() {
 		for (String s: location.keySet()) {
 			double nPath = 1;
@@ -495,5 +532,6 @@ public class CallDAG {
 //		System.out.println(knt);
 		
 //		System.out.println(nTotalPath);
+		
 	}
 }
