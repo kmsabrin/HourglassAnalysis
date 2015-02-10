@@ -18,6 +18,7 @@ public class Driver {
 /*****************************************************************************/
 		String versionNum = networkUsed + "-" + version;
 		CallDAG callDAG = new CallDAG(Driver.networkPath + version);
+		CallDAG takeApartCallDAG = new CallDAG(Driver.networkPath + version);
 //		System.out.println("nFunctions: " + callDAG.functions.size());
 //		System.out.println("nEdges: " + callDAG.nEdges);
 //		System.out.println("Roots: " + callDAG.nRoots + " Leaves: " + callDAG.nLeaves);
@@ -32,16 +33,14 @@ public class Driver {
 		DiameterAnalysis diameterAnalysis = new DiameterAnalysis();
 		ModularityAnalysis modularityAnalysis  = new ModularityAnalysis();
 		CentralityAnalysis centralityAnalysis = new CentralityAnalysis();
+//		AgeAnalysis ageAnalysis = new AgeAnalysis();
+//		RandomNetworkGenerator randomNetworkGenerator = new RandomNetworkGenerator(callDAG);
 		
 //		for (double i = 0.99; i > 0.8; i -= 0.01) {
 //			CoreAnalysis coreAnalysis = new CoreAnalysis(callDAG, i);
 //		}
-		CoreAnalysis coreAnalysis = new CoreAnalysis(callDAG, 0.95);
-		coreAnalysis.getWaistCentralityThreshold_2(callDAG, versionNum);
+		CoreAnalysis coreAnalysis = new CoreAnalysis(callDAG, takeApartCallDAG);
 //		coreAnalysis.getCentralityVsCutProperty(callDAG, versionNum);
-		
-//		AgeAnalysis ageAnalysis = new AgeAnalysis();
-//		RandomNetworkGenerator randomNetworkGenerator = new RandomNetworkGenerator(callDAG);
 /*****************************************************************************/
 		
 /*****************************************************************************/

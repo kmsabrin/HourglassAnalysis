@@ -73,11 +73,13 @@ public class ToyNetwork {
 	}
 			
 	public static void main(String[] args) throws Exception {
-		ToyNetwork test = new ToyNetwork();
-		test.loadCallGraph();
+		ToyNetwork toyNetwork = new ToyNetwork();
+		ToyNetwork dummy = new ToyNetwork();
+		toyNetwork.loadCallGraph();
+		dummy.loadCallGraph();
 		
-		CoreAnalysis coreAnalysis = new CoreAnalysis(test.callDAG, 0.95);
-		coreAnalysis.getWaistCentralityThreshold_2(test.callDAG, "toyDAG");
+		CoreAnalysis coreAnalysis = new CoreAnalysis(toyNetwork.callDAG, dummy.callDAG);
+//		coreAnalysis.getWaistCentralityThreshold_2(test.callDAG, "toyDAG");
 //		coreAnalysis.getCentralityVsCutProperty(test.callDAG, "ToyDAG");
 
 //		KCoreDecomposition kCoreDecompostion = new KCoreDecomposition();
