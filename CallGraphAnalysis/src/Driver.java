@@ -12,16 +12,16 @@ public class Driver {
 //	static int versiontStart = 1;
 //	static int versionEnd = 40;
 	
-	static String version = "31";
+	static String version = "11";
 
 	public static void main(String[] args) throws Exception {		
 /*****************************************************************************/
 		String versionNum = networkUsed + "-" + version;
 		CallDAG callDAG = new CallDAG(Driver.networkPath + version);
 		CallDAG takeApartCallDAG = new CallDAG(Driver.networkPath + version);
-//		System.out.println("nFunctions: " + callDAG.functions.size());
-//		System.out.println("nEdges: " + callDAG.nEdges);
-//		System.out.println("Roots: " + callDAG.nRoots + " Leaves: " + callDAG.nLeaves);
+		System.out.println("nFunctions: " + callDAG.functions.size());
+		System.out.println("nEdges: " + callDAG.nEdges);
+		System.out.println("Roots: " + callDAG.nRoots + " Leaves: " + callDAG.nLeaves);
 /*****************************************************************************/
 
 /*****************************************************************************/
@@ -36,10 +36,7 @@ public class Driver {
 //		AgeAnalysis ageAnalysis = new AgeAnalysis();
 //		RandomNetworkGenerator randomNetworkGenerator = new RandomNetworkGenerator(callDAG);
 		
-//		for (double i = 0.99; i > 0.8; i -= 0.01) {
-//			CoreAnalysis coreAnalysis = new CoreAnalysis(callDAG, i);
-//		}
-		CoreAnalysis coreAnalysis = new CoreAnalysis(callDAG, takeApartCallDAG);
+//		CoreAnalysis coreAnalysis = new CoreAnalysis(callDAG, takeApartCallDAG);
 //		coreAnalysis.getCentralityVsCutProperty(callDAG, versionNum);
 /*****************************************************************************/
 		
@@ -177,6 +174,5 @@ public class Driver {
 /*****************************************************************************/
 		
 /*****************************************************************************/		
-
 	}
 }

@@ -409,7 +409,10 @@ public class CallDAG {
 		visited.add(node);
 		++reachableKount;
 		
-		if (!node.equals(source)) pw.println(functionID.get(source) + " " + functionID.get(node));
+		if (!node.equals(source)) {
+			pw.println(functionID.get(source) + " " + functionID.get(node));
+//			System.out.println("Here");
+		}
 			
 		if (!callTo.containsKey(node)) { // is a leaf
 			++moduleKount;
@@ -499,6 +502,7 @@ public class CallDAG {
 			if (!callTo.containsKey(s)) ++nLeaves;
 		}
 	}
+	
 	
 	public void loadCentralityMetric() {
 		for (String s: location.keySet()) {

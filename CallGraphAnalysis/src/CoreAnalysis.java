@@ -6,12 +6,13 @@ import java.util.HashMap;
 import java.util.HashSet;
 
 import org.apache.commons.math3.stat.StatUtils;
+import org.apache.commons.math3.stat.regression.SimpleRegression;
 
 import com.google.common.collect.Ordering;
 import com.google.common.collect.TreeMultimap;
 
-
 public class CoreAnalysis {
+	int nodeThreshold = 40;
 	
 	HashSet<String> waistNodes; // W
 	HashSet<String> waistDownwardReachableNodes; // L
@@ -27,7 +28,6 @@ public class CoreAnalysis {
 	double averageWaistCentrality;
 	double coverage;
 	double hourGlassTrend;
-	double percentile;
 	
 	double connectedPair;
 	HashSet<String> visited;
@@ -41,14 +41,13 @@ public class CoreAnalysis {
 	double averageUNTCentrality;
 	
 	CoreAnalysis(CallDAG callDAG, CallDAG takeApartCallDAG) throws Exception {
-		this.percentile = percentile;
 		waistNodes = new HashSet();
 		waistDownwardReachableNodes = new HashSet();
 		waistUpwardReachableNodes = new HashSet();
 		waistNotReachableNodes = new HashSet();
 		shortestHopDistance = new HashMap();
 		centralityDistributionByHopDistance = TreeMultimap.create();
-		
+			
 		startingRoots = new HashSet();
 		startingLeaves = new HashSet();
 		for (String s: callDAG.functions) {
@@ -63,10 +62,40 @@ public class CoreAnalysis {
 
 		getNonCoreNodes(callDAG);
 
-		getHScore(callDAG);
+//		getHScore(callDAG);
 //		get5LayerHScore(callDAG);
+//		System.out.println(coverage + "\t" + averageWaistCentrality + "\t" + waistWidth + "\t" + hourGlassTrend);
 		
-		System.out.println(coverage + "\t" + averageWaistCentrality + "\t" + waistWidth + "\t" + hourGlassTrend);
+		getCentralityTrendRegression(callDAG);
+	}
+	
+	private void getCentralityTrendRegression(CallDAG callDAG) {
+		SimpleRegression upTrendRegression = new SimpleRegression();
+		SimpleRegression downTrendRegression = new SimpleRegression();
+		
+		for (String s: waistNodes) {
+			upTrendRegression.addData(0, callDAG.centrality.get(s));
+			downTrendRegression.addData(0, callDAG.centrality.get(s));
+//			System.out.println(s + "\t" + 0 + "\t" + callDAG.centrality.get(s));
+		}
+		
+		for (String s: waistUpwardReachableNodes) {
+			upTrendRegression.addData(shortestHopDistance.get(s) * -1, callDAG.centrality.get(s));
+//			System.out.println(s + "\t" + shortestHopDistance.get(s) * -1 + "\t" + callDAG.centrality.get(s));
+
+		}
+		
+		System.out.println("Upward Slope: " + upTrendRegression.getSlope());
+		System.out.println("Upward Slope Confidence Interval: " + upTrendRegression.getSlopeConfidenceInterval());
+		System.out.println("Upward Pearson's r: " + upTrendRegression.getR());
+		
+		for (String s: waistDownwardReachableNodes) {
+			downTrendRegression.addData(shortestHopDistance.get(s), callDAG.centrality.get(s));
+		}
+		
+		System.out.println("Downward Slope: " + downTrendRegression.getSlope());
+		System.out.println("Downward Slope Confidence Interval: " + downTrendRegression.getSlopeConfidenceInterval());
+		System.out.println("Downward Pearson's r: " + downTrendRegression.getR());
 	}
 	
 	private void get5LayerHScore(CallDAG callDAG) {
@@ -236,23 +265,6 @@ public class CoreAnalysis {
 	}
 	
 	private void getCoreNodes(CallDAG takeApartCallDAG) throws Exception {
-		/*
-		double centralityValues[] = new double[callDAG.functions.size()];
-		int idx = 0;		
-		for(String s: callDAG.functions) {
-			centralityValues[idx++] = callDAG.centrality.get(s);
-		}
-		Arrays.sort(centralityValues);
-		double coreCentralityThreshold = centralityValues[(int)(Math.floor(percentile * centralityValues.length))];
-//		double coreCentralityThreshold = centralityValues[(int)(centralityValues.length - 650)];
-//		System.out.println(coreCentralityThreshold);
-		
-		for(String s: callDAG.functions) {
-			if (callDAG.centrality.get(s) < coreCentralityThreshold) continue;
-			coreNodes.add(s);
-		}
-		*/
-		
 		for(String s: takeApartCallDAG.functions) {
 //			System.out.println(s + "\t" + takeApartCallDAG.centrality.get(s));
 		}
@@ -261,53 +273,7 @@ public class CoreAnalysis {
 		takeApartCallDAG = null;
 	}
 	
-	/*
-	public void getWaistCentralityThreshold(CallDAG callDAG, String filePath) throws Exception {
-		PrintWriter pw = new PrintWriter(new File("Results//centrality-threshold-" + filePath + ".txt"));
-		
-		TreeMultimap<Double, String> centralitySortedNodes = TreeMultimap.create(Ordering.natural().reverse(), Ordering.natural());
-		for (String s: callDAG.functions) {
-			centralitySortedNodes.put(callDAG.centrality.get(s), s);
-		}
-		
-		getConnectedPair(callDAG);
-		double networkConnetedPair = connectedPair;
-		double nodesRemoved = 0;
-		pw.println(nodesRemoved + "\t" + (networkConnetedPair / networkConnetedPair));
-		
-		for (double d: centralitySortedNodes.keySet()) {
-			Collection<String> nodes = centralitySortedNodes.get(d);
-			
-			for (String s: nodes) {
-//				if (callDAG.callTo.containsKey(s)) {// not a leaf 
-//					callDAG.callTo.put(s, new HashSet<String>()); // clear it
-//				}
-				
-				if (callDAG.callTo.containsKey(s)) { 
-					for (String r: callDAG.callTo.get(s)) {
-						callDAG.callFrom.get(r).remove(s);
-					}
-					callDAG.callTo.remove(s);
-				}
-				
-				if (callDAG.callFrom.containsKey(s)) { 
-					for (String r: callDAG.callFrom.get(s)) {
-						callDAG.callTo.get(r).remove(s);
-					}
-					callDAG.callFrom.remove(s);
-				}
-				
-				callDAG.functions.remove(s);
-			}
-			
-			getConnectedPair(callDAG);
-			nodesRemoved += nodes.size();
-			pw.println(nodesRemoved + "\t" + (connectedPair / networkConnetedPair));			
-		}
-		
-		pw.close();
-	}
-	
+	/*	
 	public void getCentralityVsCutProperty(CallDAG callDAG, String filePath) throws Exception {
 		PrintWriter pw = new PrintWriter(new File("Results//centrality-vs-cutproperty-" + filePath + ".txt"));
 		
@@ -483,8 +449,8 @@ public class CoreAnalysis {
 			callDAG.loadComplexityMetric();
 			callDAG.loadCentralityMetric();
 
-			if (nodesRemoved > 40)
-				break;
+//			if (nodesRemoved > nodeThreshold)
+//				break;
 			
 //			if (slope > -1)
 //				break;
