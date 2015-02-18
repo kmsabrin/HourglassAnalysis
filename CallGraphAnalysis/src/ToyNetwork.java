@@ -78,7 +78,7 @@ public class ToyNetwork {
 		toyNetwork.loadCallGraph();
 		dummy.loadCallGraph();
 		
-		CoreAnalysis coreAnalysis = new CoreAnalysis(toyNetwork.callDAG, dummy.callDAG);
+		CoreAnalysis coreAnalysis = new CoreAnalysis(toyNetwork.callDAG, dummy.callDAG, "ToyDAG");
 //		coreAnalysis.getWaistCentralityThreshold_2(test.callDAG, "toyDAG");
 //		coreAnalysis.getCentralityVsCutProperty(test.callDAG, "ToyDAG");
 

@@ -12,7 +12,7 @@ import com.google.common.collect.Ordering;
 import com.google.common.collect.TreeMultimap;
 
 public class CoreAnalysis {
-	int nodeThreshold = 40;
+	int nodeThreshold = 300;
 	
 	HashSet<String> waistNodes; // W
 	HashSet<String> waistDownwardReachableNodes; // L
@@ -40,7 +40,11 @@ public class CoreAnalysis {
 	double averageUTCentrality;
 	double averageUNTCentrality;
 	
-	CoreAnalysis(CallDAG callDAG, CallDAG takeApartCallDAG) throws Exception {
+	String version;
+	
+	CoreAnalysis(CallDAG callDAG, CallDAG takeApartCallDAG, String versionNum) throws Exception {
+		this.version = versionNum;
+		
 		waistNodes = new HashSet();
 		waistDownwardReachableNodes = new HashSet();
 		waistUpwardReachableNodes = new HashSet();
@@ -64,9 +68,8 @@ public class CoreAnalysis {
 
 //		getHScore(callDAG);
 //		get5LayerHScore(callDAG);
+//		getCentralityTrendRegression(callDAG);
 //		System.out.println(coverage + "\t" + averageWaistCentrality + "\t" + waistWidth + "\t" + hourGlassTrend);
-		
-		getCentralityTrendRegression(callDAG);
 	}
 	
 	private void getCentralityTrendRegression(CallDAG callDAG) {
@@ -269,7 +272,8 @@ public class CoreAnalysis {
 //			System.out.println(s + "\t" + takeApartCallDAG.centrality.get(s));
 		}
 		
-		getWaistCentralityThreshold_2(takeApartCallDAG, "x");
+		System.out.println(this.version);
+		getWaistCentralityThreshold_2(takeApartCallDAG, this.version);
 		takeApartCallDAG = null;
 	}
 	
@@ -377,6 +381,80 @@ public class CoreAnalysis {
 		
 		callDAG.functions.removeAll(removable);
 	}
+	
+	public void getWaistCentralityThreshold_1(CallDAG callDAG, String filePath) throws Exception {
+		PrintWriter pw1 = new PrintWriter(new File("Results//centrality-threshold1-" + filePath + ".txt"));
+		PrintWriter pw2 = new PrintWriter(new File("Results//waist-nodes-" + filePath + ".txt"));
+		
+		getConnectedPair(callDAG);
+		double networkConnetedPair = connectedPair;
+		double nodesRemoved = 0;
+		double xNodesRemoved = 0;
+		double xConnectedFraction = 1;
+		pw1.println(xNodesRemoved + "\t" + xConnectedFraction);
+
+		while (callDAG.functions.size() > 0) {
+			TreeMultimap<Double, String> centralitySortedNodes = TreeMultimap.create(Ordering.natural().reverse(), Ordering.natural());
+			for (String s : callDAG.functions) {
+				centralitySortedNodes.put(callDAG.centrality.get(s), s);
+//				System.out.println(s + "\t" + callDAG.nodePathThrough.get(s) + "\t" + callDAG.nTotalPath);
+			}
+//			System.out.println("-----");
+
+			Collection<String> nodes = centralitySortedNodes.get(centralitySortedNodes.asMap().firstKey());
+
+			for (String s : nodes) {
+				if (callDAG.callTo.containsKey(s)) {
+					for (String r : callDAG.callTo.get(s)) {
+						callDAG.callFrom.get(r).remove(s);
+						if (callDAG.callFrom.get(r).size() < 1)
+							callDAG.callFrom.remove(r);
+					}
+					callDAG.callTo.remove(s);
+				}
+
+				if (callDAG.callFrom.containsKey(s)) {
+					for (String r : callDAG.callFrom.get(s)) {
+						callDAG.callTo.get(r).remove(s);
+						if (callDAG.callTo.get(r).size() < 1)
+							callDAG.callTo.remove(r);
+					}
+					callDAG.callFrom.remove(s);
+				}
+
+				callDAG.functions.remove(s);
+
+				waistNodes.add(s);
+				pw2.println(s);
+
+//				System.out.println("removing: " + s);
+			}
+
+			removeIsolatedNodes(callDAG);
+			getConnectedPair(callDAG);
+			nodesRemoved += nodes.size();
+			double connectedFraction = connectedPair / networkConnetedPair;
+			pw1.println(nodesRemoved + "\t" + connectedFraction);
+//			System.out.println(nodesRemoved + "\t" + connectedPair + "\t" + networkConnetedPair);
+
+			double slope = (connectedFraction - xConnectedFraction) / (nodesRemoved - xNodesRemoved);
+//			System.out.println(slope);
+
+			xConnectedFraction = connectedPair / networkConnetedPair;
+			xNodesRemoved = nodesRemoved;
+
+//			if (nodesRemoved > nodeThreshold)
+//				break;
+			
+//			if (slope > -1)
+//				break;
+			
+			if (xConnectedFraction < 0.01) break;
+		}
+		
+		pw1.close();
+		pw2.close();
+	}
 		
 	public void getWaistCentralityThreshold_2(CallDAG callDAG, String filePath) throws Exception {
 		PrintWriter pw1 = new PrintWriter(new File("Results//centrality-threshold2-" + filePath + ".txt"));
@@ -435,8 +513,7 @@ public class CoreAnalysis {
 
 			double slope = (connectedFraction - xConnectedFraction) / (nodesRemoved - xNodesRemoved);
 //			System.out.println(slope);
-//			if (slope < 1)
-//				break;
+
 			xConnectedFraction = connectedPair / networkConnetedPair;
 			xNodesRemoved = nodesRemoved;
 
@@ -454,6 +531,8 @@ public class CoreAnalysis {
 			
 //			if (slope > -1)
 //				break;
+			
+			if (xConnectedFraction < 0.01) break;
 		}
 		
 		pw1.close();

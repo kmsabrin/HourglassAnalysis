@@ -22,9 +22,10 @@ public class ArtificialRandomDAG {
 	int edgeKount;
 
 	public ArtificialRandomDAG() {
-		nLayer = 50;
-		nNode = 1000;
-		nEdge = (int)(nNode * 1);
+		nNode = 4000;
+//		nLayer = nNode / 700;
+		nLayer = 9;
+		nEdge = (int)(nNode * 2.8);
 		nPath = (int)Math.ceil(nEdge / (nLayer - 1));  // (numberOfEdges / (numberOfLayer - 1))
 
 		topLayerNode = new HashSet();
@@ -44,10 +45,11 @@ public class ArtificialRandomDAG {
 	void assignLayer(int nodePerLayerDistribution[]) {
 		int nodeID = 1;
 		for (int i = 1; i <= nLayer; ++i) {
+			System.out.println("Node Count: " + nodePerLayerDistribution[i] + "\t Layer: " + i) ;
 			for (int j = 1; j <= nodePerLayerDistribution[i]; ++j) {
 				nodeLayerMap.put(nodeID, i);
 				nodePerLayer.get(i).add(nodeID);
-				System.out.println("Node: " + nodeID + "\t Layer: " + i) ;
+//				System.out.println("Node: " + nodeID + "\t Layer: " + i) ;
 
 				if (i == 1) {
 					topLayerNode.add(nodeID);
@@ -62,7 +64,7 @@ public class ArtificialRandomDAG {
 		}
 	}
 
-	void assignLayerRandomOne() { // fixed nodes per layer
+	void assignLayerFixedNode() { // fixed nodes per layer
 		int nodePerLayerDistribution[] = new int[nLayer + 1];
 		for (int i = 1; i <= nLayer; ++i) {
 			nodePerLayerDistribution[i] = (int)(Math.ceil(nNode * 1.0 / nLayer)); 
@@ -70,12 +72,12 @@ public class ArtificialRandomDAG {
 		assignLayer(nodePerLayerDistribution);
 	}
 	
-	void assignLayerRandomTwo() { // random node per layer
+	void assignLayerVariableNode() { // random node per layer
 		int nodePerLayerDistribution[] = new int[nLayer + 1];
 		double randomNumberArray[] = new double[nLayer + 1];
 		double sum = 0;
 		for (int i = 1; i <= nLayer; ++i) {
-			randomNumberArray[i] = random.nextDouble();
+			randomNumberArray[i] = random.nextDouble() + 0.5;
 			sum += randomNumberArray[i]; 
 		}
 		for (int i = 1; i <= nLayer; ++i) {
@@ -86,26 +88,19 @@ public class ArtificialRandomDAG {
 	
 	void assignLayerHourglass() {
 		int nodePerLayerDistribution[] = new int[nLayer + 1];
-		double nodePerLayerWeight[] = new double[nLayer + 1];
 	
-		double sum = 1;
-		nodePerLayerWeight[nLayer / 2] = 1;
-		int j = 2;
-		for (int i = nLayer / 2 - 1; i > 0; --i) {
-			nodePerLayerWeight[i] = j;
-			sum += j;
-			++j;
-		}
-		j = 2;
-		for (int i = nLayer / 2 + 1; i <= nLayer; ++i) {
-			nodePerLayerWeight[i] = j;
-			sum += j;
-			++j;
+		double wSize = 20.0;
+		double alpha = 4.24877;
+		nodePerLayerDistribution[(nLayer + 1) / 2] = (int)wSize;
+
+		for (int i = (nLayer + 1) / 2 - 1, p = 1; i > 0; --i, ++p) {
+			nodePerLayerDistribution[i] = (int)(Math.pow(alpha, p) * wSize); 
 		}
 		
-		for (int i = 1; i <= nLayer; ++i) {
-			nodePerLayerDistribution[i] = (int)(Math.ceil(nNode * nodePerLayerWeight[i] / sum));
+		for (int i = (nLayer + 1) / 2 + 1, p = 1; i <= nLayer; ++i, ++p) {
+			nodePerLayerDistribution[i] = (int)(Math.pow(alpha, p) * wSize); 
 		}
+		
 		assignLayer(nodePerLayerDistribution);
 	}
 
@@ -123,17 +118,11 @@ public class ArtificialRandomDAG {
 			return;
 		}
 
-		while (true) {
-			int nextLayer = nodeLayerMap.get(targetNode) + 1;
-			int randomNodeIndex = random.nextInt(nodePerLayer.get(nextLayer).size());
-			Integer[] nodeArray = nodePerLayer.get(nextLayer).toArray(new Integer[0]);
-			int randomNextNode = nodeArray[randomNodeIndex];
-			if (existingEdge.contains(targetNode + "+" + randomNextNode)) {
-//				continue;
-			}
-			traversePath(targetNode, randomNextNode, pw);
-			break;
-		}
+		int nextLayer = nodeLayerMap.get(targetNode) + 1;
+		int randomNodeIndex = random.nextInt(nodePerLayer.get(nextLayer).size());
+		Integer[] nodeArray = nodePerLayer.get(nextLayer).toArray(new Integer[0]);
+		int randomNextNode = nodeArray[randomNodeIndex];
+		traversePath(targetNode, randomNextNode, pw);
 	}
 
 	void generatePath(PrintWriter pw) {
@@ -146,18 +135,18 @@ public class ArtificialRandomDAG {
 		}
 	}
 	
-	public static void main(String[] args) throws Exception {
+	public void generateArtificialRandomDAG() throws Exception {
 		PrintWriter pwRandomOne = new PrintWriter(new File("artificial_random_callgraphs//randomOne.txt"));
 		PrintWriter pwRandomTwo = new PrintWriter(new File("artificial_random_callgraphs//randomTwo.txt"));
 		PrintWriter pwRandomHG = new PrintWriter(new File("artificial_random_callgraphs//randomHG.txt"));
 		
 		ArtificialRandomDAG artificialRandomOneDAG = new ArtificialRandomDAG();
-		artificialRandomOneDAG.assignLayerRandomOne();
+		artificialRandomOneDAG.assignLayerFixedNode();
 		artificialRandomOneDAG.generatePath(pwRandomOne);
 		artificialRandomOneDAG = null;
 
 		ArtificialRandomDAG artificialRandomTwoDAG = new ArtificialRandomDAG();
-		artificialRandomTwoDAG.assignLayerRandomTwo();
+		artificialRandomTwoDAG.assignLayerVariableNode();
 		artificialRandomTwoDAG.generatePath(pwRandomTwo);
 		
 		ArtificialRandomDAG artificialRandomHGDAG = new ArtificialRandomDAG();
@@ -167,12 +156,14 @@ public class ArtificialRandomDAG {
 		pwRandomHG.close();
 		pwRandomTwo.close();
 		pwRandomOne.close();
-		
-		CallDAG callDAG = new CallDAG("artificial_random_callgraphs//randomHG.txt");
-		CallDAG takeApartCallDAG = new CallDAG("artificial_random_callgraphs//randomHG.txt");
+	}
+	
+	public void analyzeArtificialRandomDAG(String version) throws Exception {
+		CallDAG callDAG = new CallDAG("artificial_random_callgraphs//" + version + ".txt");
+		CallDAG takeApartCallDAG = new CallDAG("artificial_random_callgraphs//" + version + ".txt");
 		System.out.println("nFunctions: " + callDAG.functions.size());
 		System.out.println("nEdges: " + callDAG.nEdges);
 		System.out.println("Roots: " + callDAG.nRoots + " Leaves: " + callDAG.nLeaves);
-		CoreAnalysis coreAnalysis = new CoreAnalysis(callDAG, takeApartCallDAG);
+		CoreAnalysis coreAnalysis = new CoreAnalysis(callDAG, takeApartCallDAG, version);
 	}
 }

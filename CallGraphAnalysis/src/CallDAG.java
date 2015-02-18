@@ -519,7 +519,7 @@ public class CallDAG {
 			nPath = rootsReached.get(s) * leavesReached.get(s);
 			nodePathThrough.put(s, nPath);
 			if (!callFrom.containsKey(s)) { // is a root
-				nTotalPath += nPath;
+				nTotalPath += nPath; // nTotalPath = nConnectedTopBottomPair
 			}
 		}
 		
@@ -527,7 +527,9 @@ public class CallDAG {
 		for (String s: location.keySet()) {
 			double cen = nodePathThrough.get(s) / nTotalPath;
 			centrality.put(s, cen);
+//			System.out.println(cen);
 //			System.out.println(s + "\t" + cen);
+			
 //			if (cen > 0.01) {
 //				System.out.println(s + "\t" + cen);
 //				++knt;
