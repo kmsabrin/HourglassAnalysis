@@ -25,7 +25,7 @@ public class ArtificialRandomDAG {
 		nNode = 4000;
 //		nLayer = nNode / 700;
 		nLayer = 9;
-		nEdge = (int)(nNode * 2.8);
+		nEdge = (int)(nNode * 3);
 		nPath = (int)Math.ceil(nEdge / (nLayer - 1));  // (numberOfEdges / (numberOfLayer - 1))
 
 		topLayerNode = new HashSet();
@@ -90,7 +90,7 @@ public class ArtificialRandomDAG {
 		int nodePerLayerDistribution[] = new int[nLayer + 1];
 	
 		double wSize = 20.0;
-		double alpha = 4.24877;
+		double alpha = 2.841;
 		nodePerLayerDistribution[(nLayer + 1) / 2] = (int)wSize;
 
 		for (int i = (nLayer + 1) / 2 - 1, p = 1; i > 0; --i, ++p) {

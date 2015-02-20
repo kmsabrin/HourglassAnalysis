@@ -33,7 +33,7 @@ public class StatMathUtilTest {
 	static public void polynomialSolverTest() {
 		LaguerreSolver laguerreSolver = new LaguerreSolver();
 		 
-		int aSz = 5; // (nLayer + 1) / 2
+		int aSz = 6; // (nLayer + 1) / 2 + 1
 		double coefficients[] = new double[aSz];
 		coefficients[0] = 99; // (N / (2 * W)) - 1
 		coefficients[1] = -100; // (N / (2 * W))

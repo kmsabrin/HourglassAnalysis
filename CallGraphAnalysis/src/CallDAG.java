@@ -44,6 +44,7 @@ public class CallDAG {
 	Map<String, Integer> inDegree;
 
 	Set<String> visited;
+	ArrayList<String> visitedOrdered;
 	Map<String, String> cycleEdges;
 	Set<String> cycleVisited;
 	List<String> cycleList;
@@ -55,6 +56,8 @@ public class CallDAG {
 	
 	HashMap<String, Double> centrality;
 	HashMap<String, Double> nodePathThrough;
+	
+	ArrayList<ArrayList<String>> detectedCycles;
 	
 	CallDAG() { 
 		functions = new HashSet();
@@ -88,6 +91,8 @@ public class CallDAG {
 		
 		centrality = new HashMap();
 		nodePathThrough = new HashMap();
+		
+		detectedCycles = new ArrayList();
 	}
 	
 	CallDAG(String callGraphFileName) {
@@ -106,6 +111,12 @@ public class CallDAG {
 		assignFunctionID();
 		
 		loadDegreeMetric();
+		
+//		System.out.println(callFrom.get("do_lcall"));
+//		System.out.println(callFrom.get("lcall27"));
+//		System.out.println(callTo.get("do_lcall"));
+//		System.out.println(callTo.get("lcall27"));
+		
 		loadLocationMetric(); // must load degree metric before
 		loadGeneralityMetric(); 
 		loadComplexityMetric();
@@ -177,13 +188,13 @@ public class CallDAG {
 			if (cycleVisited.contains(s)) {
 //				cycle found, recording edge for removal
 				cycleEdges.put(node, s);
-				
-//				for (int i = 0; ; ++i) {
-//					if (cycleList.get(i).equals(s)) {
+				for (int i = cycleList.size() - 1; ; --i) {
+					if (cycleList.get(i).equals(s)) {
 //						System.out.println(cycleList.size() - i);
-//						break;
-//					}
-//				}
+						detectedCycles.add(new ArrayList(cycleList.subList(i, cycleList.size())));
+						break;
+					}
+				}
 				
 				continue;
 			}
@@ -203,11 +214,39 @@ public class CallDAG {
 			visited = new HashSet();
 			loop = false;
 			for (String s : functions) {
+//				if (!visited.contains(s)) {
+				if (!callFrom.containsKey(s)) { // start from roots only
+					cycleEdges = new HashMap();
+					cycleVisited = new HashSet();
+					cycleList = new ArrayList();
+					removeCyclesTraverse(s);
+
+					for (String source : cycleEdges.keySet()) {
+						String target = cycleEdges.get(source);
+						callTo.get(source).remove(target);
+						callFrom.get(target).remove(source);
+						if (callTo.get(source).size() < 1) callTo.remove(source);
+						if (callFrom.get(target).size() < 1) callFrom.remove(target);
+						if (!callTo.containsKey(source) && !callFrom.containsKey(source)) functions.remove(source);
+						if (!callTo.containsKey(target) && !callFrom.containsKey(target)) functions.remove(target);
+						--nEdges;
+						++k;
+						loop = true;
+					}
+				}
+			}
+			
+			for (String s : functions) { // cycles involving roots
 				if (!visited.contains(s)) {
 					cycleEdges = new HashMap();
 					cycleVisited = new HashSet();
 					cycleList = new ArrayList();
 					removeCyclesTraverse(s);
+					
+//					if (s.equals("do_lcall")) {
+//						System.out.println("Traversing " + s);
+//						System.out.println(cycleEdges);
+//					}
 					
 					for (String source : cycleEdges.keySet()) {
 						String target = cycleEdges.get(source);
@@ -300,11 +339,25 @@ public class CallDAG {
 			return;
 		}
 				
-		visited.add(node);
+		visitedOrdered.add(node);
 		
 		double nPath = 0;
 		double sPath = 0;
 		for (String s: callFrom.get(node)) {
+			
+				if (visitedOrdered.contains(s)) {
+					System.out.print("cycle found: ");
+					for (int i = visitedOrdered.size() - 1; ; --i) {
+						System.out.print("\t" + visitedOrdered.get(i));
+						if (visitedOrdered.get(i).equals(s)) {
+							break;
+						}
+					}
+					
+					System.out.println();
+//					continue;
+				}
+			
 				rootPath(s);
 				nPath += numOfPath.get(s);
 				sPath += numOfPath.get(s) + sumOfPath.get(s);
@@ -314,7 +367,7 @@ public class CallDAG {
 		sumOfPath.put(node, sPath);
 		avgRootDepth.put(node, sPath / nPath);
 		
-		visited.remove(node);
+		visitedOrdered.remove(node);
 	}
 	
 	public void loadLocationMetric() {
@@ -334,6 +387,7 @@ public class CallDAG {
 		for (String s: functions) {
 			if (!callTo.containsKey(s)) {
 				visited = new HashSet();
+				visitedOrdered = new ArrayList();
 				rootPath(s);
 			}
 		}

@@ -12,12 +12,12 @@ public class Driver {
 //	static int versiontStart = 1;
 //	static int versionEnd = 40;
 	
-	static String version = "31";
+	static String version = "8";
 
 	public static void main(String[] args) throws Exception {		
 /*****************************************************************************/
-//		String versionNum = networkUsed + "-" + version;
-//		CallDAG callDAG = new CallDAG(Driver.networkPath + version);
+		String versionNum = networkUsed + "-" + version;
+		CallDAG callDAG = new CallDAG(Driver.networkPath + version);
 //		CallDAG takeApartCallDAG = new CallDAG(Driver.networkPath + version);
 //		System.out.println("nFunctions: " + callDAG.functions.size());
 //		System.out.println("nEdges: " + callDAG.nEdges);
@@ -35,13 +35,19 @@ public class Driver {
 		CentralityAnalysis centralityAnalysis = new CentralityAnalysis();
 //		AgeAnalysis ageAnalysis = new AgeAnalysis();
 //		RandomNetworkGenerator randomNetworkGenerator = new RandomNetworkGenerator(callDAG);
+
+//		CycleAnalysis cycleAnalysis = new CycleAnalysis();
+//		cycleAnalysis.analyzeCycle(callDAG);
+
+		PatchAnalysis patchAnalysis = new PatchAnalysis();
+		patchAnalysis.getPatchedFunctions("kernel_patches//patch-2.6.9.txt", callDAG.functions);
 		
 //		CoreAnalysis coreAnalysis = new CoreAnalysis(callDAG, takeApartCallDAG, versionNum);
 //		coreAnalysis.getCentralityVsCutProperty(callDAG, versionNum);
 		
-		ArtificialRandomDAG artificialRandomDAG = new ArtificialRandomDAG();
+//		ArtificialRandomDAG artificialRandomDAG = new ArtificialRandomDAG();
 //		artificialRandomDAG.generateArtificialRandomDAG();
-		artificialRandomDAG.analyzeArtificialRandomDAG("randomOne");
+//		artificialRandomDAG.analyzeArtificialRandomDAG("randomOne");
 /*****************************************************************************/
 		
 /*****************************************************************************/
