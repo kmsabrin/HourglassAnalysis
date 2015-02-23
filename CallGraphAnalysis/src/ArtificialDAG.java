@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
 
-public class ArtificialRandomDAG {
+public class ArtificialDAG {
 	int nLayer;
 	int nNode;
 	int nEdge;
@@ -21,8 +21,8 @@ public class ArtificialRandomDAG {
 	HashSet<String> existingEdge;
 	int edgeKount;
 
-	public ArtificialRandomDAG() {
-		nNode = 4000;
+	public ArtificialDAG() {
+		nNode = 2000;
 //		nLayer = nNode / 700;
 		nLayer = 9;
 		nEdge = (int)(nNode * 3);
@@ -42,7 +42,7 @@ public class ArtificialRandomDAG {
 		existingEdge = new HashSet();
 	}
 	
-	void assignLayer(int nodePerLayerDistribution[]) {
+	void assignNodeByLayerWeight(int nodePerLayerDistribution[]) {
 		int nodeID = 1;
 		for (int i = 1; i <= nLayer; ++i) {
 			System.out.println("Node Count: " + nodePerLayerDistribution[i] + "\t Layer: " + i) ;
@@ -64,15 +64,15 @@ public class ArtificialRandomDAG {
 		}
 	}
 
-	void assignLayerFixedNode() { // fixed nodes per layer
+	void assignLayerWeightFixedNodePerLayerDAG() { // fixed nodes per layer
 		int nodePerLayerDistribution[] = new int[nLayer + 1];
 		for (int i = 1; i <= nLayer; ++i) {
 			nodePerLayerDistribution[i] = (int)(Math.ceil(nNode * 1.0 / nLayer)); 
 		}
-		assignLayer(nodePerLayerDistribution);
+		assignNodeByLayerWeight(nodePerLayerDistribution);
 	}
 	
-	void assignLayerVariableNode() { // random node per layer
+	void assignLayerWeightVariableNodePerLayerDAG() { // random node per layer
 		int nodePerLayerDistribution[] = new int[nLayer + 1];
 		double randomNumberArray[] = new double[nLayer + 1];
 		double sum = 0;
@@ -83,14 +83,14 @@ public class ArtificialRandomDAG {
 		for (int i = 1; i <= nLayer; ++i) {
 			nodePerLayerDistribution[i] = (int)(Math.ceil(nNode * randomNumberArray[i] / sum)); 
 		}
-		assignLayer(nodePerLayerDistribution);
+		assignNodeByLayerWeight(nodePerLayerDistribution);
 	}
 	
-	void assignLayerHourglass() {
+	void assignLayerWeightHourglassDAG() {
 		int nodePerLayerDistribution[] = new int[nLayer + 1];
 	
 		double wSize = 20.0;
-		double alpha = 2.841;
+		double alpha = 2.6;
 		nodePerLayerDistribution[(nLayer + 1) / 2] = (int)wSize;
 
 		for (int i = (nLayer + 1) / 2 - 1, p = 1; i > 0; --i, ++p) {
@@ -101,10 +101,10 @@ public class ArtificialRandomDAG {
 			nodePerLayerDistribution[i] = (int)(Math.pow(alpha, p) * wSize); 
 		}
 		
-		assignLayer(nodePerLayerDistribution);
+		assignNodeByLayerWeight(nodePerLayerDistribution);
 	}
 
-	void traversePath(int sourceNode, int targetNode, PrintWriter pw) {
+	void traversePathRecurse(int sourceNode, int targetNode, PrintWriter pw) {
 		if (sourceNode > 0) {
 			if (!existingEdge.contains(sourceNode + "+" + targetNode)) {
 				pw.println(sourceNode + " -> " + targetNode + ";");
@@ -122,45 +122,53 @@ public class ArtificialRandomDAG {
 		int randomNodeIndex = random.nextInt(nodePerLayer.get(nextLayer).size());
 		Integer[] nodeArray = nodePerLayer.get(nextLayer).toArray(new Integer[0]);
 		int randomNextNode = nodeArray[randomNodeIndex];
-		traversePath(targetNode, randomNextNode, pw);
+		traversePathRecurse(targetNode, randomNextNode, pw);
 	}
 
-	void generatePath(PrintWriter pw) {
+	void traversePath(PrintWriter pw) {
 		edgeKount = 0;
 		while(edgeKount < nEdge) {
 			int randomNodeIndex = random.nextInt(topLayerNode.size());
 			Integer[] nodeArray = topLayerNode.toArray(new Integer[0]);
 			int randomNode = nodeArray[randomNodeIndex];
-			traversePath(-1, randomNode, pw);
+			traversePathRecurse(-1, randomNode, pw);
 		}
 	}
 	
-	public void generateArtificialRandomDAG() throws Exception {
-		PrintWriter pwRandomOne = new PrintWriter(new File("artificial_random_callgraphs//randomOne.txt"));
-		PrintWriter pwRandomTwo = new PrintWriter(new File("artificial_random_callgraphs//randomTwo.txt"));
-		PrintWriter pwRandomHG = new PrintWriter(new File("artificial_random_callgraphs//randomHG.txt"));
+	public void generateArtificialFixedNodePerLayerDAG() throws Exception {
+		PrintWriter pwArtificialFixedNodePerLayer = new PrintWriter(new File("artificial_callgraphs//artificialFixedNodePerLayerDAG.txt"));
 		
-		ArtificialRandomDAG artificialRandomOneDAG = new ArtificialRandomDAG();
-		artificialRandomOneDAG.assignLayerFixedNode();
-		artificialRandomOneDAG.generatePath(pwRandomOne);
-		artificialRandomOneDAG = null;
+		ArtificialDAG artificialFixedNodePerLayerDAG = new ArtificialDAG();
+		artificialFixedNodePerLayerDAG.assignLayerWeightFixedNodePerLayerDAG();
+		artificialFixedNodePerLayerDAG.traversePath(pwArtificialFixedNodePerLayer);
+		artificialFixedNodePerLayerDAG = null;
 
-		ArtificialRandomDAG artificialRandomTwoDAG = new ArtificialRandomDAG();
-		artificialRandomTwoDAG.assignLayerVariableNode();
-		artificialRandomTwoDAG.generatePath(pwRandomTwo);
-		
-		ArtificialRandomDAG artificialRandomHGDAG = new ArtificialRandomDAG();
-		artificialRandomHGDAG.assignLayerHourglass();
-		artificialRandomHGDAG.generatePath(pwRandomHG);
-		
-		pwRandomHG.close();
-		pwRandomTwo.close();
-		pwRandomOne.close();
+		pwArtificialFixedNodePerLayer.close();
 	}
 	
-	public void analyzeArtificialRandomDAG(String version) throws Exception {
-		CallDAG callDAG = new CallDAG("artificial_random_callgraphs//" + version + ".txt");
-		CallDAG takeApartCallDAG = new CallDAG("artificial_random_callgraphs//" + version + ".txt");
+	public void generateArtificialVariableNodePerLayerDAG() throws Exception {
+		PrintWriter pwArtificialVariableNodePerLayer = new PrintWriter(new File("artificial_callgraphs//artificialVariableNodePerLayerDAG.txt"));
+		
+		ArtificialDAG artificialVariableNodePerLayerDAG = new ArtificialDAG();
+		artificialVariableNodePerLayerDAG.assignLayerWeightVariableNodePerLayerDAG();
+		artificialVariableNodePerLayerDAG.traversePath(pwArtificialVariableNodePerLayer);
+		
+		pwArtificialVariableNodePerLayer.close();
+	}
+	
+	public void generateArtificialHourglassDAG() throws Exception {
+		PrintWriter pwartificialHourglass = new PrintWriter(new File("artificial_callgraphs//artificialHourglassDAG.txt"));
+
+		ArtificialDAG artificialHourglassDAG = new ArtificialDAG();
+		artificialHourglassDAG.assignLayerWeightHourglassDAG();
+		artificialHourglassDAG.traversePath(pwartificialHourglass);
+		
+		pwartificialHourglass.close();
+	}
+	
+	public void analyzeArtificialDAG(String version) throws Exception {
+		CallDAG callDAG = new CallDAG("artificial_callgraphs//" + version + ".txt");
+		CallDAG takeApartCallDAG = new CallDAG("artificial_callgraphs//" + version + ".txt");
 		System.out.println("nFunctions: " + callDAG.functions.size());
 		System.out.println("nEdges: " + callDAG.nEdges);
 		System.out.println("Roots: " + callDAG.nRoots + " Leaves: " + callDAG.nLeaves);
