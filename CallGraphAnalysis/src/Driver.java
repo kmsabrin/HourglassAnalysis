@@ -51,7 +51,7 @@ public class Driver {
 		artificialDAG.generateArtificialHourglassDAG();
 //		artificialDAG.analyzeArtificialDAG("artificialFixedNodePerLayerDAG");
 //		artificialDAG.analyzeArtificialDAG("artificialVariableNodePerLayerDAG");
-		artificialDAG.analyzeArtificialDAG("artificialHourglassDAG");
+//		artificialDAG.analyzeArtificialDAG("artificialHourglassDAG");
 /*****************************************************************************/
 		
 /*****************************************************************************/
