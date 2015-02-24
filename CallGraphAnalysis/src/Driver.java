@@ -45,13 +45,14 @@ public class Driver {
 //		CoreAnalysis coreAnalysis = new CoreAnalysis(callDAG, takeApartCallDAG, versionNum);
 //		coreAnalysis.getCentralityVsCutProperty(callDAG, versionNum);
 		
-		ArtificialDAG artificialDAG = new ArtificialDAG();
-		artificialDAG.generateArtificialFixedNodePerLayerDAG();
-		artificialDAG.generateArtificialVariableNodePerLayerDAG();
-		artificialDAG.generateArtificialHourglassDAG();
-//		artificialDAG.analyzeArtificialDAG("artificialFixedNodePerLayerDAG");
-//		artificialDAG.analyzeArtificialDAG("artificialVariableNodePerLayerDAG");
-//		artificialDAG.analyzeArtificialDAG("artificialHourglassDAG");
+		new ArtificialDAG().generateArtificialFixedNodePerLayerDAG();
+		new ArtificialDAG().generateArtificialHourglassDAG();
+		ArtificialDAG.analyzeArtificialDAG("artificialFixedNodePerLayerDAG");
+		ArtificialDAG.analyzeArtificialDAG("randomShuffleArtificialFixedNodePerLayerDAG");
+		ArtificialDAG.analyzeArtificialDAG("artificialHourglassDAG");
+		ArtificialDAG.analyzeArtificialDAG("randomShuffleArtificialHourglassDAG");
+//		new ArtificialDAG().generateArtificialVariableNodePerLayerDAG();
+//		ArtificialDAG.analyzeArtificialDAG("artificialVariableNodePerLayerDAG");
 /*****************************************************************************/
 		
 /*****************************************************************************/
