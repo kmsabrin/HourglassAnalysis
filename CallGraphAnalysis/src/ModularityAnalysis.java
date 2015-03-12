@@ -91,7 +91,7 @@ public class ModularityAnalysis {
 		PrintWriter pw = new PrintWriter(new File("Results//module-core-percentage.txt"));
 
 		for (int i = Driver.versiontStart; i < Driver.versionEnd; ++i) {
-			String versionNum = Driver.networkUsed + i;
+			String versionNum = Driver.networkType + i;
 			CallDAG callDAG = new CallDAG(Driver.networkPath + i);
 			
 			double a[] = new double[callDAG.moduleGenerality.size()];

@@ -11,11 +11,13 @@ public class ArtificialDAG {
 	int nEdge;
 	int nPath;
 
+	double rewirePrb = 0.2;
+	
 	HashSet<Integer> topLayerNode;
 	HashSet<Integer> bottomLayerNode;
 
 	HashMap<Integer, Integer> nodeLayerMap;
-	HashMap<Integer, HashSet<Integer>> nodePerLayer;
+	HashMap<Integer, HashSet<Integer>> nodeIDsPerLayer; 
 
 	HashMap<Integer, Integer> edges;
 	
@@ -25,13 +27,14 @@ public class ArtificialDAG {
 	int edgeKount;
 
 	public ArtificialDAG() {
-		// dummy
+//		dummy
 //		nNode = 12;
-//		nLayer = 4;
-//		nEdge = (int)(nNode * 1.5);
+//		nLayer = 5;
+//		nEdge = (int)(nNode * 2);
 		
-		nNode = 2000;
-		nLayer = 9;
+		nNode = 10000;
+//		nNode = 1000;
+		nLayer = 19;
 		nEdge = (int)(nNode * 3);
 
 //		nPath = (int)Math.ceil(nEdge / (nLayer - 1));  // (numberOfEdges / (numberOfLayer - 1))
@@ -40,9 +43,9 @@ public class ArtificialDAG {
 		bottomLayerNode = new HashSet();
 
 		nodeLayerMap = new HashMap();
-		nodePerLayer = new HashMap();
+		nodeIDsPerLayer = new HashMap();
 		for (int i = 1; i <= nLayer; ++i) {
-			nodePerLayer.put(i, new HashSet());
+			nodeIDsPerLayer.put(i, new HashSet());
 		}
 
 		edges = new HashMap();
@@ -58,7 +61,7 @@ public class ArtificialDAG {
 			System.out.println("Node Count: " + nodePerLayerDistribution[i] + "\t Layer: " + i) ;
 			for (int j = 1; j <= nodePerLayerDistribution[i]; ++j) {
 				nodeLayerMap.put(nodeID, i);
-				nodePerLayer.get(i).add(nodeID);
+				nodeIDsPerLayer.get(i).add(nodeID);
 //				System.out.println("Node: " + nodeID + "\t Layer: " + i) ;
 
 				if (i == 1) {
@@ -72,9 +75,11 @@ public class ArtificialDAG {
 				++nodeID;
 			}
 		}
+		nNode = nodeID - 1;
+		System.out.println("Total Nodes used: " + nNode);
 	}
 
-	void assignLayerWeightFixedNodePerLayerDAG() { // fixed nodes per layer
+	void assignLayerWeightRectangleDAG() { // fixed nodes per layer
 		int nodePerLayerDistribution[] = new int[nLayer + 1];
 		for (int i = 1; i <= nLayer; ++i) {
 			nodePerLayerDistribution[i] = (int)(Math.ceil(nNode * 1.0 / nLayer)); 
@@ -82,7 +87,7 @@ public class ArtificialDAG {
 		assignNodeByLayerWeight(nodePerLayerDistribution);
 	}
 	
-	void assignLayerWeightVariableNodePerLayerDAG() { // random node per layer
+	void assignLayerWeightNoisyRectangleDAG() { // random node per layer
 		int nodePerLayerDistribution[] = new int[nLayer + 1];
 		double randomNumberArray[] = new double[nLayer + 1];
 		double sum = 0;
@@ -99,8 +104,8 @@ public class ArtificialDAG {
 	void assignLayerWeightHourglassDAG() {
 		int nodePerLayerDistribution[] = new int[nLayer + 1];
 	
-		double wSize = 10.0;
-		double alpha = 2.85;
+		double wSize = 10;
+		double alpha = 1.81; // 10,1.81,narrow // 100,1.35,fat // for 10K,19L,3Ne
 		
 		nodePerLayerDistribution[(nLayer + 1) / 2] = (int)wSize;
 
@@ -111,6 +116,48 @@ public class ArtificialDAG {
 		for (int i = (nLayer + 1) / 2 + 1, p = 1; i <= nLayer; ++i, ++p) {
 			nodePerLayerDistribution[i] = (int)(Math.pow(alpha, p) * wSize); 
 		}
+		
+		assignNodeByLayerWeight(nodePerLayerDistribution);
+	}
+	
+	void assignLayerWeightDiamondDAG() {
+		int nodePerLayerDistribution[] = new int[nLayer + 1];
+	
+		double wSize = 10;
+		double alpha = 1.9; // 10,1.9 //
+		
+//		narrow top trapezoid
+		nodePerLayerDistribution[nLayer] = (int)wSize;
+		for (int i = nLayer - 1, p = 1; i > nLayer / 2; --i, ++p) {
+			nodePerLayerDistribution[i] = (int)(Math.pow(alpha, p) * wSize); 
+		}
+		
+//		fat top trapezoid
+		nodePerLayerDistribution[1] = (int)wSize;
+		for (int i = 2, p = 1; i <= nLayer / 2; ++i, ++p) {
+			nodePerLayerDistribution[i] = (int)(Math.pow(alpha, p) * wSize); 
+		}
+		
+		assignNodeByLayerWeight(nodePerLayerDistribution);
+	}
+	
+	void assignLayerWeightTrapezoidDAG() {
+		int nodePerLayerDistribution[] = new int[nLayer + 1];
+	
+		double wSize = 10;
+		double alpha = 1.37; // 10, 1.37 //
+		
+//		narrow top trapezoid
+		nodePerLayerDistribution[nLayer] = (int)wSize;
+		for (int i = nLayer - 1, p = 1; i > 0; --i, ++p) {
+			nodePerLayerDistribution[i] = (int)(Math.pow(alpha, p) * wSize); 
+		}
+		
+//		fat top trapezoid
+//		nodePerLayerDistribution[1] = (int)wSize;
+//		for (int i = 2, p = 1; i <= nLayer; ++i, ++p) {
+//			nodePerLayerDistribution[i] = (int)(Math.pow(alpha, p) * wSize); 
+//		}
 		
 		assignNodeByLayerWeight(nodePerLayerDistribution);
 	}
@@ -131,8 +178,8 @@ public class ArtificialDAG {
 		}
 
 		int nextLayer = nodeLayerMap.get(targetNode) + 1;
-		int randomNodeIndex = random.nextInt(nodePerLayer.get(nextLayer).size());
-		Integer[] nodeArray = nodePerLayer.get(nextLayer).toArray(new Integer[0]);
+		int randomNodeIndex = random.nextInt(nodeIDsPerLayer.get(nextLayer).size());
+		Integer[] nodeArray = nodeIDsPerLayer.get(nextLayer).toArray(new Integer[0]);
 		int randomNextNode = nodeArray[randomNodeIndex];
 		traversePathRecurse(targetNode, randomNextNode, pw);
 	}
@@ -147,8 +194,87 @@ public class ArtificialDAG {
 		}
 	}
 	
-	public void getRandomShuffleArtificialDAG(String type) throws Exception {
-		PrintWriter pwRandomShuffleArtificialDAG = new PrintWriter(new File("artificial_callgraphs//randomShuffle" + type + ".txt"));
+	public int centralityWeightedSelection(int rangeStart, int rangeEnd, CallDAG callDAG) {
+		double centralitySum = 0;
+		for (int i = rangeStart; i <= rangeEnd; ++i) {
+			if (!callDAG.functions.contains(String.valueOf(i))) continue;
+			centralitySum += callDAG.centrality.get(String.valueOf(i));
+		}
+
+		double rn = random.nextDouble();
+		double weightedCumulativeSum = 0;
+		for (int i = rangeStart; i <= rangeEnd; ++i) {
+			if (!callDAG.functions.contains(String.valueOf(i))) continue;
+			weightedCumulativeSum += callDAG.centrality.get(String.valueOf(i)) / centralitySum;
+			if (rn < weightedCumulativeSum) {
+				return i;
+			}
+		}
+		
+		return -1;
+	}
+
+	public void getCentralityShuffleArtificialDAG(String type, Double rewiringProbablity) throws Exception {
+		PrintWriter pwCentralityShuffleArtificialDAG = 
+				new PrintWriter(new File("artificial_callgraphs//centralityShuffle-" + type + "-" + rewiringProbablity + ".txt"));
+
+		HashSet<String> duplicateCheck = new HashSet();
+		
+		CallDAG callDAG = new CallDAG("artificial_callgraphs//" + type + ".txt");
+//		callDAG.printCallDAG();
+
+		for (String s: existingEdge) {
+			String nodePair[] = s.split("#");
+			int src = Integer.parseInt(nodePair[0]);
+			int dst = Integer.parseInt(nodePair[1]);
+			if (random.nextDouble() < rewiringProbablity) {
+				int srcLayer = nodeLayerMap.get(src);
+				int dstLayer = nodeLayerMap.get(dst);
+
+				int srcMax = Collections.max(nodeIDsPerLayer.get(srcLayer));
+				int dstMin = Collections.min(nodeIDsPerLayer.get(dstLayer));
+
+				while (true) {
+					int newSrc = centralityWeightedSelection(1, srcMax, callDAG);
+					int newDst = centralityWeightedSelection(dstMin, nNode, callDAG);
+					String r = newSrc + "+" + newDst;
+					if (duplicateCheck.contains(r)) {
+						continue;
+					} else {
+						duplicateCheck.add(r);
+						pwCentralityShuffleArtificialDAG.println(newSrc + " -> "+ newDst + ";");
+						
+						callDAG.callTo.get(String.valueOf(src)).remove(String.valueOf(dst));
+						callDAG.callFrom.get(String.valueOf(dst)).remove(String.valueOf(src));
+						
+						if (callDAG.callTo.get(String.valueOf(src)).size() < 1) callDAG.callTo.remove(String.valueOf(src));
+						if (callDAG.callFrom.get(String.valueOf(dst)).size() < 1) callDAG.callFrom.remove(String.valueOf(dst));
+						
+						callDAG.callTo.get(String.valueOf(newSrc)).add(String.valueOf(newDst));
+						callDAG.callFrom.get(String.valueOf(newDst)).add(String.valueOf(newSrc));
+						
+						callDAG.resetAuxiliary();
+						callDAG.removeIsolatedNodes();
+						callDAG.loadDegreeMetric();
+						callDAG.loadLocationMetric(); // must load degree metric before
+						callDAG.loadCentralityMetric();
+						break;
+					}
+				}
+			}
+			else {
+				String r = src + "+" + dst;
+				duplicateCheck.add(r);
+				pwCentralityShuffleArtificialDAG.println(src + " -> " + dst + ";");
+			}
+		}
+		
+		pwCentralityShuffleArtificialDAG.close();
+	}
+	
+	public void getRandomShuffleArtificialDAG(String type, Double rewiringProbablity) throws Exception {
+		PrintWriter pwRandomShuffleArtificialDAG = 
+				new PrintWriter(new File("artificial_callgraphs//randomShuffle-" + type + "-" + rewiringProbablity + ".txt"));
 
 		HashSet<String> duplicateCheck = new HashSet();
 		
@@ -156,70 +282,94 @@ public class ArtificialDAG {
 			String nodePair[] = s.split("#");
 			int src = Integer.parseInt(nodePair[0]);
 			int dst = Integer.parseInt(nodePair[1]);
-			
-			int srcLayer = nodeLayerMap.get(src);
-			int dstLayer = nodeLayerMap.get(dst);
-			
-			int srcMax = Collections.max(nodePerLayer.get(srcLayer));
-			int dstMin = Collections.min(nodePerLayer.get(dstLayer));
-			
-			while (true) {
-				int newSrc = random.nextInt(srcMax) + 1;
-				int newDst = random.nextInt(nNode - dstMin + 1) + dstMin;
-				String r = newSrc + "+" + newDst;
-				if (duplicateCheck.contains(r)) {
-					continue;
+			if (random.nextDouble() < rewiringProbablity) {
+				int srcLayer = nodeLayerMap.get(src);
+				int dstLayer = nodeLayerMap.get(dst);
+
+				int srcMax = Collections.max(nodeIDsPerLayer.get(srcLayer));
+				int dstMin = Collections.min(nodeIDsPerLayer.get(dstLayer));
+
+				while (true) {
+					int newSrc = random.nextInt(srcMax) + 1;
+					int newDst = random.nextInt(nNode - dstMin + 1) + dstMin;
+					String r = newSrc + "+" + newDst;
+					if (duplicateCheck.contains(r)) {
+						continue;
+					} else {
+						duplicateCheck.add(r);
+						pwRandomShuffleArtificialDAG.println(newSrc + " -> "+ newDst + ";");
+						break;
+					}
 				}
-				else {
-					duplicateCheck.add(r);
-					pwRandomShuffleArtificialDAG.println(newSrc + " -> " + newDst + ";");
-					break;
-				}
+			}
+			else {
+				String r = src + "+" + dst;
+				duplicateCheck.add(r);
+				pwRandomShuffleArtificialDAG.println(src + " -> " + dst + ";");
 			}
 		}
 		
 		pwRandomShuffleArtificialDAG.close();
 	}
 	
-	public void generateArtificialFixedNodePerLayerDAG() throws Exception {
-		PrintWriter pwArtificialFixedNodePerLayer = new PrintWriter(new File("artificial_callgraphs//artificialFixedNodePerLayerDAG.txt"));
+	public void generateRectangleDAG() throws Exception {
+		PrintWriter pw = new PrintWriter(new File("artificial_callgraphs//rectangleDAG.txt"));
 		
-		assignLayerWeightFixedNodePerLayerDAG();
-		traversePath(pwArtificialFixedNodePerLayer);
+		assignLayerWeightRectangleDAG();
+		traversePath(pw);
 
-		pwArtificialFixedNodePerLayer.close();
+		pw.close();
 		
-		getRandomShuffleArtificialDAG("ArtificialFixedNodePerLayerDAG");
+		getCentralityShuffleArtificialDAG("rectangleDAG", rewirePrb);
 	}
 	
-	public void generateArtificialVariableNodePerLayerDAG() throws Exception {
-		PrintWriter pwArtificialVariableNodePerLayer = new PrintWriter(new File("artificial_callgraphs//artificialVariableNodePerLayerDAG.txt"));
+	public void generateNoisyRectangleDAG() throws Exception {
+		PrintWriter pw = new PrintWriter(new File("artificial_callgraphs//noisyRectangleDAG.txt"));
 		
-		assignLayerWeightVariableNodePerLayerDAG();
-		traversePath(pwArtificialVariableNodePerLayer);
+		assignLayerWeightNoisyRectangleDAG();
+		traversePath(pw);
 		
-		pwArtificialVariableNodePerLayer.close();
+		pw.close();
 		
-		getRandomShuffleArtificialDAG("ArtificialVariableNodePerLayerDAG");
+		getCentralityShuffleArtificialDAG("noisyRectangleDAG", rewirePrb);
 	}
 	
-	public void generateArtificialHourglassDAG() throws Exception {
-		PrintWriter pwartificialHourglass = new PrintWriter(new File("artificial_callgraphs//artificialHourglassDAG.txt"));
+	public void generateHourglassDAG() throws Exception {
+		PrintWriter pw = new PrintWriter(new File("artificial_callgraphs//hourglassDAG.txt"));
 
 		assignLayerWeightHourglassDAG();
-		traversePath(pwartificialHourglass);
+		traversePath(pw);
 		
-		pwartificialHourglass.close();
+		pw.close();
 		
-		getRandomShuffleArtificialDAG("ArtificialHourglassDAG");
+		getRandomShuffleArtificialDAG("hourglassDAG", rewirePrb);
+		getCentralityShuffleArtificialDAG("hourglassDAG", rewirePrb);
 	}
 	
-	public static void analyzeArtificialDAG(String version) throws Exception {
-		CallDAG callDAG = new CallDAG("artificial_callgraphs//" + version + ".txt");
-		CallDAG takeApartCallDAG = new CallDAG("artificial_callgraphs//" + version + ".txt");
-		System.out.println("nFunctions: " + callDAG.functions.size());
-		System.out.println("nEdges: " + callDAG.nEdges);
-		System.out.println("Roots: " + callDAG.nRoots + " Leaves: " + callDAG.nLeaves);
-		CoreAnalysis coreAnalysis = new CoreAnalysis(callDAG, takeApartCallDAG, version);
+	public void generateTrapezoidsDAG() throws Exception {
+		PrintWriter pw = new PrintWriter(new File("artificial_callgraphs//trapezoidDAG.txt"));
+
+		assignLayerWeightTrapezoidDAG();
+		traversePath(pw);
+
+		pw.close();
 	}
+	
+	public void generateDiamondDAG() throws Exception {
+		PrintWriter pw = new PrintWriter(new File("artificial_callgraphs//diamondDAG.txt"));
+
+		assignLayerWeightDiamondDAG();
+		traversePath(pw);
+
+		pw.close();
+	}
+	
+//	public static void getMaxCentralityDecompositionCurve(String version) throws Exception {
+//		CallDAG callDAG = new CallDAG("artificial_callgraphs//" + version + ".txt");
+//		CallDAG takeApartCallDAG = new CallDAG("artificial_callgraphs//" + version + ".txt");
+//		System.out.println("nFunctions: " + callDAG.functions.size());
+//		System.out.println("nEdges: " + callDAG.nEdges);
+//		System.out.println("Roots: " + callDAG.nRoots + " Leaves: " + callDAG.nLeaves);
+//		CoreAnalysis coreAnalysis = new CoreAnalysis(callDAG, takeApartCallDAG, version);
+//	}
 }

@@ -1,5 +1,6 @@
 import java.io.File;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
@@ -12,7 +13,7 @@ import com.google.common.collect.Ordering;
 import com.google.common.collect.TreeMultimap;
 
 public class CoreAnalysis {
-	int nodeThreshold = 300;
+	int nodeThreshold;
 	
 	HashSet<String> waistNodes; // W
 	HashSet<String> waistDownwardReachableNodes; // L
@@ -43,6 +44,9 @@ public class CoreAnalysis {
 	String version;
 	
 	CoreAnalysis(CallDAG callDAG, CallDAG takeApartCallDAG, String versionNum) throws Exception {
+		nodeThreshold = (int)(callDAG.functions.size() * 0.02);
+//		nodeThreshold = 100;
+		
 		this.version = versionNum;
 		
 		waistNodes = new HashSet();
@@ -69,7 +73,7 @@ public class CoreAnalysis {
 //		getHScore(callDAG);
 //		get5LayerHScore(callDAG);
 //		getCentralityTrendRegression(callDAG);
-//		System.out.println(coverage + "\t" + averageWaistCentrality + "\t" + waistWidth + "\t" + hourGlassTrend);
+		System.out.println(coverage + "\t" + averageWaistCentrality + "\t" + waistWidth + "\t" + hourGlassTrend);
 	}
 	
 	private void getCentralityTrendRegression(CallDAG callDAG) {
@@ -243,7 +247,25 @@ public class CoreAnalysis {
 		}
 	}
 	
-	private void getNonCoreNodes(CallDAG callDAG) {
+	private void traverse(CallDAG callDAG, String node, HashSet<String> stringSet) {
+		if (stringSet.contains(node)) return;
+		
+		stringSet.add(node);
+		
+		if (callDAG.callFrom.containsKey(node)) {
+			for (String s : callDAG.callFrom.get(node)) {
+				traverse(callDAG, s, stringSet);
+			}
+		}
+
+		if (callDAG.callTo.containsKey(node)) {
+			for (String s : callDAG.callTo.get(node)) {
+				traverse(callDAG, s, stringSet);
+			}
+		}
+	}
+	
+	private void getNonCoreNodes(CallDAG callDAG) throws Exception {
 		for (String s: waistNodes) {
 			if (callDAG.callTo.containsKey(s)) {
 				for (String r: callDAG.callTo.get(s)) {
@@ -264,15 +286,39 @@ public class CoreAnalysis {
 			waistNotReachableNodes.add(s);
 		}
 		
+		/** turn off later **/
+//		printONodesCallGraph(waistNotReachableNodes, callDAG);
+		
 		coverage = 1.0 - (waistNotReachableNodes.size() * 1.0 / callDAG.functions.size());
 	}
 	
-	private void getCoreNodes(CallDAG takeApartCallDAG) throws Exception {
-		for(String s: takeApartCallDAG.functions) {
-//			System.out.println(s + "\t" + takeApartCallDAG.centrality.get(s));
+	private void printONodesCallGraph(HashSet<String> ONodes, CallDAG callDAG) throws Exception {
+		PrintWriter pw = new PrintWriter(new File("Results//" + version + "-O-Graph.txt"));
+		
+		HashSet<String> OReachableNodes = new HashSet();
+		
+		for (String s: ONodes) {
+			if (OReachableNodes.contains(s)) continue;
+			traverse(callDAG, s, OReachableNodes);
 		}
 		
-		System.out.println(this.version);
+		for (String s: callDAG.callTo.keySet()) {
+			for (String r: callDAG.callTo.get(s)) {
+				if (OReachableNodes.contains(s) && OReachableNodes.contains(r)) {
+					pw.println(s + " -> " + r + ";");
+				}
+			}
+		}
+		
+		pw.close();
+	}
+	
+	private void getCoreNodes(CallDAG takeApartCallDAG) throws Exception {
+//		for(String s: takeApartCallDAG.functions) {
+//			System.out.println(s + "\t" + takeApartCallDAG.centrality.get(s));
+//		}
+		
+//		System.out.println(this.version);
 		getWaistCentralityThreshold_2(takeApartCallDAG, this.version);
 		takeApartCallDAG = null;
 	}
@@ -355,106 +401,81 @@ public class CoreAnalysis {
 		}
 	}
 	
-	private void printCallDAG(CallDAG callDAG) {
-		for (String s: callDAG.functions) {
-			if (callDAG.callTo.containsKey(s)) {
-				for (String r : callDAG.callTo.get(s)) {
-					System.out.println("(" + s + " calling " + r + ")");
-				}
-			}
-			
-			if (callDAG.callFrom.containsKey(s)) {
-				for (String r : callDAG.callFrom.get(s)) {
-					System.out.println("(" + s + " called by " + r + ")");
-				}
-			}
-		}
-	}
 	
-	private void removeIsolatedNodes(CallDAG callDAG) {
-		HashSet<String> removable = new HashSet();
-		for (String s : callDAG.functions) {
-			if (!callDAG.callTo.containsKey(s) && !callDAG.callFrom.containsKey(s)) {
-				removable.add(s);
-			}
-		}
-		
-		callDAG.functions.removeAll(removable);
-	}
 	
-	public void getWaistCentralityThreshold_1(CallDAG callDAG, String filePath) throws Exception {
-		PrintWriter pw1 = new PrintWriter(new File("Results//centrality-threshold1-" + filePath + ".txt"));
-		PrintWriter pw2 = new PrintWriter(new File("Results//waist-nodes-" + filePath + ".txt"));
-		
-		getConnectedPair(callDAG);
-		double networkConnetedPair = connectedPair;
-		double nodesRemoved = 0;
-		double xNodesRemoved = 0;
-		double xConnectedFraction = 1;
-		pw1.println(xNodesRemoved + "\t" + xConnectedFraction);
-
-		while (callDAG.functions.size() > 0) {
-			TreeMultimap<Double, String> centralitySortedNodes = TreeMultimap.create(Ordering.natural().reverse(), Ordering.natural());
-			for (String s : callDAG.functions) {
-				centralitySortedNodes.put(callDAG.centrality.get(s), s);
-//				System.out.println(s + "\t" + callDAG.nodePathThrough.get(s) + "\t" + callDAG.nTotalPath);
-			}
-//			System.out.println("-----");
-
-			Collection<String> nodes = centralitySortedNodes.get(centralitySortedNodes.asMap().firstKey());
-
-			for (String s : nodes) {
-				if (callDAG.callTo.containsKey(s)) {
-					for (String r : callDAG.callTo.get(s)) {
-						callDAG.callFrom.get(r).remove(s);
-						if (callDAG.callFrom.get(r).size() < 1)
-							callDAG.callFrom.remove(r);
-					}
-					callDAG.callTo.remove(s);
-				}
-
-				if (callDAG.callFrom.containsKey(s)) {
-					for (String r : callDAG.callFrom.get(s)) {
-						callDAG.callTo.get(r).remove(s);
-						if (callDAG.callTo.get(r).size() < 1)
-							callDAG.callTo.remove(r);
-					}
-					callDAG.callFrom.remove(s);
-				}
-
-				callDAG.functions.remove(s);
-
-				waistNodes.add(s);
-				pw2.println(s);
-
-//				System.out.println("removing: " + s);
-			}
-
-			removeIsolatedNodes(callDAG);
-			getConnectedPair(callDAG);
-			nodesRemoved += nodes.size();
-			double connectedFraction = connectedPair / networkConnetedPair;
-			pw1.println(nodesRemoved + "\t" + connectedFraction);
-//			System.out.println(nodesRemoved + "\t" + connectedPair + "\t" + networkConnetedPair);
-
-			double slope = (connectedFraction - xConnectedFraction) / (nodesRemoved - xNodesRemoved);
-//			System.out.println(slope);
-
-			xConnectedFraction = connectedPair / networkConnetedPair;
-			xNodesRemoved = nodesRemoved;
-
-//			if (nodesRemoved > nodeThreshold)
-//				break;
-			
-//			if (slope > -1)
-//				break;
-			
-			if (xConnectedFraction < 0.01) break;
-		}
-		
-		pw1.close();
-		pw2.close();
-	}
+//	public void getWaistCentralityThreshold_1(CallDAG callDAG, String filePath) throws Exception {
+//		PrintWriter pw1 = new PrintWriter(new File("Results//centrality-threshold1-" + filePath + ".txt"));
+//		PrintWriter pw2 = new PrintWriter(new File("Results//waist-nodes-" + filePath + ".txt"));
+//		
+//		getConnectedPair(callDAG);
+//		double networkConnetedPair = connectedPair;
+//		double nodesRemoved = 0;
+//		double xNodesRemoved = 0;
+//		double xConnectedFraction = 1;
+//		pw1.println(xNodesRemoved + "\t" + xConnectedFraction);
+//
+//		while (callDAG.functions.size() > 0) {
+//			TreeMultimap<Double, String> centralitySortedNodes = TreeMultimap.create(Ordering.natural().reverse(), Ordering.natural());
+//			for (String s : callDAG.functions) {
+//				centralitySortedNodes.put(callDAG.centrality.get(s), s);
+////				System.out.println(s + "\t" + callDAG.nodePathThrough.get(s) + "\t" + callDAG.nTotalPath);
+//			}
+////			System.out.println("-----");
+//
+//			Collection<String> nodes = centralitySortedNodes.get(centralitySortedNodes.asMap().firstKey());
+//
+//			for (String s : nodes) {
+//				if (callDAG.callTo.containsKey(s)) {
+//					for (String r : callDAG.callTo.get(s)) {
+//						callDAG.callFrom.get(r).remove(s);
+//						if (callDAG.callFrom.get(r).size() < 1)
+//							callDAG.callFrom.remove(r);
+//					}
+//					callDAG.callTo.remove(s);
+//				}
+//
+//				if (callDAG.callFrom.containsKey(s)) {
+//					for (String r : callDAG.callFrom.get(s)) {
+//						callDAG.callTo.get(r).remove(s);
+//						if (callDAG.callTo.get(r).size() < 1)
+//							callDAG.callTo.remove(r);
+//					}
+//					callDAG.callFrom.remove(s);
+//				}
+//
+//				callDAG.functions.remove(s);
+//
+//				waistNodes.add(s);
+//				pw2.println(s);
+//
+////				System.out.println("removing: " + s);
+//			}
+//
+//			removeIsolatedNodes(callDAG);
+//			getConnectedPair(callDAG);
+//			nodesRemoved += nodes.size();
+//			double connectedFraction = connectedPair / networkConnetedPair;
+//			pw1.println(nodesRemoved + "\t" + connectedFraction);
+////			System.out.println(nodesRemoved + "\t" + connectedPair + "\t" + networkConnetedPair);
+//
+////			double slope = (connectedFraction - xConnectedFraction) / (nodesRemoved - xNodesRemoved);
+////			System.out.println(slope);
+//
+//			xConnectedFraction = connectedPair / networkConnetedPair;
+//			xNodesRemoved = nodesRemoved;
+//
+////			if (nodesRemoved > nodeThreshold)
+////				break;
+//			
+////			if (slope > -1)
+////				break;
+//			
+//			if (xConnectedFraction < 0.05) break;
+//		}
+//		
+//		pw1.close();
+//		pw2.close();
+//	}
 		
 	public void getWaistCentralityThreshold_2(CallDAG callDAG, String filePath) throws Exception {
 		PrintWriter pw1 = new PrintWriter(new File("Results//centrality-threshold2-" + filePath + ".txt"));
@@ -466,6 +487,10 @@ public class CoreAnalysis {
 		double xNodesRemoved = 0;
 		double xConnectedFraction = 1;
 		pw1.println(xNodesRemoved + "\t" + xConnectedFraction);
+		System.out.println(xNodesRemoved + "\t" + xConnectedFraction);
+		
+		ArrayList<Double> xValues = new ArrayList();
+		ArrayList<Double> yValues = new ArrayList();
 
 		while (callDAG.functions.size() > 0) {
 			TreeMultimap<Double, String> centralitySortedNodes = TreeMultimap.create(Ordering.natural().reverse(), Ordering.natural());
@@ -504,12 +529,14 @@ public class CoreAnalysis {
 //				System.out.println("removing: " + s);
 			}
 
-			removeIsolatedNodes(callDAG);
+			callDAG.removeIsolatedNodes();
 			getConnectedPair(callDAG);
 			nodesRemoved += nodes.size();
 			double connectedFraction = connectedPair / networkConnetedPair;
 			pw1.println(nodesRemoved + "\t" + connectedFraction);
-//			System.out.println(nodesRemoved + "\t" + connectedPair + "\t" + networkConnetedPair);
+			xValues.add(nodesRemoved);
+			yValues.add(connectedFraction);
+			System.out.println(nodesRemoved + "\t" + connectedFraction);
 
 			double slope = (connectedFraction - xConnectedFraction) / (nodesRemoved - xNodesRemoved);
 //			System.out.println(slope);
@@ -517,23 +544,41 @@ public class CoreAnalysis {
 			xConnectedFraction = connectedPair / networkConnetedPair;
 			xNodesRemoved = nodesRemoved;
 
+//			callDAG.printCallDAG();
 			callDAG.resetAuxiliary();
-//			printCallDAG(callDAG);
-
 			callDAG.loadDegreeMetric();
 			callDAG.loadLocationMetric(); // must load degree metric before
-			callDAG.loadGeneralityMetric();
-			callDAG.loadComplexityMetric();
 			callDAG.loadCentralityMetric();
 
-//			if (nodesRemoved > nodeThreshold)
-//				break;
+			if (nodesRemoved > nodeThreshold)
+				break;
+			
+			if (xConnectedFraction < 0.15) 
+				break;
 			
 //			if (slope > -1)
 //				break;
 			
-			if (xConnectedFraction < 0.01) break;
 		}
+		
+//		System.out.println("+++++++++++++++++++++++++");
+//		
+//		for (int i = xValues.size() - 3; i >= 0; --i) {
+//			double x1 = xValues.get(i);
+//			double y1 = yValues.get(i);
+//			double x2 = xValues.get(i + 1);
+//			double y2 = yValues.get(i + 1);
+//			double x3 = xValues.get(i + 2);
+//			double y3 = yValues.get(i + 2);
+//			
+//			double d1 = Math.abs((y2 - y1) / (x2 - x1));
+//			double d2 = Math.abs((y3 - y2) / (x3 - x2));
+//			double d = (d1 + d2) * 0.5;
+//			double dd = Math.abs((d2 - d1) / ((x3 - x1) * .05)); 
+//			double R = Math.pow((1 + (d * d)) / dd, 1.5);
+//			
+//			System.out.println(x2 + "\tD2: " + dd + "\tR: " + R);
+//		}
 		
 		pw1.close();
 		pw2.close();

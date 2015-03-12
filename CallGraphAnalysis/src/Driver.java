@@ -3,59 +3,134 @@ import java.io.PrintWriter;
 
 public class Driver {	
 	static String networkPath = "kernel_callgraphs//full.graph-2.6.";
-	static String networkUsed = "kernel";
+	static String networkType = "kernel";
 	static int versiontStart = 0;
 	static int versionEnd = 40; // last + 1
 	
 //	static String networkPath = "openssh_callgraphs//full.graph-openssh-";
-//	static String networkUsed = "ssh";
+//	static String networkType = "ssh";
 //	static int versiontStart = 1;
 //	static int versionEnd = 40;
 	
-	static String version = "11";
+	static String currentVersion = "39";
+	
+	public static void doCoreAnalysis(CallDAG callDAG, CallDAG takeApartCallDAG, String v) throws Exception {
+//		CentralityAnalysis centralityAnalysis = new CentralityAnalysis();		
+//		centralityAnalysis.getCentralityCDF(callDAG, v);
+//		centralityAnalysis.getCentralityCCDF(callDAG, v);
+//		System.out.println("Centrality CDF/CCDF Done.");
+		
+//		centralityAnalysis.doUniformPathSampling = false;
+//		centralityAnalysis.getSampledPathStatistics(callDAG, v);
+//		System.out.println("Sampled Path HScore Distribution Done.");
+		
+		CoreAnalysis coreAnalysis = new CoreAnalysis(callDAG, takeApartCallDAG, v);
+		System.out.println("Max Centrality Decomposition Curve Done.");	
+	}
+	
+	public static void doKernelAnalysis() throws Exception {
+		String versions[] = {"1", "11", "21", "31"};
+		for (int i = 0; i < versions.length; ++i) {
+			String v = networkType + "-" + versions[i];	
+			CallDAG callDAG = new CallDAG(networkPath + versions[i]);
+			CallDAG takeApartCallDAG = new CallDAG(networkPath + versions[i]);
+			System.out.println("Loading " + v + " Done.");
+	
+			doCoreAnalysis(callDAG, takeApartCallDAG, v);
+		}	
+	}
+	
+	public static void doBioNetAnalysis() throws Exception {
+		String versions[] = {"rat"};
+		for (int i = 0; i < versions.length; ++i) {
+			String v = versions[i];	
+			CallDAG callDAG = new CallDAG("biological_networks//" + v + ".txt");
+			System.out.println("nFunctions: " + callDAG.functions.size());
+			System.out.println("nEdges: " + callDAG.nEdges);
+			System.out.println("Roots: " + callDAG.nRoots + " Leaves: " + callDAG.nLeaves);
+			CallDAG takeApartCallDAG = new CallDAG("biological_networks//" + v + ".txt");
+			System.out.println("Loading " + v + " Done.");
+			doCoreAnalysis(callDAG, takeApartCallDAG, v);
+		}	
+	}
+	
+	public static void doONodeAnalysis() throws Exception {
+		String versions[] = {"kernel-11-O-Graph", "kernel-21-O-Graph", "kernel-31-O-Graph"};
+		for (int i = 0; i < versions.length; ++i) {
+			String v = versions[i];	
+			CallDAG callDAG = new CallDAG("Results//" + v + ".txt");
+			CallDAG takeApartCallDAG = new CallDAG("Results//" + v + ".txt");
+			System.out.println("Loading " + v + " Done.");
+			doCoreAnalysis(callDAG, takeApartCallDAG, v);
+		}	
+	}
+	
+	public static void doArtificialNetworkAnalysis() throws Exception {
+//		new ArtificialDAG().generateRectangleDAG();
+//		new ArtificialDAG().generateHourglassDAG();
+//		new ArtificialDAG().generateTrapezoidsDAG();
+//		new ArtificialDAG().generateNoisyRectangleDAG();
+//		new ArtificialDAG().generateDiamondDAG();
+
+
+		String versions[] = {"rectangleDAG", 
+							 "noisyRectangleDAG",
+							 "hourglassDAG", 
+							 "trapezoidDAG",
+							 "diamondDAG",
+							 "randomShuffle-hourglassDAG-0.2",
+							 "centralityShuffle-rectangleDAG-0.2",
+							 "centralityShuffle-hourglassDAG-0.2",
+							 "centralityShuffle-noisyRectangleDAG-0.2"};
+		
+		
+		for (int i = 0; i < versions.length; ++i) {
+//			if (i!=5) continue;
+			String v = versions[i];	
+			CallDAG callDAG = new CallDAG("artificial_callgraphs//" + v + ".txt");
+//			CallDAG takeApartCallDAG = null;
+			CallDAG takeApartCallDAG = new CallDAG("artificial_callgraphs//" + v + ".txt");
+			System.out.println("Loading " + v + " Done.");
+	
+			doCoreAnalysis(callDAG, takeApartCallDAG, v); 
+		}
+	}
 
 	public static void main(String[] args) throws Exception {		
 /*****************************************************************************/
-//		String versionNum = networkUsed + "-" + version;
-//		CallDAG callDAG = new CallDAG(Driver.networkPath + version);
-//		CallDAG takeApartCallDAG = new CallDAG(Driver.networkPath + version);
+//		String versionNum = networkType + "-" + currentVersion;
+//		CallDAG callDAG = new CallDAG(Driver.networkPath + currentVersion);
+//		CallDAG takeApartCallDAG = new CallDAG(Driver.networkPath + currentVersion);
 //		System.out.println("nFunctions: " + callDAG.functions.size());
 //		System.out.println("nEdges: " + callDAG.nEdges);
 //		System.out.println("Roots: " + callDAG.nRoots + " Leaves: " + callDAG.nLeaves);
 /*****************************************************************************/
 
 /*****************************************************************************/
-		DegreeAnalysis degreeAnalysis = new DegreeAnalysis();		
-		LocationAnalysis locationAnalysis = new LocationAnalysis();
-		PersistenceAnalysis persistenceAnalysis = new PersistenceAnalysis();
-		GeneralityAnalysis generalityAnalysis = new GeneralityAnalysis();
-		EvolutionAnalysis evolutionaryAnalysis = new EvolutionAnalysis();
-		DiameterAnalysis diameterAnalysis = new DiameterAnalysis();
-		ModularityAnalysis modularityAnalysis  = new ModularityAnalysis();
-		CentralityAnalysis centralityAnalysis = new CentralityAnalysis();
-//		AgeAnalysis ageAnalysis = new AgeAnalysis();
-//		RandomNetworkGenerator randomNetworkGenerator = new RandomNetworkGenerator(callDAG);
+		Driver.doArtificialNetworkAnalysis();
+//		Driver.doKernelAnalysis();
+//		Driver.doBioNetAnalysis();
+//		Driver.doONodeAnalysis();
+//		StatMathUtilTest.getToyGraph();
+/*****************************************************************************/
 
+/*****************************************************************************/
 //		CycleAnalysis cycleAnalysis = new CycleAnalysis();
 //		cycleAnalysis.analyzeCycle(callDAG);
-
+/*****************************************************************************/
+		
+/*****************************************************************************/
 //		PatchAnalysis patchAnalysis = new PatchAnalysis();
 //		patchAnalysis.getPatchedFunctions("kernel_patches//patch-2.6.9.txt", callDAG.functions);
-		
+/*****************************************************************************/
+
+/*****************************************************************************/
 //		CoreAnalysis coreAnalysis = new CoreAnalysis(callDAG, takeApartCallDAG, versionNum);
-//		coreAnalysis.getCentralityVsCutProperty(callDAG, versionNum);
-		
-		new ArtificialDAG().generateArtificialFixedNodePerLayerDAG();
-		new ArtificialDAG().generateArtificialHourglassDAG();
-		ArtificialDAG.analyzeArtificialDAG("artificialFixedNodePerLayerDAG");
-		ArtificialDAG.analyzeArtificialDAG("randomShuffleArtificialFixedNodePerLayerDAG");
-		ArtificialDAG.analyzeArtificialDAG("artificialHourglassDAG");
-		ArtificialDAG.analyzeArtificialDAG("randomShuffleArtificialHourglassDAG");
-//		new ArtificialDAG().generateArtificialVariableNodePerLayerDAG();
-//		ArtificialDAG.analyzeArtificialDAG("artificialVariableNodePerLayerDAG");
+//		coreAnalysis.getCentralityVsCutProperty(callDAG, versionNum);	
 /*****************************************************************************/
 		
 /*****************************************************************************/
+//		DegreeAnalysis degreeAnalysis = new DegreeAnalysis();		
 //		degreeAnalysis.getInDegreeCCDF(callDAG, versionNum);
 //		degreeAnalysis.getOutDegreeCCDF(callDAG, versionNum);
 //		degreeAnalysis.getLocationVSAvgInDegree(callDAG, versionNum);
@@ -69,6 +144,7 @@ public class Driver {
 /*****************************************************************************/
 		
 /*****************************************************************************/
+//		LocationAnalysis locationAnalysis = new LocationAnalysis();
 //		locationAnalysis.getLocationHistogram(callDAG, versionNum);
 //		locationAnalysis.getLocationVsCallDirection(callDAG);
 //		locationAnalysis.getClusterLocationDistribution();
@@ -79,7 +155,8 @@ public class Driver {
 //		locationAnalysis.getCallViolationMetric(callDAG);
 /*****************************************************************************/
 
-/*****************************************************************************/		
+/*****************************************************************************/	
+//		AgeAnalysis ageAnalysis = new AgeAnalysis();
 //		ageAnalysis.getClusterLifeTimeDistribution(); // CHANGE FOR DIFFERENT NETWORKS
 //		ageAnalysis.getLocationVsPersistencePercentiles();
 //		ageAnalysis.getLocationVsTransientStable(); // CHANGE FOR DIFFERENT NETWORKS
@@ -96,13 +173,15 @@ public class Driver {
 //		ageAnalysis.getClusterAgeDistribution();
 /*****************************************************************************/
 
-/*****************************************************************************/		
+/*****************************************************************************/	
+//		PersistenceAnalysis persistenceAnalysis = new PersistenceAnalysis();		
 //		CallDAG callDAGFrom = new CallDAG("kernel_callgraphs//full.graph-2.6.26");
 //		CallDAG callDAGTo = new CallDAG("kernel_callgraphs//full.graph-2.6.27");
 //		persistenceAnalysis.getContiguousFunctionPersistance(callDAGFrom, callDAGTo);
 /*****************************************************************************/
 
-/*****************************************************************************/		
+/*****************************************************************************/
+//		EvolutionAnalysis evolutionaryAnalysis = new EvolutionAnalysis();
 //		evolutionaryAnalysis.getAverageGeneralityPerLocationForEachVersion();
 //		evolutionaryAnalysis.getGenCmpScatterForAllVersions();
 //		evolutionaryAnalysis.getViolationMetricForEachVersion();
@@ -119,7 +198,8 @@ public class Driver {
 //		evolutionaryAnalysis.getCommunityEvolutionData();
 /*****************************************************************************/
 
-/*****************************************************************************/		
+/*****************************************************************************/	
+//		CentralityAnalysis centralityAnalysis = new CentralityAnalysis();
 //		centralityAnalysis.getCentralityCDF(callDAG, versionNum);
 //		centralityAnalysis.getLocationVsCentrality(callDAG, versionNum);
 //		centralityAnalysis.getKernelBoundaryCentralityCDF(callDAG, versionNum);
@@ -128,7 +208,8 @@ public class Driver {
 //		centralityAnalysis.test(callDAG);
 /*****************************************************************************/
 				
-/*****************************************************************************/		
+/*****************************************************************************/	
+//		GeneralityAnalysis generalityAnalysis = new GeneralityAnalysis();
 //		generalityAnalysis.getGeneralityHistogram(callDAG, versionNum);
 //		generalityAnalysis.getComplexityHistogram(callDAG, versionNum);
 //		generalityAnalysis.getLocationVsAvgGenerality(callDAG, versionNum);
@@ -138,11 +219,13 @@ public class Driver {
 /*****************************************************************************/
 
 /*****************************************************************************/		
+//		DiameterAnalysis diameterAnalysis = new DiameterAnalysis();
 //		diameterAnalysis.getEffectiveDiameter(callDAG);
 //		diameterAnalysis.getEffectiveDiameterForAllVersions();
 /*****************************************************************************/
 
 /*****************************************************************************/		
+//		ModularityAnalysis modularityAnalysis  = new ModularityAnalysis();
 //		modularityAnalysis.getModuleGeneralityVsComplexity(callDAG, versionNum);
 //		modularityAnalysis.getInfo();
 //		modularityAnalysis.getAvgModuleGeneralityVsLocation(callDAG, versionNum);
@@ -167,6 +250,7 @@ public class Driver {
 /*****************************************************************************/		
 		
 /*****************************************************************************/		
+//		RandomNetworkGenerator randomNetworkGenerator = new RandomNetworkGenerator(callDAG);
 //		String randVersionNum = versionNum + "rX";
 //		randomNetworkGenerator.generateRandomNetwork(randVersionNum);
 //		randomNetworkGenerator.randomCallDAG.removeCycles();
@@ -187,7 +271,5 @@ public class Driver {
 //		degreeAnalysis.getLocationVSAvgOutDegree(randomNetworkGenerator.randomCallDAG, randVersionNum);
 //		locationAnalysis.getCallViolationMetric(randomNetworkGenerator.randomCallDAG);
 /*****************************************************************************/
-		
-/*****************************************************************************/		
 	}
 }

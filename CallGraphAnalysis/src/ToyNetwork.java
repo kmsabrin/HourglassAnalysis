@@ -76,9 +76,20 @@ public class ToyNetwork {
 		ToyNetwork toyNetwork = new ToyNetwork();
 		ToyNetwork dummy = new ToyNetwork();
 		toyNetwork.loadCallGraph();
-		dummy.loadCallGraph();
+//		dummy.loadCallGraph();
+		String v = "toy";
 		
-		CoreAnalysis coreAnalysis = new CoreAnalysis(toyNetwork.callDAG, dummy.callDAG, "ToyDAG");
+		CentralityAnalysis centralityAnalysis = new CentralityAnalysis();
+		centralityAnalysis.getCentralityCDF(toyNetwork.callDAG, v);
+		centralityAnalysis.getCentralityCCDF(toyNetwork.callDAG, v);
+		System.out.println("Centrality CDF Done.");
+		
+//		centralityAnalysis.doUniformPathSampling = false;
+//		centralityAnalysis.getSampledPathStatistics(toyNetwork.callDAG, v);
+//		System.out.println("Sampled Path HScore Distribution Done.");
+		
+		
+//		CoreAnalysis coreAnalysis = new CoreAnalysis(toyNetwork.callDAG, dummy.callDAG, "ToyDAG");
 //		coreAnalysis.getWaistCentralityThreshold_2(test.callDAG, "toyDAG");
 //		coreAnalysis.getCentralityVsCutProperty(test.callDAG, "ToyDAG");
 

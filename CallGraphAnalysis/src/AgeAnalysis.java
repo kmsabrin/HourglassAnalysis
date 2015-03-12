@@ -407,8 +407,8 @@ public class AgeAnalysis {
 	
 	// mean separated clusters 
 	public void getClusterPersistencePercentiles() throws Exception { // fig:cluster-lifespan, fig:cluster-persistence
-		PrintWriter pwts = new PrintWriter(new File("Results//" + Driver.networkUsed + "-cluster-transient-stable.txt"));
-		PrintWriter pwls = new PrintWriter(new File("Results//" + Driver.networkUsed + "-cluster-life-span.txt"));
+		PrintWriter pwts = new PrintWriter(new File("Results//" + Driver.networkType + "-cluster-transient-stable.txt"));
+		PrintWriter pwls = new PrintWriter(new File("Results//" + Driver.networkType + "-cluster-life-span.txt"));
 		
 		List<Integer> persistenceGC = new ArrayList();
 		List<Integer> persistencegC = new ArrayList();
@@ -491,7 +491,7 @@ public class AgeAnalysis {
 	}
 	
 	public void getLocationVsPersistencePercentiles() throws Exception { // fig:loc-vs-evo-age
-		PrintWriter pw = new PrintWriter(new File("Results//" + Driver.networkUsed + "-loc-vs-evo-persistence.txt"));
+		PrintWriter pw = new PrintWriter(new File("Results//" + Driver.networkType + "-loc-vs-evo-persistence.txt"));
 		Map<Double, List<Integer>> locationPersistenceMap = new TreeMap();
 		
 		for (String s: birthVersion.keySet()) {			
@@ -523,7 +523,7 @@ public class AgeAnalysis {
 	}
 	
 	public void getLocationVsAvgGeneralityDelta() throws Exception {
-		PrintWriter pw = new PrintWriter(new File("Results//" + Driver.networkUsed + "-loc-vs-avg-delta-gen.txt"));
+		PrintWriter pw = new PrintWriter(new File("Results//" + Driver.networkType + "-loc-vs-avg-delta-gen.txt"));
 		Map<Double, Double> locVsAvGenDelta = new TreeMap();
 		
 		for (String s: birthVersion.keySet()) {

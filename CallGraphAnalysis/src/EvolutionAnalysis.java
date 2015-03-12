@@ -13,7 +13,7 @@ public class EvolutionAnalysis {
 	public static void getWalktrapCallDAGForEachVersion() throws Exception {
 		for (int i = Driver.versiontStart + 2; i < Driver.versionEnd; i++) {
 			CallDAG callDAG = new CallDAG(Driver.networkPath + i);
-			String versionNum = Driver.networkUsed + "-" + i;
+			String versionNum = Driver.networkType + "-" + i;
 			ModularityAnalysis.getCallDAGforWalktrap(callDAG, versionNum);
 		}
 	}
@@ -29,7 +29,7 @@ public class EvolutionAnalysis {
 	
 	public void getGenCmpScatterForAllVersions() throws Exception {
 		for (int i = Driver.versiontStart; i < Driver.versionEnd; ++i) {
-			String versionNum = Driver.networkUsed + "-" + i;
+			String versionNum = Driver.networkType + "-" + i;
 			CallDAG callDAG = new CallDAG(Driver.networkPath + i);
 			GeneralityAnalysis genAnalysis = new GeneralityAnalysis();
 			genAnalysis.getGeneralityVsComplexity(callDAG, versionNum);
@@ -40,7 +40,7 @@ public class EvolutionAnalysis {
 		for (int i = Driver.versiontStart; i < Driver.versionEnd; ) {
 			CallDAG callDAG = new CallDAG(Driver.networkPath + i);
 			LocationAnalysis locationAnalysis = new LocationAnalysis();
-			locationAnalysis.getLocationHistogram(callDAG, Driver.networkUsed + i);
+			locationAnalysis.getLocationHistogram(callDAG, Driver.networkType + i);
 		}
 	}
 	
@@ -53,8 +53,8 @@ public class EvolutionAnalysis {
 	}
 	
 	public void getEvolutionaryDeathBirthTrend() throws Exception {
-		PrintWriter pwD = new PrintWriter(new File("Results//" + Driver.networkUsed + "-evo-death.txt"));
-		PrintWriter pwB = new PrintWriter(new File("Results//" + Driver.networkUsed + "-evo-birth.txt"));
+		PrintWriter pwD = new PrintWriter(new File("Results//" + Driver.networkType + "-evo-death.txt"));
+		PrintWriter pwB = new PrintWriter(new File("Results//" + Driver.networkType + "-evo-birth.txt"));
 		CallDAG callDAGFrom = new CallDAG(Driver.networkPath + Driver.versiontStart); 
 		
 		for (int i = Driver.versiontStart + 1; i < Driver.versionEnd; ++i) {
@@ -99,7 +99,7 @@ public class EvolutionAnalysis {
 	}
 		
 	public void getLocationVsSizeTrend() throws Exception { // fig:loc-vs-evo-siz
-		PrintWriter pw = new PrintWriter(new File("Results//" + Driver.networkUsed + "-loc-vs-evo-size.txt"));
+		PrintWriter pw = new PrintWriter(new File("Results//" + Driver.networkType + "-loc-vs-evo-size.txt"));
 		int nVersions = 5;
 		int sample[] = new int[]{1, 9, 19, 29, 39}; // change for different network
 		int result[][] = new int[101][nVersions];
@@ -127,7 +127,7 @@ public class EvolutionAnalysis {
 	}
 	
 	public void getNetworkGrowthTrend() throws Exception { //
-		PrintWriter pw = new PrintWriter(new File("Results//" + Driver.networkUsed + "-network-growth.txt"));
+		PrintWriter pw = new PrintWriter(new File("Results//" + Driver.networkType + "-network-growth.txt"));
 		for (int i = Driver.versiontStart; i < Driver.versionEnd; ++i) {
 			pw.print(i);
 			CallDAG callDAG = new CallDAG(Driver.networkPath + i);
@@ -138,7 +138,7 @@ public class EvolutionAnalysis {
 	}
 	
 	public void getClusterSizeTrend() throws Exception {
-		PrintWriter pw = new PrintWriter(new File("Results//" + Driver.networkUsed + "-cluster-vs-network-growth.txt"));
+		PrintWriter pw = new PrintWriter(new File("Results//" + Driver.networkType + "-cluster-vs-network-growth.txt"));
 
 		for (int i = Driver.versiontStart; i < Driver.versionEnd; ++i) {
 			CallDAG callDAG = new CallDAG(Driver.networkPath + i);
@@ -191,15 +191,15 @@ public class EvolutionAnalysis {
 	}
 	
 	public void compareConsecutiveVersionFunctionsNeighborhood(String vA, String vB) throws Exception {
-		PrintWriter pw = new PrintWriter(new File("Results//" + Driver.networkUsed + "-" + vA + "-" + vB + "-module-cdf.txt"));
+		PrintWriter pw = new PrintWriter(new File("Results//" + Driver.networkType + "-" + vA + "-" + vB + "-module-cdf.txt"));
 		
 		CallDAG callDAGvA = new CallDAG(Driver.networkPath + vA);
 		ModularityAnalysis modularityAnalysisvA = new ModularityAnalysis();
-		modularityAnalysisvA.getWalktrapModules(callDAGvA, Driver.networkUsed + "-" + vA);
+		modularityAnalysisvA.getWalktrapModules(callDAGvA, Driver.networkType + "-" + vA);
 		
 		CallDAG callDAGvB = new CallDAG(Driver.networkPath + vB);		
 		ModularityAnalysis modularityAnalysisvB = new ModularityAnalysis();
-		modularityAnalysisvB.getWalktrapModules(callDAGvB, Driver.networkUsed + "-" + vB);
+		modularityAnalysisvB.getWalktrapModules(callDAGvB, Driver.networkType + "-" + vB);
 		
 		Set<String> vAFunctions = new HashSet();
 		Set<String> vBFunctions = new HashSet();
@@ -287,18 +287,18 @@ public class EvolutionAnalysis {
 			}	
 		}
 		
-		PrintWriter pw0 = new PrintWriter(new File("Results//" + Driver.networkUsed + "-" + vA + "-" + vB + "-module-to-module-closest-diff-cdf.txt"));
-		PrintWriter pw1 = new PrintWriter(new File("Results//" + Driver.networkUsed + "-" + vA + "-" + vB + "-module-to-module-closest-cdf.txt"));
+		PrintWriter pw0 = new PrintWriter(new File("Results//" + Driver.networkType + "-" + vA + "-" + vB + "-module-to-module-closest-diff-cdf.txt"));
+		PrintWriter pw1 = new PrintWriter(new File("Results//" + Driver.networkType + "-" + vA + "-" + vB + "-module-to-module-closest-cdf.txt"));
 		
-		PrintWriter pw2 = new PrintWriter(new File("Results//" + Driver.networkUsed + "-" + vA + "-" + vB + "-community-matching.txt"));
+		PrintWriter pw2 = new PrintWriter(new File("Results//" + Driver.networkType + "-" + vA + "-" + vB + "-community-matching.txt"));
 		
 		CallDAG callDAGvA = new CallDAG(Driver.networkPath + vA);
 		ModularityAnalysis modularityAnalysisvA = new ModularityAnalysis();
-		modularityAnalysisvA.getWalktrapModules(callDAGvA, Driver.networkUsed + "-" + vA);
+		modularityAnalysisvA.getWalktrapModules(callDAGvA, Driver.networkType + "-" + vA);
 		
 		CallDAG callDAGvB = new CallDAG(Driver.networkPath + vB);		
 		ModularityAnalysis modularityAnalysisvB = new ModularityAnalysis();
-		modularityAnalysisvB.getWalktrapModules(callDAGvB, Driver.networkUsed + "-" + vB);
+		modularityAnalysisvB.getWalktrapModules(callDAGvB, Driver.networkType + "-" + vB);
 		
 		Set<String> vAFunctions = new HashSet();
 		Set<String> vBFunctions = new HashSet();
@@ -429,7 +429,7 @@ public class EvolutionAnalysis {
 				String vB = Integer.toString(i + 1);
 //				 compareConsecutiveVersionModules(Integer.toString(i), Integer.toString(i + 1));
 
-				Scanner scan = new Scanner(new File("Results//" + Driver.networkUsed + "-" + vA + "-" + vB + "-community-matching.txt"));
+				Scanner scan = new Scanner(new File("Results//" + Driver.networkType + "-" + vA + "-" + vB + "-community-matching.txt"));
 
 				while (scan.hasNext()) {
 					String strFrom = scan.next();

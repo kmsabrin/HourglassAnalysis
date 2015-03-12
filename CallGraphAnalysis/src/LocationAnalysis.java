@@ -157,7 +157,7 @@ public class LocationAnalysis {
 	
 	public static void getWineGlassGroupsGrowth() throws Exception {
 		// CUSTOMIZED FOR DIFFERENT NETWORK
-		PrintWriter pw = new PrintWriter(new File("Results//" + Driver.networkUsed + "-wineglass-fractions.txt"));
+		PrintWriter pw = new PrintWriter(new File("Results//" + Driver.networkType + "-wineglass-fractions.txt"));
 		for (int i = Driver.versiontStart; i < Driver.versionEnd; i++) {
 			CallDAG callDAG = new CallDAG(Driver.networkPath + i);
 
@@ -170,7 +170,7 @@ public class LocationAnalysis {
 				else ++nNeck;
 			}
 			
-			pw.println((nBase / sz) + "\t" + (nNeck / sz) + "\t" + (nCup / sz) + "\t" + Driver.networkUsed + i);
+			pw.println((nBase / sz) + "\t" + (nNeck / sz) + "\t" + (nCup / sz) + "\t" + Driver.networkType + i);
 		}
 		
 		pw.close();

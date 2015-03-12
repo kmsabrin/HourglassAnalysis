@@ -137,7 +137,9 @@ public class CallDAG {
 					String callF = tokens[0];
 					String callT = tokens[2].substring(0, tokens[2].length() - 1); // for cobjdump
 //					String callT = tokens[2].substring(0, tokens[2].length()); // for cdepn
-
+					
+//					String callT = tokens[2].substring(0, tokens[2].length()); // for bio nets
+					
 //					for running community detection on random DAGs
 //					String callT = tokens[2]; 
 			
@@ -146,14 +148,19 @@ public class CallDAG {
 					if (callT.equals("mcount"))  // no more location metric!
 						continue;
 					
-					if (callF.equals(callT)) // loop
-						continue;
+					
+						
 					/******************/
 					/******************/
 					
 					++nEdges;
 					functions.add(callF);
 					functions.add(callT);
+					
+					if (callF.equals(callT)) { // loop, do not add the edge
+//						System.out.println(callF);
+						continue;
+					}
 					
 					if (callFrom.containsKey(callT)) {
 						callFrom.get(callT).add(callF);
@@ -563,35 +570,59 @@ public class CallDAG {
 			double nPath = 1;
 			
 //			P-Centrality
-//			nPath = callDAG.numOfLeafPath.get(s) * callDAG.numOfRootPath.get(s);
-//			nodePathThrough.put(s, nPath);
-//			if (!callDAG.callFrom.containsKey(s)) { // is a root
-//				nTotalPath += nPath;
-//			}
-			
-//			I-Centrality
-			nPath = rootsReached.get(s) * leavesReached.get(s);
+			nPath = numOfLeafPath.get(s) * numOfRootPath.get(s);
 			nodePathThrough.put(s, nPath);
 			if (!callFrom.containsKey(s)) { // is a root
-				nTotalPath += nPath; // nTotalPath = nConnectedTopBottomPair
+				nTotalPath += nPath;
 			}
+			
+//			I-Centrality
+//			nPath = rootsReached.get(s) * leavesReached.get(s);
+//			nodePathThrough.put(s, nPath); // equivalent to number of connected (t,b) pairs containing it
+//			if (!callFrom.containsKey(s)) { // is a root
+//				nTotalPath += nPath; // nTotalPath = nConnectedTopBottomPair
+//			}
 		}
 		
-//		int knt = 0;
 		for (String s: location.keySet()) {
 			double cen = nodePathThrough.get(s) / nTotalPath;
 			centrality.put(s, cen);
-//			System.out.println(cen);
-//			System.out.println(s + "\t" + cen);
 			
-//			if (cen > 0.01) {
-//				System.out.println(s + "\t" + cen);
-//				++knt;
-//			}
+//			centrality.put(s, nodePathThrough.get(s));
+			
+//			System.out.println(s + "\t" + cen);
 		}		
-//		System.out.println(knt);
 		
 //		System.out.println(nTotalPath);
 		
+	}
+	
+	public void removeIsolatedNodes() {
+		HashSet<String> removable = new HashSet();
+		for (String s : functions) {
+			if (!callTo.containsKey(s) && !callFrom.containsKey(s)) {
+				removable.add(s);
+			}
+		}
+		
+		functions.removeAll(removable);
+	}
+	
+	public void printCallDAG() {
+		for (String s: functions) {
+			if (callTo.containsKey(s)) {
+				System.out.print(s + " calling: ");
+				for (String r : callTo.get(s)) {
+					System.out.print(r + ", ");
+				}
+			}
+			System.out.println();
+			
+//			if (callFrom.containsKey(s)) {
+//				for (String r : callFrom.get(s)) {
+//					System.out.println("(" + s + " called by " + r + ")");
+//				}
+//			}
+		}
 	}
 }

@@ -304,7 +304,7 @@ public class RandomNetworkGenerator {
 		cycleCheckFull();
 		if (hasCycle) System.out.println("Cycle Found Error!");
 		
-		CallDAG originalCallDAG = new CallDAG(Driver.networkPath + Driver.version);
+		CallDAG originalCallDAG = new CallDAG(Driver.networkPath + Driver.currentVersion);
 		
 		for (String f: originalCallDAG.functions) {
 			if(!randomCallDAG.functions.contains(f)) {
