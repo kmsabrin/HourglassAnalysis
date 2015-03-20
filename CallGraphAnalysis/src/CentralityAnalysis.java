@@ -47,6 +47,29 @@ public class CentralityAnalysis {
 //		pw.close();
 //	}
 
+	public static void getCentralityPDF(CallDAG callDAG, String filePath) throws Exception {		
+		PrintWriter pw = new PrintWriter(new File("Results//centrality-pdf-" + filePath + ".txt"));
+
+		Map<Double, Double> histogram = new TreeMap();
+		
+		for (String s: callDAG.functions) {
+			double v = callDAG.centrality.get(s);	
+			
+			if (histogram.containsKey(v)) {
+				histogram.put(v, histogram.get(v) + 1.0);
+			}
+			else {
+				histogram.put(v, 1.0);
+			}
+		}
+		
+		for (double d: histogram.keySet()) {
+			pw.println(d + "\t" + histogram.get(d));
+		}
+		
+		pw.close();
+	}
+	
 	void getCentralityCDF(CallDAG callDAG, String filePath) throws Exception {		
 		PrintWriter pw = new PrintWriter(new File("Results//centrality-cdf-" + filePath + ".txt"));
 

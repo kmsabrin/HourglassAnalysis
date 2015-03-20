@@ -15,19 +15,21 @@ public class RandomNetworkGenerator {
 	Map<String, Integer> functionLevel;
 	Set<String> visited;
 	Set<String> cycleVisited;
-	boolean hasCycle;
+	boolean isReachable;
 	String randomVersionNumber;
 	int numOfIteration = 1;
+	Random random;
 	
 	public RandomNetworkGenerator(CallDAG callDAG) {
 		this.randomCallDAG = callDAG;
 		functionLevel = new HashMap();
 		visited = new HashSet();
 		cycleVisited = new HashSet();
-		hasCycle = false;
+		isReachable = false;
+		random = new Random(System.nanoTime()); 
 	}
 	
-	public void getFunctionLevelTraverse(String function) {
+	public void getNodeLevelTraverse(String function) {
 		if (!randomCallDAG.callTo.containsKey(function)) { // is Leaf
 			functionLevel.put(function, 1);
 			return;
@@ -39,7 +41,7 @@ public class RandomNetworkGenerator {
 				
 		int level = 1;
 		for (String f: randomCallDAG.callTo.get(function)) {
-			getFunctionLevelTraverse(f);
+			getNodeLevelTraverse(f);
 			int childLevel = functionLevel.get(f);
 			level = Math.max(level, childLevel + 1);
 		}
@@ -47,10 +49,10 @@ public class RandomNetworkGenerator {
 		functionLevel.put(function, level);
 	}
 	
-	public void getFunctionLevel() {
+	public void getNodeLevel() {
 		for (String f: randomCallDAG.functions) {
 			if (!randomCallDAG.callFrom.containsKey(f)) { // is Root
-				getFunctionLevelTraverse(f);
+				getNodeLevelTraverse(f);
 			}
 		}
 		
@@ -68,7 +70,7 @@ public class RandomNetworkGenerator {
 	}
 	
 	public void updateFunctionLevelWithCutOffTraverse(String function, int cutOffLevel) {		
-		if (visited.contains(function)) { // is Revisit, 
+		if (visited.contains(function)) { // is Revisit 
 			return;
 		}		
 		
@@ -100,13 +102,13 @@ public class RandomNetworkGenerator {
 //		}
 	}
 	
-	public void cycleCheckTraverse(String node, String target, int targetLevel) {
-		if (node.equals(target)) { // target Found, cycle Exists
-			hasCycle = true;
+	public void checkReachablityTraverse(String node, String target, int targetLevel) {
+		if (node.equals(target)) { // target Found, reachable, cycle created
+			isReachable = true;
 			return;
 		}
 		
-		if (hasCycle) return; // target Already Found
+		if (isReachable) return; // target Already Found
 		if (visited.contains(node)) return; // already Traversed
 		visited.add(node);
 		
@@ -114,17 +116,17 @@ public class RandomNetworkGenerator {
 		if (!randomCallDAG.callTo.containsKey(node)) return; // a leaf
 		
 		for (String f: randomCallDAG.callTo.get(node)) {
-			cycleCheckTraverse(f, target, targetLevel);
+			checkReachablityTraverse(f, target, targetLevel);
 		}
 	}
 	
-	public void cycleCheck(String source, String target, int targetLevel) {
+	public void checkReachablity(String source, String target, int targetLevel) {
 		visited.clear();
-		hasCycle = false;
-		cycleCheckTraverse(source, target, targetLevel);
+		isReachable = false;
+		checkReachablityTraverse(source, target, targetLevel);
 	}
 	
-	public void cycleCheckFullTraverse(String node) {
+	public void checkCycleExistenceTraverse(String node) {
 		if (!randomCallDAG.callTo.containsKey(node) || visited.contains(node))
 			return;
 
@@ -133,22 +135,22 @@ public class RandomNetworkGenerator {
 
 		for (String s : randomCallDAG.callTo.get(node)) {
 			if (cycleVisited.contains(s)) {
-				hasCycle = true;
+				isReachable = true;
 				continue;
 			}
-			cycleCheckFullTraverse(s);
+			checkCycleExistenceTraverse(s);
 		}
 		
 		cycleVisited.remove(node);
 	}
 	
-	public void cycleCheckFull() {
+	public void checkCycleExistence() {
 		visited.clear();
 		cycleVisited.clear();
-		hasCycle = false;
+		isReachable = false;
 		for (String s: randomCallDAG.functions) {
 			if (!visited.contains(s)) {
-				cycleCheckFullTraverse(s);
+				checkCycleExistenceTraverse(s);
 			}
 		}
 	}
@@ -211,15 +213,15 @@ public class RandomNetworkGenerator {
 //			cycle check
 			if (ls1 <= lt2) {
 //				check if s1 is reachable from t2
-				cycleCheck(ft2, fs1, ls1);
-				if (hasCycle) {
+				checkReachablity(ft2, fs1, ls1);
+				if (isReachable) {
 					continue;
 				}
 			}
 			else if (ls2 <= lt1) {
 //				check if s2 is reachable from t1
-				cycleCheck(ft1, fs2, ls2);
-				if (hasCycle) {
+				checkReachablity(ft1, fs2, ls2);
+				if (isReachable) {
 					continue;
 				}
 			}
@@ -300,50 +302,137 @@ public class RandomNetworkGenerator {
 //		}
 	}
 	
-	public void checkRandomDAGValidity() {
-		cycleCheckFull();
-		if (hasCycle) System.out.println("Cycle Found Error!");
+	public void rewireRandomEdge() throws Exception {
+		int nFunctions = randomCallDAG.functions.size();
+		Object[] functionNames = randomCallDAG.functions.toArray();
+		int nRewiring = 0;
 		
-		CallDAG originalCallDAG = new CallDAG(Driver.networkPath + Driver.currentVersion);
+		System.out.println("Making " + (randomCallDAG.nEdges * numOfIteration) + " edge rewirings");
 		
-		for (String f: originalCallDAG.functions) {
-			if(!randomCallDAG.functions.contains(f)) {
-				System.out.println("Function Vanished # Error!");
+		while(nRewiring < randomCallDAG.nEdges * numOfIteration) {
+			int indexCurrentSource; 
+			String nameCurrentSource;
+			int levelCurrentSource; 
+			do {
+				indexCurrentSource = random.nextInt(nFunctions);
+				nameCurrentSource = (String)functionNames[indexCurrentSource];
+			} 
+			while (!randomCallDAG.callTo.containsKey(nameCurrentSource));	
+			levelCurrentSource = functionLevel.get(nameCurrentSource);
+						
+			List<String> callToListS1 = new ArrayList(randomCallDAG.callTo.get(nameCurrentSource));
+			int indexCurrentTarget; 
+			String nameCurrentTarget;
+			int levelCurrentTarget; 
+			indexCurrentTarget = random.nextInt(callToListS1.size()); 
+			nameCurrentTarget = callToListS1.get(indexCurrentTarget); 
+			levelCurrentTarget = functionLevel.get(nameCurrentTarget); 
+			
+			int indexNextTarget = random.nextInt(nFunctions);
+			String nameNextTarget = (String)functionNames[indexNextTarget];
+			int levelNextTarget = functionLevel.get(nameNextTarget); 
+			
+//			check if already exists, then no rewiring, start over
+			if (randomCallDAG.callTo.get(nameCurrentSource).contains(nameNextTarget)) {
+				continue;
+			}
+
+			/* SKIP LEVEL BASED OPTIMIZATION
+//			cycle check
+			if (levelNextTarget > levelCurrentSource) {
+//				check if currentSource is reachable from nextTarget
+				checkReachablity(nameNextTarget, nameCurrentSource, levelCurrentSource);
+				if (isReachable) {
+					continue;
+				}
+			}
+			*/
+			
+			checkReachablity(nameNextTarget, nameCurrentSource, levelCurrentSource);
+			if (isReachable) {
+				continue;
 			}
 			
-			if(randomCallDAG.callFrom.containsKey(f)) {
-				if(randomCallDAG.callFrom.get(f).size() != originalCallDAG.callFrom.get(f).size()) { 
-					System.out.println("Indegree Destroyed (1) # Error!");
-				}
+//			swap ...
+			++nRewiring;
+
+//			change call graph adjacency list
+			randomCallDAG.callTo.get(nameCurrentSource).remove(nameCurrentTarget);
+			randomCallDAG.callTo.get(nameCurrentSource).add(nameNextTarget);
+						
+			randomCallDAG.callFrom.get(nameCurrentTarget).remove(nameCurrentSource);
+
+			if (!randomCallDAG.callFrom.containsKey(nameNextTarget)) {
+				randomCallDAG.callFrom.put(nameNextTarget, new HashSet());
 			}
-			else {
-				if(originalCallDAG.callFrom.containsKey(f)) {
-					System.out.println("Indegree Destryed (2) # Error!");
-				}
-			}
+			randomCallDAG.callFrom.get(nameNextTarget).add(nameCurrentSource);
+		
+//			level propagation SKIP FOR NOW
+//			int updateLevelCurrentSource = 1; 
+//			for (String s: randomCallDAG.callTo.get(nameCurrentSource)) {
+//				updateLevelCurrentSource = Math.max(updateLevelCurrentSource, functionLevel.get(s) + 1);
+//			}
+//			
+//			if (updateLevelCurrentSource != levelCurrentSource) { // if change in level of current source
+//				functionLevel.put(nameCurrentSource, updateLevelCurrentSource);
+//				updateFunctionLevelWithCutOff(Math.min(updateLevelCurrentSource, levelCurrentSource) + 1);
+//			}
 			
-			if(randomCallDAG.callTo.containsKey(f)) {
-				if(randomCallDAG.callTo.get(f).size() != originalCallDAG.callTo.get(f).size()) {
-					System.out.println("Outdegree Destryoed (1) # Error!");
-				}
+//			periodic snapshot
+			if (nRewiring % 5000 == 0) {
+				
 			}
-			else {
-				if(originalCallDAG.callTo.containsKey(f)) {
-					System.out.println("Outdegree Destryed (2) # Error!");
-				}
-			}
-			
+		}
+	}
+	
+	public void checkDAGValidity() {
+		checkCycleExistence();
+		if (isReachable) {
+			System.out.println("Cycle Found # Error!");
+		}
+		
+//		SKIP FOR NOW
+//		CallDAG originalCallDAG = new CallDAG(Driver.networkPath + Driver.currentVersion);
+//		
+//		for (String f: originalCallDAG.functions) {
+//			if(!randomCallDAG.functions.contains(f)) {
+//				System.out.println("Function Vanished # Error!");
+//			}
+//			
+//			if(randomCallDAG.callFrom.containsKey(f)) {
+//				if(randomCallDAG.callFrom.get(f).size() != originalCallDAG.callFrom.get(f).size()) { 
+//					System.out.println("Indegree Destroyed (1) # Error!");
+//				}
+//			}
+//			else {
+//				if(originalCallDAG.callFrom.containsKey(f)) {
+//					System.out.println("Indegree Destryed (2) # Error!");
+//				}
+//			}
+//			
+//			if(randomCallDAG.callTo.containsKey(f)) {
+//				if(randomCallDAG.callTo.get(f).size() != originalCallDAG.callTo.get(f).size()) {
+//					System.out.println("Outdegree Destryoed (1) # Error!");
+//				}
+//			}
+//			else {
+//				if(originalCallDAG.callTo.containsKey(f)) {
+//					System.out.println("Outdegree Destryed (2) # Error!");
+//				}
+//			}
+//			
 //			if(randomCallDAG.inDegree.get(f) != originalCallDAG.inDegree.get(f)) System.out.println("Error!");
 //			if(randomCallDAG.outDegree.get(f) != originalCallDAG.outDegree.get(f)) System.out.println("Error!");
-		}
+//		}
 		
 		System.out.println("OK !!!");
 	}
 	
-	public void generateRandomNetwork(String rVN) throws Exception {
-		randomVersionNumber = rVN;
-		getFunctionLevel();
-		chooseEdgePairsAndSwap();
-		checkRandomDAGValidity();
+	public void generateRandomNetwork(String rndmVrsnNum) throws Exception {
+		randomVersionNumber = rndmVrsnNum;
+		getNodeLevel();
+		rewireRandomEdge();
+//		chooseEdgePairsAndSwap();
+		checkDAGValidity();
 	}
 }

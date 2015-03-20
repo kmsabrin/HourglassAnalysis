@@ -24,8 +24,8 @@ public class Driver {
 //		centralityAnalysis.getSampledPathStatistics(callDAG, v);
 //		System.out.println("Sampled Path HScore Distribution Done.");
 		
-		CoreAnalysis coreAnalysis = new CoreAnalysis(callDAG, takeApartCallDAG, v);
-		System.out.println("Max Centrality Decomposition Curve Done.");	
+//		CoreAnalysis coreAnalysis = new CoreAnalysis(callDAG, takeApartCallDAG, v);
+//		System.out.println("Max Centrality Decomposition Curve Done.");	
 	}
 	
 	public static void doKernelAnalysis() throws Exception {
@@ -72,27 +72,27 @@ public class Driver {
 //		new ArtificialDAG().generateNoisyRectangleDAG();
 //		new ArtificialDAG().generateDiamondDAG();
 
-
 		String versions[] = {"rectangleDAG", 
 							 "noisyRectangleDAG",
 							 "hourglassDAG", 
 							 "trapezoidDAG",
-							 "diamondDAG",
-							 "randomShuffle-hourglassDAG-0.2",
-							 "centralityShuffle-rectangleDAG-0.2",
-							 "centralityShuffle-hourglassDAG-0.2",
-							 "centralityShuffle-noisyRectangleDAG-0.2"};
-		
+							 "diamondDAG"};
 		
 		for (int i = 0; i < versions.length; ++i) {
-//			if (i!=5) continue;
-			String v = versions[i];	
+			String v = versions[i];
 			CallDAG callDAG = new CallDAG("artificial_callgraphs//" + v + ".txt");
-//			CallDAG takeApartCallDAG = null;
-			CallDAG takeApartCallDAG = new CallDAG("artificial_callgraphs//" + v + ".txt");
 			System.out.println("Loading " + v + " Done.");
-	
-			doCoreAnalysis(callDAG, takeApartCallDAG, v); 
+			
+			RandomNetworkGenerator randomNetworkGenerator = new RandomNetworkGenerator(callDAG);
+			String randomVersionNumber = v + "rX";
+			randomNetworkGenerator.generateRandomNetwork(randomVersionNumber);
+			randomNetworkGenerator.randomCallDAG.loadDegreeMetric();
+			randomNetworkGenerator.randomCallDAG.loadLocationMetric(); 
+			randomNetworkGenerator.randomCallDAG.loadCentralityMetric();
+			System.out.println("Randomization of " + v + " Done.");
+			
+			CentralityAnalysis.getCentralityPDF(callDAG, v);
+			CentralityAnalysis.getCentralityPDF(randomNetworkGenerator.randomCallDAG, randomVersionNumber);
 		}
 	}
 

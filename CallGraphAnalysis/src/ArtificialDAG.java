@@ -28,12 +28,11 @@ public class ArtificialDAG {
 
 	public ArtificialDAG() {
 //		dummy
-//		nNode = 12;
+//		nNode = 15;
 //		nLayer = 5;
-//		nEdge = (int)(nNode * 2);
+//		nEdge = (int)(nNode * 2.2);
 		
 		nNode = 10000;
-//		nNode = 1000;
 		nLayer = 19;
 		nEdge = (int)(nNode * 3);
 
@@ -105,7 +104,7 @@ public class ArtificialDAG {
 		int nodePerLayerDistribution[] = new int[nLayer + 1];
 	
 		double wSize = 10;
-		double alpha = 1.81; // 10,1.81,narrow // 100,1.35,fat // for 10K,19L,3Ne
+		double alpha = 1.81; // 10,1.81,narrow // 100,1.35,fat // 2,1.5,dummy // for 10K,19L,3Ne
 		
 		nodePerLayerDistribution[(nLayer + 1) / 2] = (int)wSize;
 
@@ -238,20 +237,34 @@ public class ArtificialDAG {
 					int newSrc = centralityWeightedSelection(1, srcMax, callDAG);
 					int newDst = centralityWeightedSelection(dstMin, nNode, callDAG);
 					String r = newSrc + "+" + newDst;
-					if (duplicateCheck.contains(r)) {
+//					if (duplicateCheck.contains(r)) {
+					if (duplicateCheck.contains(r) || existingEdge.contains(newSrc + "#" + newDst)) {
 						continue;
 					} else {
 						duplicateCheck.add(r);
 						pwCentralityShuffleArtificialDAG.println(newSrc + " -> "+ newDst + ";");
 						
-						callDAG.callTo.get(String.valueOf(src)).remove(String.valueOf(dst));
-						callDAG.callFrom.get(String.valueOf(dst)).remove(String.valueOf(src));
+						System.out.println(src + "\t" + dst + "\t" + newSrc + "\t" + newDst);
+//						System.out.println("\t" + callDAG.centrality.get(String.valueOf(newSrc)) + "\t" + callDAG.centrality.get(String.valueOf(newDst)));
 						
-						if (callDAG.callTo.get(String.valueOf(src)).size() < 1) callDAG.callTo.remove(String.valueOf(src));
-						if (callDAG.callFrom.get(String.valueOf(dst)).size() < 1) callDAG.callFrom.remove(String.valueOf(dst));
+						System.out.print(callDAG.centrality.get(String.valueOf(src)) + "\t" + callDAG.centrality.get(String.valueOf(dst)));
+						System.out.println("\t" + callDAG.centrality.get(String.valueOf(newSrc)) + "\t" + callDAG.centrality.get(String.valueOf(newDst)));
+
+						String strSrc = String.valueOf(src);
+						String strDst = String.valueOf(dst);
+						String strNewSrc = String.valueOf(newSrc);
+						String strNewDst = String.valueOf(newDst);
 						
-						callDAG.callTo.get(String.valueOf(newSrc)).add(String.valueOf(newDst));
-						callDAG.callFrom.get(String.valueOf(newDst)).add(String.valueOf(newSrc));
+						callDAG.callTo.get(strSrc).remove(strDst);
+						callDAG.callFrom.get(strDst).remove(strSrc);
+						
+						if (callDAG.callTo.get(strSrc).size() < 1) callDAG.callTo.remove(strSrc);
+						if (callDAG.callFrom.get(strDst).size() < 1) callDAG.callFrom.remove(strDst);
+						
+						if (!callDAG.callTo.containsKey(strNewSrc)) callDAG.callTo.put(strNewSrc, new HashSet());
+						callDAG.callTo.get(strNewSrc).add(strNewDst);
+						if (!callDAG.callFrom.containsKey(strNewDst)) callDAG.callFrom.put(strNewDst, new HashSet());
+						callDAG.callFrom.get(strNewDst).add(strNewSrc);
 						
 						callDAG.resetAuxiliary();
 						callDAG.removeIsolatedNodes();
@@ -342,8 +355,8 @@ public class ArtificialDAG {
 		
 		pw.close();
 		
-		getRandomShuffleArtificialDAG("hourglassDAG", rewirePrb);
-		getCentralityShuffleArtificialDAG("hourglassDAG", rewirePrb);
+//		getRandomShuffleArtificialDAG("hourglassDAG", rewirePrb);
+//		getCentralityShuffleArtificialDAG("hourglassDAG", rewirePrb);
 	}
 	
 	public void generateTrapezoidsDAG() throws Exception {
