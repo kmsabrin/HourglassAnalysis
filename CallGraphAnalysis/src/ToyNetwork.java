@@ -59,30 +59,40 @@ public class ToyNetwork {
 		callDAG.callFrom.put("h", new HashSet<String>(Arrays.asList("g")));
 		callDAG.callFrom.put("i", new HashSet<String>(Arrays.asList("g")));
 		
-//		callDAG.nEdges = 14;
+		callDAG.nEdges = 13;
 		for (String s: callDAG.functions) {
 			if (!callDAG.callFrom.containsKey(s)) ++callDAG.nRoots;
 			if (!callDAG.callTo.containsKey(s)) ++callDAG.nLeaves;
 		}
-		callDAG.removeCycles();
+//		callDAG.removeCycles();
 		callDAG.loadDegreeMetric();
 		callDAG.loadLocationMetric(); // must load degree metric before
-		callDAG.loadGeneralityMetric(); // approximated
-		callDAG.loadComplexityMetric();
+//		callDAG.loadGeneralityMetric(); // approximated
+//		callDAG.loadComplexityMetric();
 		callDAG.loadCentralityMetric();
 	}
 			
 	public static void main(String[] args) throws Exception {
 		ToyNetwork toyNetwork = new ToyNetwork();
-		ToyNetwork dummy = new ToyNetwork();
 		toyNetwork.loadCallGraph();
-//		dummy.loadCallGraph();
 		String v = "toy";
+		toyNetwork.callDAG.printCallDAG();
+//		ToyNetwork dummy = new ToyNetwork();
+//		dummy.loadCallGraph();
+		CentralityAnalysis.getCentralityPDF(toyNetwork.callDAG, v);
 		
-		CentralityAnalysis centralityAnalysis = new CentralityAnalysis();
-		centralityAnalysis.getCentralityCDF(toyNetwork.callDAG, v);
-		centralityAnalysis.getCentralityCCDF(toyNetwork.callDAG, v);
-		System.out.println("Centrality CDF Done.");
+		RandomNetworkGenerator randomNetworkGenerator = new RandomNetworkGenerator(toyNetwork.callDAG);
+		String randomVersionNumber = v + "rX";
+		randomNetworkGenerator.generateRandomNetwork(randomVersionNumber);
+		CallDAG randomCallDAG = new CallDAG("artificial_callgraphs//" + randomVersionNumber + ".txt");
+		System.out.println("R: " + randomCallDAG.nRoots);
+		System.out.println("L: " + randomCallDAG.nLeaves);
+		System.out.println("E: " + randomCallDAG.nEdges);
+		CentralityAnalysis.getCentralityPDF(randomNetworkGenerator.randomCallDAG, randomVersionNumber);
+		
+//		centralityAnalysis.getCentralityCDF(toyNetwork.callDAG, v);
+//		centralityAnalysis.getCentralityCCDF(toyNetwork.callDAG, v);
+//		System.out.println("Centrality CDF Done.");
 		
 //		centralityAnalysis.doUniformPathSampling = false;
 //		centralityAnalysis.getSampledPathStatistics(toyNetwork.callDAG, v);

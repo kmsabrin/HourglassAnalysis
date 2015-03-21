@@ -11,7 +11,7 @@ public class ArtificialDAG {
 	int nEdge;
 	int nPath;
 
-	double rewirePrb = 0.2;
+	double rewirePrb = 1;
 	
 	HashSet<Integer> topLayerNode;
 	HashSet<Integer> bottomLayerNode;
@@ -30,7 +30,7 @@ public class ArtificialDAG {
 //		dummy
 //		nNode = 15;
 //		nLayer = 5;
-//		nEdge = (int)(nNode * 2.2);
+//		nEdge = (int)(nNode * 2);
 		
 		nNode = 10000;
 		nLayer = 19;
@@ -103,8 +103,8 @@ public class ArtificialDAG {
 	void assignLayerWeightHourglassDAG() {
 		int nodePerLayerDistribution[] = new int[nLayer + 1];
 	
-		double wSize = 10;
-		double alpha = 1.81; // 10,1.81,narrow // 100,1.35,fat // 2,1.5,dummy // for 10K,19L,3Ne
+		double wSize = 9;
+		double alpha = 1.85; // 10,1.81,narrow // 100,1.35,fat // 2,1.5,dummy // for 10K,19L,3Ne
 		
 		nodePerLayerDistribution[(nLayer + 1) / 2] = (int)wSize;
 
@@ -333,7 +333,8 @@ public class ArtificialDAG {
 
 		pw.close();
 		
-		getCentralityShuffleArtificialDAG("rectangleDAG", rewirePrb);
+		getRandomShuffleArtificialDAG("rectangleDAG", rewirePrb);
+//		getCentralityShuffleArtificialDAG("rectangleDAG", rewirePrb);
 	}
 	
 	public void generateNoisyRectangleDAG() throws Exception {
@@ -344,7 +345,8 @@ public class ArtificialDAG {
 		
 		pw.close();
 		
-		getCentralityShuffleArtificialDAG("noisyRectangleDAG", rewirePrb);
+		getRandomShuffleArtificialDAG("noisyRectangleDAG", rewirePrb);
+//		getCentralityShuffleArtificialDAG("noisyRectangleDAG", rewirePrb);
 	}
 	
 	public void generateHourglassDAG() throws Exception {
@@ -355,7 +357,7 @@ public class ArtificialDAG {
 		
 		pw.close();
 		
-//		getRandomShuffleArtificialDAG("hourglassDAG", rewirePrb);
+		getRandomShuffleArtificialDAG("hourglassDAG", rewirePrb);
 //		getCentralityShuffleArtificialDAG("hourglassDAG", rewirePrb);
 	}
 	
@@ -366,6 +368,8 @@ public class ArtificialDAG {
 		traversePath(pw);
 
 		pw.close();
+		
+		getRandomShuffleArtificialDAG("trapezoidDAG", rewirePrb);
 	}
 	
 	public void generateDiamondDAG() throws Exception {
@@ -375,6 +379,8 @@ public class ArtificialDAG {
 		traversePath(pw);
 
 		pw.close();
+		
+		getRandomShuffleArtificialDAG("diamondDAG", rewirePrb);
 	}
 	
 //	public static void getMaxCentralityDecompositionCurve(String version) throws Exception {

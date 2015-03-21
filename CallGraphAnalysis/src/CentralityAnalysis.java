@@ -64,7 +64,7 @@ public class CentralityAnalysis {
 		}
 		
 		for (double d: histogram.keySet()) {
-			pw.println(d + "\t" + histogram.get(d));
+			pw.println(d + "\t" + (histogram.get(d) / callDAG.functions.size()));
 		}
 		
 		pw.close();

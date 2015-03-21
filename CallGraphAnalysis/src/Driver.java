@@ -65,6 +65,12 @@ public class Driver {
 		}	
 	}
 	
+	private static void printNetworkStat(CallDAG callDAG) {
+		System.out.println("R: " + callDAG.nRoots);
+		System.out.println("L: " + callDAG.nLeaves);
+		System.out.println("E: " + callDAG.nEdges);
+	}
+	
 	public static void doArtificialNetworkAnalysis() throws Exception {
 //		new ArtificialDAG().generateRectangleDAG();
 //		new ArtificialDAG().generateHourglassDAG();
@@ -76,23 +82,30 @@ public class Driver {
 							 "noisyRectangleDAG",
 							 "hourglassDAG", 
 							 "trapezoidDAG",
-							 "diamondDAG"};
+							 "diamondDAG",
+		};
+		
+//		String versions[] = {"hourglassDAG"/*, "randomShuffle-hourglassDAG-1.0"*/};
 		
 		for (int i = 0; i < versions.length; ++i) {
-			String v = versions[i];
-			CallDAG callDAG = new CallDAG("artificial_callgraphs//" + v + ".txt");
-			System.out.println("Loading " + v + " Done.");
+//			if (i == 2) continue;			
+			String versionNumber = versions[i];
+			CallDAG callDAG = new CallDAG("artificial_callgraphs//" + versionNumber + ".txt");
+			CentralityAnalysis.getCentralityPDF(callDAG, versionNumber);
+			printNetworkStat(callDAG);
+
+			String r1VersionNumber = "randomShuffle-" + versionNumber + "-1.0";
+			CallDAG r1callDAG = new CallDAG("artificial_callgraphs//" + r1VersionNumber + ".txt");
+			CentralityAnalysis.getCentralityPDF(r1callDAG, r1VersionNumber);
+			printNetworkStat(r1callDAG);
 			
-			RandomNetworkGenerator randomNetworkGenerator = new RandomNetworkGenerator(callDAG);
-			String randomVersionNumber = v + "rX";
-			randomNetworkGenerator.generateRandomNetwork(randomVersionNumber);
-			randomNetworkGenerator.randomCallDAG.loadDegreeMetric();
-			randomNetworkGenerator.randomCallDAG.loadLocationMetric(); 
-			randomNetworkGenerator.randomCallDAG.loadCentralityMetric();
-			System.out.println("Randomization of " + v + " Done.");
+			String r2VersionNumber = versionNumber + "rX";
+			CallDAG r2CallDAG = new CallDAG("artificial_callgraphs//" + r2VersionNumber + ".txt");	
+			CentralityAnalysis.getCentralityPDF(r2CallDAG, r2VersionNumber);
+			printNetworkStat(r2CallDAG);
 			
-			CentralityAnalysis.getCentralityPDF(callDAG, v);
-			CentralityAnalysis.getCentralityPDF(randomNetworkGenerator.randomCallDAG, randomVersionNumber);
+//			RandomNetworkGenerator randomNetworkGenerator = new RandomNetworkGenerator(callDAG);
+//			randomNetworkGenerator.generateRandomNetwork(r2VersionNumber);
 		}
 	}
 

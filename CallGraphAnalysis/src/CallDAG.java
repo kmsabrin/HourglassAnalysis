@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.TreeSet;
 
 public class CallDAG {
 	int nEdges;
@@ -60,7 +61,7 @@ public class CallDAG {
 	ArrayList<ArrayList<String>> detectedCycles;
 	
 	CallDAG() { 
-		functions = new HashSet();
+		functions = new TreeSet();
 		callFrom = new HashMap();
 		callTo = new HashMap();
 		
@@ -100,15 +101,10 @@ public class CallDAG {
 			
 		// load & initialize the attributes of the call graph
 		loadCallGraph(callGraphFileName);
-		
-		for (String s: functions) {
-			if (!callFrom.containsKey(s)) ++nRoots;
-			if (!callTo.containsKey(s)) ++nLeaves;
-		}
 
 		removeCycles(); // or should I only ignore cycles?
 		
-		assignFunctionID();
+//		assignFunctionID();
 		
 		loadDegreeMetric();
 		
@@ -118,8 +114,8 @@ public class CallDAG {
 //		System.out.println(callTo.get("lcall27"));
 		
 		loadLocationMetric(); // must load degree metric before
-		loadGeneralityMetric(); 
-		loadComplexityMetric();
+//		loadGeneralityMetric(); //CAREFUL 
+//		loadComplexityMetric(); //CAREFUL
 		loadCentralityMetric();
 	}
 
@@ -153,7 +149,6 @@ public class CallDAG {
 					/******************/
 					/******************/
 					
-					++nEdges;
 					functions.add(callF);
 					functions.add(callT);
 					
@@ -289,7 +284,19 @@ public class CallDAG {
 			
 			outDegree.put(s, out);
 			inDegree.put(s, in);
-		}		
+//			System.out.println("Degree: " + s + " in: " + in + " out: " + out);
+		}
+		
+		nRoots = nLeaves = nEdges = 0;
+		for (String s: functions) {
+			if (!callFrom.containsKey(s)) ++nRoots;
+			if (!callTo.containsKey(s)) {
+				++nLeaves;
+			}
+			else {
+				nEdges += callTo.get(s).size();
+			}
+		}
 	}
 	
 	public void assignFunctionID() {
@@ -351,7 +358,6 @@ public class CallDAG {
 		double nPath = 0;
 		double sPath = 0;
 		for (String s: callFrom.get(node)) {
-			
 				if (visitedOrdered.contains(s)) {
 					System.out.print("cycle found: ");
 					for (int i = visitedOrdered.size() - 1; ; --i) {
@@ -566,6 +572,7 @@ public class CallDAG {
 	
 	
 	public void loadCentralityMetric() {
+		nTotalPath = 0;
 		for (String s: location.keySet()) {
 			double nPath = 1;
 			
@@ -584,13 +591,15 @@ public class CallDAG {
 //			}
 		}
 		
-		for (String s: location.keySet()) {
-			double cen = nodePathThrough.get(s) / nTotalPath;
-			centrality.put(s, cen);
+		for (String s: functions) {
+			double cntr = nodePathThrough.get(s) / nTotalPath;
+			cntr = ((int) (cntr * 1000.0)) / 1000.0;
+
+			centrality.put(s, cntr);
+//			centrality.put(s, nodePathThrough.get(s)); // non-normalized
 			
-//			centrality.put(s, nodePathThrough.get(s));
-			
-//			System.out.println(s + "\t" + cen);
+//			System.out.println(s + "\t" + cntr + "\t" + location.get(s) + "\t" + inDegree.get(s) + "\t" + outDegree.get(s));
+//			System.out.println(s + "\t" + nodePathThrough.get(s));
 		}		
 		
 //		System.out.println(nTotalPath);
@@ -617,12 +626,6 @@ public class CallDAG {
 				}
 			}
 			System.out.println();
-			
-//			if (callFrom.containsKey(s)) {
-//				for (String r : callFrom.get(s)) {
-//					System.out.println("(" + s + " called by " + r + ")");
-//				}
-//			}
 		}
 	}
 }

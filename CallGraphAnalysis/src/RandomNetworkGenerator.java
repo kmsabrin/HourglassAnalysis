@@ -17,12 +17,12 @@ public class RandomNetworkGenerator {
 	Set<String> cycleVisited;
 	boolean isReachable;
 	String randomVersionNumber;
-	int numOfIteration = 1;
+	int numOfIteration = 5;
 	Random random;
 	
 	public RandomNetworkGenerator(CallDAG callDAG) {
-		this.randomCallDAG = callDAG;
-		functionLevel = new HashMap();
+		randomCallDAG = callDAG;
+//		functionLevel = new HashMap();
 		visited = new HashSet();
 		cycleVisited = new HashSet();
 		isReachable = false;
@@ -110,9 +110,11 @@ public class RandomNetworkGenerator {
 		
 		if (isReachable) return; // target Already Found
 		if (visited.contains(node)) return; // already Traversed
+		
 		visited.add(node);
 		
-		if (functionLevel.containsKey(node) && functionLevel.get(node) <= targetLevel) return; // below the Target Level
+//		if (functionLevel.containsKey(node) && functionLevel.get(node) <= targetLevel) return; // below the Target Level
+		
 		if (!randomCallDAG.callTo.containsKey(node)) return; // a leaf
 		
 		for (String f: randomCallDAG.callTo.get(node)) {
@@ -307,88 +309,89 @@ public class RandomNetworkGenerator {
 		Object[] functionNames = randomCallDAG.functions.toArray();
 		int nRewiring = 0;
 		
+		HashSet<String> duplicateRewiring = new HashSet();
+		
 		System.out.println("Making " + (randomCallDAG.nEdges * numOfIteration) + " edge rewirings");
 		
+//		while(nRewiring < 3) {
 		while(nRewiring < randomCallDAG.nEdges * numOfIteration) {
 			int indexCurrentSource; 
 			String nameCurrentSource;
-			int levelCurrentSource; 
 			do {
 				indexCurrentSource = random.nextInt(nFunctions);
 				nameCurrentSource = (String)functionNames[indexCurrentSource];
 			} 
 			while (!randomCallDAG.callTo.containsKey(nameCurrentSource));	
-			levelCurrentSource = functionLevel.get(nameCurrentSource);
 						
-			List<String> callToListS1 = new ArrayList(randomCallDAG.callTo.get(nameCurrentSource));
-			int indexCurrentTarget; 
-			String nameCurrentTarget;
-			int levelCurrentTarget; 
-			indexCurrentTarget = random.nextInt(callToListS1.size()); 
-			nameCurrentTarget = callToListS1.get(indexCurrentTarget); 
-			levelCurrentTarget = functionLevel.get(nameCurrentTarget); 
+			ArrayList<String> callToListCurrentSource = new ArrayList(randomCallDAG.callTo.get(nameCurrentSource));
+			int indexCurrentTarget = random.nextInt(callToListCurrentSource.size()); 
+			String nameCurrentTarget = callToListCurrentSource.get(indexCurrentTarget); 
 			
-			int indexNextTarget = random.nextInt(nFunctions);
-			String nameNextTarget = (String)functionNames[indexNextTarget];
-			int levelNextTarget = functionLevel.get(nameNextTarget); 
-			
-//			check if already exists, then no rewiring, start over
-			if (randomCallDAG.callTo.get(nameCurrentSource).contains(nameNextTarget)) {
-				continue;
+			int indexNextTarget;
+			String nameNextTarget;			
+			do {
+				indexNextTarget = random.nextInt(nFunctions);
+				nameNextTarget = (String)functionNames[indexNextTarget];
 			}
+			while (randomCallDAG.callTo.get(nameCurrentSource).contains(nameNextTarget));
 
-			/* SKIP LEVEL BASED OPTIMIZATION
-//			cycle check
-			if (levelNextTarget > levelCurrentSource) {
-//				check if currentSource is reachable from nextTarget
-				checkReachablity(nameNextTarget, nameCurrentSource, levelCurrentSource);
-				if (isReachable) {
-					continue;
-				}
-			}
-			*/
+//			if (duplicateRewiring.contains(nameCurrentSource + "#" + nameCurrentTarget)) {
+//				continue;
+//			}
 			
-			checkReachablity(nameNextTarget, nameCurrentSource, levelCurrentSource);
+			// make sure no root or leaf change status
+//			if (!randomCallDAG.callFrom.containsKey(nameNextTarget)) continue; // is root
+//			if (randomCallDAG.callFrom.get(nameCurrentTarget).size() == 1) continue; // will become root
+
+
+			checkReachablity(nameNextTarget, nameCurrentSource, -1);
 			if (isReachable) {
 				continue;
 			}
 			
-//			swap ...
+//			rewire ...
 			++nRewiring;
+//			System.out.println("Rewired: " + nRewiring);
+			duplicateRewiring.add(nameCurrentSource + "#" + nameCurrentTarget);
+//			System.out.println("Rewired (" + nameCurrentSource + "," + nameCurrentTarget + ") with (" 
+//			                               + nameCurrentSource + "," + nameNextTarget + ")");
 
 //			change call graph adjacency list
 			randomCallDAG.callTo.get(nameCurrentSource).remove(nameCurrentTarget);
 			randomCallDAG.callTo.get(nameCurrentSource).add(nameNextTarget);
 						
 			randomCallDAG.callFrom.get(nameCurrentTarget).remove(nameCurrentSource);
+			if (randomCallDAG.callFrom.get(nameCurrentTarget).size() < 1) {
+				randomCallDAG.callFrom.remove(nameCurrentTarget);
+			}
 
 			if (!randomCallDAG.callFrom.containsKey(nameNextTarget)) {
 				randomCallDAG.callFrom.put(nameNextTarget, new HashSet());
 			}
-			randomCallDAG.callFrom.get(nameNextTarget).add(nameCurrentSource);
-		
-//			level propagation SKIP FOR NOW
-//			int updateLevelCurrentSource = 1; 
-//			for (String s: randomCallDAG.callTo.get(nameCurrentSource)) {
-//				updateLevelCurrentSource = Math.max(updateLevelCurrentSource, functionLevel.get(s) + 1);
-//			}
-//			
-//			if (updateLevelCurrentSource != levelCurrentSource) { // if change in level of current source
-//				functionLevel.put(nameCurrentSource, updateLevelCurrentSource);
-//				updateFunctionLevelWithCutOff(Math.min(updateLevelCurrentSource, levelCurrentSource) + 1);
-//			}
 			
-//			periodic snapshot
-			if (nRewiring % 5000 == 0) {
-				
+			randomCallDAG.callFrom.get(nameNextTarget).add(nameCurrentSource);
+		}
+		
+		writeRandomCallDAG();
+	}
+	
+	public void writeRandomCallDAG() throws Exception {
+		PrintWriter pw = new PrintWriter(new File("artificial_callgraphs//"+randomVersionNumber+".txt"));
+		for (String s: randomCallDAG.functions) {
+			if (randomCallDAG.callTo.containsKey(s)) {
+				for (String r : randomCallDAG.callTo.get(s)) {
+					pw.println(s + " -> " + r + ";");
+				}
 			}
 		}
+		pw.close();
 	}
 	
 	public void checkDAGValidity() {
 		checkCycleExistence();
 		if (isReachable) {
 			System.out.println("Cycle Found # Error!");
+			return;
 		}
 		
 //		SKIP FOR NOW
@@ -425,12 +428,12 @@ public class RandomNetworkGenerator {
 //			if(randomCallDAG.outDegree.get(f) != originalCallDAG.outDegree.get(f)) System.out.println("Error!");
 //		}
 		
-		System.out.println("OK !!!");
+		System.out.println("Random DAG is OK !!!");
 	}
 	
 	public void generateRandomNetwork(String rndmVrsnNum) throws Exception {
 		randomVersionNumber = rndmVrsnNum;
-		getNodeLevel();
+//		getNodeLevel();
 		rewireRandomEdge();
 //		chooseEdgePairsAndSwap();
 		checkDAGValidity();
