@@ -17,12 +17,12 @@ public class RandomNetworkGenerator {
 	Set<String> cycleVisited;
 	boolean isReachable;
 	String randomVersionNumber;
-	int numOfIteration = 5;
+	int numOfIteration = 2;
 	Random random;
 	
 	public RandomNetworkGenerator(CallDAG callDAG) {
 		randomCallDAG = callDAG;
-//		functionLevel = new HashMap();
+		functionLevel = new HashMap();
 		visited = new HashSet();
 		cycleVisited = new HashSet();
 		isReachable = false;
@@ -113,7 +113,7 @@ public class RandomNetworkGenerator {
 		
 		visited.add(node);
 		
-//		if (functionLevel.containsKey(node) && functionLevel.get(node) <= targetLevel) return; // below the Target Level
+		if (functionLevel.containsKey(node) && functionLevel.get(node) <= targetLevel) return; // below the Target Level
 		
 		if (!randomCallDAG.callTo.containsKey(node)) return; // a leaf
 		
@@ -302,6 +302,8 @@ public class RandomNetworkGenerator {
 //			}
 //			System.out.println();
 //		}
+		
+		writeRandomCallDAG();
 	}
 	
 	public void rewireRandomEdge() throws Exception {
@@ -433,9 +435,9 @@ public class RandomNetworkGenerator {
 	
 	public void generateRandomNetwork(String rndmVrsnNum) throws Exception {
 		randomVersionNumber = rndmVrsnNum;
-//		getNodeLevel();
-		rewireRandomEdge();
-//		chooseEdgePairsAndSwap();
+		getNodeLevel();
+//		rewireRandomEdge();
+		chooseEdgePairsAndSwap();
 		checkDAGValidity();
 	}
 }

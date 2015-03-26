@@ -102,7 +102,7 @@ public class CallDAG {
 		// load & initialize the attributes of the call graph
 		loadCallGraph(callGraphFileName);
 
-		removeCycles(); // or should I only ignore cycles?
+//		removeCycles(); // or should I only ignore cycles?
 		
 //		assignFunctionID();
 		
@@ -602,7 +602,7 @@ public class CallDAG {
 //			System.out.println(s + "\t" + nodePathThrough.get(s));
 		}		
 		
-//		System.out.println(nTotalPath);
+		System.out.println(nTotalPath);
 		
 	}
 	
@@ -624,8 +624,9 @@ public class CallDAG {
 				for (String r : callTo.get(s)) {
 					System.out.print(r + ", ");
 				}
+				System.out.println();
 			}
-			System.out.println();
 		}
+		System.out.println("#####################");
 	}
 }

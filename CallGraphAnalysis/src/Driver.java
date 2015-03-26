@@ -69,11 +69,12 @@ public class Driver {
 		System.out.println("R: " + callDAG.nRoots);
 		System.out.println("L: " + callDAG.nLeaves);
 		System.out.println("E: " + callDAG.nEdges);
+		System.out.println("N: " + callDAG.functions.size());
 	}
 	
 	public static void doArtificialNetworkAnalysis() throws Exception {
 //		new ArtificialDAG().generateRectangleDAG();
-//		new ArtificialDAG().generateHourglassDAG();
+		new ArtificialDAG().generateHourglassDAG();
 //		new ArtificialDAG().generateTrapezoidsDAG();
 //		new ArtificialDAG().generateNoisyRectangleDAG();
 //		new ArtificialDAG().generateDiamondDAG();
@@ -94,18 +95,36 @@ public class Driver {
 			CentralityAnalysis.getCentralityPDF(callDAG, versionNumber);
 			printNetworkStat(callDAG);
 
-			String r1VersionNumber = "randomShuffle-" + versionNumber + "-1.0";
-			CallDAG r1callDAG = new CallDAG("artificial_callgraphs//" + r1VersionNumber + ".txt");
-			CentralityAnalysis.getCentralityPDF(r1callDAG, r1VersionNumber);
-			printNetworkStat(r1callDAG);
-			
-			String r2VersionNumber = versionNumber + "rX";
-			CallDAG r2CallDAG = new CallDAG("artificial_callgraphs//" + r2VersionNumber + ".txt");	
-			CentralityAnalysis.getCentralityPDF(r2CallDAG, r2VersionNumber);
-			printNetworkStat(r2CallDAG);
+//			String r1VersionNumber = "randomShuffle-" + versionNumber + "-1.0";
+//			CallDAG r1callDAG = new CallDAG("artificial_callgraphs//" + r1VersionNumber + ".txt");
+//			CentralityAnalysis.getCentralityPDF(r1callDAG, r1VersionNumber);
+//			printNetworkStat(r1callDAG);
+//			
+//			String r2VersionNumber = versionNumber + "rX";
+//			CallDAG r2CallDAG = new CallDAG("artificial_callgraphs//" + r2VersionNumber + ".txt");	
+//			CentralityAnalysis.getCentralityPDF(r2CallDAG, r2VersionNumber);
+//			printNetworkStat(r2CallDAG);
 			
 //			RandomNetworkGenerator randomNetworkGenerator = new RandomNetworkGenerator(callDAG);
 //			randomNetworkGenerator.generateRandomNetwork(r2VersionNumber);
+			
+			String randomVersionNumber = versionNumber + "rX";
+			ConfigurationRandomNetwork configurationRandomNetwork = new ConfigurationRandomNetwork();
+//			callDAG.resetAuxiliary();
+			configurationRandomNetwork.init(callDAG);
+//			configurationRandomNetwork.generateNumEdgePreserve_3();
+			configurationRandomNetwork.generateKNRandomDAG(callDAG);
+			configurationRandomNetwork.writeRandomDAG(callDAG, randomVersionNumber);
+			
+			CallDAG randomDAG = new CallDAG("artificial_callgraphs//"+ randomVersionNumber +".txt");
+			printNetworkStat(randomDAG);
+			CentralityAnalysis.getCentralityPDF(randomDAG, randomVersionNumber);			
+			
+//			CallDAG randomDAG = new CallDAG("artificial_callgraphs//methodX.txt");
+//			CentralityAnalysis.getCentralityPDF(randomDAG, "methodX");
+//			
+//			randomDAG = new CallDAG("artificial_callgraphs//methodY.txt");
+//			CentralityAnalysis.getCentralityPDF(randomDAG, "methodY");
 		}
 	}
 

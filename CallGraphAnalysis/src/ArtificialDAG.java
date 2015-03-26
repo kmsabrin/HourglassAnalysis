@@ -104,8 +104,11 @@ public class ArtificialDAG {
 		int nodePerLayerDistribution[] = new int[nLayer + 1];
 	
 		double wSize = 9;
-		double alpha = 1.85; // 10,1.81,narrow // 100,1.35,fat // 2,1.5,dummy // for 10K,19L,3Ne
-		
+		double alpha = 1.85; // 10,1.85,narrow // 100,1.35,fat // 2,1.5,dummy // for 10K,19L,3Ne
+
+//		double wSize = 2;
+//		double alpha = 1.5; // 10,1.85,narrow // 100,1.35,fat // 2,1.5,dummy // for 10K,19L,3Ne
+
 		nodePerLayerDistribution[(nLayer + 1) / 2] = (int)wSize;
 
 		for (int i = (nLayer + 1) / 2 - 1, p = 1; i > 0; --i, ++p) {
