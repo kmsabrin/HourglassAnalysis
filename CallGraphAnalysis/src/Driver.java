@@ -74,19 +74,19 @@ public class Driver {
 	
 	public static void doArtificialNetworkAnalysis() throws Exception {
 //		new ArtificialDAG().generateRectangleDAG();
-		new ArtificialDAG().generateHourglassDAG();
+//		new ArtificialDAG().generateHourglassDAG();
 //		new ArtificialDAG().generateTrapezoidsDAG();
 //		new ArtificialDAG().generateNoisyRectangleDAG();
 //		new ArtificialDAG().generateDiamondDAG();
 
-		String versions[] = {"rectangleDAG", 
-							 "noisyRectangleDAG",
-							 "hourglassDAG", 
-							 "trapezoidDAG",
-							 "diamondDAG",
-		};
+//		String versions[] = {"rectangleDAG", 
+//							 "noisyRectangleDAG",
+//							 "hourglassDAG", 
+//							 "trapezoidDAG",
+//							 "diamondDAG",
+//		};
 		
-//		String versions[] = {"hourglassDAG"/*, "randomShuffle-hourglassDAG-1.0"*/};
+		String versions[] = {"hourglassDAG"/*, "randomShuffle-hourglassDAG-1.0"*/};
 		
 		for (int i = 0; i < versions.length; ++i) {
 //			if (i == 2) continue;			
@@ -112,8 +112,9 @@ public class Driver {
 			ConfigurationRandomNetwork configurationRandomNetwork = new ConfigurationRandomNetwork();
 //			callDAG.resetAuxiliary();
 			configurationRandomNetwork.init(callDAG);
-//			configurationRandomNetwork.generateNumEdgePreserve_3();
-			configurationRandomNetwork.generateKNRandomDAG(callDAG);
+			configurationRandomNetwork.generateDegreeDistributionPreserveMethodX(callDAG);
+//			configurationRandomNetwork.generateNumEdgeInOutDegreePreserveMethodY(callDAG);
+//			configurationRandomNetwork.generateKNRandomDAG(callDAG);
 			configurationRandomNetwork.writeRandomDAG(callDAG, randomVersionNumber);
 			
 			CallDAG randomDAG = new CallDAG("artificial_callgraphs//"+ randomVersionNumber +".txt");
@@ -122,7 +123,6 @@ public class Driver {
 			
 //			CallDAG randomDAG = new CallDAG("artificial_callgraphs//methodX.txt");
 //			CentralityAnalysis.getCentralityPDF(randomDAG, "methodX");
-//			
 //			randomDAG = new CallDAG("artificial_callgraphs//methodY.txt");
 //			CentralityAnalysis.getCentralityPDF(randomDAG, "methodY");
 		}

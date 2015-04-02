@@ -103,8 +103,8 @@ public class ArtificialDAG {
 	void assignLayerWeightHourglassDAG() {
 		int nodePerLayerDistribution[] = new int[nLayer + 1];
 	
-		double wSize = 9;
-		double alpha = 1.85; // 10,1.85,narrow // 100,1.35,fat // 2,1.5,dummy // for 10K,19L,3Ne
+		double wSize = 2;
+		double alpha = 2.24; // 10,1.85,narrow // 100,1.35,fat // 2,1.5,dummy // for 10K,19L,3Ne
 
 //		double wSize = 2;
 //		double alpha = 1.5; // 10,1.85,narrow // 100,1.35,fat // 2,1.5,dummy // for 10K,19L,3Ne

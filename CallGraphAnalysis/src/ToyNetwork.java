@@ -85,7 +85,7 @@ public class ToyNetwork {
 		String randomVersionNumber = v + "rX";
 		ConfigurationRandomNetwork configurationRandomNetwork = new ConfigurationRandomNetwork();
 		configurationRandomNetwork.init(toyNetwork.callDAG);
-		configurationRandomNetwork.generateNumEdgePreserve(toyNetwork.callDAG);
+		configurationRandomNetwork.generateNumEdgePreserveMethodX(toyNetwork.callDAG);
 		configurationRandomNetwork.writeRandomDAG(toyNetwork.callDAG, randomVersionNumber);
 		CallDAG randomDAG = new CallDAG("artificial_callgraphs//" + randomVersionNumber + ".txt");
 		System.out.println("R: " + randomDAG.nRoots);

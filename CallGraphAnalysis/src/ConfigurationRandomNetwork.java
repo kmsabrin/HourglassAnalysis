@@ -19,6 +19,9 @@ public class ConfigurationRandomNetwork {
 	HashSet<String> visited;
 	Boolean isReachable;
 	
+	// Method X: cycle check based on the fly ordering, same as configuration model
+	// Method Y: global ordering of nodes to start with
+	
 	public void init(CallDAG callDAG) {
 		i_deg_nm = new String[callDAG.functions.size()];
 		i_deg_val = new int[callDAG.functions.size()];
@@ -56,7 +59,85 @@ public class ConfigurationRandomNetwork {
 		random = new Random(System.nanoTime());
 	}
 	
-	public void generate(CallDAG callDAG) {
+	public void generateDegreeDistributionPreserveMethodX(CallDAG callDAG) {
+		HashSet<String> existingEdge = new HashSet();
+		
+		int looped = 0;
+		
+		while (o_deg_val.length > 0 && looped < 1000) {
+//			System.out.print("Outdeg availability: ");
+//			for (int i = 0; i < o_deg_val.length; ++i) {
+//				System.out.print(o_deg_nm[i] + "," + o_deg_val[i] + " ");
+//			}
+//			System.out.println();
+//
+//			System.out.print("Indeg availability: ");
+//			for (int i = 0; i < i_deg_val.length; ++i) {
+//				System.out.print(i_deg_nm[i] + "," + i_deg_val[i] + " ");
+//			}
+//			System.out.println();
+			
+			int src_edg_idx = random.nextInt(o_deg_val.length);
+			int tgt_edg_idx = random.nextInt(i_deg_val.length);
+			
+			String src_edg_nm = o_deg_nm[src_edg_idx];
+			String tgt_edg_nm = i_deg_nm[tgt_edg_idx];
+			
+//			System.out.println("Trying " + src_edg_nm + " to " + tgt_edg_nm);
+			++looped; 
+			
+			if (src_edg_nm.equals(tgt_edg_nm)) {
+				continue;
+			}
+			
+			checkReachablity(tgt_edg_nm, src_edg_nm, callDAG);
+			if (isReachable) {
+//				try reverse direction
+				int nSrcIdx = ArrayUtils.indexOf(o_deg_nm, tgt_edg_nm);
+				int nTgtIdx = ArrayUtils.indexOf(i_deg_nm, src_edg_nm);
+
+//				check feasibility, continue if not feasible
+				if (nSrcIdx < 0 || nTgtIdx < 0) {
+					continue;
+				}
+
+//				feasible, so swap
+				src_edg_idx = nSrcIdx;
+				tgt_edg_idx = nTgtIdx;
+				
+				src_edg_nm = o_deg_nm[src_edg_idx];
+				tgt_edg_nm = i_deg_nm[tgt_edg_idx];
+			}
+			
+//			is this correct?
+//			if (existingEdge.contains(src_edg_nm + "#" + tgt_edg_nm)) continue;
+			
+			looped = 0;
+			
+//			existingEdge.add(src_edg_nm + "#" + tgt_edg_nm);
+//			System.out.println("Adding " + src_edg_nm + " to " + tgt_edg_nm);
+						
+			--o_deg_val[src_edg_idx];
+			if (o_deg_val[src_edg_idx] < 1) {
+				o_deg_val = ArrayUtils.remove(o_deg_val, src_edg_idx);
+				o_deg_nm = ArrayUtils.remove(o_deg_nm, src_edg_idx);
+			}
+			
+			--i_deg_val[tgt_edg_idx];
+			if (i_deg_val[tgt_edg_idx] < 1) {
+				i_deg_val = ArrayUtils.remove(i_deg_val, tgt_edg_idx);
+				i_deg_nm = ArrayUtils.remove(i_deg_nm, tgt_edg_idx);
+			}
+			
+			callDAG.callTo.get(src_edg_nm).add(tgt_edg_nm);
+			callDAG.callFrom.get(tgt_edg_nm).add(src_edg_nm);
+			
+//			System.out.println(Arrays.toString(i_deg_nm));
+//			System.out.println(Arrays.toString(o_deg_nm));
+		}
+	}
+
+	public void generateDegreeDistributionPreserveMethodY(CallDAG callDAG) {
 		HashSet<String> existingEdge = new HashSet();
 		
 		int looped = 0;
@@ -68,23 +149,41 @@ public class ConfigurationRandomNetwork {
 			String src_edg_nm = o_deg_nm[src_edg_idx];
 			String tgt_edg_nm = i_deg_nm[tgt_edg_idx];
 			
-//			System.out.println("Trying " + src_edg_nm + " to " + tgt_edg_nm);
+			int src_val = Integer.parseInt(src_edg_nm);
+			int tgt_val = Integer.parseInt(tgt_edg_nm);
 			
+//			System.out.println("Trying " + src_val + " to " + tgt_val);
 			++looped; 
-			if (src_edg_nm.equals(tgt_edg_nm)) {
+			
+			if (src_val == tgt_val) {
 				continue;
 			}
 			
-			checkReachablity(tgt_edg_nm, src_edg_nm, callDAG);
-			if (isReachable) {
-				continue;
+			if (src_val > tgt_val) {
+//				continue;
+				
+//				try reverse direction
+				int nSrcIdx = ArrayUtils.indexOf(o_deg_nm, tgt_edg_nm);
+				int nTgtIdx = ArrayUtils.indexOf(i_deg_nm, src_edg_nm);
+
+//				check feasibility, continue if not feasible
+				if (nSrcIdx < 0 || nTgtIdx < 0) {
+					continue;
+				}
+
+//				feasible, so swap
+				src_edg_idx = nSrcIdx;
+				tgt_edg_idx = nTgtIdx;
+				
+				src_edg_nm = o_deg_nm[src_edg_idx];
+				tgt_edg_nm = i_deg_nm[tgt_edg_idx];
 			}
 			
-			if (existingEdge.contains(src_edg_nm + "#" + tgt_edg_nm)) continue;
+//			if (existingEdge.contains(src_edg_nm + "#" + tgt_edg_nm)) continue;
 			
 			looped = 0;
 			
-			existingEdge.add(src_edg_nm + "#" + tgt_edg_nm);
+//			existingEdge.add(src_edg_nm + "#" + tgt_edg_nm);
 //			System.out.println("Adding " + src_edg_nm + " to " + tgt_edg_nm);
 						
 			--o_deg_val[src_edg_idx];
@@ -107,7 +206,7 @@ public class ConfigurationRandomNetwork {
 		}
 	}
 	
-	public void generateOutDegreePreserve(CallDAG callDAG) {
+	public void generateOutDegreeDistributionPreserveMethodX(CallDAG callDAG) {
 		HashSet<String> existingEdge = new HashSet();
 		
 		int looped = 0;
@@ -166,8 +265,59 @@ public class ConfigurationRandomNetwork {
 //			System.out.println(Arrays.toString(o_deg_nm));
 		}
 	}
+
+	public void generateNumEdgePreserveMethodX(CallDAG callDAG) {
+		HashSet<String> existingEdge = new HashSet();
+		int looped = 0;
+		ArrayList<String> functionNameList = new ArrayList(callDAG.functions);
+		int allowedEdges = callDAG.nEdges;
+		
+		System.out.println(functionNameList.size() + "\t" + allowedEdges);
+		
+		while (allowedEdges > 0 && looped < 10000) {
+			String src_edg_nm = functionNameList.get(random.nextInt(functionNameList.size()));
+			String tgt_edg_nm = functionNameList.get(random.nextInt(functionNameList.size()));
+
+//			System.out.println("Trying " + src_edg_nm + " to " + tgt_edg_nm);
+			
+			++looped;
+			
+			// check self loop
+			if (src_edg_nm.equals(tgt_edg_nm)) {
+				continue;
+			}
+			
+			// check acyclicity
+			checkReachablity(tgt_edg_nm, src_edg_nm, callDAG);
+			if (isReachable) {
+				continue;
+//				String tmp_nm = src_edg_nm;
+//				src_edg_nm = tgt_edg_nm;
+//				tgt_edg_nm = tmp_nm;
+			}
+			
+			// check multi edge
+			if (existingEdge.contains(src_edg_nm + "#" + tgt_edg_nm)) continue;
+			
+//			// check preserve roots
+//			if (callDAG.inDegree.get(tgt_edg_nm) < 1) continue;
+//			
+//			// check preserve leaves
+//			if (callDAG.outDegree.get(src_edg_nm) < 1) continue;
+						
+			--allowedEdges;
+			looped = 0;
+			existingEdge.add(src_edg_nm + "#" + tgt_edg_nm);
+//			System.out.println("Adding " + src_edg_nm + " to " + tgt_edg_nm);
+						
+			if (!callDAG.callTo.containsKey(src_edg_nm)) callDAG.callTo.put(src_edg_nm, new HashSet());
+			callDAG.callTo.get(src_edg_nm).add(tgt_edg_nm);
+			if (!callDAG.callFrom.containsKey(tgt_edg_nm)) callDAG.callFrom.put(tgt_edg_nm, new HashSet());
+			callDAG.callFrom.get(tgt_edg_nm).add(src_edg_nm);
+		}
+	}
 	
-	public void generateNumEdgePreserve_2(CallDAG callDAG) throws Exception {
+	public void generateNumEdgePreserveMethodY(CallDAG callDAG) throws Exception {
 		HashSet<String> existingEdge = new HashSet();		
 		int allowedEdges = callDAG.nEdges;
 		PrintWriter pw = new PrintWriter(new File("artificial_callgraphs//hourglassDAGrX.txt"));
@@ -197,7 +347,7 @@ public class ConfigurationRandomNetwork {
 		pw.close();		
 	}
 	
-	public void generateNumEdgePreserve_3() throws Exception {
+	public void generateNumEdgePreserveMethodXY() throws Exception {
 		CallDAG callDAG = new CallDAG();
 		HashSet<String> existingEdgeX = new HashSet();
 		HashSet<String> existingEdgeY = new HashSet();
@@ -305,56 +455,9 @@ public class ConfigurationRandomNetwork {
 			}
 		}
 	}
-	
-	public void generateNumEdgePreserve(CallDAG callDAG) {
-		HashSet<String> existingEdge = new HashSet();
-		int looped = 0;
-		ArrayList<String> functionNameList = new ArrayList(callDAG.functions);
-		int allowedEdges = callDAG.nEdges;
-		
-		System.out.println(functionNameList.size() + "\t" + allowedEdges);
-		
-		while (allowedEdges > 0 && looped < 10000) {
-			String src_edg_nm = functionNameList.get(random.nextInt(functionNameList.size()));
-			String tgt_edg_nm = functionNameList.get(random.nextInt(functionNameList.size()));
 
-//			System.out.println("Trying " + src_edg_nm + " to " + tgt_edg_nm);
-			
-			++looped;
-			
-			// check self loop
-			if (src_edg_nm.equals(tgt_edg_nm)) {
-				continue;
-			}
-			
-			// check acyclicity
-			checkReachablity(tgt_edg_nm, src_edg_nm, callDAG);
-			if (isReachable) {
-				continue;
-//				String tmp_nm = src_edg_nm;
-//				src_edg_nm = tgt_edg_nm;
-//				tgt_edg_nm = tmp_nm;
-			}
-			
-			// check multi edge
-			if (existingEdge.contains(src_edg_nm + "#" + tgt_edg_nm)) continue;
-			
-//			// check preserve roots
-//			if (callDAG.inDegree.get(tgt_edg_nm) < 1) continue;
-//			
-//			// check preserve leaves
-//			if (callDAG.outDegree.get(src_edg_nm) < 1) continue;
-						
-			--allowedEdges;
-			looped = 0;
-			existingEdge.add(src_edg_nm + "#" + tgt_edg_nm);
-//			System.out.println("Adding " + src_edg_nm + " to " + tgt_edg_nm);
-						
-			if (!callDAG.callTo.containsKey(src_edg_nm)) callDAG.callTo.put(src_edg_nm, new HashSet());
-			callDAG.callTo.get(src_edg_nm).add(tgt_edg_nm);
-			if (!callDAG.callFrom.containsKey(tgt_edg_nm)) callDAG.callFrom.put(tgt_edg_nm, new HashSet());
-			callDAG.callFrom.get(tgt_edg_nm).add(src_edg_nm);
-		}
+	public void generateLayeredNewRandomization(CallDAG callDAG) {
+		
 	}
 	
 	public void checkReachablityTraverse(String node, String target, CallDAG callDAG) {

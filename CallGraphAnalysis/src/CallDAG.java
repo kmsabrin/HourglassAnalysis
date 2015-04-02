@@ -599,7 +599,7 @@ public class CallDAG {
 //			centrality.put(s, nodePathThrough.get(s)); // non-normalized
 			
 //			System.out.println(s + "\t" + cntr + "\t" + location.get(s) + "\t" + inDegree.get(s) + "\t" + outDegree.get(s));
-//			System.out.println(s + "\t" + nodePathThrough.get(s));
+			System.out.println(s + "\t" + cntr);
 		}		
 		
 		System.out.println(nTotalPath);

@@ -50,6 +50,11 @@ public class CentralityAnalysis {
 	public static void getCentralityPDF(CallDAG callDAG, String filePath) throws Exception {		
 		PrintWriter pw = new PrintWriter(new File("Results//centrality-pdf-" + filePath + ".txt"));
 
+		for (String s: callDAG.functions) {
+			pw.println(callDAG.centrality.get(s));
+		}
+			
+		/*
 		Map<Double, Double> histogram = new TreeMap();
 		
 		for (String s: callDAG.functions) {
@@ -66,8 +71,10 @@ public class CentralityAnalysis {
 		for (double d: histogram.keySet()) {
 			pw.println(d + "\t" + (histogram.get(d) / callDAG.functions.size()));
 		}
+		*/
 		
 		pw.close();
+		
 	}
 	
 	void getCentralityCDF(CallDAG callDAG, String filePath) throws Exception {		
