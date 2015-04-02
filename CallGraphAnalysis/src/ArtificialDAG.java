@@ -28,13 +28,13 @@ public class ArtificialDAG {
 
 	public ArtificialDAG() {
 //		dummy
-//		nNode = 15;
-//		nLayer = 5;
-//		nEdge = (int)(nNode * 2);
+		nNode = 15;
+		nLayer = 5;
+		nEdge = (int)(nNode * 2);
 		
-		nNode = 10000;
-		nLayer = 19;
-		nEdge = (int)(nNode * 3);
+//		nNode = 10000;
+//		nLayer = 19;
+//		nEdge = (int)(nNode * 3);
 
 //		nPath = (int)Math.ceil(nEdge / (nLayer - 1));  // (numberOfEdges / (numberOfLayer - 1))
 
@@ -57,7 +57,7 @@ public class ArtificialDAG {
 	void assignNodeByLayerWeight(int nodePerLayerDistribution[]) {
 		int nodeID = 1;
 		for (int i = 1; i <= nLayer; ++i) {
-			System.out.println("Node Count: " + nodePerLayerDistribution[i] + "\t Layer: " + i) ;
+//			System.out.println("Node Count: " + nodePerLayerDistribution[i] + "\t Layer: " + i) ;
 			for (int j = 1; j <= nodePerLayerDistribution[i]; ++j) {
 				nodeLayerMap.put(nodeID, i);
 				nodeIDsPerLayer.get(i).add(nodeID);
@@ -73,7 +73,10 @@ public class ArtificialDAG {
 
 				++nodeID;
 			}
+			System.out.print((nodeID - 1) + ",");
 		}
+		System.out.println();
+		
 		nNode = nodeID - 1;
 		System.out.println("Total Nodes used: " + nNode);
 	}
@@ -103,11 +106,11 @@ public class ArtificialDAG {
 	void assignLayerWeightHourglassDAG() {
 		int nodePerLayerDistribution[] = new int[nLayer + 1];
 	
-		double wSize = 2;
-		double alpha = 2.24; // 10,1.85,narrow // 100,1.35,fat // 2,1.5,dummy // for 10K,19L,3Ne
-
 //		double wSize = 2;
-//		double alpha = 1.5; // 10,1.85,narrow // 100,1.35,fat // 2,1.5,dummy // for 10K,19L,3Ne
+//		double alpha = 2.24; // 10,1.85,narrow // 100,1.35,fat // 2,1.5,dummy // for 10K,19L,3Ne
+
+		double wSize = 2;
+		double alpha = 1.5; // 10,1.85,narrow // 100,1.35,fat // 2,1.5,dummy // for 10K,19L,3Ne
 
 		nodePerLayerDistribution[(nLayer + 1) / 2] = (int)wSize;
 

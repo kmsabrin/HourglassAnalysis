@@ -8,13 +8,15 @@ import java.util.Random;
 import org.apache.commons.lang3.ArrayUtils;
 
 public class ConfigurationRandomNetwork {
-	String i_deg_nm[];
-	int i_deg_val[];
+	String inDegreeName[];
+	int inDegreeValue[];
 	
-	String o_deg_nm[];
-	int o_deg_val[];
+	String outDegreeName[];
+	int outDegreeValue[];
 	
 	Random random;
+	
+	String availableFunctionName[];
 	
 	HashSet<String> visited;
 	Boolean isReachable;
@@ -23,26 +25,30 @@ public class ConfigurationRandomNetwork {
 	// Method Y: global ordering of nodes to start with
 	
 	public void init(CallDAG callDAG) {
-		i_deg_nm = new String[callDAG.functions.size()];
-		i_deg_val = new int[callDAG.functions.size()];
-		o_deg_nm = new String[callDAG.functions.size()];
-		o_deg_val = new int[callDAG.functions.size()];
+		inDegreeName = new String[callDAG.functions.size()];
+		inDegreeValue = new int[callDAG.functions.size()];
+		outDegreeName = new String[callDAG.functions.size()];
+		outDegreeValue = new int[callDAG.functions.size()];
+		availableFunctionName = new String[callDAG.functions.size()];
 		
 		int i_idx = 0;
 		int o_idx = 0;
+		int f_idx = 0;
 		for (String s: callDAG.functions) {
+			availableFunctionName[f_idx++] = s;
+			
 			int i_deg = callDAG.inDegree.get(s);
 			int o_deg = callDAG.outDegree.get(s);
 			
 			if (i_deg > 0) {
-				i_deg_nm[i_idx] = s;
-				i_deg_val[i_idx] = i_deg;
+				inDegreeName[i_idx] = s;
+				inDegreeValue[i_idx] = i_deg;
 				++i_idx;
 			}
 			
 			if (o_deg > 0) {
-				o_deg_nm[o_idx] = s;
-				o_deg_val[o_idx] = o_deg;
+				outDegreeName[o_idx] = s;
+				outDegreeValue[o_idx] = o_deg;
 				++o_idx;
 			}
 			
@@ -50,11 +56,11 @@ public class ConfigurationRandomNetwork {
 			if(callDAG.callFrom.containsKey(s)) callDAG.callFrom.get(s).clear();
 		}
 		
-		i_deg_nm = Arrays.copyOf(i_deg_nm, i_idx);
-		i_deg_val = Arrays.copyOf(i_deg_val, i_idx);
+		inDegreeName = Arrays.copyOf(inDegreeName, i_idx);
+		inDegreeValue = Arrays.copyOf(inDegreeValue, i_idx);
 		
-		o_deg_nm = Arrays.copyOf(o_deg_nm, o_idx);
-		o_deg_val = Arrays.copyOf(o_deg_val, o_idx);
+		outDegreeName = Arrays.copyOf(outDegreeName, o_idx);
+		outDegreeValue = Arrays.copyOf(outDegreeValue, o_idx);
 		
 		random = new Random(System.nanoTime());
 	}
@@ -64,7 +70,7 @@ public class ConfigurationRandomNetwork {
 		
 		int looped = 0;
 		
-		while (o_deg_val.length > 0 && looped < 1000) {
+		while (outDegreeValue.length > 0 && looped < 1000) {
 //			System.out.print("Outdeg availability: ");
 //			for (int i = 0; i < o_deg_val.length; ++i) {
 //				System.out.print(o_deg_nm[i] + "," + o_deg_val[i] + " ");
@@ -77,11 +83,11 @@ public class ConfigurationRandomNetwork {
 //			}
 //			System.out.println();
 			
-			int src_edg_idx = random.nextInt(o_deg_val.length);
-			int tgt_edg_idx = random.nextInt(i_deg_val.length);
+			int src_edg_idx = random.nextInt(outDegreeValue.length);
+			int tgt_edg_idx = random.nextInt(inDegreeValue.length);
 			
-			String src_edg_nm = o_deg_nm[src_edg_idx];
-			String tgt_edg_nm = i_deg_nm[tgt_edg_idx];
+			String src_edg_nm = outDegreeName[src_edg_idx];
+			String tgt_edg_nm = inDegreeName[tgt_edg_idx];
 			
 //			System.out.println("Trying " + src_edg_nm + " to " + tgt_edg_nm);
 			++looped; 
@@ -93,8 +99,8 @@ public class ConfigurationRandomNetwork {
 			checkReachablity(tgt_edg_nm, src_edg_nm, callDAG);
 			if (isReachable) {
 //				try reverse direction
-				int nSrcIdx = ArrayUtils.indexOf(o_deg_nm, tgt_edg_nm);
-				int nTgtIdx = ArrayUtils.indexOf(i_deg_nm, src_edg_nm);
+				int nSrcIdx = ArrayUtils.indexOf(outDegreeName, tgt_edg_nm);
+				int nTgtIdx = ArrayUtils.indexOf(inDegreeName, src_edg_nm);
 
 //				check feasibility, continue if not feasible
 				if (nSrcIdx < 0 || nTgtIdx < 0) {
@@ -105,8 +111,8 @@ public class ConfigurationRandomNetwork {
 				src_edg_idx = nSrcIdx;
 				tgt_edg_idx = nTgtIdx;
 				
-				src_edg_nm = o_deg_nm[src_edg_idx];
-				tgt_edg_nm = i_deg_nm[tgt_edg_idx];
+				src_edg_nm = outDegreeName[src_edg_idx];
+				tgt_edg_nm = inDegreeName[tgt_edg_idx];
 			}
 			
 //			is this correct?
@@ -117,16 +123,16 @@ public class ConfigurationRandomNetwork {
 //			existingEdge.add(src_edg_nm + "#" + tgt_edg_nm);
 //			System.out.println("Adding " + src_edg_nm + " to " + tgt_edg_nm);
 						
-			--o_deg_val[src_edg_idx];
-			if (o_deg_val[src_edg_idx] < 1) {
-				o_deg_val = ArrayUtils.remove(o_deg_val, src_edg_idx);
-				o_deg_nm = ArrayUtils.remove(o_deg_nm, src_edg_idx);
+			--outDegreeValue[src_edg_idx];
+			if (outDegreeValue[src_edg_idx] < 1) {
+				outDegreeValue = ArrayUtils.remove(outDegreeValue, src_edg_idx);
+				outDegreeName = ArrayUtils.remove(outDegreeName, src_edg_idx);
 			}
 			
-			--i_deg_val[tgt_edg_idx];
-			if (i_deg_val[tgt_edg_idx] < 1) {
-				i_deg_val = ArrayUtils.remove(i_deg_val, tgt_edg_idx);
-				i_deg_nm = ArrayUtils.remove(i_deg_nm, tgt_edg_idx);
+			--inDegreeValue[tgt_edg_idx];
+			if (inDegreeValue[tgt_edg_idx] < 1) {
+				inDegreeValue = ArrayUtils.remove(inDegreeValue, tgt_edg_idx);
+				inDegreeName = ArrayUtils.remove(inDegreeName, tgt_edg_idx);
 			}
 			
 			callDAG.callTo.get(src_edg_nm).add(tgt_edg_nm);
@@ -142,12 +148,12 @@ public class ConfigurationRandomNetwork {
 		
 		int looped = 0;
 		
-		while (o_deg_val.length > 0 && looped < 10000) {
-			int src_edg_idx = random.nextInt(o_deg_val.length);
-			int tgt_edg_idx = random.nextInt(i_deg_val.length);
+		while (outDegreeValue.length > 0 && looped < 10000) {
+			int src_edg_idx = random.nextInt(outDegreeValue.length);
+			int tgt_edg_idx = random.nextInt(inDegreeValue.length);
 			
-			String src_edg_nm = o_deg_nm[src_edg_idx];
-			String tgt_edg_nm = i_deg_nm[tgt_edg_idx];
+			String src_edg_nm = outDegreeName[src_edg_idx];
+			String tgt_edg_nm = inDegreeName[tgt_edg_idx];
 			
 			int src_val = Integer.parseInt(src_edg_nm);
 			int tgt_val = Integer.parseInt(tgt_edg_nm);
@@ -163,8 +169,8 @@ public class ConfigurationRandomNetwork {
 //				continue;
 				
 //				try reverse direction
-				int nSrcIdx = ArrayUtils.indexOf(o_deg_nm, tgt_edg_nm);
-				int nTgtIdx = ArrayUtils.indexOf(i_deg_nm, src_edg_nm);
+				int nSrcIdx = ArrayUtils.indexOf(outDegreeName, tgt_edg_nm);
+				int nTgtIdx = ArrayUtils.indexOf(inDegreeName, src_edg_nm);
 
 //				check feasibility, continue if not feasible
 				if (nSrcIdx < 0 || nTgtIdx < 0) {
@@ -175,8 +181,8 @@ public class ConfigurationRandomNetwork {
 				src_edg_idx = nSrcIdx;
 				tgt_edg_idx = nTgtIdx;
 				
-				src_edg_nm = o_deg_nm[src_edg_idx];
-				tgt_edg_nm = i_deg_nm[tgt_edg_idx];
+				src_edg_nm = outDegreeName[src_edg_idx];
+				tgt_edg_nm = inDegreeName[tgt_edg_idx];
 			}
 			
 //			if (existingEdge.contains(src_edg_nm + "#" + tgt_edg_nm)) continue;
@@ -186,16 +192,16 @@ public class ConfigurationRandomNetwork {
 //			existingEdge.add(src_edg_nm + "#" + tgt_edg_nm);
 //			System.out.println("Adding " + src_edg_nm + " to " + tgt_edg_nm);
 						
-			--o_deg_val[src_edg_idx];
-			if (o_deg_val[src_edg_idx] < 1) {
-				o_deg_val = ArrayUtils.remove(o_deg_val, src_edg_idx);
-				o_deg_nm = ArrayUtils.remove(o_deg_nm, src_edg_idx);
+			--outDegreeValue[src_edg_idx];
+			if (outDegreeValue[src_edg_idx] < 1) {
+				outDegreeValue = ArrayUtils.remove(outDegreeValue, src_edg_idx);
+				outDegreeName = ArrayUtils.remove(outDegreeName, src_edg_idx);
 			}
 			
-			--i_deg_val[tgt_edg_idx];
-			if (i_deg_val[tgt_edg_idx] < 1) {
-				i_deg_val = ArrayUtils.remove(i_deg_val, tgt_edg_idx);
-				i_deg_nm = ArrayUtils.remove(i_deg_nm, tgt_edg_idx);
+			--inDegreeValue[tgt_edg_idx];
+			if (inDegreeValue[tgt_edg_idx] < 1) {
+				inDegreeValue = ArrayUtils.remove(inDegreeValue, tgt_edg_idx);
+				inDegreeName = ArrayUtils.remove(inDegreeName, tgt_edg_idx);
 			}
 			
 			callDAG.callTo.get(src_edg_nm).add(tgt_edg_nm);
@@ -213,11 +219,11 @@ public class ConfigurationRandomNetwork {
 		
 		ArrayList<String> functionNameList = new ArrayList(callDAG.functions);
 		
-		while (o_deg_val.length > 0 && looped < 10000) {
-			int src_edg_idx = random.nextInt(o_deg_val.length);
+		while (outDegreeValue.length > 0 && looped < 10000) {
+			int src_edg_idx = random.nextInt(outDegreeValue.length);
 //			int tgt_edg_idx = random.nextInt(i_deg_val.length);
 			
-			String src_edg_nm = o_deg_nm[src_edg_idx];
+			String src_edg_nm = outDegreeName[src_edg_idx];
 			String tgt_edg_nm = functionNameList.get(random.nextInt(functionNameList.size()));
 //			String tgt_edg_nm = i_deg_nm[tgt_edg_idx];
 			
@@ -244,10 +250,10 @@ public class ConfigurationRandomNetwork {
 			existingEdge.add(src_edg_nm + "#" + tgt_edg_nm);
 //			System.out.println("Adding " + src_edg_nm + " to " + tgt_edg_nm);
 						
-			--o_deg_val[src_edg_idx];
-			if (o_deg_val[src_edg_idx] < 1) {
-				o_deg_val = ArrayUtils.remove(o_deg_val, src_edg_idx);
-				o_deg_nm = ArrayUtils.remove(o_deg_nm, src_edg_idx);
+			--outDegreeValue[src_edg_idx];
+			if (outDegreeValue[src_edg_idx] < 1) {
+				outDegreeValue = ArrayUtils.remove(outDegreeValue, src_edg_idx);
+				outDegreeName = ArrayUtils.remove(outDegreeName, src_edg_idx);
 			}
 			
 //			--i_deg_val[tgt_edg_idx];
@@ -456,8 +462,113 @@ public class ConfigurationRandomNetwork {
 		}
 	}
 
-	public void generateLayeredNewRandomization(CallDAG callDAG) {
+	private int getLayer(int id) {
+		int layerDistribution[] = {2839,4106,4671,4923,5035,5085,5107,5117,5121,5123,5127,5137,5159,5209,5321,5573,6138,7405,10244};
+//		int layerDistribution[] = {4,7,9,12,16};
+
+		int layer = 1;
+		for (int val: layerDistribution) {
+			if (id < val) {
+				return layer;
+			}
+			else ++layer;
+		}
 		
+		return -1;
+	}
+	
+	public void generateLayeredNewRandomization(CallDAG callDAG) {
+//		HashSet<String> existingEdge = new HashSet();
+		
+		int looped = 0;
+		
+		while (availableFunctionName.length > 0 && looped < 10000) {
+			++looped; 
+			
+			int seedIndex = random.nextInt(availableFunctionName.length);
+			String seedName = availableFunctionName[seedIndex];
+			
+			int seedInDegreeIndex = ArrayUtils.indexOf(inDegreeName, seedName);
+			double seedInDegree = 0;
+			if (seedInDegreeIndex > -1) seedInDegree = inDegreeValue[seedInDegreeIndex];
+			
+			int seedOutDegreeIndex = ArrayUtils.indexOf(outDegreeName, seedName);
+			double seedOutDegree = 0;
+			if (seedOutDegreeIndex > -1) seedOutDegree = outDegreeValue[seedOutDegreeIndex];
+			
+			if (seedInDegree == 0 && seedOutDegree == 0) { // function covered
+				ArrayUtils.remove(availableFunctionName, seedIndex);
+				continue;
+			}
+			
+			double directionIndicatorRatio = seedInDegree / (seedInDegree + seedOutDegree);
+			
+//			System.out.println("Trying Seed " + seedName + " with ratio " + directionIndicatorRatio);
+			
+			int sourceEdgeIndex;
+			int targetEdgeIndex;
+			String sourceEdgeName;
+			String targetEdgeName;
+			
+			if (random.nextDouble() < directionIndicatorRatio) { // make seed a target
+				// find source if any
+				ArrayList<Integer> potentialSources = new ArrayList();
+				for (int i = 1; i < Integer.parseInt(seedName) && getLayer(i) != getLayer(Integer.parseInt(seedName)); ++i) {
+					if (ArrayUtils.indexOf(outDegreeName, Integer.toString(i)) > -1) {
+						// Layer Check
+						potentialSources.add(i);
+					}
+				}
+				
+				if (potentialSources.size() < 1) continue;
+				
+				sourceEdgeName = Integer.toString(potentialSources.get(random.nextInt(potentialSources.size()))); 
+				sourceEdgeIndex = ArrayUtils.indexOf(outDegreeName, sourceEdgeName);
+				targetEdgeName = seedName;
+				targetEdgeIndex = seedInDegreeIndex;				
+			}
+			else { // make seed a source
+				// find target if any
+				ArrayList<Integer> potentialTargets = new ArrayList();
+				for (int i = 10000 + 1000; i > Integer.parseInt(seedName) && getLayer(i) != getLayer(Integer.parseInt(seedName)); --i) {
+					if (ArrayUtils.indexOf(inDegreeName, Integer.toString(i)) > -1) {
+						// Layer Check
+						potentialTargets.add(i);
+					}
+				}
+				
+				if (potentialTargets.size() < 1) continue;
+				
+				targetEdgeName = Integer.toString(potentialTargets.get(random.nextInt(potentialTargets.size()))); 
+				targetEdgeIndex = ArrayUtils.indexOf(inDegreeName, targetEdgeName);
+				sourceEdgeName = seedName;
+				sourceEdgeIndex = seedOutDegreeIndex;
+			}
+						
+//			if (existingEdge.contains(src_edg_nm + "#" + tgt_edg_nm)) continue;
+			
+			looped = 0;
+			
+//			existingEdge.add(src_edg_nm + "#" + tgt_edg_nm);
+			
+//			System.out.println("Adding " + sourceEdgeName + " to " + targetEdgeName);
+			System.out.println(availableFunctionName.length);
+						
+			--outDegreeValue[sourceEdgeIndex];
+			if (outDegreeValue[sourceEdgeIndex] < 1) {
+				outDegreeValue = ArrayUtils.remove(outDegreeValue, sourceEdgeIndex);
+				outDegreeName = ArrayUtils.remove(outDegreeName, sourceEdgeIndex);
+			}
+			
+			--inDegreeValue[targetEdgeIndex];
+			if (inDegreeValue[targetEdgeIndex] < 1) {
+				inDegreeValue = ArrayUtils.remove(inDegreeValue, targetEdgeIndex);
+				inDegreeName = ArrayUtils.remove(inDegreeName, targetEdgeIndex);
+			}
+			
+			callDAG.callTo.get(sourceEdgeName).add(targetEdgeName);
+			callDAG.callFrom.get(targetEdgeName).add(sourceEdgeName);
+		}	
 	}
 	
 	public void checkReachablityTraverse(String node, String target, CallDAG callDAG) {

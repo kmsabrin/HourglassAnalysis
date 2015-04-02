@@ -112,9 +112,10 @@ public class Driver {
 			ConfigurationRandomNetwork configurationRandomNetwork = new ConfigurationRandomNetwork();
 //			callDAG.resetAuxiliary();
 			configurationRandomNetwork.init(callDAG);
-			configurationRandomNetwork.generateDegreeDistributionPreserveMethodX(callDAG);
+//			configurationRandomNetwork.generateDegreeDistributionPreserveMethodX(callDAG);
 //			configurationRandomNetwork.generateNumEdgeInOutDegreePreserveMethodY(callDAG);
 //			configurationRandomNetwork.generateKNRandomDAG(callDAG);
+			configurationRandomNetwork.generateLayeredNewRandomization(callDAG);
 			configurationRandomNetwork.writeRandomDAG(callDAG, randomVersionNumber);
 			
 			CallDAG randomDAG = new CallDAG("artificial_callgraphs//"+ randomVersionNumber +".txt");
