@@ -2,6 +2,7 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
 
@@ -13,6 +14,9 @@ public class ConfigurationRandomNetwork {
 	
 	String outDegreeName[];
 	int outDegreeValue[];
+	
+	HashMap<String, Integer> inDegreeCurrent;
+	HashMap<String, Integer> outDegreeCurrent;
 	
 	Random random;
 	
@@ -31,25 +35,30 @@ public class ConfigurationRandomNetwork {
 		outDegreeValue = new int[callDAG.functions.size()];
 		availableFunctionName = new String[callDAG.functions.size()];
 		
+		inDegreeCurrent = new HashMap();
+		outDegreeCurrent = new HashMap();
+		
 		int i_idx = 0;
 		int o_idx = 0;
 		int f_idx = 0;
 		for (String s: callDAG.functions) {
 			availableFunctionName[f_idx++] = s;
 			
-			int i_deg = callDAG.inDegree.get(s);
-			int o_deg = callDAG.outDegree.get(s);
+			int inDeg = callDAG.inDegree.get(s);
+			int outDeg = callDAG.outDegree.get(s);
 			
-			if (i_deg > 0) {
+			if (inDeg > 0) {
 				inDegreeName[i_idx] = s;
-				inDegreeValue[i_idx] = i_deg;
+				inDegreeValue[i_idx] = inDeg;
 				++i_idx;
+				inDegreeCurrent.put(s, inDeg);
 			}
 			
-			if (o_deg > 0) {
+			if (outDeg > 0) {
 				outDegreeName[o_idx] = s;
-				outDegreeValue[o_idx] = o_deg;
+				outDegreeValue[o_idx] = outDeg;
 				++o_idx;
+				outDegreeCurrent.put(s, outDeg);
 			}
 			
 			if(callDAG.callTo.containsKey(s)) callDAG.callTo.get(s).clear();
@@ -212,6 +221,7 @@ public class ConfigurationRandomNetwork {
 		}
 	}
 	
+	/*
 	public void generateOutDegreeDistributionPreserveMethodX(CallDAG callDAG) {
 		HashSet<String> existingEdge = new HashSet();
 		
@@ -271,7 +281,8 @@ public class ConfigurationRandomNetwork {
 //			System.out.println(Arrays.toString(o_deg_nm));
 		}
 	}
-
+*/
+	
 	public void generateNumEdgePreserveMethodX(CallDAG callDAG) {
 		HashSet<String> existingEdge = new HashSet();
 		int looped = 0;
@@ -463,9 +474,22 @@ public class ConfigurationRandomNetwork {
 	}
 
 	private int getLayer(int id) {
-		int layerDistribution[] = {2839,4106,4671,4923,5035,5085,5107,5117,5121,5123,5127,5137,5159,5209,5321,5573,6138,7405,10244};
-//		int layerDistribution[] = {4,7,9,12,16};
+		
+//		Total Nodes used: 10013 Rectangle
+//		int layerDistribution[] = {527,1054,1581,2108,2635,3162,3689,4216,4743,5270,5797,6324,6851,7378,7905,8432,8959,9486,10013};
 
+//		Total Nodes used: 10668 NoisyRectangle
+		int layerDistribution[] = {2890,4999,6539,7663,8483,9081,9518,9837,10069,10239,10363,10453,10519,10567,10602,10627,10645,10658,10668};
+
+//		Total Nodes used: 10244 Hourglass
+//		int layerDistribution[] = {2839,4106,4671,4923,5035,5085,5107,5117,5121,5123,5127,5137,5159,5209,5321,5573,6138,7405,10244};
+				
+//		Total Nodes used: 10010 Trapezoid
+//		int layerDistribution[] = {3535,5868,7408,8424,9095,9537,9829,10022,10149,10233,10288,10324,10348,10363,10373,10379,10383,10386,10388};
+		
+//		Total Nodes used: 10368 Diamond
+//		int layerDistribution[] = {2,6,16,41,99,236,556,1301,3038,7085,8822,9567,9887,10024,10082,10107,10117,10121,10123};
+		
 		int layer = 1;
 		for (int val: layerDistribution) {
 			if (id < val) {
@@ -481,6 +505,7 @@ public class ConfigurationRandomNetwork {
 //		HashSet<String> existingEdge = new HashSet();
 		
 		int looped = 0;
+		int edgeKount = 0;
 		
 		while (availableFunctionName.length > 0 && looped < 10000) {
 			++looped; 
@@ -488,13 +513,10 @@ public class ConfigurationRandomNetwork {
 			int seedIndex = random.nextInt(availableFunctionName.length);
 			String seedName = availableFunctionName[seedIndex];
 			
-			int seedInDegreeIndex = ArrayUtils.indexOf(inDegreeName, seedName);
 			double seedInDegree = 0;
-			if (seedInDegreeIndex > -1) seedInDegree = inDegreeValue[seedInDegreeIndex];
-			
-			int seedOutDegreeIndex = ArrayUtils.indexOf(outDegreeName, seedName);
 			double seedOutDegree = 0;
-			if (seedOutDegreeIndex > -1) seedOutDegree = outDegreeValue[seedOutDegreeIndex];
+			if (inDegreeCurrent.containsKey(seedName)) seedInDegree = inDegreeCurrent.get(seedName);
+			if (outDegreeCurrent.containsKey(seedName)) seedOutDegree = outDegreeCurrent.get(seedName);
 			
 			if (seedInDegree == 0 && seedOutDegree == 0) { // function covered
 				ArrayUtils.remove(availableFunctionName, seedIndex);
@@ -505,8 +527,6 @@ public class ConfigurationRandomNetwork {
 			
 //			System.out.println("Trying Seed " + seedName + " with ratio " + directionIndicatorRatio);
 			
-			int sourceEdgeIndex;
-			int targetEdgeIndex;
 			String sourceEdgeName;
 			String targetEdgeName;
 			
@@ -514,8 +534,7 @@ public class ConfigurationRandomNetwork {
 				// find source if any
 				ArrayList<Integer> potentialSources = new ArrayList();
 				for (int i = 1; i < Integer.parseInt(seedName) && getLayer(i) != getLayer(Integer.parseInt(seedName)); ++i) {
-					if (ArrayUtils.indexOf(outDegreeName, Integer.toString(i)) > -1) {
-						// Layer Check
+					if (outDegreeCurrent.containsKey(Integer.toString(i))) {
 						potentialSources.add(i);
 					}
 				}
@@ -523,16 +542,13 @@ public class ConfigurationRandomNetwork {
 				if (potentialSources.size() < 1) continue;
 				
 				sourceEdgeName = Integer.toString(potentialSources.get(random.nextInt(potentialSources.size()))); 
-				sourceEdgeIndex = ArrayUtils.indexOf(outDegreeName, sourceEdgeName);
 				targetEdgeName = seedName;
-				targetEdgeIndex = seedInDegreeIndex;				
 			}
 			else { // make seed a source
 				// find target if any
 				ArrayList<Integer> potentialTargets = new ArrayList();
 				for (int i = 10000 + 1000; i > Integer.parseInt(seedName) && getLayer(i) != getLayer(Integer.parseInt(seedName)); --i) {
-					if (ArrayUtils.indexOf(inDegreeName, Integer.toString(i)) > -1) {
-						// Layer Check
+					if (inDegreeCurrent.containsKey(Integer.toString(i))) {
 						potentialTargets.add(i);
 					}
 				}
@@ -540,9 +556,94 @@ public class ConfigurationRandomNetwork {
 				if (potentialTargets.size() < 1) continue;
 				
 				targetEdgeName = Integer.toString(potentialTargets.get(random.nextInt(potentialTargets.size()))); 
-				targetEdgeIndex = ArrayUtils.indexOf(inDegreeName, targetEdgeName);
 				sourceEdgeName = seedName;
-				sourceEdgeIndex = seedOutDegreeIndex;
+			}
+						
+			
+//			if (existingEdge.contains(src_edg_nm + "#" + tgt_edg_nm)) continue;
+			
+			looped = 0;
+			
+//			existingEdge.add(src_edg_nm + "#" + tgt_edg_nm);
+			
+//			System.out.println("Adding " + sourceEdgeName + " to " + targetEdgeName);
+//			System.out.println(edgeKount++);
+			
+			int updatedSourceOutDegree = outDegreeCurrent.get(sourceEdgeName) - 1;
+			if (updatedSourceOutDegree < 1) outDegreeCurrent.remove(sourceEdgeName);
+			else outDegreeCurrent.put(sourceEdgeName, updatedSourceOutDegree);
+			
+			int updatedTargetInDegree = inDegreeCurrent.get(targetEdgeName) - 1;
+			if (updatedTargetInDegree < 1) inDegreeCurrent.remove(targetEdgeName);
+			else inDegreeCurrent.put(targetEdgeName, updatedTargetInDegree);
+			
+			callDAG.callTo.get(sourceEdgeName).add(targetEdgeName);
+			callDAG.callFrom.get(targetEdgeName).add(sourceEdgeName);
+		}	
+	}
+	
+	public void generateNonLayeredNewRandomization(CallDAG callDAG) {
+//		HashSet<String> existingEdge = new HashSet();
+		
+		int looped = 0;
+		int edgeKount = 0;
+		
+		while (availableFunctionName.length > 0 && looped < 10000) {
+			++looped; 
+			
+			int seedIndex = random.nextInt(availableFunctionName.length);
+			String seedName = availableFunctionName[seedIndex];
+			
+			double seedInDegree = 0;
+			double seedOutDegree = 0;
+			if (inDegreeCurrent.containsKey(seedName)) seedInDegree = inDegreeCurrent.get(seedName);
+			if (outDegreeCurrent.containsKey(seedName)) seedOutDegree = outDegreeCurrent.get(seedName);
+			
+			if (seedInDegree == 0 && seedOutDegree == 0) { // function covered
+				ArrayUtils.remove(availableFunctionName, seedIndex);
+				continue;
+			}
+			
+			double directionIndicatorRatio = seedInDegree / (seedInDegree + seedOutDegree);
+			
+//			System.out.println("Trying Seed " + seedName + " with ratio " + directionIndicatorRatio);
+			
+			String sourceEdgeName;
+			String targetEdgeName;
+			
+			if (random.nextDouble() < directionIndicatorRatio) { // make seed a target
+				// find source if any
+//				System.out.print("Potential sources for " + seedName + ": ");
+				ArrayList<String> potentialSources = new ArrayList();
+				for (String s: callDAG.nodesReachableUpwards.get(seedName)) {
+//					System.out.print(s + "\t");
+					if (outDegreeCurrent.containsKey(s)) {
+						potentialSources.add(s);
+					}
+				}
+//				System.out.println();
+				
+				if (potentialSources.size() < 1) continue;
+				
+				sourceEdgeName = potentialSources.get(random.nextInt(potentialSources.size())); 
+				targetEdgeName = seedName;
+			}
+			else { // make seed a source
+				// find target if any
+//				System.out.print("Potential targets for " + seedName + ": ");
+				ArrayList<String> potentialTargets = new ArrayList();
+				for (String s: callDAG.nodesReachableDownwards.get(seedName)) {
+//					System.out.print(s + "\t");
+					if (inDegreeCurrent.containsKey(s)) {
+						potentialTargets.add(s);
+					}
+				}
+//				System.out.println();
+				
+				if (potentialTargets.size() < 1) continue;
+				
+				targetEdgeName = potentialTargets.get(random.nextInt(potentialTargets.size())); 
+				sourceEdgeName = seedName;
 			}
 						
 //			if (existingEdge.contains(src_edg_nm + "#" + tgt_edg_nm)) continue;
@@ -552,19 +653,15 @@ public class ConfigurationRandomNetwork {
 //			existingEdge.add(src_edg_nm + "#" + tgt_edg_nm);
 			
 //			System.out.println("Adding " + sourceEdgeName + " to " + targetEdgeName);
-			System.out.println(availableFunctionName.length);
-						
-			--outDegreeValue[sourceEdgeIndex];
-			if (outDegreeValue[sourceEdgeIndex] < 1) {
-				outDegreeValue = ArrayUtils.remove(outDegreeValue, sourceEdgeIndex);
-				outDegreeName = ArrayUtils.remove(outDegreeName, sourceEdgeIndex);
-			}
+//			System.out.println(edgeKount++);
 			
-			--inDegreeValue[targetEdgeIndex];
-			if (inDegreeValue[targetEdgeIndex] < 1) {
-				inDegreeValue = ArrayUtils.remove(inDegreeValue, targetEdgeIndex);
-				inDegreeName = ArrayUtils.remove(inDegreeName, targetEdgeIndex);
-			}
+			int updatedSourceOutDegree = outDegreeCurrent.get(sourceEdgeName) - 1;
+			if (updatedSourceOutDegree < 1) outDegreeCurrent.remove(sourceEdgeName);
+			else outDegreeCurrent.put(sourceEdgeName, updatedSourceOutDegree);
+			
+			int updatedTargetInDegree = inDegreeCurrent.get(targetEdgeName) - 1;
+			if (updatedTargetInDegree < 1) inDegreeCurrent.remove(targetEdgeName);
+			else inDegreeCurrent.put(targetEdgeName, updatedTargetInDegree);
 			
 			callDAG.callTo.get(sourceEdgeName).add(targetEdgeName);
 			callDAG.callFrom.get(targetEdgeName).add(sourceEdgeName);

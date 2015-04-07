@@ -28,13 +28,13 @@ public class ArtificialDAG {
 
 	public ArtificialDAG() {
 //		dummy
-		nNode = 15;
-		nLayer = 5;
-		nEdge = (int)(nNode * 2);
+//		nNode = 15;
+//		nLayer = 5;
+//		nEdge = (int)(nNode * 2);
 		
-//		nNode = 10000;
-//		nLayer = 19;
-//		nEdge = (int)(nNode * 3);
+		nNode = 10000;
+		nLayer = 19;
+		nEdge = (int)(nNode * 3);
 
 //		nPath = (int)Math.ceil(nEdge / (nLayer - 1));  // (numberOfEdges / (numberOfLayer - 1))
 
@@ -106,11 +106,12 @@ public class ArtificialDAG {
 	void assignLayerWeightHourglassDAG() {
 		int nodePerLayerDistribution[] = new int[nLayer + 1];
 	
-//		double wSize = 2;
-//		double alpha = 2.24; // 10,1.85,narrow // 100,1.35,fat // 2,1.5,dummy // for 10K,19L,3Ne
-
 		double wSize = 2;
-		double alpha = 1.5; // 10,1.85,narrow // 100,1.35,fat // 2,1.5,dummy // for 10K,19L,3Ne
+		double alpha = 2.24; // 10,1.85,narrow // 100,1.35,fat // 2,1.5,dummy // for 10K,19L,3Ne
+
+//		dummy
+//		double wSize = 2;
+//		double alpha = 1.5; // 10,1.85,narrow // 100,1.35,fat // 2,1.5,dummy // for 10K,19L,3Ne
 
 		nodePerLayerDistribution[(nLayer + 1) / 2] = (int)wSize;
 
@@ -128,8 +129,8 @@ public class ArtificialDAG {
 	void assignLayerWeightDiamondDAG() {
 		int nodePerLayerDistribution[] = new int[nLayer + 1];
 	
-		double wSize = 10;
-		double alpha = 1.9; // 10,1.9 //
+		double wSize = 2;
+		double alpha = 2.33; // 10,1.9 // 2, 2.33
 		
 //		narrow top trapezoid
 		nodePerLayerDistribution[nLayer] = (int)wSize;
@@ -149,16 +150,16 @@ public class ArtificialDAG {
 	void assignLayerWeightTrapezoidDAG() {
 		int nodePerLayerDistribution[] = new int[nLayer + 1];
 	
-		double wSize = 10;
-		double alpha = 1.37; // 10, 1.37 //
+		double wSize = 2;
+		double alpha = 1.515; // 10, 1.37 // 2, 1.515
 		
-//		narrow top trapezoid
+//		fat top trapezoid
 		nodePerLayerDistribution[nLayer] = (int)wSize;
 		for (int i = nLayer - 1, p = 1; i > 0; --i, ++p) {
 			nodePerLayerDistribution[i] = (int)(Math.pow(alpha, p) * wSize); 
 		}
 		
-//		fat top trapezoid
+//		narrow top trapezoid
 //		nodePerLayerDistribution[1] = (int)wSize;
 //		for (int i = 2, p = 1; i <= nLayer; ++i, ++p) {
 //			nodePerLayerDistribution[i] = (int)(Math.pow(alpha, p) * wSize); 

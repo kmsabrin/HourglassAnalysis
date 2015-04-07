@@ -70,6 +70,7 @@ public class ToyNetwork {
 //		callDAG.loadGeneralityMetric(); // approximated
 //		callDAG.loadComplexityMetric();
 		callDAG.loadCentralityMetric();
+		callDAG.loadRechablity();
 	}
 			
 	public static void main(String[] args) throws Exception {
@@ -85,8 +86,9 @@ public class ToyNetwork {
 		String randomVersionNumber = v + "rX";
 		ConfigurationRandomNetwork configurationRandomNetwork = new ConfigurationRandomNetwork();
 		configurationRandomNetwork.init(toyNetwork.callDAG);
-		configurationRandomNetwork.generateNumEdgePreserveMethodX(toyNetwork.callDAG);
+		configurationRandomNetwork.generateNonLayeredNewRandomization(toyNetwork.callDAG);
 		configurationRandomNetwork.writeRandomDAG(toyNetwork.callDAG, randomVersionNumber);
+		
 		CallDAG randomDAG = new CallDAG("artificial_callgraphs//" + randomVersionNumber + ".txt");
 		System.out.println("R: " + randomDAG.nRoots);
 		System.out.println("L: " + randomDAG.nLeaves);

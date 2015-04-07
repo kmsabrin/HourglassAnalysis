@@ -60,6 +60,9 @@ public class CallDAG {
 	
 	ArrayList<ArrayList<String>> detectedCycles;
 	
+	Map<String, Set<String>> nodesReachableUpwards;
+	Map<String, Set<String>> nodesReachableDownwards;
+	
 	CallDAG() { 
 		functions = new TreeSet();
 		callFrom = new HashMap();
@@ -94,6 +97,9 @@ public class CallDAG {
 		nodePathThrough = new HashMap();
 		
 		detectedCycles = new ArrayList();
+		
+		nodesReachableUpwards = new HashMap();
+		nodesReachableDownwards = new HashMap();
 	}
 	
 	CallDAG(String callGraphFileName) {
@@ -102,7 +108,7 @@ public class CallDAG {
 		// load & initialize the attributes of the call graph
 		loadCallGraph(callGraphFileName);
 
-//		removeCycles(); // or should I only ignore cycles?
+		removeCycles(); // or should I only ignore cycles?
 		
 //		assignFunctionID();
 		
@@ -117,6 +123,9 @@ public class CallDAG {
 //		loadGeneralityMetric(); //CAREFUL 
 //		loadComplexityMetric(); //CAREFUL
 		loadCentralityMetric();
+		
+		// for randomization
+		loadRechablity();
 	}
 
 	public void loadCallGraph(String fileName) {
@@ -468,6 +477,22 @@ public class CallDAG {
 		}
 	}
 	
+	public void reachableDownwardsNodes(String node) { // towards leaves
+		if (visited.contains(node)) { // node already traversed
+			return;
+		}
+		
+		visited.add(node);
+		
+		if (!callTo.containsKey(node)) { // is a leaf
+			return;
+		}
+		
+		for (String s : callTo.get(node)) {
+			reachableDownwardsNodes(s);
+		}
+	}
+	
 	public void reachableDownwardsNodes(String node, String source, PrintWriter pw) { // towards leaves
 		if (visited.contains(node)) { // node already traversed
 			return;
@@ -533,6 +558,19 @@ public class CallDAG {
 		pw.close();
 	}
 	
+	public void loadRechablity() {
+		visited = new HashSet();
+		for (String s : functions) {
+			visited.clear();
+			reachableUpwardsNodes(s); // how many nodes are using her
+			nodesReachableUpwards.put(s, new HashSet(visited));
+			
+			visited.clear();
+			reachableDownwardsNodes(s); // how many nodes she is using
+			nodesReachableDownwards.put(s, new HashSet(visited));
+		}
+	}
+	
 	public void resetAuxiliary() {
 		nTotalPath = 0;
 		cycleEdges = new HashMap();
@@ -570,7 +608,6 @@ public class CallDAG {
 		}
 	}
 	
-	
 	public void loadCentralityMetric() {
 		nTotalPath = 0;
 		for (String s: location.keySet()) {
@@ -599,7 +636,7 @@ public class CallDAG {
 //			centrality.put(s, nodePathThrough.get(s)); // non-normalized
 			
 //			System.out.println(s + "\t" + cntr + "\t" + location.get(s) + "\t" + inDegree.get(s) + "\t" + outDegree.get(s));
-			System.out.println(s + "\t" + cntr);
+//			System.out.println(s + "\t" + cntr);
 		}		
 		
 		System.out.println(nTotalPath);
