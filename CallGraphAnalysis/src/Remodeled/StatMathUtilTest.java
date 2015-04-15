@@ -1,3 +1,4 @@
+package Remodeled;
 import org.apache.commons.math3.analysis.solvers.LaguerreSolver;
 import org.apache.commons.math3.analysis.solvers.PolynomialSolver;
 import org.apache.commons.math3.complex.Complex;
@@ -52,19 +53,4 @@ public class StatMathUtilTest {
 		
 //		System.out.println(laguerreSolver.doSolve());
 	}
-	
-	public static void getToyGraph() {
-		CallDAG callDAG = new CallDAG(Driver.networkPath + Driver.currentVersion);
-//		for (String s: callDAG.functions) {
-//			System.out.println(s + "\t" + callDAG.location.get(s) + "\t" + callDAG.centrality.get(s));
-//		}
-		System.out.println(callDAG.functions.size() + "\t" + callDAG.nEdges );
-	}
-	
-	public static void main(String[] args) {
-		
-//		polynomialSolverTest();
-		getToyGraph();
-	}
-
 }

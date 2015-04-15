@@ -61,8 +61,8 @@ public class ToyNetwork {
 		
 		callDAG.nEdges = 13;
 		for (String s: callDAG.functions) {
-			if (!callDAG.callFrom.containsKey(s)) ++callDAG.nRoots;
-			if (!callDAG.callTo.containsKey(s)) ++callDAG.nLeaves;
+			if (!callDAG.callFrom.containsKey(s)) ++callDAG.nSources;
+			if (!callDAG.callTo.containsKey(s)) ++callDAG.nTargets;
 		}
 //		callDAG.removeCycles();
 		callDAG.loadDegreeMetric();
@@ -70,6 +70,7 @@ public class ToyNetwork {
 //		callDAG.loadGeneralityMetric(); // approximated
 //		callDAG.loadComplexityMetric();
 		callDAG.loadCentralityMetric();
+		callDAG.loadPagerankCentralityMetric();
 		callDAG.loadRechablity();
 	}
 			
@@ -82,18 +83,23 @@ public class ToyNetwork {
 //		dummy.loadCallGraph();
 //		CentralityAnalysis.getCentralityPDF(toyNetwork.callDAG, v);
 		
-//		RandomNetworkGenerator randomNetworkGenerator = new RandomNetworkGenerator(toyNetwork.callDAG);
-		String randomVersionNumber = v + "rX";
-		ConfigurationRandomNetwork configurationRandomNetwork = new ConfigurationRandomNetwork();
-		configurationRandomNetwork.init(toyNetwork.callDAG);
-		configurationRandomNetwork.generateNonLayeredNewRandomization(toyNetwork.callDAG);
-		configurationRandomNetwork.writeRandomDAG(toyNetwork.callDAG, randomVersionNumber);
+		toyNetwork.callDAG.centrality = toyNetwork.callDAG.prCentrality;
+		IteratedMaxCentralityCoverage iteratedMaxCentralityCoverage = new IteratedMaxCentralityCoverage(toyNetwork.callDAG);
+		iteratedMaxCentralityCoverage.runIMCC();		
 		
-		CallDAG randomDAG = new CallDAG("artificial_callgraphs//" + randomVersionNumber + ".txt");
-		System.out.println("R: " + randomDAG.nRoots);
-		System.out.println("L: " + randomDAG.nLeaves);
-		System.out.println("E: " + randomDAG.nEdges);
-		CentralityAnalysis.getCentralityPDF(randomDAG, randomVersionNumber);
+		
+//		RandomNetworkGenerator randomNetworkGenerator = new RandomNetworkGenerator(toyNetwork.callDAG);
+//		String randomVersionNumber = v + "rX";
+//		ConfigurationRandomNetwork configurationRandomNetwork = new ConfigurationRandomNetwork();
+//		configurationRandomNetwork.init(toyNetwork.callDAG);
+//		configurationRandomNetwork.generateNonLayeredNewRandomization(toyNetwork.callDAG);
+//		configurationRandomNetwork.writeRandomDAG(toyNetwork.callDAG, randomVersionNumber);
+//		
+//		CallDAG randomDAG = new CallDAG("artificial_callgraphs//" + randomVersionNumber + ".txt");
+//		System.out.println("R: " + randomDAG.nRoots);
+//		System.out.println("L: " + randomDAG.nLeaves);
+//		System.out.println("E: " + randomDAG.nEdges);
+//		CentralityAnalysis.getCentralityPDF(randomDAG, randomVersionNumber);
 		
 //		centralityAnalysis.getCentralityCDF(toyNetwork.callDAG, v);
 //		centralityAnalysis.getCentralityCCDF(toyNetwork.callDAG, v);

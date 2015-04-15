@@ -11,8 +11,8 @@ import java.util.TreeSet;
 
 public class CallDAG {
 	int nEdges;
-	double nRoots;
-	double nLeaves;
+	double nSources;
+	double nTargets;
 	double nTotalPath;
 
 	Set<String> functions;
@@ -21,12 +21,12 @@ public class CallDAG {
 
 	Map<String, Double> numOfPath;
 	Map<String, Double> sumOfPath;
-	Map<String, Double> avgLeafDepth;
-	Map<String, Double> avgRootDepth;
+	Map<String, Double> avgTargetDepth;
+	Map<String, Double> avgSourceDepth;
 	Map<String, Double> location;
 	
-	Map<String, Double> numOfLeafPath;
-	Map<String, Double> numOfRootPath;
+	Map<String, Double> numOfTargetPath;
+	Map<String, Double> numOfSourcePath;
 	
 	Map<String, Double> numOfReachableNodes;
 	Map<String, Double> generality;
@@ -38,8 +38,8 @@ public class CallDAG {
 	 */
 	Map<String, Double> moduleGenerality; 
 	Map<String, Double> moduleComplexity;
-	Map<String, Double> rootsReached; 
-	Map<String, Double> leavesReached;
+	Map<String, Double> sourcesReached; 
+	Map<String, Double> targetsReached;
 	
 	Map<String, Integer> outDegree;
 	Map<String, Integer> inDegree;
@@ -58,10 +58,17 @@ public class CallDAG {
 	HashMap<String, Double> centrality;
 	HashMap<String, Double> nodePathThrough;
 	
+	
+	HashMap<String, Double> prCentrality;
+	HashMap<String, Double> prFromSource;
+	HashMap<String, Double> prToTarget;
+	
 	ArrayList<ArrayList<String>> detectedCycles;
 	
 	Map<String, Set<String>> nodesReachableUpwards;
 	Map<String, Set<String>> nodesReachableDownwards;
+	
+	HashSet<String> thresholdedCore;
 	
 	CallDAG() { 
 		functions = new TreeSet();
@@ -72,20 +79,20 @@ public class CallDAG {
 		
 		numOfPath = new HashMap();
 		sumOfPath = new HashMap();
-		avgLeafDepth = new HashMap();
-		avgRootDepth = new HashMap();
+		avgTargetDepth = new HashMap();
+		avgSourceDepth = new HashMap();
 		location = new HashMap();
 		
-		numOfLeafPath = new HashMap();
-		numOfRootPath = new HashMap();
+		numOfTargetPath = new HashMap();
+		numOfSourcePath = new HashMap();
 		
 		numOfReachableNodes = new HashMap();
 		generality = new HashMap();
 		complexity = new HashMap();
 		moduleGenerality = new HashMap();
 		moduleComplexity = new HashMap();
-		rootsReached = new HashMap();
-		leavesReached = new HashMap();
+		sourcesReached = new HashMap();
+		targetsReached = new HashMap();
 		
 		outDegree = new HashMap();
 		inDegree = new HashMap();
@@ -96,10 +103,16 @@ public class CallDAG {
 		centrality = new HashMap();
 		nodePathThrough = new HashMap();
 		
+		prCentrality = new HashMap();
+		prFromSource = new HashMap();
+		prToTarget = new HashMap();
+		
 		detectedCycles = new ArrayList();
 		
 		nodesReachableUpwards = new HashMap();
 		nodesReachableDownwards = new HashMap();
+		
+		thresholdedCore = new HashSet();
 	}
 	
 	CallDAG(String callGraphFileName) {
@@ -123,6 +136,7 @@ public class CallDAG {
 //		loadGeneralityMetric(); //CAREFUL 
 //		loadComplexityMetric(); //CAREFUL
 		loadCentralityMetric();
+		loadPagerankCentralityMetric();
 		
 		// for randomization
 		loadRechablity();
@@ -296,11 +310,11 @@ public class CallDAG {
 //			System.out.println("Degree: " + s + " in: " + in + " out: " + out);
 		}
 		
-		nRoots = nLeaves = nEdges = 0;
+		nSources = nTargets = nEdges = 0;
 		for (String s: functions) {
-			if (!callFrom.containsKey(s)) ++nRoots;
+			if (!callFrom.containsKey(s)) ++nSources;
 			if (!callTo.containsKey(s)) {
-				++nLeaves;
+				++nTargets;
 			}
 			else {
 				nEdges += callTo.get(s).size();
@@ -325,7 +339,7 @@ public class CallDAG {
 		pw.close();
 	}
 	
-	public void leafPath(String node) {
+	public void targetPath(String node) {
 		if (numOfPath.containsKey(node)) { // node already traversed
 			return;
 		}
@@ -333,24 +347,24 @@ public class CallDAG {
 		if (!callTo.containsKey(node)) { // is leaf
 			numOfPath.put(node, 1.0);
 			sumOfPath.put(node, 0.0);
-			avgLeafDepth.put(node, 0.0);
+			avgTargetDepth.put(node, 0.0);
 			return;
 		}
 				
 		double nPath = 0;
 		double sPath = 0;
 		for (String s: callTo.get(node)) {
-				leafPath(s);
+				targetPath(s);
 				nPath += numOfPath.get(s);
 				sPath += numOfPath.get(s) + sumOfPath.get(s);
 		}
 		
 		numOfPath.put(node, nPath);
 		sumOfPath.put(node, sPath);
-		avgLeafDepth.put(node, sPath / nPath);
+		avgTargetDepth.put(node, sPath / nPath);
 	}
 	
-	public void rootPath(String node) {
+	public void sourcePath(String node) {
 		if (numOfPath.containsKey(node)) { // node already traversed
 			return;
 		}
@@ -358,7 +372,7 @@ public class CallDAG {
 		if (!callFrom.containsKey(node)) { // is root
 			numOfPath.put(node, 1.0);
 			sumOfPath.put(node, 0.0);
-			avgRootDepth.put(node, 0.0);
+			avgSourceDepth.put(node, 0.0);
 			return;
 		}
 				
@@ -380,14 +394,14 @@ public class CallDAG {
 //					continue;
 				}
 			
-				rootPath(s);
+				sourcePath(s);
 				nPath += numOfPath.get(s);
 				sPath += numOfPath.get(s) + sumOfPath.get(s);
 		}
 		
 		numOfPath.put(node, nPath);
 		sumOfPath.put(node, sPath);
-		avgRootDepth.put(node, sPath / nPath);
+		avgSourceDepth.put(node, sPath / nPath);
 		
 		visitedOrdered.remove(node);
 	}
@@ -396,11 +410,11 @@ public class CallDAG {
 //		go through roots
 		for (String s: functions) {
 			if (!callFrom.containsKey(s)) {
-				leafPath(s);
+				targetPath(s);
 			}
 		}
 		
-		numOfLeafPath.putAll(numOfPath);
+		numOfTargetPath.putAll(numOfPath);
 		
 //		reset data containers
 		numOfPath = new HashMap();
@@ -410,14 +424,14 @@ public class CallDAG {
 			if (!callTo.containsKey(s)) {
 				visited = new HashSet();
 				visitedOrdered = new ArrayList();
-				rootPath(s);
+				sourcePath(s);
 			}
 		}
 		
-		numOfRootPath.putAll(numOfPath);
+		numOfSourcePath.putAll(numOfPath);
 		
 		for (String s : functions) {
-			double m = avgLeafDepth.get(s) / (avgLeafDepth.get(s) + avgRootDepth.get(s));
+			double m = avgTargetDepth.get(s) / (avgTargetDepth.get(s) + avgSourceDepth.get(s));
 			m = ((int) (m * 100.0)) / 100.0; // round up to 2 decimal point
 			location.put(s, m);
 		}		
@@ -470,8 +484,8 @@ public class CallDAG {
 			g = ((int) (g * 100.0)) / 100.0;
 			generality.put(s, g);
 			
-			rootsReached.put(s, moduleKount);
-			double mG = moduleKount / nRoots;
+			sourcesReached.put(s, moduleKount);
+			double mG = moduleKount / nSources;
 			mG = ((int) (mG * 100.0)) / 100.0;
 			moduleGenerality.put(s, mG);
 		}
@@ -549,8 +563,8 @@ public class CallDAG {
 			c = ((int) (c * 100.0)) / 100.0;
 			complexity.put(s, c);
 			
-			leavesReached.put(s, moduleKount);
-			double mC = moduleKount / nLeaves;
+			targetsReached.put(s, moduleKount);
+			double mC = moduleKount / nTargets;
 			mC = ((int) (mC * 100.0)) / 100.0;
 			moduleComplexity.put(s, mC);
 		}
@@ -563,10 +577,12 @@ public class CallDAG {
 		for (String s : functions) {
 			visited.clear();
 			reachableUpwardsNodes(s); // how many nodes are using her
+			visited.remove(s); // remove ifself
 			nodesReachableUpwards.put(s, new HashSet(visited));
 			
 			visited.clear();
 			reachableDownwardsNodes(s); // how many nodes she is using
+			visited.remove(s); // remove itself
 			nodesReachableDownwards.put(s, new HashSet(visited));
 		}
 	}
@@ -577,20 +593,20 @@ public class CallDAG {
 		
 		numOfPath = new HashMap();
 		sumOfPath = new HashMap();
-		avgLeafDepth = new HashMap();
-		avgRootDepth = new HashMap();
+		avgTargetDepth = new HashMap();
+		avgSourceDepth = new HashMap();
 		location = new HashMap();
 		
-		numOfLeafPath = new HashMap();
-		numOfRootPath = new HashMap();
+		numOfTargetPath = new HashMap();
+		numOfSourcePath = new HashMap();
 		
 		numOfReachableNodes = new HashMap();
 		generality = new HashMap();
 		complexity = new HashMap();
 		moduleGenerality = new HashMap();
 		moduleComplexity = new HashMap();
-		rootsReached = new HashMap();
-		leavesReached = new HashMap();
+		sourcesReached = new HashMap();
+		targetsReached = new HashMap();
 		
 		outDegree = new HashMap();
 		inDegree = new HashMap();
@@ -601,10 +617,10 @@ public class CallDAG {
 		centrality = new HashMap();
 		nodePathThrough = new HashMap();
 		
-		nRoots = nLeaves = 0;
+		nSources = nTargets = 0;
 		for (String s: functions) {
-			if (!callFrom.containsKey(s)) ++nRoots;
-			if (!callTo.containsKey(s)) ++nLeaves;
+			if (!callFrom.containsKey(s)) ++nSources;
+			if (!callTo.containsKey(s)) ++nTargets;
 		}
 	}
 	
@@ -614,7 +630,7 @@ public class CallDAG {
 			double nPath = 1;
 			
 //			P-Centrality
-			nPath = numOfLeafPath.get(s) * numOfRootPath.get(s);
+			nPath = numOfTargetPath.get(s) * numOfSourcePath.get(s);
 			nodePathThrough.put(s, nPath);
 			if (!callFrom.containsKey(s)) { // is a root
 				nTotalPath += nPath;
@@ -630,19 +646,89 @@ public class CallDAG {
 		
 		for (String s: functions) {
 			double cntr = nodePathThrough.get(s) / nTotalPath;
-			cntr = ((int) (cntr * 1000.0)) / 1000.0;
+//			cntr = ((int) (cntr * 1000.0)) / 1000.0;
 
 			centrality.put(s, cntr);
 //			centrality.put(s, nodePathThrough.get(s)); // non-normalized
+			
+			if (cntr > 0.7) {
+//				System.out.println(s + "\t" + cntr + "\t" + numOfLeafPath.get(s) + "\t" + numOfRootPath.get(s));
+				thresholdedCore.add(s);
+			}
 			
 //			System.out.println(s + "\t" + cntr + "\t" + location.get(s) + "\t" + inDegree.get(s) + "\t" + outDegree.get(s));
 //			System.out.println(s + "\t" + cntr);
 		}		
 		
-		System.out.println(nTotalPath);
+		System.out.println("Total Paths: " + nTotalPath + "\n" + "####################");
 		
 	}
+
+	private void recursePagerankTargetToSource(String node) {
+		if (prToTarget.containsKey(node)) {
+			return;
+		}
+
+		double nodePRCentrality = 0;
+		for (String s : callTo.get(node)) {
+			recursePagerankTargetToSource(s);
+			nodePRCentrality += prToTarget.get(s) / inDegree.get(s);
+		}
+
+		prToTarget.put(node, nodePRCentrality);
+	}
+
+	private void recursePagerankSourceToTarget(String node) {
+		if (prFromSource.containsKey(node)) {
+			return;
+		}
+		
+		double nodePRCentrality = 0;
+		for (String s: callFrom.get(node)) {
+			recursePagerankSourceToTarget(s);
+			nodePRCentrality += prFromSource.get(s) / outDegree.get(s);
+		}
+		
+		prFromSource.put(node, nodePRCentrality);
+	}
 	
+	public void loadPagerankCentralityMetric() {
+		// initialize source pr
+		for (String s: functions) {
+			if (!callFrom.containsKey(s)) {
+				prFromSource.put(s, 1.0);
+			}
+		}
+		
+		for (String s: functions) {
+			recursePagerankSourceToTarget(s);
+		}
+		
+		// initialize target pr
+		for (String s : functions) {
+			if (!callTo.containsKey(s)) {
+				prToTarget.put(s, 1.0);
+			}
+		}
+
+		for (String s : functions) {
+			recursePagerankTargetToSource(s);
+		}
+		
+		for (String s: functions) {
+//			prCentrality.put(s, prFromSource.get(s) * prToTarget.get(s));
+//			prCentrality.put(s, prFromSource.get(s));
+			prCentrality.put(s, prToTarget.get(s));
+		}
+
+		for (String s: functions) {
+			System.out.println(s + "\t" + prToTarget.get(s) + "\t" + location.get(s));
+//			System.out.println(s + "\t" + prCentrality.get(s) + "\t" + prFromSource.get(s) + "\t" + prToTarget.get(s));
+		}
+		
+		System.out.println("###### ###### ######");
+	}
+
 	public void removeIsolatedNodes() {
 		HashSet<String> removable = new HashSet();
 		for (String s : functions) {

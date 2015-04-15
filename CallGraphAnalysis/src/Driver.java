@@ -28,27 +28,59 @@ public class Driver {
 //		System.out.println("Max Centrality Decomposition Curve Done.");	
 	}
 	
+	private static void corePaths(CallDAG callDAG) {
+		for (String s: callDAG.thresholdedCore) {
+			System.out.println("Node: " + s + "\tCentrality: " + callDAG.centrality.get(s) + "\t Paths to Target: " 
+							   + callDAG.numOfTargetPath.get(s) + "\tPaths to Source: " + callDAG.numOfSourcePath.get(s));
+			System.out.print("Depended by Cores: ");
+			for (String r: callDAG.nodesReachableUpwards.get(s)) {
+				if (callDAG.thresholdedCore.contains(r)) {
+					System.out.print(r + " ");
+				}
+			}
+			System.out.println();
+			
+			System.out.print("Depending on Cores: ");
+			for (String r: callDAG.nodesReachableDownwards.get(s)) {
+				if (callDAG.thresholdedCore.contains(r)) {
+					System.out.print(r + " ");
+				}
+			}
+			System.out.println();
+			
+			System.out.println("### ### ### ###");
+		}
+	}
+	
 	public static void doKernelAnalysis() throws Exception {
-		String versions[] = {"1", "11", "21", "31"};
+//		String versions[] = {"1", "11", "21", "31"};
+		String versions[] = {"11"};
 		for (int i = 0; i < versions.length; ++i) {
 			String v = networkType + "-" + versions[i];	
 			CallDAG callDAG = new CallDAG(networkPath + versions[i]);
+			printNetworkStat(callDAG);
+//			corePaths(callDAG);
+			
+			callDAG.centrality = callDAG.prCentrality; // for IMCC
+			IteratedMaxCentralityCoverage iteratedMaxCentralityCoverage = new IteratedMaxCentralityCoverage(callDAG);
+			iteratedMaxCentralityCoverage.runIMCC();		
+			
 //			CallDAG takeApartCallDAG = new CallDAG(networkPath + versions[i]);
 //			System.out.println("Loading " + v + " Done.");	
 //			doCoreAnalysis(callDAG, takeApartCallDAG, v);
-			
-			CentralityAnalysis.getCentralityPDF(callDAG, v);
-			printNetworkStat(callDAG);
-			
-			String randomVersionNumber = v + "-NonLayerOrder-New";
-			ConfigurationRandomNetwork configurationRandomNetwork = new ConfigurationRandomNetwork();
-			configurationRandomNetwork.init(callDAG);
-			configurationRandomNetwork.generateNonLayeredNewRandomization(callDAG);
-			configurationRandomNetwork.writeRandomDAG(callDAG, randomVersionNumber);
-			
-			CallDAG randomDAG = new CallDAG("artificial_callgraphs//"+ randomVersionNumber +".txt");
-			printNetworkStat(randomDAG);
-			CentralityAnalysis.getCentralityPDF(randomDAG, randomVersionNumber);
+//			
+//			CentralityAnalysis.getCentralityPDF(callDAG, v);
+//			printNetworkStat(callDAG);
+//			
+//			String randomVersionNumber = v + "-NonLayerOrder-New";
+//			ConfigurationRandomNetwork configurationRandomNetwork = new ConfigurationRandomNetwork();
+//			configurationRandomNetwork.init(callDAG);
+//			configurationRandomNetwork.generateNonLayeredNewRandomization(callDAG);
+//			configurationRandomNetwork.writeRandomDAG(callDAG, randomVersionNumber);
+//			
+//			CallDAG randomDAG = new CallDAG("artificial_callgraphs//"+ randomVersionNumber +".txt");
+//			printNetworkStat(randomDAG);
+//			CentralityAnalysis.getCentralityPDF(randomDAG, randomVersionNumber);
 		}	
 	}
 	
@@ -59,7 +91,7 @@ public class Driver {
 			CallDAG callDAG = new CallDAG("biological_networks//" + v + ".txt");
 			System.out.println("nFunctions: " + callDAG.functions.size());
 			System.out.println("nEdges: " + callDAG.nEdges);
-			System.out.println("Roots: " + callDAG.nRoots + " Leaves: " + callDAG.nLeaves);
+			System.out.println("Roots: " + callDAG.nSources + " Leaves: " + callDAG.nTargets);
 			CallDAG takeApartCallDAG = new CallDAG("biological_networks//" + v + ".txt");
 			System.out.println("Loading " + v + " Done.");
 			doCoreAnalysis(callDAG, takeApartCallDAG, v);
@@ -78,8 +110,8 @@ public class Driver {
 	}
 	
 	private static void printNetworkStat(CallDAG callDAG) {
-		System.out.println("R: " + callDAG.nRoots);
-		System.out.println("L: " + callDAG.nLeaves);
+		System.out.println("S: " + callDAG.nSources);
+		System.out.println("T: " + callDAG.nTargets);
 		System.out.println("E: " + callDAG.nEdges);
 		System.out.println("N: " + callDAG.functions.size());
 	}
@@ -102,11 +134,16 @@ public class Driver {
 		
 		
 		for (int i = 0; i < versions.length; ++i) {
-//			if (i != 1) continue;			
+//			if (i < 2) continue;			
 			String versionNumber = versions[i];
 			CallDAG callDAG = new CallDAG("artificial_callgraphs//" + versionNumber + ".txt");
-			CentralityAnalysis.getCentralityPDF(callDAG, versionNumber);
-			printNetworkStat(callDAG);
+			
+			callDAG.centrality = callDAG.prCentrality;
+			IteratedMaxCentralityCoverage iteratedMaxCentralityCoverage = new IteratedMaxCentralityCoverage(callDAG);
+			iteratedMaxCentralityCoverage.runIMCC();		
+
+//			CentralityAnalysis.getCentralityPDF(callDAG, versionNumber);
+//			printNetworkStat(callDAG);
 
 			/*
 			String r1VersionNumber = "randomShuffle-" + versionNumber + "-1.0";
@@ -121,21 +158,21 @@ public class Driver {
 			randomNetworkGenerator.generateRandomNetwork(r2VersionNumber);
 			*/
 			
-			String randomVersionNumber = versionNumber + "-NonLayerOrder-New";
-			ConfigurationRandomNetwork configurationRandomNetwork = new ConfigurationRandomNetwork();
+//			String randomVersionNumber = versionNumber + "-NonLayerOrder-New";
+//			ConfigurationRandomNetwork configurationRandomNetwork = new ConfigurationRandomNetwork();
 //			callDAG.resetAuxiliary();
 			
-			configurationRandomNetwork.init(callDAG);
+//			configurationRandomNetwork.init(callDAG);
 //			configurationRandomNetwork.generateDegreeDistributionPreserveMethodX(callDAG);
 //			configurationRandomNetwork.generateDegreeDistributionPreserveMethodY(callDAG);
 //			configurationRandomNetwork.generateKNRandomDAG(callDAG);
 //			configurationRandomNetwork.generateLayeredNewRandomization(callDAG);
-			configurationRandomNetwork.generateNonLayeredNewRandomization(callDAG);
-			configurationRandomNetwork.writeRandomDAG(callDAG, randomVersionNumber);
-			
-			CallDAG randomDAG = new CallDAG("artificial_callgraphs//"+ randomVersionNumber +".txt");
-			printNetworkStat(randomDAG);
-			CentralityAnalysis.getCentralityPDF(randomDAG, randomVersionNumber);			
+//			configurationRandomNetwork.generateNonLayeredNewRandomization(callDAG);
+//			configurationRandomNetwork.writeRandomDAG(callDAG, randomVersionNumber);
+//			
+//			CallDAG randomDAG = new CallDAG("artificial_callgraphs//"+ randomVersionNumber +".txt");
+//			printNetworkStat(randomDAG);
+//			CentralityAnalysis.getCentralityPDF(randomDAG, randomVersionNumber);			
 			
 			/*
 			CallDAG randomDAG = new CallDAG("artificial_callgraphs//methodX.txt");

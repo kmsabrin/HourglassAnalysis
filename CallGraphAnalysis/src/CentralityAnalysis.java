@@ -175,7 +175,7 @@ public class CentralityAnalysis {
 			double rn = random.nextDouble();
 			double cumulativeSum = 0;
 			for (String s : functions) {
-				cumulativeSum += callDAG.numOfLeafPath.get(s) / callDAG.numOfLeafPath.get(node);
+				cumulativeSum += callDAG.numOfTargetPath.get(s) / callDAG.numOfTargetPath.get(node);
 				if (rn < cumulativeSum) {
 					traverse(s, callDAG);
 					break;
@@ -219,7 +219,7 @@ public class CentralityAnalysis {
 				
 				if (doUniformPathSampling) {
 //				uniformly sampling paths
-					if (rn > callDAG.numOfLeafPath.get(s) / callDAG.nTotalPath) {
+					if (rn > callDAG.numOfTargetPath.get(s) / callDAG.nTotalPath) {
 						continue; 
 					}
 				}

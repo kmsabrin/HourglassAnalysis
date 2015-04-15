@@ -653,7 +653,7 @@ public class ModularityAnalysis {
 	}
 	
 	public void getLeafStatistics(CallDAG callDAG) {
-		System.out.println("Total Leaves: " + callDAG.nLeaves);
+		System.out.println("Total Leaves: " + callDAG.nTargets);
 		int engulfed = 0;
 		int knt = 0;
 		for (String s: communities.keySet()) {

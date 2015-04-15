@@ -1,3 +1,4 @@
+package Remodeled;
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.Collections;
@@ -200,138 +201,6 @@ public class ArtificialDAG {
 		}
 	}
 	
-	private int centralityWeightedSelection(int rangeStart, int rangeEnd, CallDAG callDAG) {
-		double centralitySum = 0;
-		for (int i = rangeStart; i <= rangeEnd; ++i) {
-			if (!callDAG.functions.contains(String.valueOf(i))) continue;
-			centralitySum += callDAG.centrality.get(String.valueOf(i));
-		}
-
-		double rn = random.nextDouble();
-		double weightedCumulativeSum = 0;
-		for (int i = rangeStart; i <= rangeEnd; ++i) {
-			if (!callDAG.functions.contains(String.valueOf(i))) continue;
-			weightedCumulativeSum += callDAG.centrality.get(String.valueOf(i)) / centralitySum;
-			if (rn < weightedCumulativeSum) {
-				return i;
-			}
-		}
-		
-		return -1;
-	}
-
-	public void getCentralityShuffleArtificialDAG(String type, Double rewiringProbablity) throws Exception {
-		PrintWriter pwCentralityShuffleArtificialDAG = 
-				new PrintWriter(new File("artificial_callgraphs//centralityShuffle-" + type + "-" + rewiringProbablity + ".txt"));
-
-		HashSet<String> duplicateCheck = new HashSet();
-		
-		CallDAG callDAG = new CallDAG("artificial_callgraphs//" + type + ".txt");
-//		callDAG.printCallDAG();
-
-		for (String s: existingEdge) {
-			String nodePair[] = s.split("#");
-			int src = Integer.parseInt(nodePair[0]);
-			int dst = Integer.parseInt(nodePair[1]);
-			if (random.nextDouble() < rewiringProbablity) {
-				int srcLayer = nodeLayerMap.get(src);
-				int dstLayer = nodeLayerMap.get(dst);
-
-				int srcMax = Collections.max(nodeIDsPerLayer.get(srcLayer));
-				int dstMin = Collections.min(nodeIDsPerLayer.get(dstLayer));
-
-				while (true) {
-					int newSrc = centralityWeightedSelection(1, srcMax, callDAG);
-					int newDst = centralityWeightedSelection(dstMin, nNode, callDAG);
-					String r = newSrc + "+" + newDst;
-//					if (duplicateCheck.contains(r)) {
-					if (duplicateCheck.contains(r) || existingEdge.contains(newSrc + "#" + newDst)) {
-						continue;
-					} else {
-						duplicateCheck.add(r);
-						pwCentralityShuffleArtificialDAG.println(newSrc + " -> "+ newDst + ";");
-						
-						System.out.println(src + "\t" + dst + "\t" + newSrc + "\t" + newDst);
-//						System.out.println("\t" + callDAG.centrality.get(String.valueOf(newSrc)) + "\t" + callDAG.centrality.get(String.valueOf(newDst)));
-						
-						System.out.print(callDAG.centrality.get(String.valueOf(src)) + "\t" + callDAG.centrality.get(String.valueOf(dst)));
-						System.out.println("\t" + callDAG.centrality.get(String.valueOf(newSrc)) + "\t" + callDAG.centrality.get(String.valueOf(newDst)));
-
-						String strSrc = String.valueOf(src);
-						String strDst = String.valueOf(dst);
-						String strNewSrc = String.valueOf(newSrc);
-						String strNewDst = String.valueOf(newDst);
-						
-						callDAG.callTo.get(strSrc).remove(strDst);
-						callDAG.callFrom.get(strDst).remove(strSrc);
-						
-						if (callDAG.callTo.get(strSrc).size() < 1) callDAG.callTo.remove(strSrc);
-						if (callDAG.callFrom.get(strDst).size() < 1) callDAG.callFrom.remove(strDst);
-						
-						if (!callDAG.callTo.containsKey(strNewSrc)) callDAG.callTo.put(strNewSrc, new HashSet());
-						callDAG.callTo.get(strNewSrc).add(strNewDst);
-						if (!callDAG.callFrom.containsKey(strNewDst)) callDAG.callFrom.put(strNewDst, new HashSet());
-						callDAG.callFrom.get(strNewDst).add(strNewSrc);
-						
-						callDAG.resetAuxiliary();
-						callDAG.removeIsolatedNodes();
-						callDAG.loadDegreeMetric();
-						callDAG.loadLocationMetric(); // must load degree metric before
-						callDAG.loadCentralityMetric();
-						break;
-					}
-				}
-			}
-			else {
-				String r = src + "+" + dst;
-				duplicateCheck.add(r);
-				pwCentralityShuffleArtificialDAG.println(src + " -> " + dst + ";");
-			}
-		}
-		
-		pwCentralityShuffleArtificialDAG.close();
-	}
-	
-	public void getRandomShuffleArtificialDAG(String type, Double rewiringProbablity) throws Exception {
-		PrintWriter pwRandomShuffleArtificialDAG = 
-				new PrintWriter(new File("artificial_callgraphs//randomShuffle-" + type + "-" + rewiringProbablity + ".txt"));
-
-		HashSet<String> duplicateCheck = new HashSet();
-		
-		for (String s: existingEdge) {
-			String nodePair[] = s.split("#");
-			int src = Integer.parseInt(nodePair[0]);
-			int dst = Integer.parseInt(nodePair[1]);
-			if (random.nextDouble() < rewiringProbablity) {
-				int srcLayer = nodeLayerMap.get(src);
-				int dstLayer = nodeLayerMap.get(dst);
-
-				int srcMax = Collections.max(nodeIDsPerLayer.get(srcLayer));
-				int dstMin = Collections.min(nodeIDsPerLayer.get(dstLayer));
-
-				while (true) {
-					int newSrc = random.nextInt(srcMax) + 1;
-					int newDst = random.nextInt(nNode - dstMin + 1) + dstMin;
-					String r = newSrc + "+" + newDst;
-					if (duplicateCheck.contains(r)) {
-						continue;
-					} else {
-						duplicateCheck.add(r);
-						pwRandomShuffleArtificialDAG.println(newSrc + " -> "+ newDst + ";");
-						break;
-					}
-				}
-			}
-			else {
-				String r = src + "+" + dst;
-				duplicateCheck.add(r);
-				pwRandomShuffleArtificialDAG.println(src + " -> " + dst + ";");
-			}
-		}
-		
-		pwRandomShuffleArtificialDAG.close();
-	}
-	
 	public void generateRectangleDAG() throws Exception {
 		PrintWriter pw = new PrintWriter(new File("artificial_callgraphs//rectangleDAG.txt"));
 		
@@ -339,9 +208,6 @@ public class ArtificialDAG {
 		traversePath(pw);
 
 		pw.close();
-		
-		getRandomShuffleArtificialDAG("rectangleDAG", rewirePrb);
-//		getCentralityShuffleArtificialDAG("rectangleDAG", rewirePrb);
 	}
 	
 	public void generateNoisyRectangleDAG() throws Exception {
@@ -351,9 +217,6 @@ public class ArtificialDAG {
 		traversePath(pw);
 		
 		pw.close();
-		
-		getRandomShuffleArtificialDAG("noisyRectangleDAG", rewirePrb);
-//		getCentralityShuffleArtificialDAG("noisyRectangleDAG", rewirePrb);
 	}
 	
 	public void generateHourglassDAG() throws Exception {
@@ -363,9 +226,6 @@ public class ArtificialDAG {
 		traversePath(pw);
 		
 		pw.close();
-		
-		getRandomShuffleArtificialDAG("hourglassDAG", rewirePrb);
-//		getCentralityShuffleArtificialDAG("hourglassDAG", rewirePrb);
 	}
 	
 	public void generateTrapezoidsDAG() throws Exception {
@@ -375,8 +235,6 @@ public class ArtificialDAG {
 		traversePath(pw);
 
 		pw.close();
-		
-		getRandomShuffleArtificialDAG("trapezoidDAG", rewirePrb);
 	}
 	
 	public void generateDiamondDAG() throws Exception {
@@ -386,18 +244,5 @@ public class ArtificialDAG {
 		traversePath(pw);
 
 		pw.close();
-		
-		getRandomShuffleArtificialDAG("diamondDAG", rewirePrb);
 	}
-	
-	/*
-	public static void getMaxCentralityDecompositionCurve(String version) throws Exception {
-		CallDAG callDAG = new CallDAG("artificial_callgraphs//" + version + ".txt");
-		CallDAG takeApartCallDAG = new CallDAG("artificial_callgraphs//" + version + ".txt");
-		System.out.println("nFunctions: " + callDAG.functions.size());
-		System.out.println("nEdges: " + callDAG.nEdges);
-		System.out.println("Roots: " + callDAG.nRoots + " Leaves: " + callDAG.nLeaves);
-		CoreAnalysis coreAnalysis = new CoreAnalysis(callDAG, takeApartCallDAG, version);
-	}
-	*/
 }
