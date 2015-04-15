@@ -1,3 +1,4 @@
+package Initial;
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.Collections;
@@ -38,20 +39,20 @@ public class ArtificialDAG {
 
 //		nPath = (int)Math.ceil(nEdge / (nLayer - 1));  // (numberOfEdges / (numberOfLayer - 1))
 
-		topLayerNode = new HashSet();
-		bottomLayerNode = new HashSet();
+		topLayerNode = new HashSet<Integer>();
+		bottomLayerNode = new HashSet<Integer>();
 
-		nodeLayerMap = new HashMap();
-		nodeIDsPerLayer = new HashMap();
+		nodeLayerMap = new HashMap<Integer, Integer>();
+		nodeIDsPerLayer = new HashMap<Integer, HashSet<Integer>>();
 		for (int i = 1; i <= nLayer; ++i) {
-			nodeIDsPerLayer.put(i, new HashSet());
+			nodeIDsPerLayer.put(i, new HashSet<Integer>());
 		}
 
-		edges = new HashMap();
+		edges = new HashMap<Integer, Integer>();
 		
 		random = new Random();
 		
-		existingEdge = new HashSet();
+		existingEdge = new HashSet<String>();
 	}
 	
 	private void assignNodeByLayerWeight(int nodePerLayerDistribution[]) {
@@ -224,7 +225,7 @@ public class ArtificialDAG {
 		PrintWriter pwCentralityShuffleArtificialDAG = 
 				new PrintWriter(new File("artificial_callgraphs//centralityShuffle-" + type + "-" + rewiringProbablity + ".txt"));
 
-		HashSet<String> duplicateCheck = new HashSet();
+		HashSet<String> duplicateCheck = new HashSet<String>();
 		
 		CallDAG callDAG = new CallDAG("artificial_callgraphs//" + type + ".txt");
 //		callDAG.printCallDAG();
@@ -296,7 +297,7 @@ public class ArtificialDAG {
 		PrintWriter pwRandomShuffleArtificialDAG = 
 				new PrintWriter(new File("artificial_callgraphs//randomShuffle-" + type + "-" + rewiringProbablity + ".txt"));
 
-		HashSet<String> duplicateCheck = new HashSet();
+		HashSet<String> duplicateCheck = new HashSet<String>();
 		
 		for (String s: existingEdge) {
 			String nodePair[] = s.split("#");

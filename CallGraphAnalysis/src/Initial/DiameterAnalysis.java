@@ -1,3 +1,4 @@
+package Initial;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -37,9 +38,9 @@ public class DiameterAnalysis {
 	}
 	
 	public void getEffectiveDiameter(CallDAG callDAG) {
-		List<Integer> d = new ArrayList();
-		visited = new HashSet();
-		maxDepthToLeaf = new HashMap();
+		List<Integer> d = new ArrayList<Integer>();
+		visited = new HashSet<String>();
+		maxDepthToLeaf = new HashMap<String, Integer>();
 
 		for (String s: callDAG.functions) {
 			if (!callDAG.callFrom.containsKey(s)) { // is a root

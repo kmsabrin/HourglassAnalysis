@@ -1,3 +1,4 @@
+package Initial;
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -60,13 +61,13 @@ public class EvolutionAnalysis {
 		for (int i = Driver.versiontStart + 1; i < Driver.versionEnd; ++i) {
 			CallDAG callDAGTo = new CallDAG(Driver.networkPath + i);
 			
-			Set<String> sF = new HashSet(callDAGFrom.functions);
-			Set<String> sT = new HashSet(callDAGTo.functions);
+			Set<String> sF = new HashSet<String>(callDAGFrom.functions);
+			Set<String> sT = new HashSet<String>(callDAGTo.functions);
 
-			Set<String> dead = new HashSet(sF);
+			Set<String> dead = new HashSet<String>(sF);
 			dead.removeAll(sT); // in sF but not in sT, dead nodes;
 			
-			Set<String> born = new HashSet(sT);
+			Set<String> born = new HashSet<String>(sT);
 			born.removeAll(sF); // in sT but not in sF, born nodes;
 
 			int counterD[] = new int[101];
@@ -181,8 +182,8 @@ public class EvolutionAnalysis {
 //	}
 	
 	private double getJaccard(Set<String> s1, Set<String> s2) {
-		Set<String> capSet = new HashSet(s1);
-		Set<String> cupSet = new HashSet(s1);
+		Set<String> capSet = new HashSet<String>(s1);
+		Set<String> cupSet = new HashSet<String>(s1);
 		
 		capSet.retainAll(s2);
 		cupSet.addAll(s2);
@@ -201,8 +202,8 @@ public class EvolutionAnalysis {
 		ModularityAnalysis modularityAnalysisvB = new ModularityAnalysis();
 		modularityAnalysisvB.getWalktrapModules(callDAGvB, Driver.networkType + "-" + vB);
 		
-		Set<String> vAFunctions = new HashSet();
-		Set<String> vBFunctions = new HashSet();
+		Set<String> vAFunctions = new HashSet<String>();
+		Set<String> vBFunctions = new HashSet<String>();
 		
 		for (String s: modularityAnalysisvA.communities.keySet()) {
 			vAFunctions.addAll(modularityAnalysisvA.communities.get(s));
@@ -216,11 +217,11 @@ public class EvolutionAnalysis {
 		double kount = 0;
 		for (String s: modularityAnalysisvA.communities.keySet()) {			
 			for (String r: modularityAnalysisvA.communities.get(s)) {
-				Set<String> funcRneighborhoodvA = new HashSet(modularityAnalysisvA.communities.get(s));		
+				Set<String> funcRneighborhoodvA = new HashSet<String>(modularityAnalysisvA.communities.get(s));		
 				Set<String> funcRneighborhoodvB = null;
 				for (String t: modularityAnalysisvB.communities.keySet()) {
 					if (modularityAnalysisvB.communities.get(t).contains(r)) {
-						funcRneighborhoodvB = new HashSet(modularityAnalysisvB.communities.get(t));
+						funcRneighborhoodvB = new HashSet<String>(modularityAnalysisvB.communities.get(t));
 						break;
 					}
 				}
@@ -230,7 +231,7 @@ public class EvolutionAnalysis {
 				}
 								
 				// remove functions that were not present in both versions
-				List<String> stringList = new ArrayList();
+				List<String> stringList = new ArrayList<String>();
 				for (String t: funcRneighborhoodvA) {
 					if (!vBFunctions.contains(t)) {
 						stringList.add(t);
@@ -238,7 +239,7 @@ public class EvolutionAnalysis {
 				}
 				funcRneighborhoodvA.removeAll(stringList);
 				
-				stringList = new ArrayList();
+				stringList = new ArrayList<String>();
 				for (String t: funcRneighborhoodvB) {
 					if (!vAFunctions.contains(t)) {
 						stringList.add(t);
@@ -300,8 +301,8 @@ public class EvolutionAnalysis {
 		ModularityAnalysis modularityAnalysisvB = new ModularityAnalysis();
 		modularityAnalysisvB.getWalktrapModules(callDAGvB, Driver.networkType + "-" + vB);
 		
-		Set<String> vAFunctions = new HashSet();
-		Set<String> vBFunctions = new HashSet();
+		Set<String> vAFunctions = new HashSet<String>();
+		Set<String> vBFunctions = new HashSet<String>();
 		
 		for (String s: modularityAnalysisvA.communities.keySet()) {
 			vAFunctions.addAll(modularityAnalysisvA.communities.get(s));
@@ -317,8 +318,8 @@ public class EvolutionAnalysis {
 		
 		for (String r: modularityAnalysisvA.communities.keySet()) {
 			
-			List<Double> distanceList = new ArrayList();
-			Set<Info> tset = new TreeSet();
+			List<Double> distanceList = new ArrayList<Double>();
+			Set<Info> tset = new TreeSet<Info>();
 		
 			int val = 0;
 			String vBMaxMatchId = "-";
@@ -330,15 +331,15 @@ public class EvolutionAnalysis {
 			double medianLocationDispersion = 0;
 			
 			for (String s: modularityAnalysisvB.communities.keySet()) {
-				Set<String> comRverA = new HashSet(modularityAnalysisvA.communities.get(r));
-				Set<String> comSverB = new HashSet(modularityAnalysisvB.communities.get(s));
+				Set<String> comRverA = new HashSet<String>(modularityAnalysisvA.communities.get(r));
+				Set<String> comSverB = new HashSet<String>(modularityAnalysisvB.communities.get(s));
 				
 				int fA;
 				int fR;
 				int sizeDelta = comSverB.size() - comRverA.size();
 				double locDelta = modularityAnalysisvB.communitiesAvgLocation.get(s) - modularityAnalysisvA.communitiesAvgLocation.get(r);
 				
-				List<String> stringList = new ArrayList();
+				List<String> stringList = new ArrayList<String>();
 				for (String t: comRverA) {
 					if (!vBFunctions.contains(t)) {
 						stringList.add(t);
@@ -346,7 +347,7 @@ public class EvolutionAnalysis {
 				}
 				comRverA.removeAll(stringList);
 				
-				stringList = new ArrayList();
+				stringList = new ArrayList<String>();
 				for (String t: comSverB) {
 					if (!vAFunctions.contains(t)) {
 						stringList.add(t);

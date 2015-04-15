@@ -1,3 +1,4 @@
+package Initial;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Random;
@@ -9,8 +10,8 @@ public class IteratedMaxCentralityCoverage {
 	Random random;
 	
 	public IteratedMaxCentralityCoverage(CallDAG callDAG) {
-		coveredNodes = new HashSet();
-		coreNodes = new ArrayList();
+		coveredNodes = new HashSet<String>();
+		coreNodes = new ArrayList<String>();
 		this.callDAG = callDAG;
 		random = new Random(System.nanoTime());
 	}
@@ -57,7 +58,7 @@ public class IteratedMaxCentralityCoverage {
 	}
 	
 	private String getMaxCentralityNode() {
-		ArrayList<String> maxCentralityNodes = new ArrayList();
+		ArrayList<String> maxCentralityNodes = new ArrayList<String>();
 		double maxCentrality = -1;
 		
 		for (String s: callDAG.functions) {

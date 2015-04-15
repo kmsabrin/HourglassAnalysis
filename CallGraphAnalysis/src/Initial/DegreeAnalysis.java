@@ -1,3 +1,4 @@
+package Initial;
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -68,8 +69,8 @@ public class DegreeAnalysis {
 	void getInDegreeCCDF(CallDAG callDAG, String filePath) throws Exception {		
 		PrintWriter pw1 = new PrintWriter(new File("Results//indeg-CCDF-log-log-" + filePath + ".txt"));
 		PrintWriter pw2 = new PrintWriter(new File("Results//indeg-CCDF-" + filePath + ".txt"));
-		Map<Integer, Integer> inDegreeHistogram = new TreeMap();
-		Map<Integer, Double> inDegreeCDF = new TreeMap();
+		Map<Integer, Integer> inDegreeHistogram = new TreeMap<Integer, Integer>();
+		Map<Integer, Double> inDegreeCDF = new TreeMap<Integer, Double>();
 		
 		for (String s: callDAG.functions) {
 			int size;
@@ -110,8 +111,8 @@ public class DegreeAnalysis {
 		PrintWriter pw1 = new PrintWriter(new File("Results//outdeg-CCDF-log-log-" + filePath + ".txt"));
 		PrintWriter pw2 = new PrintWriter(new File("Results//outdeg-CCDF-" + filePath + ".txt"));
 		
-		Map<Integer, Integer> outDegreeHistogram = new TreeMap();
-		Map<Integer, Double> outDegreeCDF = new TreeMap();
+		Map<Integer, Integer> outDegreeHistogram = new TreeMap<Integer, Integer>();
+		Map<Integer, Double> outDegreeCDF = new TreeMap<Integer, Double>();
 		
 		for (String s: callDAG.functions) {
 			int size;
@@ -151,7 +152,7 @@ public class DegreeAnalysis {
 	public void getLocationVSAvgOutDegree(CallDAG callDAG, String filePath) throws Exception {
 		PrintWriter pw = new PrintWriter(new File("Results//loc-vs-avg-outdeg-" + filePath + ".txt"));
 //		getting average fanOut per location
-		Map<Double, List<Integer>> result = new TreeMap();
+		Map<Double, List<Integer>> result = new TreeMap<Double, List<Integer>>();
 		for (String s: callDAG.location.keySet()) {
 			double m = callDAG.location.get(s); 
 			
@@ -159,7 +160,7 @@ public class DegreeAnalysis {
 				result.get(m).add(callDAG.outDegree.get(s));
 			}
 			else {
-				List<Integer> list = new ArrayList();
+				List<Integer> list = new ArrayList<Integer>();
 				list.add(callDAG.outDegree.get(s));
 				result.put(m, list);
 			}
@@ -180,7 +181,7 @@ public class DegreeAnalysis {
 	public void getLocationVSAvgInDegree(CallDAG callDAG, String filePath) throws Exception {
 		PrintWriter pw = new PrintWriter(new File("Results//loc-vs-avg-indeg-" + filePath + ".txt"));
 //		getting average fanIN per location
-		Map<Double, List<Integer>> result = new TreeMap();
+		Map<Double, List<Integer>> result = new TreeMap<Double, List<Integer>>();
 		
 		for (String s: callDAG.location.keySet()) {
 			double m = callDAG.location.get(s); 
@@ -189,7 +190,7 @@ public class DegreeAnalysis {
 				result.get(m).add(callDAG.inDegree.get(s));
 			}
 			else {
-				List<Integer> list = new ArrayList();
+				List<Integer> list = new ArrayList<Integer>();
 				list.add(callDAG.inDegree.get(s));
 				result.put(m, list);
 			}

@@ -1,3 +1,4 @@
+package Initial;
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -22,9 +23,9 @@ public class RandomNetworkGenerator {
 	
 	public RandomNetworkGenerator(CallDAG callDAG) {
 		randomCallDAG = callDAG;
-		functionLevel = new HashMap();
-		visited = new HashSet();
-		cycleVisited = new HashSet();
+		functionLevel = new HashMap<String, Integer>();
+		visited = new HashSet<String>();
+		cycleVisited = new HashSet<String>();
 		isReachable = false;
 		random = new Random(System.nanoTime()); 
 	}
@@ -90,7 +91,7 @@ public class RandomNetworkGenerator {
 	}
 	
 	public void updateFunctionLevelWithCutOff(int cutOffLevel) {
-		visited = new HashSet();
+		visited = new HashSet<String>();
 		for (String f: randomCallDAG.functions) {
 			if (!randomCallDAG.callFrom.containsKey(f)) { // is Root
 				updateFunctionLevelWithCutOffTraverse(f, cutOffLevel);
@@ -190,8 +191,8 @@ public class RandomNetworkGenerator {
 			ls1 = functionLevel.get(fs1);
 			ls2 = functionLevel.get(fs2);
 						
-			List<String> callToListS1 = new ArrayList(randomCallDAG.callTo.get(fs1));
-			List<String> callToListS2 = new ArrayList(randomCallDAG.callTo.get(fs2));
+			List<String> callToListS1 = new ArrayList<String>(randomCallDAG.callTo.get(fs1));
+			List<String> callToListS2 = new ArrayList<String>(randomCallDAG.callTo.get(fs2));
 			
 			int rt1, rt2; // random_index_target_1 = rt1, random_index_target_2 = rt2
 			String ft1, ft2; // function-name_target_1 = ft1, function-name_target_2 = ft2
@@ -311,7 +312,7 @@ public class RandomNetworkGenerator {
 		Object[] functionNames = randomCallDAG.functions.toArray();
 		int nRewiring = 0;
 		
-		HashSet<String> duplicateRewiring = new HashSet();
+		HashSet<String> duplicateRewiring = new HashSet<String>();
 		
 		System.out.println("Making " + (randomCallDAG.nEdges * numOfIteration) + " edge rewirings");
 		
@@ -325,7 +326,7 @@ public class RandomNetworkGenerator {
 			} 
 			while (!randomCallDAG.callTo.containsKey(nameCurrentSource));	
 						
-			ArrayList<String> callToListCurrentSource = new ArrayList(randomCallDAG.callTo.get(nameCurrentSource));
+			ArrayList<String> callToListCurrentSource = new ArrayList<String>(randomCallDAG.callTo.get(nameCurrentSource));
 			int indexCurrentTarget = random.nextInt(callToListCurrentSource.size()); 
 			String nameCurrentTarget = callToListCurrentSource.get(indexCurrentTarget); 
 			

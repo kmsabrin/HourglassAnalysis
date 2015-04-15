@@ -1,3 +1,4 @@
+package Initial;
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -26,7 +27,7 @@ public class GeneralityAnalysis {
 	
 	public void getLocationVsAvgGenerality(CallDAG callDAG, String filePath) throws Exception {
 		PrintWriter pw = new PrintWriter(new File("Results//loc-vs-avg-gen-" + filePath + ".txt"));
-		Map<Double, List<Double>> locationVSGenerality = new TreeMap();
+		Map<Double, List<Double>> locationVSGenerality = new TreeMap<Double, List<Double>>();
 		
 		for (String s: callDAG.functions) {
 			double l = callDAG.location.get(s);
@@ -36,7 +37,7 @@ public class GeneralityAnalysis {
 				locationVSGenerality.get(l).add(g);
 			}
 			else {
-				List<Double> list = new ArrayList();
+				List<Double> list = new ArrayList<Double>();
 				list.add(g);
 				locationVSGenerality.put(l, list);
 			}
@@ -56,7 +57,7 @@ public class GeneralityAnalysis {
 	
 	public void getLocationVsAvgComplexity(CallDAG callDAG, String filePath) throws Exception {
 		PrintWriter pw = new PrintWriter(new File("Results//loc-vs-avg-cmp-" + filePath + ".txt"));
-		Map<Double, List<Double>> locationVSComplexity = new TreeMap();
+		Map<Double, List<Double>> locationVSComplexity = new TreeMap<Double, List<Double>>();
 		
 		for (String s: callDAG.functions) {
 			double l = callDAG.location.get(s);
@@ -66,7 +67,7 @@ public class GeneralityAnalysis {
 				locationVSComplexity.get(l).add(g);
 			}
 			else {
-				List<Double> list = new ArrayList();
+				List<Double> list = new ArrayList<Double>();
 				list.add(g);
 				locationVSComplexity.put(l, list);
 			}

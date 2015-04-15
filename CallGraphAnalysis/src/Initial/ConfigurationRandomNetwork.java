@@ -1,3 +1,4 @@
+package Initial;
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -35,8 +36,8 @@ public class ConfigurationRandomNetwork {
 		outDegreeValue = new int[callDAG.functions.size()];
 		availableFunctionName = new String[callDAG.functions.size()];
 		
-		inDegreeCurrent = new HashMap();
-		outDegreeCurrent = new HashMap();
+		inDegreeCurrent = new HashMap<String, Integer>();
+		outDegreeCurrent = new HashMap<String, Integer>();
 		
 		int i_idx = 0;
 		int o_idx = 0;
@@ -75,7 +76,7 @@ public class ConfigurationRandomNetwork {
 	}
 	
 	public void generateDegreeDistributionPreserveMethodX(CallDAG callDAG) {
-		HashSet<String> existingEdge = new HashSet();
+		HashSet<String> existingEdge = new HashSet<String>();
 		
 		int looped = 0;
 		
@@ -153,7 +154,7 @@ public class ConfigurationRandomNetwork {
 	}
 
 	public void generateDegreeDistributionPreserveMethodY(CallDAG callDAG) {
-		HashSet<String> existingEdge = new HashSet();
+		HashSet<String> existingEdge = new HashSet<String>();
 		
 		int looped = 0;
 		
@@ -284,9 +285,9 @@ public class ConfigurationRandomNetwork {
 */
 	
 	public void generateNumEdgePreserveMethodX(CallDAG callDAG) {
-		HashSet<String> existingEdge = new HashSet();
+		HashSet<String> existingEdge = new HashSet<String>();
 		int looped = 0;
-		ArrayList<String> functionNameList = new ArrayList(callDAG.functions);
+		ArrayList<String> functionNameList = new ArrayList<String>(callDAG.functions);
 		int allowedEdges = callDAG.nEdges;
 		
 		System.out.println(functionNameList.size() + "\t" + allowedEdges);
@@ -335,7 +336,7 @@ public class ConfigurationRandomNetwork {
 	}
 	
 	public void generateNumEdgePreserveMethodY(CallDAG callDAG) throws Exception {
-		HashSet<String> existingEdge = new HashSet();		
+		HashSet<String> existingEdge = new HashSet<String>();		
 		int allowedEdges = callDAG.nEdges;
 		PrintWriter pw = new PrintWriter(new File("artificial_callgraphs//hourglassDAGrX.txt"));
 //		allowedEdges = 6000;
@@ -366,8 +367,8 @@ public class ConfigurationRandomNetwork {
 	
 	public void generateNumEdgePreserveMethodXY() throws Exception {
 		CallDAG callDAG = new CallDAG();
-		HashSet<String> existingEdgeX = new HashSet();
-		HashSet<String> existingEdgeY = new HashSet();
+		HashSet<String> existingEdgeX = new HashSet<String>();
+		HashSet<String> existingEdgeY = new HashSet<String>();
 		PrintWriter pwX = new PrintWriter(new File("artificial_callgraphs//methodX.txt"));
 		PrintWriter pwY = new PrintWriter(new File("artificial_callgraphs//methodY.txt"));
 		
@@ -439,8 +440,8 @@ public class ConfigurationRandomNetwork {
 			
 //			System.out.println("Working on " + srcIdx + " with outDeg " + oDegSrc);
 			
-			ArrayList<Integer> inStubsID = new ArrayList();
-			ArrayList<Integer> inStubsDegree = new ArrayList();
+			ArrayList<Integer> inStubsID = new ArrayList<Integer>();
+			ArrayList<Integer> inStubsDegree = new ArrayList<Integer>();
 			for (int inStubIdx = srcIdx + 1; inStubIdx <= maxN; ++inStubIdx) {
 				String node = inStubIdx + "";
 				if (!callDAG.functions.contains(node)) continue;
@@ -532,7 +533,7 @@ public class ConfigurationRandomNetwork {
 			
 			if (random.nextDouble() < directionIndicatorRatio) { // make seed a target
 				// find source if any
-				ArrayList<Integer> potentialSources = new ArrayList();
+				ArrayList<Integer> potentialSources = new ArrayList<Integer>();
 				for (int i = 1; i < Integer.parseInt(seedName) && getLayer(i) != getLayer(Integer.parseInt(seedName)); ++i) {
 					if (outDegreeCurrent.containsKey(Integer.toString(i))) {
 						potentialSources.add(i);
@@ -546,7 +547,7 @@ public class ConfigurationRandomNetwork {
 			}
 			else { // make seed a source
 				// find target if any
-				ArrayList<Integer> potentialTargets = new ArrayList();
+				ArrayList<Integer> potentialTargets = new ArrayList<Integer>();
 				for (int i = 10000 + 1000; i > Integer.parseInt(seedName) && getLayer(i) != getLayer(Integer.parseInt(seedName)); --i) {
 					if (inDegreeCurrent.containsKey(Integer.toString(i))) {
 						potentialTargets.add(i);
@@ -614,7 +615,7 @@ public class ConfigurationRandomNetwork {
 			if (random.nextDouble() < directionIndicatorRatio) { // make seed a target
 				// find source if any
 //				System.out.print("Potential sources for " + seedName + ": ");
-				ArrayList<String> potentialSources = new ArrayList();
+				ArrayList<String> potentialSources = new ArrayList<String>();
 				for (String s: callDAG.nodesReachableUpwards.get(seedName)) {
 //					System.out.print(s + "\t");
 					if (outDegreeCurrent.containsKey(s)) {
@@ -631,7 +632,7 @@ public class ConfigurationRandomNetwork {
 			else { // make seed a source
 				// find target if any
 //				System.out.print("Potential targets for " + seedName + ": ");
-				ArrayList<String> potentialTargets = new ArrayList();
+				ArrayList<String> potentialTargets = new ArrayList<String>();
 				for (String s: callDAG.nodesReachableDownwards.get(seedName)) {
 //					System.out.print(s + "\t");
 					if (inDegreeCurrent.containsKey(s)) {
@@ -687,7 +688,7 @@ public class ConfigurationRandomNetwork {
 	}
 	
 	public void checkReachablity(String source, String target, CallDAG callDAG) {
-		visited =  new HashSet();
+		visited =  new HashSet<String>();
 		isReachable = false;
 		checkReachablityTraverse(source, target, callDAG);
 	}

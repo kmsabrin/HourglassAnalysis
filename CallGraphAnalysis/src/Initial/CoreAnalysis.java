@@ -1,3 +1,4 @@
+package Initial;
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -49,15 +50,15 @@ public class CoreAnalysis {
 		
 		this.version = versionNum;
 		
-		waistNodes = new HashSet();
-		waistDownwardReachableNodes = new HashSet();
-		waistUpwardReachableNodes = new HashSet();
-		waistNotReachableNodes = new HashSet();
-		shortestHopDistance = new HashMap();
+		waistNodes = new HashSet<String>();
+		waistDownwardReachableNodes = new HashSet<String>();
+		waistUpwardReachableNodes = new HashSet<String>();
+		waistNotReachableNodes = new HashSet<String>();
+		shortestHopDistance = new HashMap<String, Integer>();
 		centralityDistributionByHopDistance = TreeMultimap.create();
 			
-		startingRoots = new HashSet();
-		startingLeaves = new HashSet();
+		startingRoots = new HashSet<String>();
+		startingLeaves = new HashSet<String>();
 		for (String s: callDAG.functions) {
 			if (!callDAG.callTo.containsKey(s))
 				startingLeaves.add(s);
@@ -295,7 +296,7 @@ public class CoreAnalysis {
 	private void printONodesCallGraph(HashSet<String> ONodes, CallDAG callDAG) throws Exception {
 		PrintWriter pw = new PrintWriter(new File("Results//" + version + "-O-Graph.txt"));
 		
-		HashSet<String> OReachableNodes = new HashSet();
+		HashSet<String> OReachableNodes = new HashSet<String>();
 		
 		for (String s: ONodes) {
 			if (OReachableNodes.contains(s)) continue;
@@ -394,7 +395,7 @@ public class CoreAnalysis {
 		for (String s : startingRoots) {
 			if (!callDAG.functions.contains(s))
 				continue;
-			visited = new HashSet();
+			visited = new HashSet<String>();
 //			System.out.println("Traversing " + s);
 			getConnectedPairTraverse(s, callDAG);
 //			System.out.println();
@@ -489,8 +490,8 @@ public class CoreAnalysis {
 		pw1.println(xNodesRemoved + "\t" + xConnectedFraction);
 		System.out.println(xNodesRemoved + "\t" + xConnectedFraction);
 		
-		ArrayList<Double> xValues = new ArrayList();
-		ArrayList<Double> yValues = new ArrayList();
+		ArrayList<Double> xValues = new ArrayList<Double>();
+		ArrayList<Double> yValues = new ArrayList<Double>();
 
 		while (callDAG.functions.size() > 0) {
 			TreeMultimap<Double, String> centralitySortedNodes = TreeMultimap.create(Ordering.natural().reverse(), Ordering.natural());

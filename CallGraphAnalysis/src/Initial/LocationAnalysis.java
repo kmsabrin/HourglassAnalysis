@@ -1,3 +1,4 @@
+package Initial;
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.HashSet;
@@ -12,7 +13,7 @@ public class LocationAnalysis {
 		
 	public Map<Double, Integer> getLocationHistogram(CallDAG callDAG, String filePath) throws Exception {
 		PrintWriter pw = new PrintWriter(new File("Results//loc-hist-" + filePath + ".txt"));
-		Map<Double, Integer> locHistogram = new TreeMap();
+		Map<Double, Integer> locHistogram = new TreeMap<Double, Integer>();
 		for (String s: callDAG.location.keySet()) { // location is a map with location of each function
 			double m = callDAG.location.get(s);
 			pw.println(m); // for kernel density estimation with gnuplot
@@ -64,7 +65,7 @@ public class LocationAnalysis {
 		violatingPair = 0;
 		totalPair = 0;
 		for (String s: callDAG.functions) {	
-			visited = new HashSet();
+			visited = new HashSet<String>();
 			double sourceLocation = callDAG.location.get(s);
 			reachableNodes(s, s, sourceLocation, callDAG);
 			totalPair += visited.size() - 1;			
@@ -120,7 +121,7 @@ public class LocationAnalysis {
 	}
 	
 	public void getLeafCallerLocationHistogram(CallDAG callDAG) {
-		Map<Double, Integer> locHistogram = new TreeMap();
+		Map<Double, Integer> locHistogram = new TreeMap<Double, Integer>();
 		for (String s: callDAG.location.keySet()) {
 			if (callDAG.callTo.containsKey(s)) continue;
 			

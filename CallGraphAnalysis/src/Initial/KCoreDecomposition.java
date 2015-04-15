@@ -1,3 +1,4 @@
+package Initial;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -5,12 +6,12 @@ import java.util.Queue;
 import com.google.common.collect.TreeMultimap;
 
 public class KCoreDecomposition {
-	HashMap<String, Integer> nodeCore = new HashMap();
-	HashMap<String, Integer> nodeDegree = new HashMap();
+	HashMap<String, Integer> nodeCore = new HashMap<String, Integer>();
+	HashMap<String, Integer> nodeDegree = new HashMap<String, Integer>();
 	
 	public KCoreDecomposition() {
-		nodeCore = new HashMap();
-		nodeDegree = new HashMap();
+		nodeCore = new HashMap<String, Integer>();
+		nodeDegree = new HashMap<String, Integer>();
 	}
 	
 	public void getCores(CallDAG callDAG) {
@@ -26,7 +27,7 @@ public class KCoreDecomposition {
 		int kount = 0;
 		while (kount < callDAG.location.size()) {
 			if (!degreeSortedNodes.containsKey(core)) continue;
-			Queue<String> nodeQ = new LinkedList(degreeSortedNodes.get(core));			
+			Queue<String> nodeQ = new LinkedList<String>(degreeSortedNodes.get(core));			
 			while (!nodeQ.isEmpty()) {
 				String f = nodeQ.poll();
 				nodeCore.put(f, core);

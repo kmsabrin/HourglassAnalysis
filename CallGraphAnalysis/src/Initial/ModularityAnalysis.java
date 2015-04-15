@@ -1,3 +1,4 @@
+package Initial;
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -33,13 +34,13 @@ public class ModularityAnalysis {
 	static int walkLength = 5;
 	
 	ModularityAnalysis() {
-		communities = new HashMap();
-		communitiesInDeg = new HashMap();
-		communitiesOutDeg = new HashMap();
-		communitiesAvgLocation = new HashMap();
-		communitiesInWeight = new HashMap();
-		communitiesOutWeight = new HashMap();
-		communitiesAvgGenerality = new HashMap();
+		communities = new HashMap<String, Set<String>>();
+		communitiesInDeg = new HashMap<String, Double>();
+		communitiesOutDeg = new HashMap<String, Double>();
+		communitiesAvgLocation = new HashMap<String, Double>();
+		communitiesInWeight = new HashMap<String, Double>();
+		communitiesOutWeight = new HashMap<String, Double>();
+		communitiesAvgGenerality = new HashMap<String, Double>();
 	}
 	
 	public static void getCallDAGforWalktrap(CallDAG callDAG, String versionNum) throws Exception {
@@ -66,7 +67,7 @@ public class ModularityAnalysis {
 	
 	public void getAvgModuleGeneralityVsLocation(CallDAG callDAG, String filePath) throws Exception {
 		PrintWriter pw = new PrintWriter(new File("Results//avg-module-gen-vs-loc-" + filePath + ".txt"));		
-		Map<Double, Double> avgModuleGeneralityVsLocation = new TreeMap();
+		Map<Double, Double> avgModuleGeneralityVsLocation = new TreeMap<Double, Double>();
 		for (String s: callDAG.functions) {
 			double loc = callDAG.location.get(s);
 			double mG = callDAG.moduleGenerality.get(s);
@@ -127,7 +128,7 @@ public class ModularityAnalysis {
 	public void getArtificialModularNetwork() throws Exception {
 		PrintWriter pw = new PrintWriter(new File("Results//random-modular-network_100x100-50n.txt"));
 
-		HashMap<Integer, HashSet<Integer>> adjacencyList = new HashMap();
+		HashMap<Integer, HashSet<Integer>> adjacencyList = new HashMap<Integer, HashSet<Integer>>();
 		
 		int blockSize = 100;
 		int nBlocks = 100;
@@ -135,7 +136,7 @@ public class ModularityAnalysis {
 		double nInterModuleEdges = 0;
 				
 		for (int i = 0; i < nNodes; ++i) {
-			HashSet<Integer> hset = new HashSet();
+			HashSet<Integer> hset = new HashSet<Integer>();
 			adjacencyList.put(i, hset);
 		}
 		
@@ -217,7 +218,7 @@ public class ModularityAnalysis {
 		double averageJS = 0; // JS - Jaccard Similarity
 		int averageKnt = 0;
 		
-		ArrayList<Double> jSValueList = new ArrayList();
+		ArrayList<Double> jSValueList = new ArrayList<Double>();
 
 		int blockSize = 100;
 		int nBlocks = 100;
@@ -231,7 +232,7 @@ public class ModularityAnalysis {
 		
 			if (val.length < (blockSize / 5)) continue; // wrongly detected community, skip it
 			
-			HashSet<Integer> communityMembers = new HashSet();
+			HashSet<Integer> communityMembers = new HashSet<Integer>();
 			for(String r: val) {
 				int id = Integer.parseInt(r);
 				communityMembers.add(id);
@@ -288,7 +289,7 @@ public class ModularityAnalysis {
 		
 //			if (val.length < nCommunitySizeThreshold) continue;
 
-			Set<String> communityFunctions = new HashSet();
+			Set<String> communityFunctions = new HashSet<String>();
 			String cID = "C" + communityID;
 			
 			pw.print(cID);
@@ -367,8 +368,8 @@ public class ModularityAnalysis {
 	public void getNonrepresentativeCommunityNode(CallDAG callDAG, String versionNum) throws Exception {
 		double nodeOutRatio[] = new double[callDAG.location.size() + 1];
 		double nodeInRatio[] = new double[callDAG.location.size() + 1];
-		Map<String, Double> nodeInRatioMap = new HashMap();
-		Map<String, Double> nodeOutRatioMap = new HashMap();
+		Map<String, Double> nodeInRatioMap = new HashMap<String, Double>();
+		Map<String, Double> nodeOutRatioMap = new HashMap<String, Double>();
 		
 		int idx = 0;
 		for (String s: communities.keySet()) {
@@ -551,7 +552,7 @@ public class ModularityAnalysis {
 //		int hMetricCDF[] = new int[150];
 		
 		for (String s: communities.keySet()) {
-			TreeMap<Double, Integer> communityShape = new TreeMap();
+			TreeMap<Double, Integer> communityShape = new TreeMap<Double, Integer>();
 			for (String r: communities.get(s)) {
 				double loc = callDAG.location.get(r);
 				if (communityShape.containsKey(loc)) {
@@ -619,7 +620,7 @@ public class ModularityAnalysis {
 	
 	public void getCommunityHistogram(CallDAG callDAG) throws Exception {
 		PrintWriter pw0 = new PrintWriter(new File("Results//gnuplot.command.txt"));
-		TreeMap<Integer, ArrayList<String>> sizeSortedCommunities = new TreeMap();
+		TreeMap<Integer, ArrayList<String>> sizeSortedCommunities = new TreeMap<Integer, ArrayList<String>>();
 		
 		for (String s: communities.keySet()) {
 			int sz = communities.get(s).size() * -1;
@@ -627,7 +628,7 @@ public class ModularityAnalysis {
 				sizeSortedCommunities.get(sz).add(s);
 			}
 			else {
-				ArrayList<String> aList = new ArrayList();
+				ArrayList<String> aList = new ArrayList<String>();
 				aList.add(s);
 				sizeSortedCommunities.put(sz, aList);
 			}
@@ -720,7 +721,7 @@ public class ModularityAnalysis {
 		PrintWriter pw1 = new PrintWriter(new File("Results//module-inweight-cdf-" + versionNum + ".txt"));
 		PrintWriter pw2 = new PrintWriter(new File("Results//module-outweight-cdf-" + versionNum + ".txt"));
 		
-		Map<Integer, Integer> cdfMap = new TreeMap();
+		Map<Integer, Integer> cdfMap = new TreeMap<Integer, Integer>();
 		for (String s: communitiesInWeight.keySet()) {
 			int w = communitiesInWeight.get(s).intValue();
 			if (cdfMap.containsKey(w)) {
@@ -790,7 +791,7 @@ public class ModularityAnalysis {
 		getCommunityNetworkWeightCDF(versionNum);
 		
 //		///////////////////////////////////////////////////////
-		Map<Double, Double> averages = new HashMap();
+		Map<Double, Double> averages = new HashMap<Double, Double>();
 //		for (String s: communitiesInWeight.keySet()) {
 //			double iw = communitiesInWeight.get(s);
 //			double l = communitiesAvgLocation.get(s);
@@ -892,7 +893,7 @@ public class ModularityAnalysis {
 		PrintWriter pw = new PrintWriter(new File("Results//community-call-network.dot"));
 		pw.println("digraph G {");
 		
-		Map<String, Double> communityGenerality = new TreeMap();
+		Map<String, Double> communityGenerality = new TreeMap<String, Double>();
 		
 		for (String s: communities.keySet()) {
 			double d = 0;
@@ -930,7 +931,7 @@ public class ModularityAnalysis {
 
 		int commID = 0;
 		
-		List<String> communityList = new ArrayList();
+		List<String> communityList = new ArrayList<String>();
 		
 		scanner.nextLine(); // skip first line
 		while (scanner.hasNextLine()) {
@@ -953,7 +954,7 @@ public class ModularityAnalysis {
 			double locations[] = new double[val.length];		
 			if (locations.length < nCommunitySizeThreshold) continue;
 
-			Map<Integer, Double> locationCounter = new TreeMap();
+			Map<Integer, Double> locationCounter = new TreeMap<Integer, Double>();
 			int i = 0;
 			double maxHeight = 0;
 			for(String r: val) {
@@ -1068,9 +1069,9 @@ public class ModularityAnalysis {
 		boolean used[] = new boolean[communityList.size()];
 		int notUsedKnt = communityList.size();
 		
-		Map<String, Integer> communityMidX = new HashMap();
-		Map<String, Integer> communityMidY = new HashMap();
-		Map<String, Set<String>> tmpCommunities = new HashMap();
+		Map<String, Integer> communityMidX = new HashMap<String, Integer>();
+		Map<String, Integer> communityMidY = new HashMap<String, Integer>();
+		Map<String, Set<String>> tmpCommunities = new HashMap<String, Set<String>>();
 		int comId = 1;		
 		while (notUsedKnt > 0) {
 			boolean heightBits[] = new boolean[600];
@@ -1087,7 +1088,7 @@ public class ModularityAnalysis {
 //					continue;
 
 				int i = 0;
-				Set<String> commFunc = new HashSet();
+				Set<String> commFunc = new HashSet<String>();
 				for (String r : val) {
 					int id = Integer.parseInt(r);
 					String f = callDAG.IDFunction.get(id);
@@ -1225,7 +1226,7 @@ public class ModularityAnalysis {
 
 		getWalktrapModules(callDAG, versionNum);
 		
-		List<String> communityList = new ArrayList();	
+		List<String> communityList = new ArrayList<String>();	
 		
 		Scanner scanner = new Scanner(new File("module_graphs//w" + walkLength + "-" + versionNum + ".txt"));
 		scanner.nextLine(); // skip first line

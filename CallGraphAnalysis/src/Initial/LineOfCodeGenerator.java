@@ -1,9 +1,10 @@
+package Initial;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 public class LineOfCodeGenerator {
-	static List<String> sourceFilePath = new ArrayList();
+	static List<String> sourceFilePath = new ArrayList<String>();
 
 	// directory traverse
 	public static void showFiles(File[] files) {

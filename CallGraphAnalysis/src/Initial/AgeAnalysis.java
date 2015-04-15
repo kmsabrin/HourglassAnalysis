@@ -1,3 +1,4 @@
+package Initial;
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -28,27 +29,27 @@ public class AgeAnalysis {
 	Map<String, Integer> functionPersistence;
 		
 	AgeAnalysis() {
-		birthVersion = new HashMap();
-		birthLocation = new HashMap();
-		birthComplexity = new HashMap();
-		birthGenerality = new HashMap();
+		birthVersion = new HashMap<String, Integer>();
+		birthLocation = new HashMap<String, Double>();
+		birthComplexity = new HashMap<String, Double>();
+		birthGenerality = new HashMap<String, Double>();
 
-		lastVersion = new HashMap();
-		lastLocation = new HashMap();
-		lastComplexity = new HashMap();
-		lastGenerality = new HashMap();
+		lastVersion = new HashMap<String, Integer>();
+		lastLocation = new HashMap<String, Double>();
+		lastComplexity = new HashMap<String, Double>();
+		lastGenerality = new HashMap<String, Double>();
 
-		avgLocation = new HashMap();
-		avgComplexity = new HashMap();
-		avgGenerality = new HashMap();
+		avgLocation = new HashMap<String, Double>();
+		avgComplexity = new HashMap<String, Double>();
+		avgGenerality = new HashMap<String, Double>();
 
-		functionPersistence = new HashMap();
+		functionPersistence = new HashMap<String, Integer>();
 		
 		/****
 		 * Think about using avgLocation, avgComplexity and avgGenerality
 		 */
-		Set<String> totalFunction = new HashSet();
-		Set<String> rebornFunction = new HashSet();
+		Set<String> totalFunction = new HashSet<String>();
+		Set<String> rebornFunction = new HashSet<String>();
 		
 		for (int i = Driver.versiontStart; i < Driver.versionEnd; ++i) {	
 			CallDAG callDAG = new CallDAG(Driver.networkPath + i);
@@ -337,8 +338,8 @@ public class AgeAnalysis {
 	
 //	transient and stable distribution with location
 	public void getLocationVsTransientStable() { // fig:loc-vs-stable & fig:loc-vs-transient
-		Map<Double, Integer> locationVsNumNodesWithAgeX = new TreeMap();
-		Map<Double, Integer> locationFrequency = new HashMap(); // for percentage
+		Map<Double, Integer> locationVsNumNodesWithAgeX = new TreeMap<Double, Integer>();
+		Map<Double, Integer> locationFrequency = new HashMap<Double, Integer>(); // for percentage
 		
 		for (String s: birthVersion.keySet()) {
 			int persistence = functionPersistence.get(s);
@@ -370,9 +371,9 @@ public class AgeAnalysis {
 	}
 	
 	public void getLocationDispersion() {
-		Map<Double, Integer> locationDispersionCount = new TreeMap();
-		Map<Double, Integer> locationFrequency = new TreeMap();
-		Map<Double, Double> locationAverageDispersion = new TreeMap();
+		Map<Double, Integer> locationDispersionCount = new TreeMap<Double, Integer>();
+		Map<Double, Integer> locationFrequency = new TreeMap<Double, Integer>();
+		Map<Double, Double> locationAverageDispersion = new TreeMap<Double, Double>();
 		
 		for (String s: birthVersion.keySet()) {
 			double bLocation = birthLocation.get(s);
@@ -410,10 +411,10 @@ public class AgeAnalysis {
 		PrintWriter pwts = new PrintWriter(new File("Results//" + Driver.networkType + "-cluster-transient-stable.txt"));
 		PrintWriter pwls = new PrintWriter(new File("Results//" + Driver.networkType + "-cluster-life-span.txt"));
 		
-		List<Integer> persistenceGC = new ArrayList();
-		List<Integer> persistencegC = new ArrayList();
-		List<Integer> persistencegc = new ArrayList();
-		List<Integer> persistenceGc = new ArrayList();
+		List<Integer> persistenceGC = new ArrayList<Integer>();
+		List<Integer> persistencegC = new ArrayList<Integer>();
+		List<Integer> persistencegc = new ArrayList<Integer>();
+		List<Integer> persistenceGc = new ArrayList<Integer>();
 		
 		double sGC = 0, sgC = 0, sgc = 0, sGc = 0; // stable node counters
 		double tGC = 0, tgC = 0, tgc = 0, tGc = 0; // transient node counters
@@ -492,7 +493,7 @@ public class AgeAnalysis {
 	
 	public void getLocationVsPersistencePercentiles() throws Exception { // fig:loc-vs-evo-age
 		PrintWriter pw = new PrintWriter(new File("Results//" + Driver.networkType + "-loc-vs-evo-persistence.txt"));
-		Map<Double, List<Integer>> locationPersistenceMap = new TreeMap();
+		Map<Double, List<Integer>> locationPersistenceMap = new TreeMap<Double, List<Integer>>();
 		
 		for (String s: birthVersion.keySet()) {			
 			int persistence = functionPersistence.get(s);
@@ -502,7 +503,7 @@ public class AgeAnalysis {
 				locationPersistenceMap.get(avgLoc).add(persistence);
 			}
 			else {
-				List<Integer> list = new ArrayList();
+				List<Integer> list = new ArrayList<Integer>();
 				list.add(persistence);
 				locationPersistenceMap.put(avgLoc, list);
 			}
@@ -524,7 +525,7 @@ public class AgeAnalysis {
 	
 	public void getLocationVsAvgGeneralityDelta() throws Exception {
 		PrintWriter pw = new PrintWriter(new File("Results//" + Driver.networkType + "-loc-vs-avg-delta-gen.txt"));
-		Map<Double, Double> locVsAvGenDelta = new TreeMap();
+		Map<Double, Double> locVsAvGenDelta = new TreeMap<Double, Double>();
 		
 		for (String s: birthVersion.keySet()) {
 			double l = avgLocation.get(s);

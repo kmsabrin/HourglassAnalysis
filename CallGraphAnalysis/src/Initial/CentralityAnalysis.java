@@ -1,3 +1,4 @@
+package Initial;
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.Arrays;
@@ -80,8 +81,8 @@ public class CentralityAnalysis {
 	void getCentralityCDF(CallDAG callDAG, String filePath) throws Exception {		
 		PrintWriter pw = new PrintWriter(new File("Results//centrality-cdf-" + filePath + ".txt"));
 
-		Map<Double, Double> histogram = new TreeMap();
-		Map<Double, Double> CDF = new TreeMap();
+		Map<Double, Double> histogram = new TreeMap<Double, Double>();
+		Map<Double, Double> CDF = new TreeMap<Double, Double>();
 		
 		for (String s: callDAG.functions) {
 			double v = callDAG.centrality.get(s);	
@@ -109,8 +110,8 @@ public class CentralityAnalysis {
 	void getCentralityCCDF(CallDAG callDAG, String filePath) throws Exception {		
 		PrintWriter pw = new PrintWriter(new File("Results//centrality-ccdf-" + filePath + ".txt"));
 
-		Map<Double, Double> histogram = new TreeMap();
-		Map<Double, Double> CDF = new TreeMap();
+		Map<Double, Double> histogram = new TreeMap<Double, Double>();
+		Map<Double, Double> CDF = new TreeMap<Double, Double>();
 		
 		for (String s: callDAG.functions) {
 			double v = callDAG.centrality.get(s);	

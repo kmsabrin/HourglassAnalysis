@@ -1,3 +1,4 @@
+package Initial;
 import java.io.File;
 import java.util.HashSet;
 import java.util.Scanner;
@@ -8,7 +9,7 @@ public class PatchAnalysis {
 	public HashSet<String> getPatchedFunctions(String filePath, Set<String> functions) throws Exception {
 		Scanner scan = new Scanner(new File(filePath));
 		
-		HashSet<String> possibleFunctionNameToken = new HashSet();
+		HashSet<String> possibleFunctionNameToken = new HashSet<String>();
 		
 		while (scan.hasNextLine()) {
 			String line = scan.nextLine();
@@ -28,7 +29,7 @@ public class PatchAnalysis {
 			
 		}
 		
-		HashSet<String> notFunctionNameToken = new HashSet();
+		HashSet<String> notFunctionNameToken = new HashSet<String>();
 		for (String s : possibleFunctionNameToken) {
 			if (functions.contains(s)) {
 				System.out.println(s);

@@ -1,3 +1,4 @@
+package Initial;
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -71,48 +72,48 @@ public class CallDAG {
 	HashSet<String> thresholdedCore;
 	
 	CallDAG() { 
-		functions = new TreeSet();
-		callFrom = new HashMap();
-		callTo = new HashMap();
+		functions = new TreeSet<String>();
+		callFrom = new HashMap<String, Set<String>>();
+		callTo = new HashMap<String, Set<String>>();
 		
-		cycleEdges = new HashMap();
+		cycleEdges = new HashMap<String, String>();
 		
-		numOfPath = new HashMap();
-		sumOfPath = new HashMap();
-		avgTargetDepth = new HashMap();
-		avgSourceDepth = new HashMap();
-		location = new HashMap();
+		numOfPath = new HashMap<String, Double>();
+		sumOfPath = new HashMap<String, Double>();
+		avgTargetDepth = new HashMap<String, Double>();
+		avgSourceDepth = new HashMap<String, Double>();
+		location = new HashMap<String, Double>();
 		
-		numOfTargetPath = new HashMap();
-		numOfSourcePath = new HashMap();
+		numOfTargetPath = new HashMap<String, Double>();
+		numOfSourcePath = new HashMap<String, Double>();
 		
-		numOfReachableNodes = new HashMap();
-		generality = new HashMap();
-		complexity = new HashMap();
-		moduleGenerality = new HashMap();
-		moduleComplexity = new HashMap();
-		sourcesReached = new HashMap();
-		targetsReached = new HashMap();
+		numOfReachableNodes = new HashMap<String, Double>();
+		generality = new HashMap<String, Double>();
+		complexity = new HashMap<String, Double>();
+		moduleGenerality = new HashMap<String, Double>();
+		moduleComplexity = new HashMap<String, Double>();
+		sourcesReached = new HashMap<String, Double>();
+		targetsReached = new HashMap<String, Double>();
 		
-		outDegree = new HashMap();
-		inDegree = new HashMap();
+		outDegree = new HashMap<String, Integer>();
+		inDegree = new HashMap<String, Integer>();
 		
-		functionID = new HashMap();
-		IDFunction = new HashMap();
+		functionID = new HashMap<String, Integer>();
+		IDFunction = new HashMap<Integer, String>();
 		
-		centrality = new HashMap();
-		nodePathThrough = new HashMap();
+		centrality = new HashMap<String, Double>();
+		nodePathThrough = new HashMap<String, Double>();
 		
-		prCentrality = new HashMap();
-		prFromSource = new HashMap();
-		prToTarget = new HashMap();
+		prCentrality = new HashMap<String, Double>();
+		prFromSource = new HashMap<String, Double>();
+		prToTarget = new HashMap<String, Double>();
 		
-		detectedCycles = new ArrayList();
+		detectedCycles = new ArrayList<ArrayList<String>>();
 		
-		nodesReachableUpwards = new HashMap();
-		nodesReachableDownwards = new HashMap();
+		nodesReachableUpwards = new HashMap<String, Set<String>>();
+		nodesReachableDownwards = new HashMap<String, Set<String>>();
 		
-		thresholdedCore = new HashSet();
+		thresholdedCore = new HashSet<String>();
 	}
 	
 	CallDAG(String callGraphFileName) {
@@ -183,7 +184,7 @@ public class CallDAG {
 					if (callFrom.containsKey(callT)) {
 						callFrom.get(callT).add(callF);
 					} else {
-						Set<String> l = new HashSet();
+						Set<String> l = new HashSet<String>();
 						l.add(callF);
 						callFrom.put(callT, l);
 					}
@@ -191,7 +192,7 @@ public class CallDAG {
 					if (callTo.containsKey(callF)) {
 						callTo.get(callF).add(callT);
 					} else {
-						Set<String> l = new HashSet();
+						Set<String> l = new HashSet<String>();
 						l.add(callT);
 						callTo.put(callF, l);
 					}
@@ -216,7 +217,7 @@ public class CallDAG {
 				for (int i = cycleList.size() - 1; ; --i) {
 					if (cycleList.get(i).equals(s)) {
 //						System.out.println(cycleList.size() - i);
-						detectedCycles.add(new ArrayList(cycleList.subList(i, cycleList.size())));
+						detectedCycles.add(new ArrayList<String>(cycleList.subList(i, cycleList.size())));
 						break;
 					}
 				}
@@ -236,14 +237,14 @@ public class CallDAG {
 		boolean loop = true;
 		int k = 0;
 		while (loop) {
-			visited = new HashSet();
+			visited = new HashSet<String>();
 			loop = false;
 			for (String s : functions) {
 //				if (!visited.contains(s)) {
 				if (!callFrom.containsKey(s)) { // start from roots only
-					cycleEdges = new HashMap();
-					cycleVisited = new HashSet();
-					cycleList = new ArrayList();
+					cycleEdges = new HashMap<String, String>();
+					cycleVisited = new HashSet<String>();
+					cycleList = new ArrayList<String>();
 					removeCyclesTraverse(s);
 
 					for (String source : cycleEdges.keySet()) {
@@ -263,9 +264,9 @@ public class CallDAG {
 			
 			for (String s : functions) { // cycles involving roots
 				if (!visited.contains(s)) {
-					cycleEdges = new HashMap();
-					cycleVisited = new HashSet();
-					cycleList = new ArrayList();
+					cycleEdges = new HashMap<String, String>();
+					cycleVisited = new HashSet<String>();
+					cycleList = new ArrayList<String>();
 					removeCyclesTraverse(s);
 					
 //					if (s.equals("do_lcall")) {
@@ -417,13 +418,13 @@ public class CallDAG {
 		numOfTargetPath.putAll(numOfPath);
 		
 //		reset data containers
-		numOfPath = new HashMap();
-		sumOfPath = new HashMap();
+		numOfPath = new HashMap<String, Double>();
+		sumOfPath = new HashMap<String, Double>();
 //		go through leaves
 		for (String s: functions) {
 			if (!callTo.containsKey(s)) {
-				visited = new HashSet();
-				visitedOrdered = new ArrayList();
+				visited = new HashSet<String>();
+				visitedOrdered = new ArrayList<String>();
 				sourcePath(s);
 			}
 		}
@@ -472,7 +473,7 @@ public class CallDAG {
 		for (String s : functions) {
 			reachableKount = -1.0; // for excluding itself, note kount is global
 			moduleKount = 0;
-			visited = new HashSet();
+			visited = new HashSet<String>();
 			reachableUpwardsNodes(s); // how many nodes are using her
 			
 			double g = 0;
@@ -552,7 +553,7 @@ public class CallDAG {
 		for (String s : functions) {
 			reachableKount = -1.0; // for excluding itself
 			moduleKount = 0;
-			visited = new HashSet();
+			visited = new HashSet<String>();
 			reachableDownwardsNodes(s, s, pw);
 			
 			int loc = (int)(location.get(s) * 100);
@@ -573,49 +574,49 @@ public class CallDAG {
 	}
 	
 	public void loadRechablity() {
-		visited = new HashSet();
+		visited = new HashSet<String>();
 		for (String s : functions) {
 			visited.clear();
 			reachableUpwardsNodes(s); // how many nodes are using her
 			visited.remove(s); // remove ifself
-			nodesReachableUpwards.put(s, new HashSet(visited));
+			nodesReachableUpwards.put(s, new HashSet<String>(visited));
 			
 			visited.clear();
 			reachableDownwardsNodes(s); // how many nodes she is using
 			visited.remove(s); // remove itself
-			nodesReachableDownwards.put(s, new HashSet(visited));
+			nodesReachableDownwards.put(s, new HashSet<String>(visited));
 		}
 	}
 	
 	public void resetAuxiliary() {
 		nTotalPath = 0;
-		cycleEdges = new HashMap();
+		cycleEdges = new HashMap<String, String>();
 		
-		numOfPath = new HashMap();
-		sumOfPath = new HashMap();
-		avgTargetDepth = new HashMap();
-		avgSourceDepth = new HashMap();
-		location = new HashMap();
+		numOfPath = new HashMap<String, Double>();
+		sumOfPath = new HashMap<String, Double>();
+		avgTargetDepth = new HashMap<String, Double>();
+		avgSourceDepth = new HashMap<String, Double>();
+		location = new HashMap<String, Double>();
 		
-		numOfTargetPath = new HashMap();
-		numOfSourcePath = new HashMap();
+		numOfTargetPath = new HashMap<String, Double>();
+		numOfSourcePath = new HashMap<String, Double>();
 		
-		numOfReachableNodes = new HashMap();
-		generality = new HashMap();
-		complexity = new HashMap();
-		moduleGenerality = new HashMap();
-		moduleComplexity = new HashMap();
-		sourcesReached = new HashMap();
-		targetsReached = new HashMap();
+		numOfReachableNodes = new HashMap<String, Double>();
+		generality = new HashMap<String, Double>();
+		complexity = new HashMap<String, Double>();
+		moduleGenerality = new HashMap<String, Double>();
+		moduleComplexity = new HashMap<String, Double>();
+		sourcesReached = new HashMap<String, Double>();
+		targetsReached = new HashMap<String, Double>();
 		
-		outDegree = new HashMap();
-		inDegree = new HashMap();
+		outDegree = new HashMap<String, Integer>();
+		inDegree = new HashMap<String, Integer>();
 		
-		functionID = new HashMap();
-		IDFunction = new HashMap();
+		functionID = new HashMap<String, Integer>();
+		IDFunction = new HashMap<Integer, String>();
 		
-		centrality = new HashMap();
-		nodePathThrough = new HashMap();
+		centrality = new HashMap<String, Double>();
+		nodePathThrough = new HashMap<String, Double>();
 		
 		nSources = nTargets = 0;
 		for (String s: functions) {
@@ -730,7 +731,7 @@ public class CallDAG {
 	}
 
 	public void removeIsolatedNodes() {
-		HashSet<String> removable = new HashSet();
+		HashSet<String> removable = new HashSet<String>();
 		for (String s : functions) {
 			if (!callTo.containsKey(s) && !callFrom.containsKey(s)) {
 				removable.add(s);

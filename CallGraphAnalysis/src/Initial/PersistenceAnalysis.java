@@ -1,3 +1,4 @@
+package Initial;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -5,10 +6,10 @@ import java.util.Set;
 public class PersistenceAnalysis {
 	
 	public void getContiguousFunctionPersistance(CallDAG cgDAG1, CallDAG cgDAG2) {		
-		Set<String> s1 = new HashSet(cgDAG1.functions);
-		Set<String> s2 = new HashSet(cgDAG2.functions);
+		Set<String> s1 = new HashSet<String>(cgDAG1.functions);
+		Set<String> s2 = new HashSet<String>(cgDAG2.functions);
 		
-		Set<String> s3 = new HashSet(s1);
+		Set<String> s3 = new HashSet<String>(s1);
 		
 		s3.retainAll(s2);
 		System.out.println(s1.size());
