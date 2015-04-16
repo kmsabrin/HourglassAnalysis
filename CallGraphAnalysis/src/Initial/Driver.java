@@ -139,9 +139,9 @@ public class Driver {
 			String versionNumber = versions[i];
 			CallDAG callDAG = new CallDAG("artificial_callgraphs//" + versionNumber + ".txt");
 			
-			callDAG.centrality = callDAG.prCentrality;
-			IteratedMaxCentralityCoverage iteratedMaxCentralityCoverage = new IteratedMaxCentralityCoverage(callDAG);
-			iteratedMaxCentralityCoverage.runIMCC();		
+//			callDAG.centrality = callDAG.prCentrality;
+//			IteratedMaxCentralityCoverage iteratedMaxCentralityCoverage = new IteratedMaxCentralityCoverage(callDAG);
+//			iteratedMaxCentralityCoverage.runIMCC();		
 
 //			CentralityAnalysis.getCentralityPDF(callDAG, versionNumber);
 //			printNetworkStat(callDAG);

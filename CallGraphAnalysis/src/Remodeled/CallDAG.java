@@ -13,7 +13,7 @@ import java.util.TreeSet;
 public class CallDAG {
 	int nEdges;
 	double nSources; // source =  simple module, zero in degree, depends on none
-	double nTargets; // target = complex module, zero out degree, server none (yeah right)
+	double nTargets; // target = complex module, zero out degree, serves none (yeah right)
 
 	Set<String> functions;
 	Map<String, Set<String>> serves; 
@@ -32,12 +32,11 @@ public class CallDAG {
 	Map<String, String> cycleEdges;
 	Set<String> cycleVisited;
 	List<String> cycleList;
+	ArrayList<ArrayList<String>> detectedCycles;
 		
 	HashMap<String, Double> centrality;
 	HashMap<String, Double> prSource;
 	HashMap<String, Double> prTarget;
-	
-	ArrayList<ArrayList<String>> detectedCycles;
 	
 	Map<String, Set<String>> dependentsReachable;
 	Map<String, Set<String>> serversReachable;
@@ -46,9 +45,7 @@ public class CallDAG {
 		functions = new TreeSet();
 		serves = new HashMap();
 		depends = new HashMap();
-		
-		cycleEdges = new HashMap();
-		
+				
 		numOfPath = new HashMap();
 		sumOfPath = new HashMap();
 		avgTargetDepth = new HashMap();
@@ -63,7 +60,8 @@ public class CallDAG {
 		prTarget = new HashMap();
 		
 		detectedCycles = new ArrayList();
-		
+		cycleEdges = new HashMap();
+
 		dependentsReachable = new HashMap();
 		serversReachable = new HashMap();
 	}
@@ -109,17 +107,17 @@ public class CallDAG {
 					if (serves.containsKey(server)) {
 						serves.get(server).add(dependent);
 					} else {
-						Set<String> l = new HashSet();
-						l.add(dependent);
-						serves.put(server, l);
+						HashSet<String> hs = new HashSet();
+						hs.add(dependent);
+						serves.put(server, hs);
 					}
 
 					if (depends.containsKey(dependent)) {
 						depends.get(dependent).add(server);
 					} else {
-						Set<String> l = new HashSet();
-						l.add(server);
-						depends.put(dependent, l);
+						HashSet<String> hs = new HashSet();
+						hs.add(server);
+						depends.put(dependent, hs);
 					}
 				} 
 			}
@@ -150,6 +148,7 @@ public class CallDAG {
 				
 				continue;
 			}
+			
 			removeCyclesTraverse(s);
 		}
 
@@ -160,62 +159,42 @@ public class CallDAG {
 	}
 
 	public void removeCycles() {
-//		go through sources
+		// go through sources
 		boolean loop = true;
-		int k = 0;
+		int nCycles = 0;
 		while (loop) {
-			visited = new HashSet();
 			loop = false;
 			for (String s : functions) {
-				if (!depends.containsKey(s)) { // start from sources only
-					cycleEdges = new HashMap();
-					cycleVisited = new HashSet();
-					cycleList = new ArrayList();
-					removeCyclesTraverse(s);
+				visited = new HashSet();
+				cycleEdges = new HashMap();
+				cycleVisited = new HashSet();
+				cycleList = new ArrayList();
+				removeCyclesTraverse(s);
 
-					for (String server : cycleEdges.keySet()) {
-						String dependent = cycleEdges.get(server);
-						depends.get(dependent).remove(server);
-						serves.get(server).remove(dependent);
-						if (depends.get(dependent).size() < 1) depends.remove(dependent);
-						if (serves.get(server).size() < 1) serves.remove(server);
-						if (!depends.containsKey(server) && !serves.containsKey(server)) functions.remove(server);
-						if (!depends.containsKey(dependent) && !serves.containsKey(dependent)) functions.remove(dependent);
-						--nEdges;
-						++k;
-						loop = true;
+				for (String server : cycleEdges.keySet()) {
+					String dependent = cycleEdges.get(server);
+					depends.get(dependent).remove(server);
+					serves.get(server).remove(dependent);
+					if (depends.get(dependent).size() < 1) {
+						depends.remove(dependent);
 					}
-				}
-			}
-			
-			for (String s : functions) { // cycles involving roots
-				if (!visited.contains(s)) {
-					cycleEdges = new HashMap();
-					cycleVisited = new HashSet();
-					cycleList = new ArrayList();
-					removeCyclesTraverse(s);
-					
-//					if (s.equals("do_lcall")) {
-//						System.out.println("Traversing " + s);
-//						System.out.println(cycleEdges);
-//					}
-					
-					for (String server : cycleEdges.keySet()) {
-						String dependent = cycleEdges.get(server);
-						depends.get(dependent).remove(server);
-						serves.get(server).remove(dependent);
-						if (depends.get(dependent).size() < 1) depends.remove(dependent);
-						if (serves.get(server).size() < 1) serves.remove(server);
-						if (!depends.containsKey(server) && !serves.containsKey(server)) functions.remove(server);
-						if (!depends.containsKey(dependent) && !serves.containsKey(dependent)) functions.remove(dependent);
-						--nEdges;
-						++k;
-						loop = true;
+					if (serves.get(server).size() < 1) {
+						serves.remove(server);
 					}
+					if (!depends.containsKey(server) && !serves.containsKey(server)) {
+						functions.remove(server);
+					}
+					if (!depends.containsKey(dependent) && !serves.containsKey(dependent)) {
+						functions.remove(dependent);
+					}
+					--nEdges;
+					++nCycles;
+//					loop = true;
 				}
 			}
 		}
-//		System.out.println(k + " cycle edges removed!");
+
+		// System.out.println(k + " cycle edges removed!");
 	}
 	
 	public void loadDegreeMetric() {
@@ -423,16 +402,17 @@ public class CallDAG {
 		}
 		
 		for (String s: functions) {
-			centrality.put(s, prSource.get(s));
-//			centrality.put(s, prTarget.get(s));
-//			centrality.put(s, prFromSource.get(s) * prToTarget.get(s));
+//			centrality.put(s, prSource.get(s));
+			centrality.put(s, prTarget.get(s));
+//			centrality.put(s, prSource.get(s) * prTarget.get(s));
 		}
 
-//		for (String s: functions) {
-//			System.out.println(s + "\t" + prSource.get(s) + "\t" + prTarget.get(s));
-//		}
-		
-		System.out.println("###### ###### ######");
+		for (String s: functions) {
+//			if (depends.containsKey(s) && serves.containsKey(s)) {
+				System.out.println(s + "\t" + location.get(s) + "\t" + centrality.get(s));
+//			}
+		}
+//		System.out.println("###### ###### ######");
 	}
 	
 	public void printNetworkMetrics() {
@@ -442,6 +422,20 @@ public class CallDAG {
 			System.out.print(outDegree.get(s) + "\t");
 			System.out.print(location.get(s) + "\t");
 			System.out.print(centrality.get(s) + "\t");
+			System.out.println();
+		}
+		
+		for (String s: functions) {
+			System.out.print(s + " serves to");
+			for (String r: dependentsReachable.get(s)) {
+				System.out.print(" " + r);
+			}
+			System.out.println();
+			
+			System.out.print(s + " depends on");
+			for (String r: serversReachable.get(s)) {
+				System.out.print(" " + r);
+			}
 			System.out.println();
 		}
 	}

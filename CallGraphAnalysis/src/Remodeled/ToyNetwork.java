@@ -51,7 +51,7 @@ public class ToyNetwork {
 	public static void main(String[] args) throws Exception {
 		ToyNetwork toyNetwork = new ToyNetwork();
 		toyNetwork.loadCallGraph();
-		toyNetwork.callDAG.printNetworkMetrics();
+//		toyNetwork.callDAG.printNetworkMetrics();
 		
 //		IteratedMaxCentralityCoverage iteratedMaxCentralityCoverage = new IteratedMaxCentralityCoverage(toyNetwork.callDAG);
 //		iteratedMaxCentralityCoverage.runIMCC();		
