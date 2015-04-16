@@ -1,6 +1,5 @@
 package Initial;
 import org.apache.commons.math3.analysis.solvers.LaguerreSolver;
-import org.apache.commons.math3.analysis.solvers.PolynomialSolver;
 import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 

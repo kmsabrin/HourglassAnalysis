@@ -942,6 +942,7 @@ public class ModularityAnalysis {
 		}
 		
 		Collections.sort(communityList, new Comparator<String>() {
+			@Override
 			public int compare(String left, String right) {
 				return right.length() - left.length();
 			}
@@ -1239,6 +1240,7 @@ public class ModularityAnalysis {
 		scanner.close();
 		
 		Collections.sort(communityList, new Comparator<String>() {
+			@Override
 			public int compare(String left, String right) {
 				return right.length() - left.length();
 			}

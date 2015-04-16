@@ -35,7 +35,7 @@ public class ArtificialDAG {
 		
 		nNode = 10000;
 		nLayer = 19;
-		nEdge = (int)(nNode * 3);
+		nEdge = nNode * 3;
 
 //		nPath = (int)Math.ceil(nEdge / (nLayer - 1));  // (numberOfEdges / (numberOfLayer - 1))
 

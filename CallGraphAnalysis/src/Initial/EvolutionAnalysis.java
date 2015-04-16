@@ -3,7 +3,6 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
@@ -275,9 +274,10 @@ public class EvolutionAnalysis {
 				this.dist = dist;
 			}
 			
+			@Override
 			public int compareTo(Info compareInfo) {
 				 
-				double compareQuantity = ((Info) compareInfo).dist; 
+				double compareQuantity = compareInfo.dist; 
 		 
 				//ascending order
 //				return this.quantity - compareQuantity?;

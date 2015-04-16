@@ -1,12 +1,6 @@
 package Initial;
 import java.io.File;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.apache.commons.math3.ml.clustering.Cluster;
-import org.apache.commons.math3.ml.clustering.Clusterable;
-import org.apache.commons.math3.ml.clustering.DBSCANClusterer;
 
 public class ClusterAnalysis {
 //	DBSCANClusterer dbScanClusterer;

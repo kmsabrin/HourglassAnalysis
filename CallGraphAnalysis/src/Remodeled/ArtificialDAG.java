@@ -1,7 +1,6 @@
 package Remodeled;
 import java.io.File;
 import java.io.PrintWriter;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
@@ -35,7 +34,7 @@ public class ArtificialDAG {
 		
 		nNode = 10000;
 		nLayer = 19;
-		nEdge = (int)(nNode * 3);
+		nEdge = nNode * 3;
 
 //		nPath = (int)Math.ceil(nEdge / (nLayer - 1));  // (numberOfEdges / (numberOfLayer - 1))
 

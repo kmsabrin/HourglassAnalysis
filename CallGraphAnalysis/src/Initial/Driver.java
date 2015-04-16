@@ -1,6 +1,4 @@
 package Initial;
-import java.io.File;
-import java.io.PrintWriter;
 
 public class Driver {	
 	static String networkPath = "kernel_callgraphs//full.graph-2.6.";
