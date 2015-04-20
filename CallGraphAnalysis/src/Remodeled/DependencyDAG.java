@@ -9,7 +9,7 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeSet;
 
-public class CallDAG {
+public class DependencyDAG {
 	int nEdges;
 	double nSources; // source =  simple module, zero in degree, depends on none
 	double nTargets; // target = complex module, zero out degree, serves none (yeah right)
@@ -40,7 +40,7 @@ public class CallDAG {
 	Map<String, Set<String>> dependentsReachable;
 	Map<String, Set<String>> serversReachable;
 	
-	CallDAG() { 
+	DependencyDAG() { 
 		functions = new TreeSet();
 		serves = new HashMap();
 		depends = new HashMap();
@@ -65,12 +65,13 @@ public class CallDAG {
 		serversReachable = new HashMap();
 	}
 	
-	CallDAG(String callGraphFileName) {
+	DependencyDAG(String dependencyGraphFileName) {
 		this();
 			
-		// load & initialize the attributes of the call graph
-		loadCallGraph(callGraphFileName);
+		// load & initialize the attributes of the dependency graph
+		loadCallGraph(dependencyGraphFileName);
 		removeCycles(); // or should I only ignore cycles?
+		removeIsolatedNodes();
 		
 		loadDegreeMetric();
 		loadLocationMetric(); // must load degree metric before
@@ -90,8 +91,8 @@ public class CallDAG {
 
 				if (tokens[1].equals("->")) {
 					String dependent = tokens[0];
-					String server = tokens[2].substring(0, tokens[2].length() - 1); // for cobjdump
-//					String server = tokens[2].substring(0, tokens[2].length()); // for cdepn/bio nets
+//					String server = tokens[2].substring(0, tokens[2].length() - 1); // for cobjdump
+					String server = tokens[2].substring(0, tokens[2].length()); // for cdepn/bio nets
 					
 					if (server.equals("mcount"))  // no more location metric noise! // compiler generated
 						continue;
@@ -123,6 +124,16 @@ public class CallDAG {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+	
+	private void removeIsolatedNodes() {
+		HashSet<String> removable = new HashSet<String>();
+		for (String s: functions) {
+			if (!serves.containsKey(s) && !depends.containsKey(s)) {
+				removable.add(s);
+			}
+		}
+		functions.removeAll(removable);
 	}
 
 	private void removeCyclesTraverse(String node) {

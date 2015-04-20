@@ -64,7 +64,20 @@ public class StatMathUtilTest {
 	public static void main(String[] args) {
 		
 //		polynomialSolverTest();
-		getToyGraph();
+//		getToyGraph();
+		
+		
+//		for (double a = -100000; a < 100000; ++a) {
+//			for (double b = -100000; b < 100000; ++b)
+//			{
+//				double v = a + (6.0 * Math.sqrt(5.0)) + 1.0 - (Math.sqrt(5.0) * b / a) + (6.0 / a);
+//				if (Math.abs(v) < 0.000001)
+//					System.out.println(a + "\t" + b);
+//			}				
+//		}
+		
+		System.out.println("Done");
+						
 	}
 
 }

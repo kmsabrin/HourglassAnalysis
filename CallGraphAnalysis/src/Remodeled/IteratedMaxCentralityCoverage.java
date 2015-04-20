@@ -6,22 +6,22 @@ import java.util.Random;
 public class IteratedMaxCentralityCoverage {
 	HashSet<String> coveredNodes;
 	ArrayList<String> coreNodes;
-	CallDAG callDAG;
+	DependencyDAG dependencyDAG;
 	Random random;
 	
-	public IteratedMaxCentralityCoverage(CallDAG callDAG) {
+	public IteratedMaxCentralityCoverage(DependencyDAG dependencyDAG) {
 		coveredNodes = new HashSet();
 		coreNodes = new ArrayList();
-		this.callDAG = callDAG;
+		this.dependencyDAG = dependencyDAG;
 		random = new Random(System.nanoTime());
 	}
 	
 	private void coverReachableNodes(String candidateNode) {
-		for (String s: callDAG.dependentsReachable.get(candidateNode)) {
+		for (String s: dependencyDAG.dependentsReachable.get(candidateNode)) {
 			coveredNodes.add(s);
 		}
 		
-		for (String s: callDAG.serversReachable.get(candidateNode)) {
+		for (String s: dependencyDAG.serversReachable.get(candidateNode)) {
 			coveredNodes.add(s);
 		}
 	}
@@ -30,12 +30,12 @@ public class IteratedMaxCentralityCoverage {
 		ArrayList<String> maxCentralityNodes = new ArrayList();
 		double maxCentrality = -1;
 		
-		for (String s: callDAG.functions) {
+		for (String s: dependencyDAG.functions) {
 			if (coveredNodes.contains(s)) {
 				continue;
 			}
 			
-			double centrality = callDAG.centrality.get(s);
+			double centrality = dependencyDAG.centrality.get(s);
 			
 			if (centrality > maxCentrality) {
 				maxCentrality = centrality;
@@ -61,7 +61,7 @@ public class IteratedMaxCentralityCoverage {
 
 		if (maxCentralityCandidateNode == null) return false;
 
-		if (callDAG.centrality.get(maxCentralityCandidateNode) > 1.0) {
+		if (dependencyDAG.centrality.get(maxCentralityCandidateNode) > 1.0) {
 			coreNodes.add(maxCentralityCandidateNode);
 			coveredNodes.add(maxCentralityCandidateNode);
 			coverReachableNodes(maxCentralityCandidateNode);
@@ -81,12 +81,12 @@ public class IteratedMaxCentralityCoverage {
 	}
 	
 	private void checkHourglassness() {
-		double S = callDAG.nSources;
+		double S = dependencyDAG.nSources;
 		
 		double sumW = 0;
 		for (String s: coreNodes) {
 //			System.out.println(s + "\t" + callDAG.centrality.get(s) + "\t" + callDAG.location.get(s));
-			sumW += callDAG.centrality.get(s);
+			sumW += dependencyDAG.centrality.get(s);
 		}
 		
 		System.out.println("Hourglassness: " + (sumW / (S * coreNodes.size())));

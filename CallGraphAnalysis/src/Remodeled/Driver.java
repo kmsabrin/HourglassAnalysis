@@ -1,7 +1,7 @@
 package Remodeled;
 
 public class Driver {	
-	static String networkPath = "kernel_callgraphs//full.graph-2.6.";
+	static String networkPath = "kernel_callgraphs//full.graph-cdepn_2.6.";
 	static String networkType = "kernel";
 	static int versiontStart = 0;
 	static int versionEnd = 40; // last + 1
@@ -11,26 +11,27 @@ public class Driver {
 //	static int versiontStart = 1;
 //	static int versionEnd = 40;
 	
-	private static void printNetworkStat(CallDAG callDAG) {
-		System.out.println("S: " + callDAG.nSources);
-		System.out.println("T: " + callDAG.nTargets);
-		System.out.println("E: " + callDAG.nEdges);
-		System.out.println("N: " + callDAG.functions.size());
+	private static void printNetworkStat(DependencyDAG dependencyDAG) {
+		System.out.println("S: " + dependencyDAG.nSources);
+		System.out.println("T: " + dependencyDAG.nTargets);
+		System.out.println("E: " + dependencyDAG.nEdges);
+		System.out.println("N: " + dependencyDAG.functions.size());
 	}
 	
 	public static void doKernelAnalysis() throws Exception {
 //		String versions[] = {"1", "11", "21", "31"};
-		String versions[] = {"31"};
+		String versions[] = {"21"};
 		for (int i = 0; i < versions.length; ++i) {
 			String networkID = networkType + "-" + versions[i];	
-			CallDAG callDAG = new CallDAG(networkPath + versions[i]);
-//			printNetworkStat(callDAG);
-//			callDAG.printNetworkMetrics();
-			DistributionAnalysis.printCentralityDistribution(callDAG, networkID);
-			DistributionAnalysis.printLocationVsCentrality(callDAG, networkID);
+			DependencyDAG dependencyDAG = new DependencyDAG(networkPath + versions[i]);
+//			printNetworkStat(dependencyDAG);
+//			dependencyDAG.printNetworkMetrics();
+//			DistributionAnalysis.printCentralityDistribution(dependencyDAG, networkID);
+//			DistributionAnalysis.printLocationVsCentrality(dependencyDAG, networkID);
+			DistributionAnalysis.printTargetDependencyDistribution(dependencyDAG, networkID);
+			System.out.println(dependencyDAG.serversReachable.get("start_kernel").size());
 			
-			
-//			IteratedMaxCentralityCoverage iteratedMaxCentralityCoverage = new IteratedMaxCentralityCoverage(callDAG);
+//			IteratedMaxCentralityCoverage iteratedMaxCentralityCoverage = new IteratedMaxCentralityCoverage(dependencyDAG);
 //			iteratedMaxCentralityCoverage.runIMCC();					
 		}	
 	}
@@ -55,8 +56,8 @@ public class Driver {
 		for (int i = 0; i < versions.length; ++i) {
 //			if (i < 2) continue;			
 			String networkID = versions[i];
-			CallDAG callDAG = new CallDAG("artificial_callgraphs//" + networkID + ".txt");
-			IteratedMaxCentralityCoverage iteratedMaxCentralityCoverage = new IteratedMaxCentralityCoverage(callDAG);
+			DependencyDAG dependencyDAG = new DependencyDAG("artificial_callgraphs//" + networkID + ".txt");
+			IteratedMaxCentralityCoverage iteratedMaxCentralityCoverage = new IteratedMaxCentralityCoverage(dependencyDAG);
 			iteratedMaxCentralityCoverage.runIMCC();		
 		}
 	}
