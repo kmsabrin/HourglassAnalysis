@@ -12,7 +12,7 @@ import java.util.TreeSet;
 public class DependencyDAG {
 	int nEdges;
 	double nSources; // source =  simple module, zero in degree, depends on none
-	double nTargets; // target = complex module, zero out degree, serves none (yeah right)
+	double nTargets; // target = complex module, zero out degree, serves none (or external api)
 
 	Set<String> functions;
 	Map<String, Set<String>> serves; 
@@ -32,10 +32,11 @@ public class DependencyDAG {
 	Set<String> cycleVisited;
 	List<String> cycleList;
 	ArrayList<ArrayList<String>> detectedCycles;
-		
-	HashMap<String, Double> centrality;
-	HashMap<String, Double> prSource;
-	HashMap<String, Double> prTarget;
+	
+	HashMap<String, Double> geometricMeanPagerankCentrality;
+	HashMap<String, Double> harmonicMeanPagerankCentrality;
+	HashMap<String, Double> pagerankComplexity;
+	HashMap<String, Double> pagerankGenerality;
 	
 	Map<String, Set<String>> dependentsReachable;
 	Map<String, Set<String>> serversReachable;
@@ -56,9 +57,10 @@ public class DependencyDAG {
 		outDegree = new HashMap();
 		inDegree = new HashMap();
 		
-		centrality = new HashMap();
-		prSource = new HashMap();
-		prTarget = new HashMap();
+		geometricMeanPagerankCentrality = new HashMap();
+		harmonicMeanPagerankCentrality = new HashMap();
+		pagerankComplexity = new HashMap();
+		pagerankGenerality = new HashMap();
 		
 		detectedCycles = new ArrayList();
 		cycleEdges = new HashMap();
@@ -311,7 +313,7 @@ public class DependencyDAG {
 		
 		for (String s : functions) {
 			double m = avgSourceDepth.get(s) / (avgTargetDepth.get(s) + avgSourceDepth.get(s));
-			m = ((int) (m * 100.0)) / 100.0; // round up to 2 decimal point
+			m = ((int) (m * 1000.0)) / 1000.0; // round up to 2 decimal point
 			location.put(s, m);
 		}		
 	}
@@ -331,7 +333,6 @@ public class DependencyDAG {
 			reachableUpwardsNodes(s);
 		}
 	}
-
 	
 	private void reachableDownwardsNodes(String node) { // towards leaves
 		if (visited.contains(node)) { // node already traversed
@@ -365,49 +366,38 @@ public class DependencyDAG {
 	}
 	
 	private void recursePagerankTargetToSource(String node) {
-		if (prTarget.containsKey(node)) {
+		if (pagerankGenerality.containsKey(node)) {
 			return;
 		}
 
 		double nodePRCentrality = 0;
 		for (String s : serves.get(node)) {
 			recursePagerankTargetToSource(s);
-			nodePRCentrality += prTarget.get(s) / inDegree.get(s);
+			nodePRCentrality += pagerankGenerality.get(s) / inDegree.get(s);
 		}
 
-		prTarget.put(node, nodePRCentrality);
+		pagerankGenerality.put(node, nodePRCentrality);
 	}
 
 	private void recursePagerankSourceToTarget(String node) {
-		if (prSource.containsKey(node)) {
+		if (pagerankComplexity.containsKey(node)) {
 			return;
 		}
 		
 		double nodePRCentrality = 0;
 		for (String s: depends.get(node)) {
 			recursePagerankSourceToTarget(s);
-			nodePRCentrality += prSource.get(s) / outDegree.get(s);
+			nodePRCentrality += pagerankComplexity.get(s) / outDegree.get(s);
 		}
 		
-		prSource.put(node, nodePRCentrality);
+		pagerankComplexity.put(node, nodePRCentrality);
 	}
 	
 	public void loadPagerankCentralityMetric() {
-		// initialize source pr
-		for (String s: functions) {
-			if (!depends.containsKey(s)) {
-				prSource.put(s, 1.0);
-			}
-		}
-		
-		for (String s: functions) {
-			recursePagerankSourceToTarget(s);
-		}
-		
 		// initialize target pr
 		for (String s : functions) {
 			if (!serves.containsKey(s)) {
-				prTarget.put(s, 1.0);
+				pagerankGenerality.put(s, 1.0);
 			}
 		}
 
@@ -415,16 +405,34 @@ public class DependencyDAG {
 			recursePagerankTargetToSource(s);
 		}
 		
+		// initialize source pr
 		for (String s: functions) {
-//			centrality.put(s, prSource.get(s));
-			centrality.put(s, prTarget.get(s));
-//			centrality.put(s, prSource.get(s) * prTarget.get(s));
+			if (!depends.containsKey(s)) {
+				pagerankComplexity.put(s, 1.0);
+			}
+		}
+		
+		for (String s: functions) {
+			recursePagerankSourceToTarget(s);
+		}
+		
+		for (String s: functions) {
+			pagerankComplexity.put(s, pagerankComplexity.get(s) / nSources);
+			pagerankGenerality.put(s, pagerankGenerality.get(s) / nTargets);
+			
+			double harmonicMeanCentrality = 2.0 * pagerankComplexity.get(s) * pagerankGenerality.get(s) / (pagerankComplexity.get(s) + pagerankGenerality.get(s));
+			double geometricMeanCentrality = Math.sqrt(pagerankComplexity.get(s) * pagerankGenerality.get(s));
+			
+			harmonicMeanPagerankCentrality.put(s, harmonicMeanCentrality);
+			geometricMeanPagerankCentrality.put(s, geometricMeanCentrality);
 		}
 
 		for (String s: functions) {
-//			if (depends.containsKey(s) && serves.containsKey(s)) {
-//				System.out.println(s + "\t" + location.get(s) + "\t" + centrality.get(s));
-//			}
+			if (depends.containsKey(s) && serves.containsKey(s)) {
+				System.out.print(s + "\t" + location.get(s) + "\t" + pagerankGenerality.get(s) + "\t" + pagerankComplexity.get(s));
+				System.out.print("\t" + harmonicMeanPagerankCentrality.get(s) + "\t" + geometricMeanPagerankCentrality.get(s));
+				System.out.println();
+			}
 		}
 //		System.out.println("###### ###### ######");
 	}
@@ -435,7 +443,7 @@ public class DependencyDAG {
 			System.out.print(inDegree.get(s) + "\t");
 			System.out.print(outDegree.get(s) + "\t");
 			System.out.print(location.get(s) + "\t");
-			System.out.print(centrality.get(s) + "\t");
+			System.out.print(geometricMeanPagerankCentrality.get(s) + "\t");
 			System.out.println();
 		}
 		

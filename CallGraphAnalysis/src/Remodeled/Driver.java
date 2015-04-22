@@ -20,7 +20,7 @@ public class Driver {
 	
 	public static void doKernelAnalysis() throws Exception {
 //		String versions[] = {"1", "11", "21", "31"};
-		String versions[] = {"1"};
+		String versions[] = {"21"};
 		for (int i = 0; i < versions.length; ++i) {
 			String networkID = networkType + "-" + versions[i];	
 			DependencyDAG dependencyDAG = new DependencyDAG(networkPath + versions[i]);
@@ -31,9 +31,9 @@ public class Driver {
 //			DistributionAnalysis.printTargetDependencyDistribution(dependencyDAG, networkID);
 //			System.out.println(dependencyDAG.serversReachable.get("start_kernel").size());
 			
-			IteratedMaxCentralityCoverage iteratedMaxCentralityCoverage = new IteratedMaxCentralityCoverage(dependencyDAG);
+//			IteratedMaxCentralityCoverage iteratedMaxCentralityCoverage = new IteratedMaxCentralityCoverage(dependencyDAG);
 //			iteratedMaxCentralityCoverage.runIMCC();
-			iteratedMaxCentralityCoverage.runLinkCoverage(networkID);
+//			iteratedMaxCentralityCoverage.runLinkCoverage(networkID);
 		}	
 	}
 	
@@ -55,18 +55,18 @@ public class Driver {
 		
 		
 		for (int i = 0; i < versions.length; ++i) {
-//			if (i < 2) continue;			
+			if (i > 0) continue;			
 			String networkID = versions[i];
 			DependencyDAG dependencyDAG = new DependencyDAG("artificial_callgraphs//" + networkID + ".txt");
-			IteratedMaxCentralityCoverage iteratedMaxCentralityCoverage = new IteratedMaxCentralityCoverage(dependencyDAG);
+//			IteratedMaxCentralityCoverage iteratedMaxCentralityCoverage = new IteratedMaxCentralityCoverage(dependencyDAG);
 //			iteratedMaxCentralityCoverage.runIMCC();	
-			iteratedMaxCentralityCoverage.runLinkCoverage(networkID);
+//			iteratedMaxCentralityCoverage.runLinkCoverage(networkID);
 		}
 	}
 
 	public static void main(String[] args) throws Exception {		
-//		Driver.doArtificialNetworkAnalysis();
-		Driver.doKernelAnalysis();
+		Driver.doArtificialNetworkAnalysis();
+//		Driver.doKernelAnalysis();
 //		System.out.println("Done!");
 	}
 }

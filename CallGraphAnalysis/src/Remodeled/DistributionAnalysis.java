@@ -9,7 +9,7 @@ public class DistributionAnalysis {
 		PrintWriter pw = new PrintWriter(new File("analysis//centrality-distribution-" + filePath + ".txt"));
 
 		for (String s: dependencyDAG.functions) {
-			pw.println(dependencyDAG.centrality.get(s));
+			pw.println(dependencyDAG.geometricMeanPagerankCentrality.get(s));
 		}	
 		
 		pw.close();
@@ -19,8 +19,8 @@ public class DistributionAnalysis {
 		PrintWriter pw = new PrintWriter(new File("analysis//loc-vs-centrality-" + filePath + ".txt"));
 
 //		for scatter and average using smooth unique
-		for (String s : dependencyDAG.centrality.keySet()) {
-			pw.println(dependencyDAG.location.get(s) + "\t" + dependencyDAG.centrality.get(s));
+		for (String s : dependencyDAG.geometricMeanPagerankCentrality.keySet()) {
+			pw.println(dependencyDAG.location.get(s) + "\t" + dependencyDAG.geometricMeanPagerankCentrality.get(s));
 		}
 		
 		pw.close();

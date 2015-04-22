@@ -43,7 +43,7 @@ public class IteratedMaxCentralityCoverage {
 				continue;
 			}
 			
-			double centrality = dependencyDAG.centrality.get(s);
+			double centrality = dependencyDAG.geometricMeanPagerankCentrality.get(s);
 			
 			if (centrality > maxCentrality) {
 				maxCentrality = centrality;
@@ -69,7 +69,7 @@ public class IteratedMaxCentralityCoverage {
 
 		if (maxCentralityCandidateNode == null) return false;
 
-		if (dependencyDAG.centrality.get(maxCentralityCandidateNode) > 1.0) {
+		if (dependencyDAG.geometricMeanPagerankCentrality.get(maxCentralityCandidateNode) > 1.0) {
 			coreNodes.add(maxCentralityCandidateNode);
 			coveredNodes.add(maxCentralityCandidateNode);
 			coverReachableNodes(maxCentralityCandidateNode);
@@ -94,7 +94,7 @@ public class IteratedMaxCentralityCoverage {
 		double sumW = 0;
 		for (String s: coreNodes) {
 //			System.out.println(s + "\t" + callDAG.centrality.get(s) + "\t" + callDAG.location.get(s));
-			sumW += dependencyDAG.centrality.get(s);
+			sumW += dependencyDAG.geometricMeanPagerankCentrality.get(s);
 		}
 		
 		System.out.println("Hourglassness: " + (sumW / (S * coreNodes.size())));
@@ -105,7 +105,7 @@ public class IteratedMaxCentralityCoverage {
 			int flag = 1;
 			for (String r: dependencyDAG.serversReachable.get(s)) {
 //				if (callDAG.numOfTargetPath.get(r) > callDAG.numOfTargetPath.get(s) || callDAG.numOfSourcePath.get(r) > callDAG.numOfSourcePath.get(s)) {
-				if (dependencyDAG.prTarget.get(r) > dependencyDAG.prTarget.get(s) && dependencyDAG.prSource.get(r) > dependencyDAG.prSource.get(s)) {	
+				if (dependencyDAG.pagerankGenerality.get(r) > dependencyDAG.pagerankGenerality.get(s) && dependencyDAG.pagerankComplexity.get(r) > dependencyDAG.pagerankComplexity.get(s)) {	
 					flag = 0;
 					break;
 				}
@@ -113,7 +113,7 @@ public class IteratedMaxCentralityCoverage {
 			
 			for (String r: dependencyDAG.dependentsReachable.get(s)) {
 //				if (callDAG.numOfTargetPath.get(r) > callDAG.numOfTargetPath.get(s) || callDAG.numOfSourcePath.get(r) > callDAG.numOfSourcePath.get(s)) {
-				if (dependencyDAG.prTarget.get(r) > dependencyDAG.prTarget.get(s) && dependencyDAG.prSource.get(r) > dependencyDAG.prSource.get(s)) {	
+				if (dependencyDAG.pagerankGenerality.get(r) > dependencyDAG.pagerankGenerality.get(s) && dependencyDAG.pagerankComplexity.get(r) > dependencyDAG.pagerankComplexity.get(s)) {	
 					flag = 0;
 					break;
 				}
@@ -122,7 +122,7 @@ public class IteratedMaxCentralityCoverage {
 			if (!dependencyDAG.depends.containsKey(s) || !dependencyDAG.serves.containsKey(s)) flag = 0;
 			
 			if (flag == 1) {
-				System.out.println(s + "\t" + dependencyDAG.centrality.get(s) + "\t" + dependencyDAG.location.get(s));
+				System.out.println(s + "\t" + dependencyDAG.geometricMeanPagerankCentrality.get(s) + "\t" + dependencyDAG.location.get(s));
 			}
 		}
 	}
@@ -180,7 +180,7 @@ public class IteratedMaxCentralityCoverage {
 		TreeMultimap<Double, String> prCentralitySortedNodes = TreeMultimap.create(Ordering.natural().reverse(), Ordering.natural());
 		for (String s : dependencyDAG.functions) {
 			if (dependencyDAG.depends.containsKey(s) && dependencyDAG.serves.containsKey(s)) {
-				prCentralitySortedNodes.put(dependencyDAG.centrality.get(s), s);
+				prCentralitySortedNodes.put(dependencyDAG.geometricMeanPagerankCentrality.get(s), s);
 			}
 		}
 
