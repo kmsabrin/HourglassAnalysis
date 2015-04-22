@@ -40,6 +40,8 @@ public class DependencyDAG {
 	Map<String, Set<String>> dependentsReachable;
 	Map<String, Set<String>> serversReachable;
 	
+	String dependencyGraphID;
+	
 	DependencyDAG() { 
 		functions = new TreeSet();
 		serves = new HashMap();
@@ -65,18 +67,20 @@ public class DependencyDAG {
 		serversReachable = new HashMap();
 	}
 	
-	DependencyDAG(String dependencyGraphFileName) {
+	DependencyDAG(String dependencyGraphID) {
 		this();
+		
+		this.dependencyGraphID = dependencyGraphID;
 			
 		// load & initialize the attributes of the dependency graph
-		loadCallGraph(dependencyGraphFileName);
+		loadCallGraph(dependencyGraphID);
 		removeCycles(); // or should I only ignore cycles?
 		removeIsolatedNodes();
 		
 		loadDegreeMetric();
 		loadLocationMetric(); // must load degree metric before
 		loadPagerankCentralityMetric();
-		loadRechablity();
+//		loadRechablity();
 	}
 
 	public void loadCallGraph(String fileName) {
@@ -91,8 +95,8 @@ public class DependencyDAG {
 
 				if (tokens[1].equals("->")) {
 					String dependent = tokens[0];
-//					String server = tokens[2].substring(0, tokens[2].length() - 1); // for cobjdump
-					String server = tokens[2].substring(0, tokens[2].length()); // for cdepn/bio nets
+					String server = tokens[2].substring(0, tokens[2].length() - 1); // for cobjdump
+//					String server = tokens[2].substring(0, tokens[2].length()); // for cdepn/bio nets
 					
 					if (server.equals("mcount"))  // no more location metric noise! // compiler generated
 						continue;
@@ -419,7 +423,7 @@ public class DependencyDAG {
 
 		for (String s: functions) {
 //			if (depends.containsKey(s) && serves.containsKey(s)) {
-				System.out.println(s + "\t" + location.get(s) + "\t" + centrality.get(s));
+//				System.out.println(s + "\t" + location.get(s) + "\t" + centrality.get(s));
 //			}
 		}
 //		System.out.println("###### ###### ######");

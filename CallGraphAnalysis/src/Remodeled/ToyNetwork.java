@@ -53,8 +53,9 @@ public class ToyNetwork {
 		toyNetwork.loadCallGraph();
 //		toyNetwork.dependencyDAG.printNetworkMetrics();
 		
-//		IteratedMaxCentralityCoverage iteratedMaxCentralityCoverage = new IteratedMaxCentralityCoverage(toyNetwork.callDAG);
+		IteratedMaxCentralityCoverage iteratedMaxCentralityCoverage = new IteratedMaxCentralityCoverage(toyNetwork.dependencyDAG);
 //		iteratedMaxCentralityCoverage.runIMCC();		
+		iteratedMaxCentralityCoverage.runLinkCoverage("toyNetowrk");
 	}
 }
 

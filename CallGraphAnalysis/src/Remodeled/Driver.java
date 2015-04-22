@@ -1,7 +1,7 @@
 package Remodeled;
 
 public class Driver {	
-	static String networkPath = "kernel_callgraphs//full.graph-cdepn_2.6.";
+	static String networkPath = "kernel_callgraphs//full.graph-2.6.";
 	static String networkType = "kernel";
 	static int versiontStart = 0;
 	static int versionEnd = 40; // last + 1
@@ -20,7 +20,7 @@ public class Driver {
 	
 	public static void doKernelAnalysis() throws Exception {
 //		String versions[] = {"1", "11", "21", "31"};
-		String versions[] = {"21"};
+		String versions[] = {"1"};
 		for (int i = 0; i < versions.length; ++i) {
 			String networkID = networkType + "-" + versions[i];	
 			DependencyDAG dependencyDAG = new DependencyDAG(networkPath + versions[i]);
@@ -28,11 +28,12 @@ public class Driver {
 //			dependencyDAG.printNetworkMetrics();
 //			DistributionAnalysis.printCentralityDistribution(dependencyDAG, networkID);
 //			DistributionAnalysis.printLocationVsCentrality(dependencyDAG, networkID);
-			DistributionAnalysis.printTargetDependencyDistribution(dependencyDAG, networkID);
-			System.out.println(dependencyDAG.serversReachable.get("start_kernel").size());
+//			DistributionAnalysis.printTargetDependencyDistribution(dependencyDAG, networkID);
+//			System.out.println(dependencyDAG.serversReachable.get("start_kernel").size());
 			
-//			IteratedMaxCentralityCoverage iteratedMaxCentralityCoverage = new IteratedMaxCentralityCoverage(dependencyDAG);
-//			iteratedMaxCentralityCoverage.runIMCC();					
+			IteratedMaxCentralityCoverage iteratedMaxCentralityCoverage = new IteratedMaxCentralityCoverage(dependencyDAG);
+//			iteratedMaxCentralityCoverage.runIMCC();
+			iteratedMaxCentralityCoverage.runLinkCoverage(networkID);
 		}	
 	}
 	
@@ -58,7 +59,8 @@ public class Driver {
 			String networkID = versions[i];
 			DependencyDAG dependencyDAG = new DependencyDAG("artificial_callgraphs//" + networkID + ".txt");
 			IteratedMaxCentralityCoverage iteratedMaxCentralityCoverage = new IteratedMaxCentralityCoverage(dependencyDAG);
-			iteratedMaxCentralityCoverage.runIMCC();		
+//			iteratedMaxCentralityCoverage.runIMCC();	
+			iteratedMaxCentralityCoverage.runLinkCoverage(networkID);
 		}
 	}
 
