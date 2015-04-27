@@ -428,11 +428,11 @@ public class DependencyDAG {
 		}
 
 		for (String s: functions) {
-			if (depends.containsKey(s) && serves.containsKey(s)) {
-				System.out.print(s + "\t" + location.get(s) + "\t" + pagerankGenerality.get(s) + "\t" + pagerankComplexity.get(s));
-				System.out.print("\t" + harmonicMeanPagerankCentrality.get(s) + "\t" + geometricMeanPagerankCentrality.get(s));
-				System.out.println();
-			}
+//			if (depends.containsKey(s) && serves.containsKey(s)) {
+//				System.out.print(s + "\t" + location.get(s) + "\t" + pagerankGenerality.get(s) + "\t" + pagerankComplexity.get(s));
+//				System.out.print("\t" + harmonicMeanPagerankCentrality.get(s) + "\t" + geometricMeanPagerankCentrality.get(s));
+//				System.out.println();
+//			}
 		}
 //		System.out.println("###### ###### ######");
 	}

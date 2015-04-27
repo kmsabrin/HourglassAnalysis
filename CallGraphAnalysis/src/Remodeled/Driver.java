@@ -29,7 +29,9 @@ public class Driver {
 //			DistributionAnalysis.printCentralityDistribution(dependencyDAG, networkID);
 //			DistributionAnalysis.printLocationVsCentrality(dependencyDAG, networkID);
 //			DistributionAnalysis.printTargetDependencyDistribution(dependencyDAG, networkID);
+//			DistributionAnalysis.printCentralityCCDF(dependencyDAG, networkID);
 //			System.out.println(dependencyDAG.serversReachable.get("start_kernel").size());
+			RankAggregation.aggregateRanks(dependencyDAG);
 			
 //			IteratedMaxCentralityCoverage iteratedMaxCentralityCoverage = new IteratedMaxCentralityCoverage(dependencyDAG);
 //			iteratedMaxCentralityCoverage.runIMCC();
@@ -55,9 +57,10 @@ public class Driver {
 		
 		
 		for (int i = 0; i < versions.length; ++i) {
-			if (i > 0) continue;			
+//			if (i > 0) continue;			
 			String networkID = versions[i];
 			DependencyDAG dependencyDAG = new DependencyDAG("artificial_callgraphs//" + networkID + ".txt");
+			DistributionAnalysis.printCentralityCCDF(dependencyDAG, networkID);
 //			IteratedMaxCentralityCoverage iteratedMaxCentralityCoverage = new IteratedMaxCentralityCoverage(dependencyDAG);
 //			iteratedMaxCentralityCoverage.runIMCC();	
 //			iteratedMaxCentralityCoverage.runLinkCoverage(networkID);
@@ -65,8 +68,8 @@ public class Driver {
 	}
 
 	public static void main(String[] args) throws Exception {		
-		Driver.doArtificialNetworkAnalysis();
-//		Driver.doKernelAnalysis();
+//		Driver.doArtificialNetworkAnalysis();
+		Driver.doKernelAnalysis();
 //		System.out.println("Done!");
 	}
 }

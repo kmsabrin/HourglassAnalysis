@@ -180,7 +180,7 @@ public class IteratedMaxCentralityCoverage {
 		TreeMultimap<Double, String> prCentralitySortedNodes = TreeMultimap.create(Ordering.natural().reverse(), Ordering.natural());
 		for (String s : dependencyDAG.functions) {
 			if (dependencyDAG.depends.containsKey(s) && dependencyDAG.serves.containsKey(s)) {
-				prCentralitySortedNodes.put(dependencyDAG.geometricMeanPagerankCentrality.get(s), s);
+				prCentralitySortedNodes.put(dependencyDAG.harmonicMeanPagerankCentrality.get(s), s);
 			}
 		}
 
