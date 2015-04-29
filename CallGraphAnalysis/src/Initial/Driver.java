@@ -133,7 +133,7 @@ public class Driver {
 		
 		
 		for (int i = 0; i < versions.length; ++i) {
-//			if (i < 2) continue;			
+			if (i != 2) continue;			
 			String versionNumber = versions[i];
 			CallDAG callDAG = new CallDAG("artificial_callgraphs//" + versionNumber + ".txt");
 			
@@ -157,17 +157,17 @@ public class Driver {
 			randomNetworkGenerator.generateRandomNetwork(r2VersionNumber);
 			*/
 			
-//			String randomVersionNumber = versionNumber + "-NonLayerOrder-New";
-//			ConfigurationRandomNetwork configurationRandomNetwork = new ConfigurationRandomNetwork();
+			String randomVersionNumber = versionNumber + "KN";
+			ConfigurationRandomNetwork configurationRandomNetwork = new ConfigurationRandomNetwork();
 //			callDAG.resetAuxiliary();
 			
-//			configurationRandomNetwork.init(callDAG);
+			configurationRandomNetwork.init(callDAG);
 //			configurationRandomNetwork.generateDegreeDistributionPreserveMethodX(callDAG);
 //			configurationRandomNetwork.generateDegreeDistributionPreserveMethodY(callDAG);
-//			configurationRandomNetwork.generateKNRandomDAG(callDAG);
+			configurationRandomNetwork.generateKNRandomDAG(callDAG);
 //			configurationRandomNetwork.generateLayeredNewRandomization(callDAG);
 //			configurationRandomNetwork.generateNonLayeredNewRandomization(callDAG);
-//			configurationRandomNetwork.writeRandomDAG(callDAG, randomVersionNumber);
+			configurationRandomNetwork.writeRandomDAG(callDAG, randomVersionNumber);
 //			
 //			CallDAG randomDAG = new CallDAG("artificial_callgraphs//"+ randomVersionNumber +".txt");
 //			printNetworkStat(randomDAG);
@@ -193,8 +193,8 @@ public class Driver {
 /*****************************************************************************/
 
 /*****************************************************************************/
-//		Driver.doArtificialNetworkAnalysis();
-		Driver.doKernelAnalysis();
+		Driver.doArtificialNetworkAnalysis();
+//		Driver.doKernelAnalysis();
 //		Driver.doBioNetAnalysis();
 //		Driver.doONodeAnalysis();
 //		StatMathUtilTest.getToyGraph();

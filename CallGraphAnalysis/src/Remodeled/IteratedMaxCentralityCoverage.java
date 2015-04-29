@@ -188,14 +188,19 @@ public class IteratedMaxCentralityCoverage {
 		for (double prC: prCentralitySortedNodes.keySet()) {
 			Collection<String> nodes = prCentralitySortedNodes.get(prC);
 			for (String s: nodes) {
+				coveredLinks = new HashSet();
 				double linkCoverage = coverLinks(s);
 				pw.println(idx++ + "\t" +  linkCoverage + "\t" + prC + "\t" + s);
-//				System.out.println(idx++ + "\t" +  linkCoverage + "\t" + "\t" + prC + "\t" + s);
-				if (linkCoverage > 0.9) {
-//				if (idx > 50) {
+				
+				if (idx > 100) {
 					pw.close();
 					return;
-				};
+				}
+				
+//				if (linkCoverage > 0.9) {
+//					pw.close();
+//					return;
+//				};
 			}
 		}
 		

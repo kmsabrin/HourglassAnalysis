@@ -70,7 +70,8 @@ public class DistributionAnalysis {
 		
 		// CCDF: Complementary CDF
 		for (double d: CDF.keySet()) {
-			pw.println(d + "\t" + (1.0 - CDF.get(d)));
+			double ccdfP = 1.0 - CDF.get(d);
+			pw.println(d + "\t" + ccdfP);
 
 		}
 		

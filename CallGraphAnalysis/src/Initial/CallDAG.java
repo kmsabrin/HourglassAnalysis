@@ -137,10 +137,10 @@ public class CallDAG {
 //		loadGeneralityMetric(); //CAREFUL 
 //		loadComplexityMetric(); //CAREFUL
 		loadCentralityMetric();
-		loadPagerankCentralityMetric();
+//		loadPagerankCentralityMetric();
 		
 		// for randomization
-		loadRechablity();
+//		loadRechablity();
 	}
 
 	public void loadCallGraph(String fileName) {
