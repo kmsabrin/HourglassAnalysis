@@ -647,7 +647,7 @@ public class CallDAG {
 		
 		for (String s: functions) {
 			double cntr = nodePathThrough.get(s) / nTotalPath;
-//			cntr = ((int) (cntr * 1000.0)) / 1000.0;
+			cntr = ((int) (cntr * 1000.0)) / 1000.0;
 
 			centrality.put(s, cntr);
 //			centrality.put(s, nodePathThrough.get(s)); // non-normalized

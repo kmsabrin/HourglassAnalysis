@@ -19,8 +19,8 @@ public class Manager {
 	}
 	
 	public static void doKernelAnalysis() throws Exception {
-		String versions[] = {"1", "11", "21", "31"};
-//		String versions[] = {"21"};
+//		String versions[] = {"1", "11", "21", "31"};
+		String versions[] = {"21"};
 		for (int i = 0; i < versions.length; ++i) {
 			String networkID = networkType + "-" + versions[i];	
 			DependencyDAG dependencyDAG = new DependencyDAG(networkPath + versions[i]);
@@ -30,13 +30,17 @@ public class Manager {
 //			DistributionAnalysis.printLocationVsCentrality(dependencyDAG, networkID);
 //			DistributionAnalysis.printTargetDependencyDistribution(dependencyDAG, networkID);
 //			DistributionAnalysis.printCentralityCCDF(dependencyDAG, networkID);
+//			DistributionAnalysis.printPathCentralityVsPageRankScatter(dependencyDAG, networkID);
 			
 //			System.out.println(dependencyDAG.serversReachable.get("start_kernel").size());
 //			RankAggregation.aggregateRanks(dependencyDAG);
 			
-			IteratedMaxCentralityCoverage iteratedMaxCentralityCoverage = new IteratedMaxCentralityCoverage(dependencyDAG);
+//			IteratedMaxCentralityCoverage iteratedMaxCentralityCoverage = new IteratedMaxCentralityCoverage(dependencyDAG);
+//			iteratedMaxCentralityCoverage.runLinkCoverage(networkID);
+			
 //			iteratedMaxCentralityCoverage.runIMCC();
-			iteratedMaxCentralityCoverage.runLinkCoverage(networkID);
+			
+			WaistDetection.runWaistDetection(dependencyDAG);
 		}	
 	}
 	
@@ -47,28 +51,29 @@ public class Manager {
 //		new ArtificialDAG().generateNoisyRectangleDAG();
 //		new ArtificialDAG().generateDiamondDAG();
 
-//		String versions[] = {"rectangleDAG", 
-//							 "noisyRectangleDAG",
-//							 "hourglassDAG", 
-//							 "trapezoidDAG",
-//							 "diamondDAG",
-//		};
+		String versions[] = {"rectangleDAG", 
+							 "noisyRectangleDAG",
+							 "hourglassDAG", 
+							 "trapezoidDAG",
+							 "diamondDAG",
+		};
 		
-		String versions[] = {"hourglassDAGKN"/*, "rectangleDAGKN", "noisyRectangleDAGKN"*/};
+//		String versions[] = {"hourglassDAG"/*, "rectangleDAGKN", "noisyRectangleDAGKN"*/};
 		
 		
 		for (int i = 0; i < versions.length; ++i) {
-//			if (i < 2) continue;			
+			if (i >= 2) continue;			
 			String networkID = versions[i];
+			System.out.println("Working on: " + networkID);
 			DependencyDAG dependencyDAG = new DependencyDAG("artificial_callgraphs//" + networkID + ".txt");
 			
 //			DistributionAnalysis.printCentralityCCDF(dependencyDAG, networkID);
 			
-			IteratedMaxCentralityCoverage iteratedMaxCentralityCoverage = new IteratedMaxCentralityCoverage(dependencyDAG);
-			iteratedMaxCentralityCoverage.runLinkCoverage(networkID);
+//			IteratedMaxCentralityCoverage iteratedMaxCentralityCoverage = new IteratedMaxCentralityCoverage(dependencyDAG);
+//			iteratedMaxCentralityCoverage.runLinkCoverage(networkID);
 			
 /*			iteratedMaxCentralityCoverage.runIMCC(); */	
-
+			WaistDetection.runWaistDetection(dependencyDAG);
 		}
 	}
 

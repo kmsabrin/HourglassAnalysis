@@ -122,18 +122,18 @@ public class Driver {
 //		new ArtificialDAG().generateNoisyRectangleDAG();
 //		new ArtificialDAG().generateDiamondDAG();
 
-		String versions[] = {"rectangleDAG", 
-							 "noisyRectangleDAG",
-							 "hourglassDAG", 
-							 "trapezoidDAG",
-							 "diamondDAG",
-		};
+//		String versions[] = {"rectangleDAG", 
+//							 "noisyRectangleDAG",
+//							 "hourglassDAG", 
+//							 "trapezoidDAG",
+//							 "diamondDAG",
+//		};
 		
-//		String versions[] = {"hourglassDAG"/*, "randomShuffle-hourglassDAG-1.0"*/};
+		String versions[] = {"hourglassDAG", "rectangleDAG"};
 		
 		
 		for (int i = 0; i < versions.length; ++i) {
-			if (i != 2) continue;			
+//			if (i != 2) continue;			
 			String versionNumber = versions[i];
 			CallDAG callDAG = new CallDAG("artificial_callgraphs//" + versionNumber + ".txt");
 			
@@ -157,21 +157,22 @@ public class Driver {
 			randomNetworkGenerator.generateRandomNetwork(r2VersionNumber);
 			*/
 			
-			String randomVersionNumber = versionNumber + "KN";
+			String randomVersionNumber = versionNumber + "LayeredNew";
 			ConfigurationRandomNetwork configurationRandomNetwork = new ConfigurationRandomNetwork();
 //			callDAG.resetAuxiliary();
 			
 			configurationRandomNetwork.init(callDAG);
 //			configurationRandomNetwork.generateDegreeDistributionPreserveMethodX(callDAG);
 //			configurationRandomNetwork.generateDegreeDistributionPreserveMethodY(callDAG);
-			configurationRandomNetwork.generateKNRandomDAG(callDAG);
-//			configurationRandomNetwork.generateLayeredNewRandomization(callDAG);
+//			configurationRandomNetwork.generateKNRandomDAG(callDAG);
+			configurationRandomNetwork.generateLayeredNewRandomization(callDAG);
 //			configurationRandomNetwork.generateNonLayeredNewRandomization(callDAG);
 			configurationRandomNetwork.writeRandomDAG(callDAG, randomVersionNumber);
 //			
-//			CallDAG randomDAG = new CallDAG("artificial_callgraphs//"+ randomVersionNumber +".txt");
+			CallDAG randomDAG = new CallDAG("artificial_callgraphs//"+ randomVersionNumber +".txt");
 //			printNetworkStat(randomDAG);
-//			CentralityAnalysis.getCentralityPDF(randomDAG, randomVersionNumber);			
+			CentralityAnalysis.getCentralityPDF(callDAG, versionNumber);			
+			CentralityAnalysis.getCentralityPDF(randomDAG, randomVersionNumber);			
 			
 			/*
 			CallDAG randomDAG = new CallDAG("artificial_callgraphs//methodX.txt");

@@ -105,7 +105,7 @@ public class IteratedMaxCentralityCoverage {
 			int flag = 1;
 			for (String r: dependencyDAG.serversReachable.get(s)) {
 //				if (callDAG.numOfTargetPath.get(r) > callDAG.numOfTargetPath.get(s) || callDAG.numOfSourcePath.get(r) > callDAG.numOfSourcePath.get(s)) {
-				if (dependencyDAG.pagerankGenerality.get(r) > dependencyDAG.pagerankGenerality.get(s) && dependencyDAG.pagerankComplexity.get(r) > dependencyDAG.pagerankComplexity.get(s)) {	
+				if (dependencyDAG.pagerankTargetCompression.get(r) > dependencyDAG.pagerankTargetCompression.get(s) && dependencyDAG.pagerankSourceCompression.get(r) > dependencyDAG.pagerankSourceCompression.get(s)) {	
 					flag = 0;
 					break;
 				}
@@ -113,7 +113,7 @@ public class IteratedMaxCentralityCoverage {
 			
 			for (String r: dependencyDAG.dependentsReachable.get(s)) {
 //				if (callDAG.numOfTargetPath.get(r) > callDAG.numOfTargetPath.get(s) || callDAG.numOfSourcePath.get(r) > callDAG.numOfSourcePath.get(s)) {
-				if (dependencyDAG.pagerankGenerality.get(r) > dependencyDAG.pagerankGenerality.get(s) && dependencyDAG.pagerankComplexity.get(r) > dependencyDAG.pagerankComplexity.get(s)) {	
+				if (dependencyDAG.pagerankTargetCompression.get(r) > dependencyDAG.pagerankTargetCompression.get(s) && dependencyDAG.pagerankSourceCompression.get(r) > dependencyDAG.pagerankSourceCompression.get(s)) {	
 					flag = 0;
 					break;
 				}

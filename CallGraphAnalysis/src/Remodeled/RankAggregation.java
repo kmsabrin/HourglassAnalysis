@@ -74,7 +74,7 @@ public class RankAggregation {
 		int knt = 0;
 		for (String s : dependencyDAG.functions) {
 			if (dependencyDAG.depends.containsKey(s) && dependencyDAG.serves.containsKey(s)) {
-				sortedNodes.put(dependencyDAG.pagerankGenerality.get(s), s);
+				sortedNodes.put(dependencyDAG.pagerankTargetCompression.get(s), s);
 				++knt;
 			}
 		}
@@ -92,7 +92,7 @@ public class RankAggregation {
 		sortedNodes.clear();
 		for (String s : dependencyDAG.functions) {
 			if (dependencyDAG.depends.containsKey(s) && dependencyDAG.serves.containsKey(s)) {
-				sortedNodes.put(dependencyDAG.pagerankComplexity.get(s), s);
+				sortedNodes.put(dependencyDAG.pagerankSourceCompression.get(s), s);
 			}
 		}
 

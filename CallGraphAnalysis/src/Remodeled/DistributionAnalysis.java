@@ -72,7 +72,16 @@ public class DistributionAnalysis {
 		for (double d: CDF.keySet()) {
 			double ccdfP = 1.0 - CDF.get(d);
 			pw.println(d + "\t" + ccdfP);
+		}
+		
+		pw.close();
+	}
+	
+	public static void printPathCentralityVsPageRankScatter(DependencyDAG dependencyDAG, String filePath) throws Exception {
+		PrintWriter pw = new PrintWriter(new File("analysis//pcentrality-vs-pagerank-" + filePath + ".txt"));
 
+		for (String s : dependencyDAG.functions) {
+			pw.println(dependencyDAG.pathCentrality.get(s) + "\t" + dependencyDAG.harmonicMeanPagerankCentrality.get(s));
 		}
 		
 		pw.close();
