@@ -11,7 +11,6 @@ public class WaistDetection {
 	static HashSet<String> topKNodes = new HashSet();
 	
 	public static void runWaistDetection(DependencyDAG dependencyDAG) {
-		
 		TreeMultimap<Double, String> pagerankSortedNodes = TreeMultimap.create(Ordering.natural().reverse(), Ordering.natural());
 		for (String s : dependencyDAG.functions) {
 			if (dependencyDAG.depends.containsKey(s) && dependencyDAG.serves.containsKey(s)) {
@@ -19,7 +18,7 @@ public class WaistDetection {
 			}
 		}
 		
-		int k = 10;
+		int k = 100;
 		ArrayList<String> tempTopKNodes;
 		while (true) {			
 			topKNodes = new HashSet();
@@ -60,7 +59,7 @@ public class WaistDetection {
 				break;
 			}
 			
-			if (k >= 50 ) {
+			if (k >= 100 ) {
 				System.out.println("No waist");
 				break;
 			}

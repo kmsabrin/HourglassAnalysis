@@ -1,5 +1,7 @@
 package Remodeled;
 
+import java.util.HashSet;
+
 public class Manager {	
 	static String networkPath = "kernel_callgraphs//full.graph-2.6.";
 	static String networkType = "kernel";
@@ -20,7 +22,7 @@ public class Manager {
 	
 	public static void doKernelAnalysis() throws Exception {
 //		String versions[] = {"1", "11", "21", "31"};
-		String versions[] = {"21"};
+		String versions[] = {"31"};
 		for (int i = 0; i < versions.length; ++i) {
 			String networkID = networkType + "-" + versions[i];	
 			DependencyDAG dependencyDAG = new DependencyDAG(networkPath + versions[i]);
@@ -51,35 +53,35 @@ public class Manager {
 //		new ArtificialDAG().generateNoisyRectangleDAG();
 //		new ArtificialDAG().generateDiamondDAG();
 
-		String versions[] = {"rectangleDAG", 
-							 "noisyRectangleDAG",
-							 "hourglassDAG", 
-							 "trapezoidDAG",
-							 "diamondDAG",
-		};
+//		String versions[] = {"rectangleDAG", 
+//							 "noisyRectangleDAG",
+//							 "hourglassDAG", 
+//							 "trapezoidDAG",
+//							 "diamondDAG",
+//		};
 		
-//		String versions[] = {"hourglassDAG"/*, "rectangleDAGKN", "noisyRectangleDAGKN"*/};
-		
+		String versions[] = {"NLHGDAG"/*, "rectangleDAGKN", "noisyRectangleDAGKN"*/};
 		
 		for (int i = 0; i < versions.length; ++i) {
-			if (i >= 2) continue;			
+//			if (i != 2) continue;			
 			String networkID = versions[i];
 			System.out.println("Working on: " + networkID);
 			DependencyDAG dependencyDAG = new DependencyDAG("artificial_callgraphs//" + networkID + ".txt");
 			
-//			DistributionAnalysis.printCentralityCCDF(dependencyDAG, networkID);
+			DistributionAnalysis.printCentralityCCDF(dependencyDAG, networkID);
 			
 //			IteratedMaxCentralityCoverage iteratedMaxCentralityCoverage = new IteratedMaxCentralityCoverage(dependencyDAG);
 //			iteratedMaxCentralityCoverage.runLinkCoverage(networkID);
 			
 /*			iteratedMaxCentralityCoverage.runIMCC(); */	
-			WaistDetection.runWaistDetection(dependencyDAG);
+
+//			WaistDetection.runWaistDetection(dependencyDAG);
 		}
 	}
 
 	public static void main(String[] args) throws Exception {		
-//		Manager.doArtificialNetworkAnalysis();
-		Manager.doKernelAnalysis();
+		Manager.doArtificialNetworkAnalysis();
+//		Manager.doKernelAnalysis();
 //		System.out.println("Done!");
 	}
 }

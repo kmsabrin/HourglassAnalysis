@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
 
-public class ArtificialDAG {
+public class SyntheticLayeredDAG {
 	int nLayer;
 	int nNode;
 	int nEdge;
@@ -26,7 +26,7 @@ public class ArtificialDAG {
 	HashSet<String> existingEdge;
 	int edgeKount;
 
-	public ArtificialDAG() {
+	public SyntheticLayeredDAG() {
 //		dummy
 //		nNode = 15;
 //		nLayer = 5;

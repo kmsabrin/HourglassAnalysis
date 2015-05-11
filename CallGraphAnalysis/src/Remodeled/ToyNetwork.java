@@ -51,6 +51,7 @@ public class ToyNetwork {
 			
 	public static void main(String[] args) throws Exception {
 		ToyNetwork toyNetwork = new ToyNetwork();
+		WaistDetection.topKNodes = new HashSet();
 		toyNetwork.loadCallGraph();
 //		toyNetwork.dependencyDAG.printNetworkMetrics();
 		
@@ -60,7 +61,10 @@ public class ToyNetwork {
 //		IteratedMaxCentralityCoverage iteratedMaxCentralityCoverage = new IteratedMaxCentralityCoverage(toyNetwork.dependencyDAG);
 //		iteratedMaxCentralityCoverage.runLinkCoverage("toyNetowrk");
 		/*iteratedMaxCentralityCoverage.runIMCC();*/		
+		
 		WaistDetection.runWaistDetection(toyNetwork.dependencyDAG);
+		
+
 	}
 }
 

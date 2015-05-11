@@ -94,7 +94,7 @@ public class DependencyDAG {
 		loadLocationMetric(); // must load degree metric before
 		loadPagerankCentralityMetric();
 //		loadRechablity();
-		loadPathCentralityMetric();
+//		loadPathCentralityMetric();
 	}
 
 	public void loadCallGraph(String fileName) {
@@ -448,12 +448,13 @@ public class DependencyDAG {
 		for (String s: functions) {
 //			if (depends.containsKey(s) && serves.containsKey(s)) {
 //				System.out.print(s + "\t" + location.get(s) + "\t" + pagerankTargetCompression.get(s) + "\t" + pagerankSourceCompression.get(s));
-//				System.out.print("\t" + harmonicMeanPagerankCentrality.get(s) + "\t" + geometricMeanPagerankCentrality.get(s));
+//				System.out.print("\t" + harmonicMeanPagerankCentrality.get(s));
 //				System.out.println();
-			}
+//			}
 //			System.out.println(s + "\t" + location.get(s) + "\t" + harmonicMeanPagerankCentrality.get(s));
-//		}
+		}
 //		System.out.println("###### ###### ######");
+//		System.out.println("HERE!");
 	}
 	
 	public void loadPathCentralityMetric() {
