@@ -32,20 +32,21 @@ public class DependencyDAG {
 	Set<String> cycleVisited;
 	List<String> cycleList;
 	ArrayList<ArrayList<String>> detectedCycles;
-	
-	HashMap<String, Double> geometricMeanPagerankCentrality;
-	HashMap<String, Double> harmonicMeanPagerankCentrality;
-	HashMap<String, Double> pagerankSourceCompression;
-	HashMap<String, Double> pagerankTargetCompression;
-	
+
 	HashMap<String, Set<String>> dependentsReachable;
 	HashMap<String, Set<String>> serversReachable;
-	
+
+	HashMap<String, Double> pagerankSourceCompression;
+	HashMap<String, Double> pagerankTargetCompression;
+	HashMap<String, Double> geometricMeanPagerankCentrality;
+	HashMap<String, Double> harmonicMeanPagerankCentrality;
+		
 	double nTotalPath;
 	HashMap<String, Double> numOfSourcePath;
 	HashMap<String, Double> numOfTargetPath;
 	HashMap<String, Double> nodePathThrough;
-	HashMap<String, Double> pathCentrality;
+	HashMap<String, Double> geometricMeanPathCentrality;
+	HashMap<String, Double> harmonicMeanPathCentrality;
 	
 	String dependencyGraphID;
 	
@@ -77,7 +78,9 @@ public class DependencyDAG {
 		numOfSourcePath = new HashMap();
 		numOfTargetPath = new HashMap();
 		nodePathThrough = new HashMap();
-		pathCentrality = new HashMap();
+		geometricMeanPathCentrality = new HashMap();
+		harmonicMeanPathCentrality = new HashMap();
+
 	}
 	
 	DependencyDAG(String dependencyGraphID) {
@@ -93,8 +96,8 @@ public class DependencyDAG {
 		loadDegreeMetric();
 		loadLocationMetric(); // must load degree metric before
 		loadPagerankCentralityMetric();
+		loadPathCentralityMetric();
 //		loadRechablity();
-//		loadPathCentralityMetric();
 	}
 
 	public void loadCallGraph(String fileName) {
@@ -451,7 +454,7 @@ public class DependencyDAG {
 //				System.out.print("\t" + harmonicMeanPagerankCentrality.get(s));
 //				System.out.println();
 //			}
-//			System.out.println(s + "\t" + location.get(s) + "\t" + harmonicMeanPagerankCentrality.get(s));
+//			System.out.println(s + "\t" + harmonicMeanPagerankCentrality.get(s));
 		}
 //		System.out.println("###### ###### ######");
 //		System.out.println("HERE!");
@@ -459,34 +462,29 @@ public class DependencyDAG {
 	
 	public void loadPathCentralityMetric() {
 		nTotalPath = 0;
-		for (String s: location.keySet()) {
-			double nPath = 1;
-//			P-Centrality
-			nPath = numOfTargetPath.get(s) * numOfSourcePath.get(s);
-			nodePathThrough.put(s, nPath);
-			if (!serves.containsKey(s)) { // is a target
-				nTotalPath += nPath;
-			}
-			
+		for (String s: location.keySet()) {			
 //			I-Centrality
 //			nPath = rootsReached.get(s) * leavesReached.get(s);
 //			nodePathThrough.put(s, nPath); // equivalent to number of connected (t,b) pairs containing it
 //			if (!callFrom.containsKey(s)) { // is a root
 //				nTotalPath += nPath; // nTotalPath = nConnectedTopBottomPair
 //			}
-		}
-		
-		for (String s: functions) {
-			double pCentrality = nodePathThrough.get(s) / nTotalPath;
-//			pCentrality = ((int) (cntr * 1000.0)) / 1000.0;
-			pathCentrality.put(s, pCentrality);
-//			pathCentrality.put(s, nodePathThrough.get(s)); // non-normalized
-//			System.out.println(s + " pCentrality: " + pCentrality);
+
+//			P-Centrality
+			double nPath = 1;
+			nPath = numOfTargetPath.get(s) * numOfSourcePath.get(s);
+			nodePathThrough.put(s, nPath);
+			if (!serves.containsKey(s)) { // is a target
+				nTotalPath += nPath;
+			}
+			double harmonicMean = 2.0 * numOfTargetPath.get(s) * numOfSourcePath.get(s) / (numOfTargetPath.get(s) + numOfSourcePath.get(s));
+			double geometricMean = Math.sqrt(numOfTargetPath.get(s) * numOfSourcePath.get(s));
+			harmonicMeanPathCentrality.put(s, harmonicMean);
+			geometricMeanPathCentrality.put(s, geometricMean);			
 		}		
 		
 //		System.out.println("Total Paths: " + nTotalPath + "\n" + "####################");
 	}
-
 	
 	public void printNetworkMetrics() {
 		for (String s: functions) {
@@ -512,4 +510,5 @@ public class DependencyDAG {
 			System.out.println();
 		}
 	}
+
 }

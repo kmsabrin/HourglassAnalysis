@@ -26,12 +26,14 @@ public class Manager {
 		for (int i = 0; i < versions.length; ++i) {
 			String networkID = networkType + "-" + versions[i];	
 			DependencyDAG dependencyDAG = new DependencyDAG(networkPath + versions[i]);
+			DistributionAnalysis.printCentralityRanks(dependencyDAG, networkID);
+//			DistributionAnalysis.printCentralityCCDF(dependencyDAG, networkID);
+			
 //			printNetworkStat(dependencyDAG);
 //			dependencyDAG.printNetworkMetrics();
 //			DistributionAnalysis.printCentralityDistribution(dependencyDAG, networkID);
 //			DistributionAnalysis.printLocationVsCentrality(dependencyDAG, networkID);
 //			DistributionAnalysis.printTargetDependencyDistribution(dependencyDAG, networkID);
-//			DistributionAnalysis.printCentralityCCDF(dependencyDAG, networkID);
 //			DistributionAnalysis.printPathCentralityVsPageRankScatter(dependencyDAG, networkID);
 			
 //			System.out.println(dependencyDAG.serversReachable.get("start_kernel").size());
@@ -39,10 +41,9 @@ public class Manager {
 			
 //			IteratedMaxCentralityCoverage iteratedMaxCentralityCoverage = new IteratedMaxCentralityCoverage(dependencyDAG);
 //			iteratedMaxCentralityCoverage.runLinkCoverage(networkID);
-			
 //			iteratedMaxCentralityCoverage.runIMCC();
 			
-			WaistDetection.runWaistDetection(dependencyDAG);
+//			WaistDetection.runWaistDetection(dependencyDAG);
 		}	
 	}
 	
@@ -71,17 +72,16 @@ public class Manager {
 			DistributionAnalysis.printCentralityCCDF(dependencyDAG, networkID);
 			
 //			IteratedMaxCentralityCoverage iteratedMaxCentralityCoverage = new IteratedMaxCentralityCoverage(dependencyDAG);
-//			iteratedMaxCentralityCoverage.runLinkCoverage(networkID);
-			
-/*			iteratedMaxCentralityCoverage.runIMCC(); */	
+//			iteratedMaxCentralityCoverage.runLinkCoverage(networkID);		
+//			iteratedMaxCentralityCoverage.runIMCC();
 
 //			WaistDetection.runWaistDetection(dependencyDAG);
 		}
 	}
 
 	public static void main(String[] args) throws Exception {		
-		Manager.doArtificialNetworkAnalysis();
-//		Manager.doKernelAnalysis();
+//		Manager.doArtificialNetworkAnalysis();
+		Manager.doKernelAnalysis();
 //		System.out.println("Done!");
 	}
 }
