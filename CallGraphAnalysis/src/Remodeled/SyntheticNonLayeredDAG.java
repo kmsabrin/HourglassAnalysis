@@ -19,11 +19,21 @@ public class SyntheticNonLayeredDAG {
 		int sL = 5051;
 		int sS = 9051;
 
-		double pSL = 0.7;
-		double pLL = 0.2;
-		double pWW = 0.2;
+		double pSL = 0.65;
+		double pSW = 0.25;
+		double pSU = 0.05;
+		double pST = 0.05;
+				
+		double pLL = 0.40;
+		double pLW = 0.50;
+		double pLU = 0.05;
+		double pLT = 0.05;
+		
+		double pWW = 0.3;
 		double pWU = 0.5;
-		double pUU = 0.2;
+		double pWT = 0.2;
+		
+		double pUU = 0.4;
 
 		int nE = 30000;
 		
@@ -37,24 +47,30 @@ public class SyntheticNonLayeredDAG {
 			int st = -1;
 			int en = -1;
 			double p = -1;
+			
 			while (flag) {
+				p = random.nextDouble();
+				
 				if (startingFrom == 'S') {
-					st = sS + random.nextInt(nS);
-					p = random.nextDouble();
+					st = sS + random.nextInt(nS);					
 					if (p < pSL) {
 						en = sL + random.nextInt(nL);
 						startingFrom = 'L';
-					} else {
+					} 
+					else if (p < pSL + pSW) {
 						en = sW + random.nextInt(nW);
 						startingFrom = 'W';
 					}
-					if (!edgeHash.contains(st + "#" + en)) {
-						pw.println(st + " -> " + en + ";");
-						edgeHash.add(st + "#" + en);
+					else if (p < pSL + pSW + pSU) {
+						en = sU + random.nextInt(nU);
+						startingFrom = 'U';
 					}
-					st = en;
-				} else if (startingFrom == 'L') {
-					p = random.nextDouble();
+					else {
+						en = sT + random.nextInt(nT);
+						flag = false;
+					}
+				} 
+				else if (startingFrom == 'L') {
 					if (p < pLL) {
 						en = sL + random.nextInt(nL);
 						startingFrom = 'L';
@@ -63,17 +79,21 @@ public class SyntheticNonLayeredDAG {
 							st = en;
 							en = tmp;
 						}
-					} else {
+					}
+					else if (p < pLL + pLW) {
 						en = sW + random.nextInt(nW);
 						startingFrom = 'W';
 					}
-					if (!edgeHash.contains(st + "#" + en)) {
-						pw.println(st + " -> " + en + ";");
-						edgeHash.add(st + "#" + en);
+					else if (p < pLL + pLW + pLU) {
+						en = sU + random.nextInt(nU);
+						startingFrom = 'U';
 					}
-					st = en;
-				} else if (startingFrom == 'W') {
-					p = random.nextDouble();
+					else {
+						en = sT + random.nextInt(nT);
+						flag = false;
+					}
+				} 
+				else if (startingFrom == 'W') {
 					if (p < pWW) {
 						en = sW + random.nextInt(nW);
 						startingFrom = 'W';
@@ -82,20 +102,17 @@ public class SyntheticNonLayeredDAG {
 							st = en;
 							en = tmp;
 						}
-					} else if (p < pWW + pWU) {
+					} 
+					else if (p < pWW + pWU) {
 						en = sU + random.nextInt(nU);
 						startingFrom = 'U';
-					} else {
+					} 
+					else {
 						en = sT + random.nextInt(nT);
 						flag = false;
 					}
-					if (!edgeHash.contains(st + "#" + en)) {
-						pw.println(st + " -> " + en + ";");
-						edgeHash.add(st + "#" + en);
-					}
-					st = en;
-				} else if (startingFrom == 'U') {
-					p = random.nextDouble();
+				} 
+				else if (startingFrom == 'U') {
 					if (p < pUU) {
 						en = sU + random.nextInt(nU);
 						startingFrom = 'U';
@@ -104,16 +121,18 @@ public class SyntheticNonLayeredDAG {
 							st = en;
 							en = tmp;
 						}
-					} else {
+					} 
+					else {
 						en = sT + random.nextInt(nT);
 						flag = false;
 					}
-					if (!edgeHash.contains(st + "#" + en)) {
-						pw.println(st + " -> " + en + ";");
-						edgeHash.add(st + "#" + en);
-					}
-					st = en;
 				}
+				
+				if (!edgeHash.contains(st + "#" + en)) {
+					pw.println(st + " -> " + en + ";");
+					edgeHash.add(st + "#" + en);
+				}
+				st = en;
 			}
 		}
 		pw.close();

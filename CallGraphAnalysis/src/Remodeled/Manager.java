@@ -22,7 +22,7 @@ public class Manager {
 	
 	public static void doKernelAnalysis() throws Exception {
 //		String versions[] = {"1", "11", "21", "31"};
-		String versions[] = {"31"};
+		String versions[] = {"11"};
 		for (int i = 0; i < versions.length; ++i) {
 			String networkID = networkType + "-" + versions[i];	
 			DependencyDAG dependencyDAG = new DependencyDAG(networkPath + versions[i]);
@@ -43,7 +43,7 @@ public class Manager {
 //			iteratedMaxCentralityCoverage.runLinkCoverage(networkID);
 //			iteratedMaxCentralityCoverage.runIMCC();
 			
-//			WaistDetection.runWaistDetection(dependencyDAG);
+//			WaistDetection.runPCWaistDetection(dependencyDAG);
 		}	
 	}
 	
@@ -69,6 +69,7 @@ public class Manager {
 			System.out.println("Working on: " + networkID);
 			DependencyDAG dependencyDAG = new DependencyDAG("artificial_callgraphs//" + networkID + ".txt");
 			
+			DistributionAnalysis.printCentralityRanks(dependencyDAG, networkID);
 			DistributionAnalysis.printCentralityCCDF(dependencyDAG, networkID);
 			
 //			IteratedMaxCentralityCoverage iteratedMaxCentralityCoverage = new IteratedMaxCentralityCoverage(dependencyDAG);

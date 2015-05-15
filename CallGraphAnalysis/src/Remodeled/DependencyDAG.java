@@ -18,11 +18,18 @@ public class DependencyDAG {
 	Map<String, Set<String>> serves; 
 	Map<String, Set<String>> depends; 
 	
-	Map<String, Double> numOfPath;
-	Map<String, Double> sumOfPath;
+	Map<String, Double> numOfTargetPath;
+	Map<String, Double> sumOfTargetPath;
+	Map<String, Double> numOfSourcePath;
+	Map<String, Double> sumOfSourcePath;	
 	Map<String, Double> avgTargetDepth;
 	Map<String, Double> avgSourceDepth;
 	Map<String, Double> location;
+	
+	double nTotalPath;
+	HashMap<String, Double> nodePathThrough;
+	HashMap<String, Double> geometricMeanPathCentrality;
+	HashMap<String, Double> harmonicMeanPathCentrality;
 	
 	Map<String, Integer> outDegree;
 	Map<String, Integer> inDegree;
@@ -41,13 +48,6 @@ public class DependencyDAG {
 	HashMap<String, Double> geometricMeanPagerankCentrality;
 	HashMap<String, Double> harmonicMeanPagerankCentrality;
 		
-	double nTotalPath;
-	HashMap<String, Double> numOfSourcePath;
-	HashMap<String, Double> numOfTargetPath;
-	HashMap<String, Double> nodePathThrough;
-	HashMap<String, Double> geometricMeanPathCentrality;
-	HashMap<String, Double> harmonicMeanPathCentrality;
-	
 	String dependencyGraphID;
 	
 	DependencyDAG() { 
@@ -55,11 +55,17 @@ public class DependencyDAG {
 		serves = new HashMap();
 		depends = new HashMap();
 				
-		numOfPath = new HashMap();
-		sumOfPath = new HashMap();
+		numOfTargetPath = new HashMap();
+		sumOfTargetPath = new HashMap();
 		avgTargetDepth = new HashMap();
+		numOfSourcePath = new HashMap();
+		sumOfSourcePath = new HashMap();
 		avgSourceDepth = new HashMap();
 		location = new HashMap();
+
+		nodePathThrough = new HashMap();
+		geometricMeanPathCentrality = new HashMap();
+		harmonicMeanPathCentrality = new HashMap();
 		
 		outDegree = new HashMap();
 		inDegree = new HashMap();
@@ -74,13 +80,6 @@ public class DependencyDAG {
 
 		dependentsReachable = new HashMap();
 		serversReachable = new HashMap();
-		
-		numOfSourcePath = new HashMap();
-		numOfTargetPath = new HashMap();
-		nodePathThrough = new HashMap();
-		geometricMeanPathCentrality = new HashMap();
-		harmonicMeanPathCentrality = new HashMap();
-
 	}
 	
 	DependencyDAG(String dependencyGraphID) {
@@ -94,9 +93,10 @@ public class DependencyDAG {
 		removeIsolatedNodes();
 		
 		loadDegreeMetric();
+		loadPathStatistics();
 		loadLocationMetric(); // must load degree metric before
-		loadPagerankCentralityMetric();
 		loadPathCentralityMetric();
+		loadPagerankCentralityMetric();
 //		loadRechablity();
 	}
 
@@ -147,7 +147,7 @@ public class DependencyDAG {
 		}
 	}
 	
-	private void removeIsolatedNodes() {
+	public void removeIsolatedNodes() {
 		HashSet<String> removable = new HashSet<String>();
 		for (String s: functions) {
 			if (!serves.containsKey(s) && !depends.containsKey(s)) {
@@ -259,84 +259,87 @@ public class DependencyDAG {
 	}
 		
 	private void sourcePathDepth(String node) {
-		if (numOfPath.containsKey(node)) { // node already traversed
+		if (numOfSourcePath.containsKey(node)) { // node already traversed
 			return;
 		}
 		
 		if (!depends.containsKey(node)) { // is source
-			numOfPath.put(node, 1.0);
-			sumOfPath.put(node, 0.0);
+			numOfSourcePath.put(node, 1.0);
+			sumOfSourcePath.put(node, 0.0);
 			avgSourceDepth.put(node, 0.0);
 			return;
 		}
 				
 		double nPath = 0;
 		double sPath = 0;
-		for (String s: depends.get(node)) {
+		if (!WaistDetection.topKNodes.contains(node)) { // special condition for waist detection
+			for (String s : depends.get(node)) {
 				sourcePathDepth(s);
-				nPath += numOfPath.get(s);
-				sPath += numOfPath.get(s) + sumOfPath.get(s);
+				nPath += numOfSourcePath.get(s);
+				sPath += numOfSourcePath.get(s) + sumOfSourcePath.get(s);
+			}
 		}
-		
-		numOfPath.put(node, nPath);
-		sumOfPath.put(node, sPath);
+		numOfSourcePath.put(node, nPath);
+		sumOfSourcePath.put(node, sPath);
 		avgSourceDepth.put(node, sPath / nPath);
 	}
 	
 	private void targetPathDepth(String node) {
-		if (numOfPath.containsKey(node)) { // node already traversed
+		if (numOfTargetPath.containsKey(node)) { // node already traversed
 			return;
 		}
 		
 		if (!serves.containsKey(node)) { // is target
-			numOfPath.put(node, 1.0);
-			sumOfPath.put(node, 0.0);
+			numOfTargetPath.put(node, 1.0);
+			sumOfTargetPath.put(node, 0.0);
 			avgTargetDepth.put(node, 0.0);
 			return;
 		}
 		
 		double nPath = 0;
 		double sPath = 0;
-		for (String s: serves.get(node)) {
+		if (!WaistDetection.topKNodes.contains(node)) { // special condition for waist detection
+			for (String s : serves.get(node)) {
 				targetPathDepth(s);
-				nPath += numOfPath.get(s);
-				sPath += numOfPath.get(s) + sumOfPath.get(s);
+				nPath += numOfTargetPath.get(s);
+				sPath += numOfTargetPath.get(s) + sumOfTargetPath.get(s);
+			}
 		}
-		
-		numOfPath.put(node, nPath);
-		sumOfPath.put(node, sPath);
+		numOfTargetPath.put(node, nPath);
+		sumOfTargetPath.put(node, sPath);
 		avgTargetDepth.put(node, sPath / nPath);
 	}
 	
-	public void loadLocationMetric() {
-//		go through targets
+	public void loadPathStatistics() {
 		for (String s: functions) {
-			if (!serves.containsKey(s)) {
-				sourcePathDepth(s);
-			}
+			sourcePathDepth(s);
 		}
-		
-		numOfSourcePath.putAll(numOfPath);
 				
-		numOfPath.clear();
-		sumOfPath.clear();
-		
-//		go through sources
 		for (String s: functions) {
-			if (!depends.containsKey(s)) {
-				targetPathDepth(s);
+			targetPathDepth(s);
+		}		
+
+		nTotalPath = 0;
+		for (String s : functions) {
+			double nPath = 1;
+			nPath = numOfTargetPath.get(s) * numOfSourcePath.get(s);
+			nodePathThrough.put(s, nPath);
+			if (!serves.containsKey(s)) { // is a target
+				nTotalPath += nPath;
 			}
 		}
-		
-		numOfTargetPath.putAll(numOfPath);
-		
+//		System.out.println("Total Paths: " + nTotalPath + "\n" + "####################");
+	}
+	
+	public void loadLocationMetric() {
 		for (String s : functions) {
 			double m = avgSourceDepth.get(s) / (avgTargetDepth.get(s) + avgSourceDepth.get(s));
 			m = ((int) (m * 1000.0)) / 1000.0; // round up to 2 decimal point
 			location.put(s, m);
 		}		
 	}
-		
+	
+	/*
 	private void reachableUpwardsNodes(String node) { // towards root
 		if (visited.contains(node)) { // node already traversed
 			return;
@@ -383,6 +386,7 @@ public class DependencyDAG {
 			serversReachable.put(s, new HashSet(visited));
 		}
 	}
+	*/
 	
 	private void recursePagerankTargetToSource(String node) {
 		if (pagerankTargetCompression.containsKey(node)) {
@@ -461,29 +465,20 @@ public class DependencyDAG {
 	}
 	
 	public void loadPathCentralityMetric() {
-		nTotalPath = 0;
-		for (String s: location.keySet()) {			
+		for (String s: functions) {			
+//			P-Centrality
+			double harmonicMean = 2.0 * numOfTargetPath.get(s) * numOfSourcePath.get(s) / (numOfTargetPath.get(s) + numOfSourcePath.get(s));
+			double geometricMean = Math.sqrt(numOfTargetPath.get(s) * numOfSourcePath.get(s));
+			harmonicMeanPathCentrality.put(s, harmonicMean);
+			geometricMeanPathCentrality.put(s, geometricMean);	
+			
 //			I-Centrality
 //			nPath = rootsReached.get(s) * leavesReached.get(s);
 //			nodePathThrough.put(s, nPath); // equivalent to number of connected (t,b) pairs containing it
 //			if (!callFrom.containsKey(s)) { // is a root
 //				nTotalPath += nPath; // nTotalPath = nConnectedTopBottomPair
 //			}
-
-//			P-Centrality
-			double nPath = 1;
-			nPath = numOfTargetPath.get(s) * numOfSourcePath.get(s);
-			nodePathThrough.put(s, nPath);
-			if (!serves.containsKey(s)) { // is a target
-				nTotalPath += nPath;
-			}
-			double harmonicMean = 2.0 * numOfTargetPath.get(s) * numOfSourcePath.get(s) / (numOfTargetPath.get(s) + numOfSourcePath.get(s));
-			double geometricMean = Math.sqrt(numOfTargetPath.get(s) * numOfSourcePath.get(s));
-			harmonicMeanPathCentrality.put(s, harmonicMean);
-			geometricMeanPathCentrality.put(s, geometricMean);			
-		}		
-		
-//		System.out.println("Total Paths: " + nTotalPath + "\n" + "####################");
+		}				
 	}
 	
 	public void printNetworkMetrics() {

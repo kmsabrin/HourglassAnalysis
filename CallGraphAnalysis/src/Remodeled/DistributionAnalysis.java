@@ -55,7 +55,7 @@ public class DistributionAnalysis {
 		Map<Double, Double> CDF = new TreeMap<Double, Double>();
 		
 		for (String s: dependencyDAG.functions) {
-			double v = dependencyDAG.harmonicMeanPathCentrality.get(s);	
+			double v = dependencyDAG.harmonicMeanPagerankCentrality.get(s);	
 			
 			if (histogram.containsKey(v)) {
 				histogram.put(v, histogram.get(v) + 1.0);
