@@ -34,7 +34,7 @@ public class WaistDetection {
 //					System.out.print(s + " " + pC); 
 //					System.out.println(" " + dependencyDAG.numOfTargetPath.get(s) + " " + dependencyDAG.numOfSourcePath.get(s));
 					if (dependencyDAG.depends.containsKey(s) && dependencyDAG.serves.containsKey(s)) {
-						System.out.println(s + "\t" + dependencyDAG.geometricMeanPathCentrality.get(s) + "\t" + dependencyDAG.geometricMeanPagerankCentrality.get(s));
+//						System.out.println(s + "\t" + dependencyDAG.geometricMeanPathCentrality.get(s) + "\t" + dependencyDAG.geometricMeanPagerankCentrality.get(s));
 					}
 				}
 				

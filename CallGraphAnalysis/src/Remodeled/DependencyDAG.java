@@ -107,12 +107,15 @@ public class DependencyDAG {
 			while (scanner.hasNext()) {
 				String line = scanner.nextLine();
 				String tokens[] = line.split("\\s+");
-				if (tokens.length < 2)
-					continue;
+//				if (tokens.length < 2)
+//					continue;
 
-				if (tokens[1].equals("->")) {
+//				if (tokens[1].equals("->")) 
+				{
 					String dependent = tokens[0];
-					String server = tokens[2].substring(0, tokens[2].length() - 1); // for cobjdump
+					String server = tokens[1];
+//					System.out.println(dependent + "\t" + server);
+//					String server = tokens[2].substring(0, tokens[2].length() - 1); // for cobjdump
 //					String server = tokens[2].substring(0, tokens[2].length()); // for cdepn/bio nets
 					
 					if (server.equals("mcount"))  // no more location metric noise! // compiler generated

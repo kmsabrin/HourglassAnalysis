@@ -1,7 +1,5 @@
 package Remodeled;
 
-import java.util.HashSet;
-
 public class Manager {	
 	static String networkPath = "kernel_callgraphs//full.graph-2.6.";
 	static String networkType = "kernel";
@@ -18,6 +16,12 @@ public class Manager {
 		System.out.println("T: " + dependencyDAG.nTargets);
 		System.out.println("E: " + dependencyDAG.nEdges);
 		System.out.println("N: " + dependencyDAG.functions.size());
+	}
+	
+	public static void doMiscNetworkAnalysis() throws Exception {
+		String networkID = "other_callgraphs//out.linux";
+		DependencyDAG dependencyDAG = new DependencyDAG(networkID);
+		WaistDetection.runPCWaistDetection(dependencyDAG);
 	}
 	
 	public static void doKernelAnalysis() throws Exception {
@@ -82,7 +86,8 @@ public class Manager {
 
 	public static void main(String[] args) throws Exception {		
 //		Manager.doArtificialNetworkAnalysis();
-		Manager.doKernelAnalysis();
+//		Manager.doKernelAnalysis();
+		Manager.doMiscNetworkAnalysis();
 //		System.out.println("Done!");
 	}
 }
