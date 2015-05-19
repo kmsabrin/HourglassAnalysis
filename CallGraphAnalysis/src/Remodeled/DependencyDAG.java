@@ -30,6 +30,7 @@ public class DependencyDAG {
 	HashMap<String, Double> nodePathThrough;
 	HashMap<String, Double> geometricMeanPathCentrality;
 	HashMap<String, Double> harmonicMeanPathCentrality;
+	HashMap<String, Double> normalizedPathCentrality;
 	
 	Map<String, Integer> outDegree;
 	Map<String, Integer> inDegree;
@@ -66,6 +67,7 @@ public class DependencyDAG {
 		nodePathThrough = new HashMap();
 		geometricMeanPathCentrality = new HashMap();
 		harmonicMeanPathCentrality = new HashMap();
+		normalizedPathCentrality = new HashMap();
 		
 		outDegree = new HashMap();
 		inDegree = new HashMap();
@@ -80,6 +82,8 @@ public class DependencyDAG {
 
 		dependentsReachable = new HashMap();
 		serversReachable = new HashMap();
+		
+		WaistDetection.topKNodes.clear();
 	}
 	
 	DependencyDAG(String dependencyGraphID) {
@@ -96,7 +100,7 @@ public class DependencyDAG {
 		loadPathStatistics();
 		loadLocationMetric(); // must load degree metric before
 		loadPathCentralityMetric();
-		loadPagerankCentralityMetric();
+//		loadPagerankCentralityMetric();
 //		loadRechablity();
 	}
 
@@ -107,16 +111,16 @@ public class DependencyDAG {
 			while (scanner.hasNext()) {
 				String line = scanner.nextLine();
 				String tokens[] = line.split("\\s+");
-//				if (tokens.length < 2)
-//					continue;
+				if (tokens.length < 2)
+					continue;
 
-//				if (tokens[1].equals("->")) 
+				if (tokens[1].equals("->")) 
 				{
 					String dependent = tokens[0];
-					String server = tokens[1];
+//					String server = tokens[1]; // for space separted DAG: a b
+					String server = tokens[2].substring(0, tokens[2].length() - 1); // for cobjdump: a -> b;
+//					String server = tokens[2].substring(0, tokens[2].length()); // for cdepn/bio nets: a -> b
 //					System.out.println(dependent + "\t" + server);
-//					String server = tokens[2].substring(0, tokens[2].length() - 1); // for cobjdump
-//					String server = tokens[2].substring(0, tokens[2].length()); // for cdepn/bio nets
 					
 					if (server.equals("mcount"))  // no more location metric noise! // compiler generated
 						continue;
@@ -266,7 +270,7 @@ public class DependencyDAG {
 			return;
 		}
 		
-		if (!depends.containsKey(node)) { // is source
+		if (!depends.containsKey(node) && !WaistDetection.topKNodes.contains(node)) { // is source
 			numOfSourcePath.put(node, 1.0);
 			sumOfSourcePath.put(node, 0.0);
 			avgSourceDepth.put(node, 0.0);
@@ -292,7 +296,7 @@ public class DependencyDAG {
 			return;
 		}
 		
-		if (!serves.containsKey(node)) { // is target
+		if (!serves.containsKey(node) && !WaistDetection.topKNodes.contains(node)) { // is target
 			numOfTargetPath.put(node, 1.0);
 			sumOfTargetPath.put(node, 0.0);
 			avgTargetDepth.put(node, 0.0);
@@ -331,6 +335,7 @@ public class DependencyDAG {
 				nTotalPath += nPath;
 			}
 		}
+		
 //		System.out.println("Total Paths: " + nTotalPath + "\n" + "####################");
 	}
 	
@@ -474,6 +479,7 @@ public class DependencyDAG {
 			double geometricMean = Math.sqrt(numOfTargetPath.get(s) * numOfSourcePath.get(s));
 			harmonicMeanPathCentrality.put(s, harmonicMean);
 			geometricMeanPathCentrality.put(s, geometricMean);	
+			normalizedPathCentrality.put(s, numOfTargetPath.get(s) * numOfSourcePath.get(s) / nTotalPath);
 			
 //			I-Centrality
 //			nPath = rootsReached.get(s) * leavesReached.get(s);
@@ -490,23 +496,8 @@ public class DependencyDAG {
 			System.out.print(inDegree.get(s) + "\t");
 			System.out.print(outDegree.get(s) + "\t");
 			System.out.print(location.get(s) + "\t");
-			System.out.print(geometricMeanPagerankCentrality.get(s) + "\t");
-			System.out.println();
-		}
-		
-		for (String s: functions) {
-			System.out.print(s + " serves to");
-			for (String r: dependentsReachable.get(s)) {
-				System.out.print(" " + r);
-			}
-			System.out.println();
-			
-			System.out.print(s + " depends on");
-			for (String r: serversReachable.get(s)) {
-				System.out.print(" " + r);
-			}
+			System.out.print(normalizedPathCentrality.get(s) + "\t");
 			System.out.println();
 		}
 	}
-
 }

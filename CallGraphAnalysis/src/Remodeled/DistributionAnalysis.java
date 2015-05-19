@@ -16,7 +16,7 @@ public class DistributionAnalysis {
 		PrintWriter pw = new PrintWriter(new File("analysis//centrality-distribution-" + filePath + ".txt"));
 
 		for (String s: dependencyDAG.functions) {
-			pw.println(dependencyDAG.harmonicMeanPagerankCentrality.get(s));
+			pw.println(dependencyDAG.geometricMeanPathCentrality.get(s));
 		}	
 		
 		pw.close();
@@ -26,8 +26,8 @@ public class DistributionAnalysis {
 		PrintWriter pw = new PrintWriter(new File("analysis//loc-vs-centrality-" + filePath + ".txt"));
 
 //		for scatter and average using smooth unique
-		for (String s : dependencyDAG.geometricMeanPagerankCentrality.keySet()) {
-			pw.println(dependencyDAG.location.get(s) + "\t" + dependencyDAG.geometricMeanPagerankCentrality.get(s));
+		for (String s : dependencyDAG.geometricMeanPathCentrality.keySet()) {
+			pw.println(dependencyDAG.location.get(s) + "\t" + dependencyDAG.geometricMeanPathCentrality.get(s));
 		}
 		
 		pw.close();
@@ -55,7 +55,7 @@ public class DistributionAnalysis {
 		Map<Double, Double> CDF = new TreeMap<Double, Double>();
 		
 		for (String s: dependencyDAG.functions) {
-			double v = dependencyDAG.harmonicMeanPagerankCentrality.get(s);	
+			double v = dependencyDAG.normalizedPathCentrality.get(s);	
 			
 			if (histogram.containsKey(v)) {
 				histogram.put(v, histogram.get(v) + 1.0);

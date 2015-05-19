@@ -21,7 +21,7 @@ public class Manager {
 	public static void doMiscNetworkAnalysis() throws Exception {
 		String networkID = "other_callgraphs//out.linux";
 		DependencyDAG dependencyDAG = new DependencyDAG(networkID);
-		WaistDetection.runPCWaistDetection(dependencyDAG);
+		WaistDetection.runPCWaistDetection(dependencyDAG, networkID);
 	}
 	
 	public static void doKernelAnalysis() throws Exception {
@@ -65,29 +65,30 @@ public class Manager {
 //							 "diamondDAG",
 //		};
 		
-		String versions[] = {"NLHGDAG"/*, "rectangleDAGKN", "noisyRectangleDAGKN"*/};
+		String versions[] = {"NLHGDAG", "NLNHGDAG"};
 		
 		for (int i = 0; i < versions.length; ++i) {
-//			if (i != 2) continue;			
+//			if (i < 1) continue;			
 			String networkID = versions[i];
 			System.out.println("Working on: " + networkID);
 			DependencyDAG dependencyDAG = new DependencyDAG("artificial_callgraphs//" + networkID + ".txt");
+//			dependencyDAG.printNetworkMetrics();
 			
-			DistributionAnalysis.printCentralityRanks(dependencyDAG, networkID);
-			DistributionAnalysis.printCentralityCCDF(dependencyDAG, networkID);
+//			DistributionAnalysis.printCentralityRanks(dependencyDAG, networkID);
+//			DistributionAnalysis.printCentralityCCDF(dependencyDAG, networkID);
 			
 //			IteratedMaxCentralityCoverage iteratedMaxCentralityCoverage = new IteratedMaxCentralityCoverage(dependencyDAG);
 //			iteratedMaxCentralityCoverage.runLinkCoverage(networkID);		
 //			iteratedMaxCentralityCoverage.runIMCC();
 
-//			WaistDetection.runWaistDetection(dependencyDAG);
+			WaistDetection.runPCWaistDetection(dependencyDAG, networkID);
 		}
 	}
 
 	public static void main(String[] args) throws Exception {		
-//		Manager.doArtificialNetworkAnalysis();
+		Manager.doArtificialNetworkAnalysis();
 //		Manager.doKernelAnalysis();
-		Manager.doMiscNetworkAnalysis();
-//		System.out.println("Done!");
+//		Manager.doMiscNetworkAnalysis();
+		System.out.println("Done!");
 	}
 }

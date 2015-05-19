@@ -64,7 +64,7 @@ public class ToyNetwork {
 //		iteratedMaxCentralityCoverage.runLinkCoverage("toyNetowrk");
 		/*iteratedMaxCentralityCoverage.runIMCC();*/		
 		
-		WaistDetection.runPCWaistDetection(toyNetwork.dependencyDAG);
+		WaistDetection.runPCWaistDetection(toyNetwork.dependencyDAG, "toyDAG");
 		
 
 	}
