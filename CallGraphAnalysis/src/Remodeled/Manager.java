@@ -30,9 +30,10 @@ public class Manager {
 		for (int i = 0; i < versions.length; ++i) {
 			String networkID = networkType + "-" + versions[i];	
 			DependencyDAG dependencyDAG = new DependencyDAG(networkPath + versions[i]);
-			DistributionAnalysis.printCentralityRanks(dependencyDAG, networkID);
+//			DistributionAnalysis.printCentralityRanks(dependencyDAG, networkID);
 //			DistributionAnalysis.printCentralityCCDF(dependencyDAG, networkID);
 			
+			new GradientFilter().getWilcoxonRankSum(dependencyDAG, networkID);
 //			printNetworkStat(dependencyDAG);
 //			dependencyDAG.printNetworkMetrics();
 //			DistributionAnalysis.printCentralityDistribution(dependencyDAG, networkID);
@@ -75,13 +76,15 @@ public class Manager {
 //			dependencyDAG.printNetworkMetrics();
 			
 //			DistributionAnalysis.printCentralityRanks(dependencyDAG, networkID);
-//			DistributionAnalysis.printCentralityCCDF(dependencyDAG, networkID);
+//			DistributionAnalysis.getCentralityCCDF(dependencyDAG, networkID);
+			new GradientFilter().getWilcoxonRankSum(dependencyDAG, networkID);
+			
 			
 //			IteratedMaxCentralityCoverage iteratedMaxCentralityCoverage = new IteratedMaxCentralityCoverage(dependencyDAG);
 //			iteratedMaxCentralityCoverage.runLinkCoverage(networkID);		
 //			iteratedMaxCentralityCoverage.runIMCC();
 
-			WaistDetection.runPCWaistDetection(dependencyDAG, networkID);
+//			WaistDetection.runPCWaistDetection(dependencyDAG, networkID);
 		}
 	}
 

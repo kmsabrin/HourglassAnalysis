@@ -56,6 +56,7 @@ public class ToyNetwork {
 		toyNetwork.loadCallGraph();
 //		toyNetwork.dependencyDAG.printNetworkMetrics();
 		
+		new GradientFilter().getWilcoxonRankSum(toyNetwork.dependencyDAG, "toyDAG");
 //		DistributionAnalysis.printCentralityRanks(toyNetwork.dependencyDAG, "toyDAG");
 //		DistributionAnalysis.printCentralityCCDF(toyNetwork.dependencyDAG, "toyDAG");
 //		RankAggregation.aggregateRanks(toyNetwork.dependencyDAG);
@@ -64,7 +65,7 @@ public class ToyNetwork {
 //		iteratedMaxCentralityCoverage.runLinkCoverage("toyNetowrk");
 		/*iteratedMaxCentralityCoverage.runIMCC();*/		
 		
-		WaistDetection.runPCWaistDetection(toyNetwork.dependencyDAG, "toyDAG");
+//		WaistDetection.runPCWaistDetection(toyNetwork.dependencyDAG, "toyDAG");
 		
 
 	}

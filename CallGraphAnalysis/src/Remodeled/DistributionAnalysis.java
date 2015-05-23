@@ -2,6 +2,7 @@ package Remodeled;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -48,7 +49,7 @@ public class DistributionAnalysis {
 		pw.close();
 	}
 	
-	public static void printCentralityCCDF(DependencyDAG dependencyDAG, String filePath) throws Exception {		
+	public static TreeMap<Double, Double> getCentralityCCDF(DependencyDAG dependencyDAG, String filePath) throws Exception {		
 		PrintWriter pw = new PrintWriter(new File("analysis//centrality-ccdf-" + filePath + ".txt"));
 
 		Map<Double, Double> histogram = new TreeMap<Double, Double>();
@@ -74,12 +75,15 @@ public class DistributionAnalysis {
 		}
 		
 		// CCDF: Complementary CDF
+		TreeMap<Double, Double> ccdfMap = new TreeMap();
 		for (double d: CDF.keySet()) {
 			double ccdfP = 1.0 - CDF.get(d);
 			pw.println(d + "\t" + ccdfP);
+			ccdfMap.put(d, ccdfP);
 		}
 		
 		pw.close();
+		return ccdfMap;
 	}
 	
 	public static void printPathCentralityVsPageRankScatter(DependencyDAG dependencyDAG, String filePath) throws Exception {
