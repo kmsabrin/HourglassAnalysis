@@ -69,7 +69,7 @@ public class Manager {
 		String versions[] = {"NLHGDAG", "NLNHGDAG"};
 		
 		for (int i = 0; i < versions.length; ++i) {
-//			if (i < 1) continue;			
+			if (i < 1) continue;			
 			String networkID = versions[i];
 			System.out.println("Working on: " + networkID);
 			DependencyDAG dependencyDAG = new DependencyDAG("artificial_callgraphs//" + networkID + ".txt");

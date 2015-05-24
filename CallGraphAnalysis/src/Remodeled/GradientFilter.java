@@ -7,14 +7,17 @@ import java.util.TreeMap;
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 
 public class GradientFilter {
-	int nSample = 15;
+	int nSample = 5;
 	double headGradientSample[];
 	double tailGradientSample[];
 	
 	private double getGradient(double x1, double y1, double x2, double y2) {
 		
-		y1 = (y1 > 0) ? Math.log(y1) : 0;
-		y2 = (y2 > 0) ? Math.log(y2) : 0;
+//		y1 = (y1 > 0) ? Math.log(y1) : 0;
+//		y2 = (y2 > 0) ? Math.log(y2) : 0;
+		
+		y1 = Math.log(y1);
+		y2 = Math.log(y2);
 		
 //		System.out.println(x1 + "\t" + y1 + "\t" + x2 + "\t" + y2);
 //		System.out.println((y2 - y1) / (x2 - x1));
@@ -31,9 +34,10 @@ public class GradientFilter {
 		double rightXValues[] = new double[nSample];
 		ArrayList<Double> xIndexList= new ArrayList(ccdfMap.keySet());
 		for (int i = 0; i < nSample; ++i) {
-//			int randomIndex = random.nextInt(100);
-			int randomIndex = i;
+			int randomIndex = random.nextInt(1000);
 			leftXValues[i] = xIndexList.get(randomIndex);
+			
+			randomIndex = random.nextInt(50);
 			rightXValues[i] = xIndexList.get(xIndexList.size() - 2 - randomIndex);
 		}
 		
@@ -53,6 +57,9 @@ public class GradientFilter {
 	public void getWilcoxonRankSum(DependencyDAG dependencyDAG, String networkID) throws Exception {
 		getSampleGradients(dependencyDAG, networkID);
 
+		for (int i = 0; i < headGradientSample.length; ++i) System.out.print(headGradientSample[i] + "\t"); System.out.println();
+		for (int i = 0; i < tailGradientSample.length; ++i) System.out.print(tailGradientSample[i] + "\t"); System.out.println();
+		
 		MannWhitneyUTest mannWhitneyUTest = new MannWhitneyUTest();
 		System.out.println(mannWhitneyUTest.mannWhitneyU(headGradientSample, tailGradientSample));
 		System.out.println(mannWhitneyUTest.mannWhitneyUTest(headGradientSample, tailGradientSample) * 0.5);		
