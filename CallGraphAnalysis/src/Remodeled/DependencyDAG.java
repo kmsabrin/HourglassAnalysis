@@ -114,16 +114,17 @@ public class DependencyDAG {
 				if (tokens.length < 2)
 					continue;
 
-				if (tokens[1].equals("->")) 
+//				if (tokens[1].equals("->")) // for call graphs
 				{
 					String dependent = tokens[0];
-//					String server = tokens[1]; // for space separted DAG: a b
-					String server = tokens[2].substring(0, tokens[2].length() - 1); // for cobjdump: a -> b;
-//					String server = tokens[2].substring(0, tokens[2].length()); // for cdepn/bio nets: a -> b
+					String server = tokens[1]; // for space separated DAG: a b
+					
+//					String server = tokens[2].substring(0, tokens[2].length() - 1); // for cobjdump: a -> b;
+//					String server = tokens[2].substring(0, tokens[2].length()); // for cdepn: a -> b
 //					System.out.println(dependent + "\t" + server);
 					
-					if (server.equals("mcount"))  // no more location metric noise! // compiler generated
-						continue;
+//					if (server.equals("mcount"))  // no more location metric noise! // compiler generated
+//						continue;
 					
 					functions.add(dependent);
 					functions.add(server);
@@ -228,6 +229,7 @@ public class DependencyDAG {
 					--nEdges;
 					++nCycles;
 //					loop = true;
+					System.out.println("cycle found");
 				}
 			}
 		}

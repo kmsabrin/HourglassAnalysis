@@ -56,7 +56,8 @@ public class ToyNetwork {
 		toyNetwork.loadCallGraph();
 //		toyNetwork.dependencyDAG.printNetworkMetrics();
 		
-		new GradientFilter().getWilcoxonRankSum(toyNetwork.dependencyDAG, "toyDAG");
+		DistributionAnalysis.getAveragePathLenth(toyNetwork.dependencyDAG);
+//		new GradientFilter().getWilcoxonRankSum(toyNetwork.dependencyDAG, "toyDAG");
 		
 //		DistributionAnalysis.printCentralityRanks(toyNetwork.dependencyDAG, "toyDAG");
 //		DistributionAnalysis.printCentralityCCDF(toyNetwork.dependencyDAG, "toyDAG");

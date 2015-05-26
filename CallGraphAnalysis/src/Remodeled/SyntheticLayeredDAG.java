@@ -201,7 +201,7 @@ public class SyntheticLayeredDAG {
 	}
 	
 	public void generateRectangleDAG() throws Exception {
-		PrintWriter pw = new PrintWriter(new File("artificial_callgraphs//rectangleDAG.txt"));
+		PrintWriter pw = new PrintWriter(new File("synthetic_callgraphs//rectangleDAG.txt"));
 		
 		assignLayerWeightRectangleDAG();
 		traversePath(pw);
@@ -210,7 +210,7 @@ public class SyntheticLayeredDAG {
 	}
 	
 	public void generateNoisyRectangleDAG() throws Exception {
-		PrintWriter pw = new PrintWriter(new File("artificial_callgraphs//noisyRectangleDAG.txt"));
+		PrintWriter pw = new PrintWriter(new File("synthetic_callgraphs//noisyRectangleDAG.txt"));
 		
 		assignLayerWeightNoisyRectangleDAG();
 		traversePath(pw);
@@ -219,7 +219,7 @@ public class SyntheticLayeredDAG {
 	}
 	
 	public void generateHourglassDAG() throws Exception {
-		PrintWriter pw = new PrintWriter(new File("artificial_callgraphs//hourglassDAG.txt"));
+		PrintWriter pw = new PrintWriter(new File("synthetic_callgraphs//hourglassDAG.txt"));
 
 		assignLayerWeightHourglassDAG();
 		traversePath(pw);
@@ -228,7 +228,7 @@ public class SyntheticLayeredDAG {
 	}
 	
 	public void generateTrapezoidsDAG() throws Exception {
-		PrintWriter pw = new PrintWriter(new File("artificial_callgraphs//trapezoidDAG.txt"));
+		PrintWriter pw = new PrintWriter(new File("synthetic_callgraphs//trapezoidDAG.txt"));
 
 		assignLayerWeightTrapezoidDAG();
 		traversePath(pw);
@@ -237,7 +237,7 @@ public class SyntheticLayeredDAG {
 	}
 	
 	public void generateDiamondDAG() throws Exception {
-		PrintWriter pw = new PrintWriter(new File("artificial_callgraphs//diamondDAG.txt"));
+		PrintWriter pw = new PrintWriter(new File("synthetic_callgraphs//diamondDAG.txt"));
 
 		assignLayerWeightDiamondDAG();
 		traversePath(pw);

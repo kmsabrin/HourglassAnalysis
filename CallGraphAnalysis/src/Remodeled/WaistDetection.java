@@ -13,7 +13,7 @@ public class WaistDetection {
 	static HashSet<String> topKNodes = new HashSet();
 
 	public static void runPCWaistDetection(DependencyDAG dependencyDAG, String filePath) throws Exception {
-		PrintWriter pw = new PrintWriter(new File("analysis//top-K-path-cover-" + filePath + ".txt"));
+		PrintWriter pw = new PrintWriter(new File("analysis//path-cover-" + filePath + ".txt"));
 		
 		TreeMultimap<Double, String> centralitySortedNodes = TreeMultimap.create(Ordering.natural().reverse(), Ordering.natural());
 		for (String s : dependencyDAG.functions) {
@@ -51,7 +51,7 @@ public class WaistDetection {
 			dependencyDAG.loadPathStatistics();
 			individualCumulativePaths += dependencyDAG.numOfTargetPath.get(s) * dependencyDAG.numOfSourcePath.get(s);
 			topKNodes.add(s);
-			// System.out.println(s + "\t" + dependencyDAG.numOfTargetPath.get(s) + "\t" + dependencyDAG.numOfSourcePath.get(s) + "\t" + individualCumulativePaths);
+			 System.out.println(s + "\t" + dependencyDAG.numOfTargetPath.get(s) + "\t" + dependencyDAG.numOfSourcePath.get(s) + "\t" + individualCumulativePaths);
 			double pathCoverage = individualCumulativePaths / tPath;
 			pw.println(topKNodes.size() + " " + pathCoverage);
 
@@ -63,6 +63,7 @@ public class WaistDetection {
 		pw.close();
 	}
 	
+/*	
 	public static void runPRWaistDetection(DependencyDAG dependencyDAG) {
 		TreeMultimap<Double, String> pagerankSortedNodes = TreeMultimap.create(Ordering.natural().reverse(), Ordering.natural());
 		for (String s : dependencyDAG.functions) {
@@ -119,4 +120,5 @@ public class WaistDetection {
 			k += 10;
 		}
 	}	
+*/
 }

@@ -132,4 +132,17 @@ public class DistributionAnalysis {
 			System.out.println("\t" + dependencyDAG.geometricMeanPagerankCentrality.get(s) + "\t" + dependencyDAG.harmonicMeanPagerankCentrality.get(s));
 		}
 	}
+	
+	public static void getAveragePathLenth(DependencyDAG dependencyDAG) {
+		double avgPLength = 0;
+		double knt = 0;
+		for (String s: dependencyDAG.functions) {
+			if (!dependencyDAG.serves.containsKey(s)) {
+				avgPLength += dependencyDAG.avgSourceDepth.get(s);
+				++knt;
+//				System.out.println(s + " " + dependencyDAG.avgSourceDepth.get(s));
+			}
+		}
+		System.out.println("Average Path Length: " + avgPLength / knt);
+	}
 }
