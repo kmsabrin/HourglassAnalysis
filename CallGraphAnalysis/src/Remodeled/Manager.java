@@ -41,16 +41,17 @@ public class Manager {
 		String versions[] = {"NLHGDAG", "NLNHGDAG"};
 		
 		for (int i = 0; i < versions.length; ++i) {
-			if (i < 1) continue;			
+			if (i >= 1) continue;			
 			String networkID = versions[i];
 			System.out.println("Working on: " + networkID);
 			DependencyDAG dependencyDAG = new DependencyDAG("synthetic_callgraphs//" + networkID + ".txt");
-//			dependencyDAG.printNetworkMetrics();
+			printNetworkStat(dependencyDAG);
 			
-			DistributionAnalysis.getAveragePathLenth(dependencyDAG);
+//			DistributionAnalysis.getAveragePathLenth(dependencyDAG);
 //			DistributionAnalysis.printCentralityRanks(dependencyDAG, networkID);
-//			DistributionAnalysis.getCentralityCCDF(dependencyDAG, networkID);
+			DistributionAnalysis.getCentralityCCDF(dependencyDAG, networkID);
 //			new GradientFilter().getWilcoxonRankSum(dependencyDAG, networkID);
+			new GradientFilterAnalysis().getSampleGradientQuartileInterval(dependencyDAG, networkID);
 			
 //			IteratedMaxCentralityCoverage iteratedMaxCentralityCoverage = new IteratedMaxCentralityCoverage(dependencyDAG);
 //			iteratedMaxCentralityCoverage.runLinkCoverage(networkID);		

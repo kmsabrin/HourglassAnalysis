@@ -17,13 +17,13 @@ public class SyntheticNonLayeredDAG {
 	static double pSI, pII, pIT; // pST defined earlier
 	
 	public static void setHG5TierParameters() {
-		pSL = 0.60; pSW = 0.20; pSU = 0.1; pST = 0.1;
+		pSL = 0.69; pSW = 0.29; pSU = 0.01; pST = 0.01;
 				
-		pLL = 0.40; pLW = 0.40; pLU = 0.1; pLT = 0.1;
+		pLL = 0.54; pLW = 0.44; pLU = 0.01; pLT = 0.01;
 		
-		pWW = 0.3; pWU = 0.5; pWT = 0.2;
+		pWW = 0.4; pWU = 0.5; pWT = 0.1;
 		
-		pUU = 0.4; pUT = 0.6;
+		pUU = 0.7; pUT = 0.3;
 	}
 	
 	public static void setNHG5TierParameters() {
@@ -38,7 +38,7 @@ public class SyntheticNonLayeredDAG {
 	
 	public static void setNHG3TierParameters() {
 		pST = 0.1; pSI = 0.9;
-		pII = 0.75; pIT = 0.25;
+		pII = 0.98; pIT = 0.02;
 	}
 	
 	public static void getNLHGDAG() throws Exception {
@@ -191,13 +191,25 @@ public class SyntheticNonLayeredDAG {
 	
 	public static void generate3TierDAG(PrintWriter pw) throws Exception {
 		int nT = 1000; // no. of T(arget) nodes
-		int nI = 8000; // no. of I(ntermediate) nodes
+		int nI = 8050; // no. of I(ntermediate) nodes
 		int nS = 1000; // no. of S(ource) nodes
 
 		int sT = 1; // start of Target
 		int sI = 1001; // start of Intermediate
 		int sS = 9051; // start of source
-
+		
+//		toy
+//		int nT = 4; // no. of T(arget) nodes
+//		int nI = 8; // no. of I(ntermediate) nodes
+//		int nS = 4; // no. of S(ource) nodes
+//
+//		int sT = 1; // start of Target
+//		int sI = 5; // start of Intermediate
+//		int sS = 13; // start of source
+//
+//		int nE = 20; // no. of Edges
+//		int nN = 16; // no. of Nodes
+		
 		Random random = new Random(System.nanoTime());
 		HashSet<String> edgeHash = new HashSet();
 
@@ -227,12 +239,14 @@ public class SyntheticNonLayeredDAG {
 					
 					if (p < pII) {
 						en = sI + random.nextInt(st - sI);
-						startingFrom = 'I';
+						
+//						en = sI + random.nextInt(nI);
 //						if (st < en) { // edge goes from large index to small index
 //							int tmp = st;
 //							st = en;
 //							en = tmp;
 //						}
+						startingFrom = 'I';
 					}
 					else {
 						en = sT + random.nextInt(nT);
