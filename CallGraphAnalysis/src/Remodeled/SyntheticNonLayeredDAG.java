@@ -2,8 +2,11 @@ package Remodeled;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Random;
+import java.util.TreeSet;
 
 public class SyntheticNonLayeredDAG {
 	static int nE = 30000; // no. of Edges
@@ -17,28 +20,28 @@ public class SyntheticNonLayeredDAG {
 	static double pSI, pII, pIT; // pST defined earlier
 	
 	public static void setHG5TierParameters() {
-		pSL = 0.69; pSW = 0.29; pSU = 0.01; pST = 0.01;
+		pSL = 0.60; pSW = 0.20; pSU = 0.1; pST = 0.1;
 				
-		pLL = 0.54; pLW = 0.44; pLU = 0.01; pLT = 0.01;
+		pLL = 0.45; pLW = 0.35; pLU = 0.1; pLT = 0.1;
 		
-		pWW = 0.4; pWU = 0.5; pWT = 0.1;
+		pWW = 0.3; pWU = 0.6; pWT = 0.1;
 		
 		pUU = 0.7; pUT = 0.3;
 	}
 	
-	public static void setNHG5TierParameters() {
-		pSL = 0.44; pSW = 0.02; pSU = 0.44; pST = 0.1;
-				
-		pLL = 0.44; pLW = 0.02; pLU = 0.44; pLT = 0.1;
-		
-		pWW = 0.02; pWU = 0.75; pWT = 0.23;
-		
-		pUU = 0.8; pUT = 0.2;
-	}
+//	public static void setNHG5TierParameters() {
+//		pSL = 0.44; pSW = 0.02; pSU = 0.44; pST = 0.1;
+//				
+//		pLL = 0.44; pLW = 0.02; pLU = 0.44; pLT = 0.1;
+//		
+//		pWW = 0.02; pWU = 0.75; pWT = 0.23;
+//		
+//		pUU = 0.8; pUT = 0.2;
+//	}
 	
 	public static void setNHG3TierParameters() {
-		pST = 0.1; pSI = 0.9;
-		pII = 0.98; pIT = 0.02;
+		pSI = 0.99; pST = 0.01;
+		pII = 0.86; pIT = 0.14;
 	}
 	
 	public static void getNLHGDAG() throws Exception {
@@ -88,104 +91,90 @@ public class SyntheticNonLayeredDAG {
 		while (edgeHash.size() < nE) {
 			char startingFrom = 'S';
 			boolean notReachedTarget = true;
-			int st = -1;
-			int en = -1;
+			int nxtNode = -1;
 			double p = -1;
+			ArrayList<Integer> tracedPathNodes = new ArrayList();
 			
 			while (notReachedTarget) {
 				p = random.nextDouble();
 				
 				if (startingFrom == 'S') {
-					st = sS + random.nextInt(nS);					
+					int start = sS + random.nextInt(nS);
+					tracedPathNodes.add(start);					
 					if (p < pSL) {
-						en = sL + random.nextInt(nL);
+						nxtNode = sL + random.nextInt(nL);
 						startingFrom = 'L';
 					} 
 					else if (p < pSL + pSW) {
-						en = sW + random.nextInt(nW);
+						nxtNode = sW + random.nextInt(nW);
 						startingFrom = 'W';
 					}
 					else if (p < pSL + pSW + pSU) {
-						en = sU + random.nextInt(nU);
+						nxtNode = sU + random.nextInt(nU);
 						startingFrom = 'U';
 					}
 					else {
-						en = sT + random.nextInt(nT);
+						nxtNode = sT + random.nextInt(nT);
 						notReachedTarget = false;
 					}
 				} 
 				else if (startingFrom == 'L') {
-					if (st == sL) p = random.nextDouble() * (1.0 - pLL) + pLL;
-					
 					if (p < pLL) {
-						en = sL + random.nextInt(st - sL);
+						nxtNode = sL + random.nextInt(nL);
 						startingFrom = 'L';
-//						if (st < en) { // edge goes from large index to small index
-//							int tmp = st;
-//							st = en;
-//							en = tmp;
-//						}
 					}
 					else if (p < pLL + pLW) {
-						en = sW + random.nextInt(nW);
+						nxtNode = sW + random.nextInt(nW);
 						startingFrom = 'W';
 					}
 					else if (p < pLL + pLW + pLU) {
-						en = sU + random.nextInt(nU);
+						nxtNode = sU + random.nextInt(nU);
 						startingFrom = 'U';
 					}
 					else {
-						en = sT + random.nextInt(nT);
+						nxtNode = sT + random.nextInt(nT);
 						notReachedTarget = false;
 					}
 				} 
-				else if (startingFrom == 'W') {
-					if (st == sW) p = random.nextDouble() * (1.0 - pWW) + pWW;
-					
+				else if (startingFrom == 'W') {					
 					if (p < pWW) {
-						en = sW + random.nextInt(st - sW);
+						nxtNode = sW + random.nextInt(nW);
 						startingFrom = 'W';
-//						if (st < en) {
-//							int tmp = st;
-//							st = en;
-//							en = tmp;
-//						}
 					} 
 					else if (p < pWW + pWU) {
-						en = sU + random.nextInt(nU);
+						nxtNode = sU + random.nextInt(nU);
 						startingFrom = 'U';
 					} 
 					else {
-						en = sT + random.nextInt(nT);
+						nxtNode = sT + random.nextInt(nT);
 						notReachedTarget = false;
 					}
 				} 
 				else if (startingFrom == 'U') {
-					if (st == sU) p = random.nextDouble() * (1.0 - pUU) + pUU;
-					
 					if (p < pUU) {
-						en = sU + random.nextInt(st - sU);
+						nxtNode = sU + random.nextInt(nU);
 						startingFrom = 'U';
-//						if (st < en) {
-//							int tmp = st;
-//							st = en;
-//							en = tmp;
-//						}
 					} 
 					else {
-						en = sT + random.nextInt(nT);
+						nxtNode = sT + random.nextInt(nT);
 						notReachedTarget = false;
 					}
 				}
 				
-				if (!edgeHash.contains(st + "#" + en)) {
-					pw.println(st + " " + en);
-					edgeHash.add(st + "#" + en);
+				tracedPathNodes.add(nxtNode);
+			}
+			
+			tracedPathNodes = new ArrayList(new TreeSet<Integer>(tracedPathNodes));
+			for (int i = 1; i < tracedPathNodes.size(); ++i) {
+				int src = tracedPathNodes.get(i - 1);
+				int tgt = tracedPathNodes.get(i);
+				if (!edgeHash.contains(src + "#" + tgt)) {
+					pw.println(src + " " + tgt);
+					edgeHash.add(src + "#" + tgt);
 				}
-				
-				st = en;
 			}
 		}
+		
 		pw.close();
 	}
 	
@@ -216,57 +205,55 @@ public class SyntheticNonLayeredDAG {
 		while (edgeHash.size() < nE) {
 			char startingFrom = 'S';
 			boolean notReachedTarget = true;
-			int st = -1;
-			int en = -1;
+			int nxtNode = -1;
 			double p = -1;
-			
+			ArrayList<Integer> tracedPathNodes = new ArrayList();
+
 			while (notReachedTarget) {
 				p = random.nextDouble();
 				
 				if (startingFrom == 'S') {
-					st = sS + random.nextInt(nS);					
+					int start = sS + random.nextInt(nS);	
+					tracedPathNodes.add(start);
+					
 					if (p < pSI) {
-						en = sI + random.nextInt(nI);
+						nxtNode = sI + random.nextInt(nI);
 						startingFrom = 'I';
 					}
 					else {
-						en = sT + random.nextInt(nT);
+						nxtNode = sT + random.nextInt(nT);
 						notReachedTarget = false;
 					}
 				} 
 				else if (startingFrom == 'I') {
-					if (st == sI) p = random.nextDouble() * (1.0 - pII) + pII;
-					
 					if (p < pII) {
-						en = sI + random.nextInt(st - sI);
-						
-//						en = sI + random.nextInt(nI);
-//						if (st < en) { // edge goes from large index to small index
-//							int tmp = st;
-//							st = en;
-//							en = tmp;
-//						}
+						nxtNode = sI + random.nextInt(nI);
 						startingFrom = 'I';
 					}
 					else {
-						en = sT + random.nextInt(nT);
+						nxtNode = sT + random.nextInt(nT);
 						notReachedTarget = false;
 					}
 				} 
 				
-				if (!edgeHash.contains(st + "#" + en)) {
-					pw.println(st + " " + en);
-					edgeHash.add(st + "#" + en);
+				tracedPathNodes.add(nxtNode);
+			}
+			
+			tracedPathNodes = new ArrayList(new TreeSet<Integer>(tracedPathNodes));
+			for (int i = 1; i < tracedPathNodes.size(); ++i) {
+				int src = tracedPathNodes.get(i - 1);
+				int tgt = tracedPathNodes.get(i);
+				if (!edgeHash.contains(src + "#" + tgt)) {
+					pw.println(src + " " + tgt);
+					edgeHash.add(src + "#" + tgt);
 				}
-				
-				st = en;
 			}
 		}
 		pw.close();
 	}
 
 	public static void main(String[] args) throws Exception {
-//		getNLHGDAG();
+		getNLHGDAG();
 		getNLNHGDAG();
 		System.out.println("Done!");
 	}

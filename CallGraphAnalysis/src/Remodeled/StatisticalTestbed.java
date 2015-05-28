@@ -33,6 +33,10 @@ public class StatisticalTestbed {
 //		getCCDF(new NormalDistribution(4.0, 1.0));
 //		getCCDF(new ParetoDistribution());	
 		
-		tryWilcoxonRankSumTest();
+//		tryWilcoxonRankSumTest();
+		
+		System.out.println(Math.log(0.13));
+		System.out.println(Math.exp(-2.0402208285265546));
+
 	}
 }
