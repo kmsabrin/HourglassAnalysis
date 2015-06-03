@@ -28,15 +28,16 @@ public class Manager {
 		String versions[] = {"NLHGDAG", "NLNHGDAG"};
 		
 		for (int i = 0; i < versions.length; ++i) {
-//			if (i >= 1) continue;			
+			if (i < 1) continue;			
 			String networkID = versions[i];
 			System.out.println("Working on: " + networkID);
 			DependencyDAG dependencyDAG = new DependencyDAG("synthetic_callgraphs//" + networkID + ".txt");
 			printNetworkStat(dependencyDAG);
 			
-//			DistributionAnalysis.getAveragePathLenth(dependencyDAG);
+			DistributionAnalysis.getAveragePathLenth(dependencyDAG);
 //			DistributionAnalysis.getCentralityCCDF(dependencyDAG, networkID);
-			new GradientFilterAnalysis().getSampleGradientsQuartileInterval(dependencyDAG, networkID);
+//			DistributionAnalysis.getReachabilityCount(dependencyDAG);
+//			new GradientFilterAnalysis().getSampleGradientsQuartileInterval(dependencyDAG, networkID);
 //			WaistDetection.runPCWaistDetection(dependencyDAG, networkID);
 		}
 	}

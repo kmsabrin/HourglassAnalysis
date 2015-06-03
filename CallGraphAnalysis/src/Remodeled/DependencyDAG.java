@@ -116,8 +116,8 @@ public class DependencyDAG {
 
 //				if (tokens[1].equals("->")) // for call graphs
 				{
-					String dependent = tokens[0];
-					String server = tokens[1]; // for space separated DAG: a b
+					String server = tokens[0];
+					String dependent = tokens[1]; // for space separated DAG: a b
 					
 //					String server = tokens[2].substring(0, tokens[2].length() - 1); // for cobjdump: a -> b;
 //					String server = tokens[2].substring(0, tokens[2].length()); // for cdepn: a -> b
@@ -349,7 +349,7 @@ public class DependencyDAG {
 		}		
 	}
 	
-	/*
+	
 	private void reachableUpwardsNodes(String node) { // towards root
 		if (visited.contains(node)) { // node already traversed
 			return;
@@ -396,7 +396,7 @@ public class DependencyDAG {
 			serversReachable.put(s, new HashSet(visited));
 		}
 	}
-	*/
+	
 	
 	private void recursePagerankTargetToSource(String node) {
 		if (pagerankTargetCompression.containsKey(node)) {

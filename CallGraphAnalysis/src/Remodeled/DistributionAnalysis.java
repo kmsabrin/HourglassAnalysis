@@ -145,4 +145,45 @@ public class DistributionAnalysis {
 		}
 		System.out.println("Average Path Length: " + avgPLength / knt);
 	}
+	
+	public static void getReachabilityCount(DependencyDAG dependencyDAG) {
+		double overFlowed = 0;
+		double participant = 0;
+		double rSum = 0;
+		for (String s: dependencyDAG.functions) {
+//			if (dependencyDAG.serves.containsKey(s) && dependencyDAG.depends.containsKey(s)) {
+				double reachable = 0, possible = 0;
+//				System.out.print(s);
+//				System.out.print(" reaches:");
+				for (String r: dependencyDAG.dependentsReachable.get(s)) {
+					if (dependencyDAG.serves.containsKey(r)) {
+						++reachable;
+//						System.out.print(" " + r);
+					}
+				}
+				
+//				System.out.print(" canReach:");
+				double u = Double.parseDouble(s);
+				for (String r: dependencyDAG.functions) {
+					double v = Double.parseDouble(r);
+					if (dependencyDAG.serves.containsKey(r) && v < u) {
+						++possible;
+//						System.out.print(" " + r);
+					}
+				}
+//				System.out.println();
+				
+				double r = reachable / possible;
+				rSum += r;
+				if (r > 0.9) ++overFlowed;
+//				System.out.println(s + "\t" + reachable + "\t" + possible);
+				
+				++participant;
+//			}
+		}
+		
+//		System.out.println(overFlowed / participant);
+		
+		System.out.println(rSum / participant);
+	}
 }

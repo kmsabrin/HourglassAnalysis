@@ -47,21 +47,24 @@ public class ToyNetwork {
 		dependencyDAG.loadLocationMetric(); // must load degree metric before
 		dependencyDAG.loadPagerankCentralityMetric();
 		dependencyDAG.loadPathCentralityMetric();
-//		dependencyDAG.loadRechablity();
+		dependencyDAG.loadRechablity();
 	}
 			
 	public static void main(String[] args) throws Exception {
 		ToyNetwork toyNetwork = new ToyNetwork();
 		WaistDetection.topKNodes = new HashSet();
 		toyNetwork.loadCallGraph();
-//		toyNetwork.dependencyDAG.printNetworkMetrics();
+		toyNetwork.dependencyDAG.printNetworkMetrics();
+		
 		
 //		DistributionAnalysis.getAveragePathLenth(toyNetwork.dependencyDAG);
+//		DistributionAnalysis.getReachabilityCount(toyNetwork.dependencyDAG);
+		
 //		new GradientFilter().getWilcoxonRankSum(toyNetwork.dependencyDAG, "toyDAG");
-		new GradientFilterAnalysis().getSampleGradientsQuartileInterval(toyNetwork.dependencyDAG, "toyDAG");
+//		new GradientFilterAnalysis().getSampleGradientsQuartileInterval(toyNetwork.dependencyDAG, "toyDAG");
 		
 //		DistributionAnalysis.printCentralityRanks(toyNetwork.dependencyDAG, "toyDAG");
-//		DistributionAnalysis.printCentralityCCDF(toyNetwork.dependencyDAG, "toyDAG");
+		DistributionAnalysis.getCentralityCCDF(toyNetwork.dependencyDAG, "toyDAG");
 //		RankAggregation.aggregateRanks(toyNetwork.dependencyDAG);
 		
 //		IteratedMaxCentralityCoverage iteratedMaxCentralityCoverage = new IteratedMaxCentralityCoverage(toyNetwork.dependencyDAG);

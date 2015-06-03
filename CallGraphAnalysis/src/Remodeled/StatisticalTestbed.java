@@ -1,5 +1,7 @@
 package Remodeled;
 
+import java.util.Random;
+
 import org.apache.commons.math3.distribution.AbstractRealDistribution;
 import org.apache.commons.math3.distribution.ExponentialDistribution;
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
@@ -35,8 +37,15 @@ public class StatisticalTestbed {
 		
 //		tryWilcoxonRankSumTest();
 		
-		System.out.println(Math.log(0.13));
-		System.out.println(Math.exp(-2.0402208285265546));
+//		System.out.println(Math.log(0.13));
+//		System.out.println(Math.exp(-2.0402208285265546));
+		
+		Random random = new Random(System.nanoTime());
+		
+		int i = 20;
+		while (i-- > 0) {
+			System.out.println(random.nextDouble());
+		}
 
 	}
 }
