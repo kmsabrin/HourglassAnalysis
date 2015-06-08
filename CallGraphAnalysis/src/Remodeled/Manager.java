@@ -35,7 +35,7 @@ public class Manager {
 			printNetworkStat(dependencyDAG);
 			
 			DistributionAnalysis.getAveragePathLenth(dependencyDAG);
-//			DistributionAnalysis.getCentralityCCDF(dependencyDAG, networkID);
+			DistributionAnalysis.getCentralityCCDF(dependencyDAG, networkID);
 //			DistributionAnalysis.getReachabilityCount(dependencyDAG);
 //			new GradientFilterAnalysis().getSampleGradientsQuartileInterval(dependencyDAG, networkID);
 //			WaistDetection.runPCWaistDetection(dependencyDAG, networkID);

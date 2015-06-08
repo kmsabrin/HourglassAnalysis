@@ -9,7 +9,7 @@ import java.util.Random;
 import java.util.TreeSet;
 
 public class SyntheticNonLayeredDAG {
-	static int nE = 10000; // no. of Edges
+	static int nE = 30000; // no. of Edges
 	static int nN = 10050; // no. of Nodes
 	
 	static double pSL, pSW, pSU, pST;
@@ -40,8 +40,8 @@ public class SyntheticNonLayeredDAG {
 //	}
 	
 	public static void setNHG3TierParameters() {
-		pSI = 0.99; pST = 0.01;
-		pII = 0.80; pIT = 0.20;
+		pSI = 0.75; pST = 1.0 - pSI;
+		pII = 0.5; pIT = 1.0 - pII;
 	}
 	
 	public static void getNLHGDAG() throws Exception {

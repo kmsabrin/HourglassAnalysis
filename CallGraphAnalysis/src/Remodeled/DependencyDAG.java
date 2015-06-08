@@ -93,13 +93,14 @@ public class DependencyDAG {
 			
 		// load & initialize the attributes of the dependency graph
 		loadCallGraph(dependencyGraphID);
-		removeCycles(); // or should I only ignore cycles?
-		removeIsolatedNodes();
+//		removeCycles(); // or should I only ignore cycles?
+//		removeIsolatedNodes();
 		
 		loadDegreeMetric();
-		loadPathStatistics();
-		loadLocationMetric(); // must load degree metric before
-		loadPathCentralityMetric();
+//		loadPathStatistics();
+//		loadLocationMetric(); // must load degree metric before
+//		loadPathCentralityMetric();
+		
 //		loadPagerankCentralityMetric();
 //		loadRechablity();
 	}
