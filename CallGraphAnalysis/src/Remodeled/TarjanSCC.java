@@ -22,31 +22,6 @@ import java.util.Stack;
  *
  *************************************************************************/
 
-/**
- * The <tt>TarjanSCC</tt> class represents a data type for determining the
- * strong components in a digraph. The <em>id</em> operation determines in which
- * strong component a given vertex lies; the <em>areStronglyConnected</em>
- * operation determines whether two vertices are in the same strong component;
- * and the <em>count</em> operation determines the number of strong components.
- * 
- * The <em>component identifier</em> of a component is one of the vertices in
- * the strong component: two vertices have the same component identifier if and
- * only if they are in the same strong component.
- * 
- * <p>
- * This implementation uses Tarjan's algorithm. The constructor takes time
- * proportional to <em>V</em> + <em>E</em> (in the worst case), where <em>V</em>
- * is the number of vertices and <em>E</em> is the number of edges. Afterwards,
- * the <em>id</em>, <em>count</em>, and <em>areStronglyConnected</em> operations
- * take constant time. For alternate implementations of the same API, see
- * {@link KosarajuSharirSCC} and {@link GabowSCC}.
- * <p>
- * For additional documentation, see <a href="/algs4/42digraph">Section 4.2</a>
- * of <i>Algorithms, 4th Edition</i> by Robert Sedgewick and Kevin Wayne.
- * 
- * @author Robert Sedgewick
- * @author Kevin Wayne
- */
 public class TarjanSCC {
 	private HashSet<String> marked; // marked[v] = has v been visited?
 	private HashMap<String, Integer> id; // id[v] = id of strong componentcontaining v
@@ -55,12 +30,6 @@ public class TarjanSCC {
 	private int count; // number of strongly-connected components
 	private Stack<String> stack;
 
-	/**
-	 * Computes the strong components of the digraph <tt>G</tt>.
-	 * 
-	 * @param G
-	 *            the digraph
-	 */
 	private TarjanSCC(DependencyDAG G) {
 		marked = new HashSet();
 		stack = new Stack();
@@ -98,25 +67,14 @@ public class TarjanSCC {
 		count++;
 	}
 
-	/**
-	 * Returns the number of strong components.
-	 * 
-	 * @return the number of strong components
-	 */
+	
+//	Returns the number of strong components.
 	private int count() {
 		return count;
 	}
 
-	/**
-	 * Are vertices <tt>v</tt> and <tt>w</tt> in the same strong component?
-	 * 
-	 * @param v
-	 *            one vertex
-	 * @param w
-	 *            the other vertex
-	 * @return <tt>true</tt> if vertices <tt>v</tt> and <tt>w</tt> are in the
-	 *         same strong component, and <tt>false</tt> otherwise
-	 */
+	
+//	Are vertices <tt>v</tt> and <tt>w</tt> in the same strong component?
 	private boolean stronglyConnected(String v, String w) {
 		return id.get(v) == id.get(w);
 	}
