@@ -1,7 +1,9 @@
 package Remodeled;
 
 import java.io.File;
+import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.TreeSet;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -13,6 +15,8 @@ import org.w3c.dom.NodeList;
 
 public class ExtractMetabolicNetwork {
 	public static void parseMetabolicNetworkXML(String filePath) throws Exception {
+		PrintWriter pw = new PrintWriter(new File("metabolic_networks//rat-links.txt"));
+
 		File inputFile = new File(filePath);
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -22,6 +26,7 @@ public class ExtractMetabolicNetwork {
 
 		NodeList reactionList = doc.getElementsByTagName("reaction");
 		// System.out.println("Number of reactions: " + reactionList.getLength());
+		TreeSet<String> compoundsInReactions = new TreeSet();
 		for (int reactionIndex = 0; reactionIndex < reactionList.getLength(); reactionIndex++) {
 			Element reaction = (Element) reactionList.item(reactionIndex);
 			// System.out.println("Reaction id: " + reaction.getAttribute("id"));
@@ -39,6 +44,7 @@ public class ExtractMetabolicNetwork {
 						product.add(compound.getAttribute("name"));
 					}
 					// System.out.println(compound.getNodeName() + "\t" + compound.getAttribute("id") + "\t" + compound.getAttribute("name"));
+					compoundsInReactions.add(compound.getAttribute("name"));
 				} 
 				else {
 					// System.out.println(node.getTextContent());
@@ -47,21 +53,27 @@ public class ExtractMetabolicNetwork {
 
 			for (String s : substrate) {
 				for (String p : product) {
-					System.out.println(s + " " + p);
+					pw.println(s + " " + p);
 				}
 			}
 
-			if (reaction.getAttribute("type").equals("reversible")) {
-				for (String s : substrate) {
-					for (String p : product) {
-						System.out.println(p + " " + s);
-					}
-				}
-			}
+//			if (reaction.getAttribute("type").equals("reversible")) {
+//				for (String s : substrate) {
+//					for (String p : product) {
+////						System.out.println(p + " " + s);
+//					}
+//				}
+//			}
 		}
+		
+//		for (String s: compoundsInReactions) {
+////			System.out.println(s);
+//		}
+		
+		pw.close();
 	}
 
 	public static void main(String[] args) throws Exception {
-		parseMetabolicNetworkXML("metabolic_networks//rat-kgml.xml");
+		parseMetabolicNetworkXML("metabolic_networks//rno-kgml.xml");
 	}
 }

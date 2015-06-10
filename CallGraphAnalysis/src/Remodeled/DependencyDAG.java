@@ -97,9 +97,9 @@ public class DependencyDAG {
 //		removeIsolatedNodes();
 		
 		loadDegreeMetric();
-//		loadPathStatistics();
-//		loadLocationMetric(); // must load degree metric before
-//		loadPathCentralityMetric();
+		loadPathStatistics();
+		loadLocationMetric(); // must load degree metric before
+		loadPathCentralityMetric();
 		
 //		loadPagerankCentralityMetric();
 //		loadRechablity();

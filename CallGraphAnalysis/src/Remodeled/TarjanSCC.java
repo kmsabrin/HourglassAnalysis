@@ -1,27 +1,24 @@
 package Remodeled;
 
+import java.io.File;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.Stack;
 
 /*************************************************************************
- *  Compilation:  javac TarjanSCC.java
- *  Execution:    Java TarjanSCC V E
- *  Dependencies: Digraph.java Stack.java TransitiveClosure.java StdOut.java
- *
  *  Compute the strongly-connected components of a digraph using 
  *  Tarjan's algorithm.
  *
  *  Runs in O(E + V) time.
  *
- *  % java TarjanSCC tinyDG.txt
+ *  toy_dag_1.txt
  *  5 components
  *  1 
  *  0 2 3 4 5
  *  9 10 11 12
- *  6 8
- *  7 
+ *  6
+ *  7 8 
  *
  *************************************************************************/
 
@@ -51,10 +48,8 @@ import java.util.Stack;
  * @author Kevin Wayne
  */
 public class TarjanSCC {
-
 	private HashSet<String> marked; // marked[v] = has v been visited?
-	private HashMap<String, Integer> id; // id[v] = id of strong component
-											// containing v
+	private HashMap<String, Integer> id; // id[v] = id of strong componentcontaining v
 	private HashMap<String, Integer> low; // low[v] = low number of v
 	private int pre; // preorder number counter
 	private int count; // number of strongly-connected components
@@ -66,7 +61,7 @@ public class TarjanSCC {
 	 * @param G
 	 *            the digraph
 	 */
-	public TarjanSCC(DependencyDAG G) {
+	private TarjanSCC(DependencyDAG G) {
 		marked = new HashSet();
 		stack = new Stack();
 		id = new HashMap();
@@ -108,7 +103,7 @@ public class TarjanSCC {
 	 * 
 	 * @return the number of strong components
 	 */
-	public int count() {
+	private int count() {
 		return count;
 	}
 
@@ -122,36 +117,40 @@ public class TarjanSCC {
 	 * @return <tt>true</tt> if vertices <tt>v</tt> and <tt>w</tt> are in the
 	 *         same strong component, and <tt>false</tt> otherwise
 	 */
-	public boolean stronglyConnected(String v, String w) {
+	private boolean stronglyConnected(String v, String w) {
 		return id.get(v) == id.get(w);
 	}
-
-	/**
-	 * Unit tests the <tt>TarjanSCC</tt> data type.
-	 */
-	public static void main(String[] args) {
-		DependencyDAG G = new DependencyDAG("metabolic_networks//rat_new.txt");
+	
+	public static void main(String[] args) throws Exception {
+		PrintWriter pw = new PrintWriter(new File("metabolic_networks//rat-consolidated.txt"));
+		
+		DependencyDAG G = new DependencyDAG(); 
+		G.loadCallGraph("metabolic_networks//rat-links.txt"); // "metabolic_networks//rat-links.txt"
+		
 		TarjanSCC scc = new TarjanSCC(G);
-
 		// number of connected components
 		int M = scc.count();
 		System.out.println(M + " components from " + G.functions.size() + " metabolites");
 
-		// compute list of vertices in each strong component
-		HashMap<Integer, HashSet<String>> components = new HashMap();
-		for (int i = 0; i < M; i++) {
-			components.put(i, new HashSet<String>());
-		}
+		HashMap<String, String> sccIdMap = new HashMap();
 		for (String v : G.functions) {
-			components.get(scc.id.get(v)).add(v);
+			String sccId = String.valueOf(scc.id.get(v));
+			sccIdMap.put(v, sccId);
+			System.out.println(v + "\t" + sccId);
 		}
-
-		// print results
-		for (int i : components.keySet()) {
-			for (String v : components.get(i)) {
-				System.out.print(v + " ");
+		
+		for (String v: G.functions) {
+			String srcSCCId = sccIdMap.get(v);
+			if (G.serves.containsKey(v)) {
+				for (String r: G.serves.get(v)) {
+					String tgtSCCId = sccIdMap.get(r);
+					if (!srcSCCId.equals(tgtSCCId)) {
+						pw.println(srcSCCId + "\t" + tgtSCCId); 
+					}
+				}
 			}
-			System.out.println();
 		}
+		
+		pw.close();
 	}
 }

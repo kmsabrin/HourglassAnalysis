@@ -6,7 +6,7 @@ import org.apache.commons.math3.distribution.AbstractRealDistribution;
 import org.apache.commons.math3.distribution.ExponentialDistribution;
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 
-public class StatisticalTestbed {
+public class StatisticalUtilTest {
 	public static void getCCDF(AbstractRealDistribution distribution) {
 		for (double i = 0.0; ; i += 0.02) {
 			double ccdf = 1.0 - distribution.cumulativeProbability(i);

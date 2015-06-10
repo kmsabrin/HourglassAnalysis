@@ -10,16 +10,17 @@ public class Manager {
 	
 	public static void doRealNetworkAnalysis() throws Exception {
 //		String netPath = "other_callgraphs//out.linux";
-//		String netPath = "metabolic_networks//rat.txt";
-//		String netID = "rat";
-		String netPath = "supremecourt_networks//court.txt";
-		String netID = "court";
+		String netPath = "metabolic_networks//rat-consolidated.txt";
+		String netID = "rat";
+//		String netPath = "supremecourt_networks//court.txt";
+//		String netID = "court";
 //		String netPath = "kernel_callgraphs//full.graph-2.6.11";
 //		String netID = "kernel-21";
 		
 		DependencyDAG dependencyDAG = new DependencyDAG(netPath);
 		printNetworkStat(dependencyDAG);
-		DistributionAnalysis.printCentralityRanks(dependencyDAG, netID);
+		dependencyDAG.printNetworkMetrics();
+//		DistributionAnalysis.printCentralityRanks(dependencyDAG, netID);
 		DistributionAnalysis.getCentralityCCDF(dependencyDAG, netID);
 		WaistDetection.runPCWaistDetection(dependencyDAG, netID);
 	}
@@ -41,10 +42,22 @@ public class Manager {
 //			WaistDetection.runPCWaistDetection(dependencyDAG, networkID);
 		}
 	}
+	
+	public static void doToyNetworkAnalysis() throws Exception {
+		DependencyDAG dependencyDAG = new DependencyDAG("toy_networks//toy_dag.txt");
+		String netID = "toy_dag";
+		printNetworkStat(dependencyDAG);
+		dependencyDAG.printNetworkMetrics();
+//		DistributionAnalysis.printCentralityRanks(dependencyDAG, netID);
+//		DistributionAnalysis.getCentralityCCDF(dependencyDAG, netID);
+//		WaistDetection.runPCWaistDetection(dependencyDAG, netID);
+
+	}
 
 	public static void main(String[] args) throws Exception {		
-		Manager.doSyntheticNetworkAnalysis();
-//		Manager.doRealNetworkAnalysis();
+//		Manager.doSyntheticNetworkAnalysis();
+		Manager.doRealNetworkAnalysis();
+//		Manager.doToyNetworkAnalysis();
 		System.out.println("Done!");
 	}
 }
