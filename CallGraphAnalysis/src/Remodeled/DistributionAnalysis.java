@@ -11,8 +11,7 @@ import java.util.TreeMap;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.TreeMultimap;
 
-public class DistributionAnalysis {
-	
+public class DistributionAnalysis {	
 	public static void printCentralityDistribution(DependencyDAG dependencyDAG, String filePath) throws Exception {		
 		PrintWriter pw = new PrintWriter(new File("analysis//centrality-distribution-" + filePath + ".txt"));
 
@@ -29,6 +28,19 @@ public class DistributionAnalysis {
 //		for scatter and average using smooth unique
 		for (String s : dependencyDAG.geometricMeanPathCentrality.keySet()) {
 			pw.println(dependencyDAG.location.get(s) + "\t" + dependencyDAG.geometricMeanPathCentrality.get(s));
+		}
+		
+		pw.close();
+	}
+	
+	public static void printSourceVsTargetCompression(DependencyDAG dependencyDAG, String filePath) throws Exception {
+		PrintWriter pw = new PrintWriter(new File("analysis//src-vs-tgt-compression-" + filePath + ".txt"));
+
+//		for scatter and average using smooth unique
+		for (String s : dependencyDAG.functions) {
+			if (dependencyDAG.serves.containsKey(s) && dependencyDAG.depends.containsKey(s)) {
+				pw.println(dependencyDAG.pagerankSourceCompression.get(s) + "\t" + dependencyDAG.pagerankTargetCompression.get(s));
+			}
 		}
 		
 		pw.close();
@@ -56,7 +68,9 @@ public class DistributionAnalysis {
 		Map<Double, Double> CDF = new TreeMap<Double, Double>();
 		
 		for (String s: dependencyDAG.functions) {
-			double v = dependencyDAG.normalizedPathCentrality.get(s);	
+			double v = dependencyDAG.normalizedPathCentrality.get(s);
+//			double v = dependencyDAG.iCentrality.get(s);
+//			double v = dependencyDAG.harmonicMeanPagerankCentrality.get(s);
 			
 			if (histogram.containsKey(v)) {
 				histogram.put(v, histogram.get(v) + 1.0);
@@ -67,11 +81,11 @@ public class DistributionAnalysis {
 		}
 		
 		// CDF: Cumulative Distribution Function
-		double cumSum = 0;
+		double cumulativeSum = 0;
 		for (double d: histogram.keySet()) {
 			double v = histogram.get(d);
-			cumSum += v;
-			CDF.put(d, cumSum / dependencyDAG.functions.size());
+			cumulativeSum += v;
+			CDF.put(d, cumulativeSum / dependencyDAG.functions.size());
 		}
 		
 		// CCDF: Complementary CDF

@@ -73,9 +73,9 @@ public class SyntheticLayeredDAG {
 
 				++nodeID;
 			}
-			System.out.print((nodeID - 1) + ",");
+//			System.out.print((nodeID - 1) + ",");
 		}
-		System.out.println();
+//		System.out.println();
 		
 		nNode = nodeID - 1;
 		System.out.println("Total Nodes used: " + nNode);
@@ -243,5 +243,13 @@ public class SyntheticLayeredDAG {
 		traversePath(pw);
 
 		pw.close();
+	}
+	
+	public static void main(String[] args) throws Exception {
+		new SyntheticLayeredDAG().generateTrapezoidsDAG();
+		new SyntheticLayeredDAG().generateDiamondDAG();
+		new SyntheticLayeredDAG().generateHourglassDAG();
+		new SyntheticLayeredDAG().generateRectangleDAG();
+		new SyntheticLayeredDAG().generateNoisyRectangleDAG();
 	}
 }

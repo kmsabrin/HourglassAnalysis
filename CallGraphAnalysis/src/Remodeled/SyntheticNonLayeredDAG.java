@@ -3,7 +3,6 @@ package Remodeled;
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.TreeSet;
@@ -20,9 +19,9 @@ public class SyntheticNonLayeredDAG {
 	static double pSI, pII, pIT; // pST defined earlier
 	
 	public static void setHG5TierParameters() {
-		pSL = 0.60; pSW = 0.20; pSU = 0.1; pST = 0.1;
+		pSL = 0.65; pSW = 0.25; pSU = 0.05; pST = 0.05;
 				
-		pLL = 0.5; pLW = 0.30; pLU = 0.1; pLT = 0.1;
+		pLL = 0.55; pLW = 0.35; pLU = 0.05; pLT = 0.05;
 		
 		pWW = 0.4; pWU = 0.5; pWT = 0.1;
 		
@@ -40,8 +39,8 @@ public class SyntheticNonLayeredDAG {
 //	}
 	
 	public static void setNHG3TierParameters() {
-		pSI = 0.75; pST = 1.0 - pSI;
-		pII = 0.5; pIT = 1.0 - pII;
+		pSI = 0.98; pST = 1.0 - pSI;
+		pII = 0.50; pIT = 1.0 - pII;
 	}
 	
 	public static void getNLHGDAG() throws Exception {
@@ -169,7 +168,7 @@ public class SyntheticNonLayeredDAG {
 			}
 			
 			tracedPathNodes = new ArrayList(new TreeSet<Integer>(tracedPathNodes));
-			System.out.println(tracedPathNodes.size());
+//			System.out.println(tracedPathNodes.size());
 
 			
 			sumOfPathLengths += (tracedPathNodes.size() - 1);
@@ -272,13 +271,12 @@ public class SyntheticNonLayeredDAG {
 			}
 		}
 		
-
 		System.out.println(sumOfPathLengths / numOfPaths);
 		pw.close();
 	}
 
 	public static void main(String[] args) throws Exception {
-//		getNLHGDAG();
+		getNLHGDAG();
 		getNLNHGDAG();
 		System.out.println("Done!");
 	}

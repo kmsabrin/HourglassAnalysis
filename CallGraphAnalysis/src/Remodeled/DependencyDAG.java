@@ -32,6 +32,8 @@ public class DependencyDAG {
 	HashMap<String, Double> harmonicMeanPathCentrality;
 	HashMap<String, Double> normalizedPathCentrality;
 	
+	HashMap<String, Double> iCentrality;
+	
 	Map<String, Integer> outDegree;
 	Map<String, Integer> inDegree;
 
@@ -43,13 +45,17 @@ public class DependencyDAG {
 
 	HashMap<String, Set<String>> dependentsReachable;
 	HashMap<String, Set<String>> serversReachable;
-
+	HashMap<String, Integer> targetsReachable;
+	HashMap<String, Integer> sourcesReachable;
+	
 	HashMap<String, Double> pagerankSourceCompression;
 	HashMap<String, Double> pagerankTargetCompression;
 	HashMap<String, Double> geometricMeanPagerankCentrality;
 	HashMap<String, Double> harmonicMeanPagerankCentrality;
 		
 	String dependencyGraphID;
+	
+	int kounter;
 	
 	DependencyDAG() { 
 		functions = new TreeSet();
@@ -69,6 +75,8 @@ public class DependencyDAG {
 		harmonicMeanPathCentrality = new HashMap();
 		normalizedPathCentrality = new HashMap();
 		
+		iCentrality = new HashMap();
+		
 		outDegree = new HashMap();
 		inDegree = new HashMap();
 		
@@ -82,6 +90,9 @@ public class DependencyDAG {
 
 		dependentsReachable = new HashMap();
 		serversReachable = new HashMap();
+		
+		targetsReachable = new HashMap();
+		sourcesReachable = new HashMap();
 		
 		WaistDetection.topKNodes.clear();
 	}
@@ -99,10 +110,10 @@ public class DependencyDAG {
 		loadDegreeMetric();
 		loadPathStatistics();
 		loadLocationMetric(); // must load degree metric before
-		loadPathCentralityMetric();
+		loadRechablity();
 		
-//		loadPagerankCentralityMetric();
-//		loadRechablity();
+		loadPathCentralityMetric();
+		loadPagerankCentralityMetric();
 	}
 
 	public void loadCallGraph(String fileName) {
@@ -112,15 +123,24 @@ public class DependencyDAG {
 			while (scanner.hasNext()) {
 				String line = scanner.nextLine();
 				String tokens[] = line.split("\\s+");
+//				String tokens[] = line.split("[,]");
 				if (tokens.length < 2)
 					continue;
 
 //				if (tokens[1].equals("->")) // for call graphs
 				{
-					String server = tokens[0];
-					String dependent = tokens[1]; // for space separated DAG: a b
+					String server = tokens[0]; // for space separated DAG: a b or a,b
+					String dependent = tokens[1]; // for space separated DAG: a b or a,b
 					
+//					desparetely need to clean all the datasets
+//					if (Integer.parseInt(dependent) < Integer.parseInt(server)) { // for court cases
+//						System.out.println(dependent + " citing " + server);
+//						continue;
+//					}
+					
+//					String dependent = tokens[0].substring(0, tokens[0].length()); // for cobjdump: a -> b;
 //					String server = tokens[2].substring(0, tokens[2].length() - 1); // for cobjdump: a -> b;
+					
 //					String server = tokens[2].substring(0, tokens[2].length()); // for cdepn: a -> b
 //					System.out.println(dependent + "\t" + server);
 					
@@ -182,6 +202,12 @@ public class DependencyDAG {
 					if (cycleList.get(i).equals(s)) {
 //						System.out.println(cycleList.size() - i);
 						detectedCycles.add(new ArrayList(cycleList.subList(i, cycleList.size())));
+						
+						for (String r: detectedCycles.get(detectedCycles.size() - 1)) {
+							System.out.print(r + " ");
+						}
+						System.out.println();
+						
 						break;
 					}
 				}
@@ -321,7 +347,9 @@ public class DependencyDAG {
 	}
 	
 	public void loadPathStatistics() {
+//		int knt = 0;
 		for (String s: functions) {
+//			if (!numOfSourcePath.containsKey(s)) ++knt;
 			sourcePathDepth(s);
 		}
 				
@@ -339,6 +367,7 @@ public class DependencyDAG {
 			}
 		}
 		
+//		System.out.println("Components " + knt);
 //		System.out.println("Total Paths: " + nTotalPath + "\n" + "####################");
 	}
 	
@@ -349,8 +378,7 @@ public class DependencyDAG {
 			location.put(s, m);
 		}		
 	}
-	
-	
+		
 	private void reachableUpwardsNodes(String node) { // towards root
 		if (visited.contains(node)) { // node already traversed
 			return;
@@ -359,6 +387,7 @@ public class DependencyDAG {
 		visited.add(node);
 				
 		if (!serves.containsKey(node)) { // is a target
+			++kounter;
 			return;
 		}
 		
@@ -375,6 +404,7 @@ public class DependencyDAG {
 		visited.add(node);
 		
 		if (!depends.containsKey(node)) { // is a source
+			++kounter;
 			return;
 		}
 		
@@ -387,45 +417,48 @@ public class DependencyDAG {
 		visited = new HashSet();
 		for (String s : functions) {
 			visited.clear();
+			kounter = 0;
 			reachableUpwardsNodes(s); // how many nodes are using her
 			visited.remove(s); // remove ifself
 			dependentsReachable.put(s, new HashSet(visited));
+			targetsReachable.put(s, kounter);
 			
 			visited.clear();
+			kounter = 0;
 			reachableDownwardsNodes(s); // how many nodes she is using
 			visited.remove(s); // remove itself
 			serversReachable.put(s, new HashSet(visited));
+			sourcesReachable.put(s, kounter);
 		}
 	}
 	
-	
-	private void recursePagerankTargetToSource(String node) {
+	private void computeTargetPagerankCompression(String node) {
 		if (pagerankTargetCompression.containsKey(node)) {
 			return;
 		}
 
 		double nodePRCentrality = 0;
-		if (!WaistDetection.topKNodes.contains(node)) {
+//		if (!WaistDetection.topKNodes.contains(node)) {
 			for (String s : serves.get(node)) {
-				recursePagerankTargetToSource(s);
+				computeTargetPagerankCompression(s);
 				nodePRCentrality += pagerankTargetCompression.get(s) / inDegree.get(s);
 			}
-		}
+//		}
 		pagerankTargetCompression.put(node, nodePRCentrality);
 	}
 
-	private void recursePagerankSourceToTarget(String node) {
+	private void computeSourcePagerankCompression(String node) {
 		if (pagerankSourceCompression.containsKey(node)) {
 			return;
 		}
 		
 		double nodePRCentrality = 0;
-		if (!WaistDetection.topKNodes.contains(node)) {
+//		if (!WaistDetection.topKNodes.contains(node)) {
 			for (String s : depends.get(node)) {
-				recursePagerankSourceToTarget(s);
+				computeSourcePagerankCompression(s);
 				nodePRCentrality += pagerankSourceCompression.get(s) / outDegree.get(s);
 			}
-		}
+//		}
 		pagerankSourceCompression.put(node, nodePRCentrality);
 	}
 	
@@ -433,28 +466,28 @@ public class DependencyDAG {
 		// initialize target pr
 		for (String s : functions) {
 			if (!serves.containsKey(s)) {
-				pagerankTargetCompression.put(s, 1.0);
+				pagerankTargetCompression.put(s, 1.0 / nTargets);
 			}
 		}
 
 		for (String s : functions) {
-			recursePagerankTargetToSource(s);
+			computeTargetPagerankCompression(s);
 		}
 		
 		// initialize source pr
 		for (String s: functions) {
 			if (!depends.containsKey(s)) {
-				pagerankSourceCompression.put(s, 1.0);
+				pagerankSourceCompression.put(s, 1.0 / nSources);
 			}
 		}
 		
 		for (String s: functions) {
-			recursePagerankSourceToTarget(s);
+			computeSourcePagerankCompression(s);
 		}
 		
 		for (String s: functions) {
-			pagerankSourceCompression.put(s, pagerankSourceCompression.get(s) / nSources);
-			pagerankTargetCompression.put(s, pagerankTargetCompression.get(s) / nTargets);
+//			pagerankSourceCompression.put(s, pagerankSourceCompression.get(s) / nSources);
+//			pagerankTargetCompression.put(s, pagerankTargetCompression.get(s) / nTargets);
 			
 			double harmonicMeanPagerank = 2.0 * pagerankSourceCompression.get(s) * pagerankTargetCompression.get(s) / (pagerankSourceCompression.get(s) + pagerankTargetCompression.get(s));
 			double geometricMeanPagerank = Math.sqrt(pagerankSourceCompression.get(s) * pagerankTargetCompression.get(s));
@@ -462,20 +495,16 @@ public class DependencyDAG {
 			harmonicMeanPagerankCentrality.put(s, harmonicMeanPagerank);
 			geometricMeanPagerankCentrality.put(s, geometricMeanPagerank);
 		}
-
-		for (String s: functions) {
-//			if (depends.containsKey(s) && serves.containsKey(s)) {
-//				System.out.print(s + "\t" + location.get(s) + "\t" + pagerankTargetCompression.get(s) + "\t" + pagerankSourceCompression.get(s));
-//				System.out.print("\t" + harmonicMeanPagerankCentrality.get(s));
-//				System.out.println();
-//			}
-//			System.out.println(s + "\t" + harmonicMeanPagerankCentrality.get(s));
-		}
-//		System.out.println("###### ###### ######");
-//		System.out.println("HERE!");
 	}
 	
 	public void loadPathCentralityMetric() {
+		double connectedSTPairs = 0;
+		for (String s: functions) {
+			if (!serves.containsKey(s)) { // is a target
+				connectedSTPairs += sourcesReachable.get(s);
+			}
+		}
+		
 		for (String s: functions) {			
 //			P-Centrality
 			double harmonicMean = 2.0 * numOfTargetPath.get(s) * numOfSourcePath.get(s) / (numOfTargetPath.get(s) + numOfSourcePath.get(s));
@@ -485,21 +514,24 @@ public class DependencyDAG {
 			normalizedPathCentrality.put(s, numOfTargetPath.get(s) * numOfSourcePath.get(s) / nTotalPath);
 			
 //			I-Centrality
-//			nPath = rootsReached.get(s) * leavesReached.get(s);
-//			nodePathThrough.put(s, nPath); // equivalent to number of connected (t,b) pairs containing it
-//			if (!callFrom.containsKey(s)) { // is a root
-//				nTotalPath += nPath; // nTotalPath = nConnectedTopBottomPair
-//			}
+//			double targetsReachedNormalized = targetsReachable.get(s) * 1.0 / nTargets;
+//			double sourcesReachedNormalized = sourcesReachable.get(s) * 1.0 / nSources;
+			double stPairsConnected = targetsReachable.get(s) * sourcesReachable.get(s);
+			iCentrality.put(s, stPairsConnected / connectedSTPairs);
 		}				
 	}
 	
 	public void printNetworkMetrics() {
 		for (String s: functions) {
 			System.out.print(s + "\t");
-			System.out.print(inDegree.get(s) + "\t");
-			System.out.print(outDegree.get(s) + "\t");
-			System.out.print(location.get(s) + "\t");
+//			System.out.print(inDegree.get(s) + "\t");
+//			System.out.print(outDegree.get(s) + "\t");
+//			System.out.print(location.get(s) + "\t");
 			System.out.print(normalizedPathCentrality.get(s) + "\t");
+//			System.out.print(pagerankTargetCompression.get(s) + "\t");
+//			System.out.print(pagerankSourceCompression.get(s) + "\t");
+			System.out.print(harmonicMeanPagerankCentrality.get(s) + "\t");
+			System.out.print(iCentrality.get(s) + "\t");
 			System.out.println();
 		}
 	}
