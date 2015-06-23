@@ -88,10 +88,10 @@ public class TarjanSCC {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		PrintWriter pw = new PrintWriter(new File("metabolic_networks//rat-consolidated.txt"));
+		PrintWriter pw = new PrintWriter(new File("metabolic_networks//monkey-consolidated.txt"));
 		
 		DependencyDAG G = new DependencyDAG(); 
-		G.loadCallGraph("metabolic_networks//rat-links.txt"); // "metabolic_networks//rat-links.txt"
+		G.loadCallGraph("metabolic_networks//monkey-links.txt"); // "metabolic_networks//rat-links.txt"
 		
 		TarjanSCC scc = new TarjanSCC(G);
 		// number of connected components

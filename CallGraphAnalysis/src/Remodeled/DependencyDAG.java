@@ -57,6 +57,9 @@ public class DependencyDAG {
 	
 	int kounter;
 	
+	boolean canReachTarget;
+	boolean canReachSource;
+	
 	DependencyDAG() { 
 		functions = new TreeSet();
 		serves = new HashMap();
@@ -104,16 +107,86 @@ public class DependencyDAG {
 			
 		// load & initialize the attributes of the dependency graph
 		loadCallGraph(dependencyGraphID);
-//		removeCycles(); // or should I only ignore cycles?
+		removeCycles(); // or should I only ignore cycles?
 //		removeIsolatedNodes();
-		
+		removeDisconnectedNodes();
 		loadDegreeMetric();
+		
 		loadPathStatistics();
 		loadLocationMetric(); // must load degree metric before
-		loadRechablity();
+		
+		loadRechablity();		
 		
 		loadPathCentralityMetric();
-		loadPagerankCentralityMetric();
+		loadPagerankCentralityMetric();		
+	}
+	
+	private void checkTargetReachability(String node) {
+		if (Integer.parseInt(node) < SyntheticNLDAG2.sI) {
+			canReachTarget = true;
+			return;
+		}
+		
+		if (canReachTarget) return;
+		
+		if (serves.containsKey(node)) {
+			for (String s : serves.get(node)) {
+				checkTargetReachability(s);
+			}
+		}
+	}
+	
+	private void checkSourceReachability(String node) {
+		if (Integer.parseInt(node) >= SyntheticNLDAG2.sS) {
+			canReachSource = true;
+			return;
+		}
+		
+		if (canReachSource) return;
+		
+		if (depends.containsKey(node)) {
+			for (String s : depends.get(node)) {
+				checkSourceReachability(s);
+			}
+		}
+	}
+	
+	private void checkReach(String node) {
+		canReachTarget = false;
+		canReachSource = false;
+		checkTargetReachability(node);
+		checkSourceReachability(node);
+	}
+	
+	private void removeNode(String node) {
+		functions.remove(node);
+		
+		if (serves.containsKey(node)) {
+			for (String s: serves.get(node)) {
+				depends.get(s).remove(node);
+			}
+			serves.remove(node);
+		}
+		
+		if (depends.containsKey(node)) {
+			for (String s: depends.get(node)) {
+				serves.get(s).remove(node);
+			}
+			depends.remove(node);
+		}
+	}
+	
+	private void removeDisconnectedNodes() {
+		HashSet<String> tempFunctions = new HashSet(functions);
+		for (String s: tempFunctions) {
+			int index = Integer.parseInt(s);
+			if (index >= SyntheticNLDAG2.sI && index < SyntheticNLDAG2.sS) {
+				checkReach(s);
+				if (!canReachTarget || !canReachSource) {
+					removeNode(s);
+				}
+			}
+		}
 	}
 
 	public void loadCallGraph(String fileName) {
@@ -420,14 +493,14 @@ public class DependencyDAG {
 			kounter = 0;
 			reachableUpwardsNodes(s); // how many nodes are using her
 			visited.remove(s); // remove ifself
-			dependentsReachable.put(s, new HashSet(visited));
+//			dependentsReachable.put(s, new HashSet(visited));
 			targetsReachable.put(s, kounter);
 			
 			visited.clear();
 			kounter = 0;
 			reachableDownwardsNodes(s); // how many nodes she is using
 			visited.remove(s); // remove itself
-			serversReachable.put(s, new HashSet(visited));
+//			serversReachable.put(s, new HashSet(visited));
 			sourcesReachable.put(s, kounter);
 		}
 	}
@@ -437,6 +510,7 @@ public class DependencyDAG {
 			return;
 		}
 
+//		System.out.println("Working on: " + node);
 		double nodePRCentrality = 0;
 //		if (!WaistDetection.topKNodes.contains(node)) {
 			for (String s : serves.get(node)) {
@@ -514,8 +588,6 @@ public class DependencyDAG {
 			normalizedPathCentrality.put(s, numOfTargetPath.get(s) * numOfSourcePath.get(s) / nTotalPath);
 			
 //			I-Centrality
-//			double targetsReachedNormalized = targetsReachable.get(s) * 1.0 / nTargets;
-//			double sourcesReachedNormalized = sourcesReachable.get(s) * 1.0 / nSources;
 			double stPairsConnected = targetsReachable.get(s) * sourcesReachable.get(s);
 			iCentrality.put(s, stPairsConnected / connectedSTPairs);
 		}				

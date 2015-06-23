@@ -1,9 +1,8 @@
 package Remodeled;
 
-import java.util.Random;
-
 import org.apache.commons.math3.distribution.AbstractRealDistribution;
-import org.apache.commons.math3.distribution.ExponentialDistribution;
+import org.apache.commons.math3.distribution.UniformIntegerDistribution;
+import org.apache.commons.math3.distribution.ZipfDistribution;
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 
 public class StatisticalUtilTest {
@@ -40,11 +39,25 @@ public class StatisticalUtilTest {
 //		System.out.println(Math.log(0.13));
 //		System.out.println(Math.exp(-2.0402208285265546));
 		
-		Random random = new Random(System.nanoTime());
+//		Random random = new Random(System.nanoTime());
+//		
+//		int i = 20;
+//		while (i-- > 0) {
+//			System.out.println(random.nextDouble());
+//		}
 		
-		int i = 20;
-		while (i-- > 0) {
-			System.out.println(random.nextDouble());
+		int n = 3;
+		ZipfDistribution zipfDistribution = new ZipfDistribution(n, 1);
+		for (int i = 0; i <= n + 1; ++i) {
+			System.out.println(i + "\t" + zipfDistribution.probability(i));
+		}
+		
+		System.out.println("----------");
+		
+		n = 3;
+		UniformIntegerDistribution uniformIntegerDistribution = new UniformIntegerDistribution(1, n);
+		for (int i = 0; i <= n + 1; ++i) {
+			System.out.println(i + "\t" + uniformIntegerDistribution.probability(i));
 		}
 
 	}

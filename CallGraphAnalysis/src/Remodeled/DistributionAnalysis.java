@@ -61,16 +61,20 @@ public class DistributionAnalysis {
 		pw.close();
 	}
 	
-	public static TreeMap<Double, Double> getCentralityCCDF(DependencyDAG dependencyDAG, String filePath) throws Exception {		
-		PrintWriter pw = new PrintWriter(new File("analysis//centrality-ccdf-" + filePath + ".txt"));
+	public static TreeMap<Double, Double> getCentralityCCDF(DependencyDAG dependencyDAG, String filePath, int key) throws Exception {		
+		String[] centrality = {"p-", "i-", "hpr-", "gpr-"};
+		
+		PrintWriter pw = new PrintWriter(new File("analysis//centrality-ccdf-" + centrality[key - 1] + filePath + ".txt"));
 
 		Map<Double, Double> histogram = new TreeMap<Double, Double>();
 		Map<Double, Double> CDF = new TreeMap<Double, Double>();
 		
 		for (String s: dependencyDAG.functions) {
-			double v = dependencyDAG.normalizedPathCentrality.get(s);
-//			double v = dependencyDAG.iCentrality.get(s);
-//			double v = dependencyDAG.harmonicMeanPagerankCentrality.get(s);
+			double v = 0;
+			if (key == 1) v = dependencyDAG.normalizedPathCentrality.get(s);
+			if (key == 2) v = dependencyDAG.iCentrality.get(s);
+			if (key == 3) v = dependencyDAG.harmonicMeanPagerankCentrality.get(s);
+			if (key == 4) v = dependencyDAG.geometricMeanPagerankCentrality.get(s);
 			
 			if (histogram.containsKey(v)) {
 				histogram.put(v, histogram.get(v) + 1.0);
@@ -158,6 +162,31 @@ public class DistributionAnalysis {
 			}
 		}
 		System.out.println("Average Path Length: " + avgPLength / knt);
+	}
+	
+	public static void targetEdgeConcentration(DependencyDAG dependencyDAG) {
+		TreeMap<Integer, Integer> frequencyCounter = new TreeMap();
+		for (String s: dependencyDAG.functions) {
+			int n = Integer.parseInt(s) / 1000;
+			if (dependencyDAG.serves.containsKey(s)) {
+				for (String r: dependencyDAG.serves.get(s)) {
+					int p = Integer.parseInt(r) / 1000;
+					
+					if (p > 1) continue;
+					if (frequencyCounter.containsKey(n)) {
+						int i = frequencyCounter.get(n) + 1;
+						frequencyCounter.put(n, i);
+					}
+					else {
+						frequencyCounter.put(n, 1);
+					}
+				}
+			}
+		}
+		
+		for (int i: frequencyCounter.keySet()) {
+			System.out.println(i + "\t" + frequencyCounter.get(i));
+		}
 	}
 	
 	public static void getReachabilityCount(DependencyDAG dependencyDAG) {

@@ -27,7 +27,7 @@ public class GradientFilterAnalysis {
 	double tailGradients[];
 
 	private void getPercentileRangeForBodyAndTail(DependencyDAG dependencyDAG, String networkID) throws Exception {
-		ccdfMap = DistributionAnalysis.getCentralityCCDF(dependencyDAG, networkID);		
+		ccdfMap = DistributionAnalysis.getCentralityCCDF(dependencyDAG, networkID, 1);		
 		HashMap<Double, Double> ccdfReverseMapLogScale = new HashMap();
 		xList = new double[ccdfMap.size() - 1]; // one entry less for the log(O) one
 		double[] yList = new double[ccdfMap.size() - 1];

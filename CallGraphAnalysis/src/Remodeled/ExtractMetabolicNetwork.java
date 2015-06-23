@@ -15,7 +15,7 @@ import org.w3c.dom.NodeList;
 
 public class ExtractMetabolicNetwork {
 	public static void parseMetabolicNetworkXML(String filePath) throws Exception {
-		PrintWriter pw = new PrintWriter(new File("metabolic_networks//rat-links.txt"));
+		PrintWriter pw = new PrintWriter(new File("metabolic_networks//monkey-links.txt"));
 
 		File inputFile = new File(filePath);
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -74,6 +74,6 @@ public class ExtractMetabolicNetwork {
 	}
 
 	public static void main(String[] args) throws Exception {
-		parseMetabolicNetworkXML("metabolic_networks//rno-kgml.xml");
+		parseMetabolicNetworkXML("metabolic_networks//mcc-kgml.xml"); // eco, rno, mcc
 	}
 }

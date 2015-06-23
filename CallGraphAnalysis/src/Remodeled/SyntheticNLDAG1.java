@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.TreeSet;
 
-public class SyntheticNonLayeredDAG {
+public class SyntheticNLDAG1 {
 	static int nE = 30000; // no. of Edges
 	static int nN = 10050; // no. of Nodes
 	
@@ -40,7 +40,7 @@ public class SyntheticNonLayeredDAG {
 	
 	public static void setNHG3TierParameters() {
 		pSI = 0.98; pST = 1.0 - pSI;
-		pII = 0.50; pIT = 1.0 - pII;
+		pII = 0.80; pIT = 1.0 - pII;
 	}
 	
 	public static void getNLHGDAG() throws Exception {
@@ -225,7 +225,9 @@ public class SyntheticNonLayeredDAG {
 			int nxtNode = -1;
 			double p = -1;
 			ArrayList<Integer> tracedPathNodes = new ArrayList();
-
+//			pII = random.nextDouble();
+//			System.out.println(pII);
+			
 			while (notReachedTarget) {
 				p = random.nextDouble();
 				

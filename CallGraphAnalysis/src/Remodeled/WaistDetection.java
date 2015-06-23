@@ -26,7 +26,7 @@ public class WaistDetection {
 		int k = 1000;
 		ArrayList<String> tempTopKNodes;
 		double tPath = dependencyDAG.nTotalPath;
-		System.out.println(tPath);
+//		System.out.println(tPath);
 		topKNodes = new HashSet();
 		tempTopKNodes = new ArrayList();
 
@@ -51,7 +51,7 @@ public class WaistDetection {
 			dependencyDAG.loadPathStatistics();
 			individualCumulativePaths += dependencyDAG.numOfTargetPath.get(s) * dependencyDAG.numOfSourcePath.get(s);
 			topKNodes.add(s);
-			System.out.println(s + "\t" + dependencyDAG.numOfTargetPath.get(s) + "\t" + dependencyDAG.numOfSourcePath.get(s) + "\t" + individualCumulativePaths);
+//			System.out.println(s + "\t" + dependencyDAG.numOfTargetPath.get(s) + "\t" + dependencyDAG.numOfSourcePath.get(s) + "\t" + individualCumulativePaths);
 			double pathCoverage = individualCumulativePaths / tPath;
 			pw.println(topKNodes.size() + " " + pathCoverage);
 
