@@ -9,24 +9,24 @@ import org.apache.commons.math3.distribution.ZipfDistribution;
 
 public class SyntheticNLDAG2 {
 	static Random random = new Random(System.nanoTime());
-	static int alpha = 1;
+	static double alpha = 0.5;
 	
-	static int nT = 200; // no. of T(arget) nodes
-	static int nI = 1600; // no. of I(ntermediate) nodes
-	static int nS = 200; // no. of S(ource) nodes
-
-	static int sT = 1; // start of Target
-	static int sI = 201; // start of Intermediate
-	static int sS = 1801; // start of source
+//	static int nT = 200; // no. of T(arget) nodes
+//	static int nI = 1600; // no. of I(ntermediate) nodes
+//	static int nS = 200; // no. of S(ource) nodes
+//
+//	static int sT = 1; // start of Target
+//	static int sI = 201; // start of Intermediate
+//	static int sS = 1801; // start of source
 	
 //	toy
-//	int nT = 4; // no. of T(arget) nodes
-//	int nI = 8; // no. of I(ntermediate) nodes
-//	int nS = 4; // no. of S(ource) nodes
-//
-//	int sT = 1; // start of Target
-//	int sI = 5; // start of Intermediate
-//	int sS = 13; // start of source
+	static int nT = 4; // no. of T(arget) nodes
+	static int nI = 8; // no. of I(ntermediate) nodes
+	static int nS = 4; // no. of S(ource) nodes
+
+	static int sT = 1; // start of Target
+	static int sI = 5; // start of Intermediate
+	static int sS = 13; // start of source
 
 	
 	public static void getNLNHGDAG() throws Exception {
@@ -35,7 +35,9 @@ public class SyntheticNLDAG2 {
 	}
 	
 	public static int getInDegree() {
-		return 4;
+		int values[] = {1, 2, 3, 4, 5};
+//		int values[] = {7, 8, 9, 10};
+		return values[random.nextInt(2)];
 	}
 	
 	public static int getNodeFromZipfDistribution(int startNodeIndex, int endNodeIndex) {

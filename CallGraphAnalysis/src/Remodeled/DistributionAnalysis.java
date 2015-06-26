@@ -88,6 +88,7 @@ public class DistributionAnalysis {
 		double cumulativeSum = 0;
 		for (double d: histogram.keySet()) {
 			double v = histogram.get(d);
+			System.out.println(d + "\t" + v);
 			cumulativeSum += v;
 			CDF.put(d, cumulativeSum / dependencyDAG.functions.size());
 		}

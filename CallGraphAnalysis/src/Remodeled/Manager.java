@@ -8,52 +8,62 @@ public class Manager {
 		System.out.println("N: " + dependencyDAG.functions.size());
 	}
 	
-	public static void doRealNetworkAnalysis() throws Exception {	
-//		String netPath = "metabolic_networks//rat-consolidated.txt";
-//		String netID = "rat";
+	public static void doRealNetworkAnalysis() throws Exception {
+		String netPath = "";
+		String netID = "rat";
 		
-//		String netPath = "metabolic_networks//monkey-consolidated.txt";
-//		String netID = "monkey";
-		
-		String netPath = "supremecourt_networks//court.txt";
-		String netID = "court";
+		if (netID.equals("rat")) {
+			netPath = "metabolic_networks//rat-consolidated.txt";
+			DependencyDAG.isMetabolic = true;
+		}
+		else if (netID.equals("monkey")) {
+			netPath = "metabolic_networks//monkey-consolidated.txt";
+			DependencyDAG.isMetabolic = true;
+		}
+		else if (netID.equals("court")) {
+			netPath = "supremecourt_networks//court.txt";
+			DependencyDAG.isCourtcase = true;
+		}
+		else if (netID.equals("kernel-21")) {
+			netPath = "kernel_callgraphs//full.graph-2.6.21";
+			DependencyDAG.isCallgraph = true;
+		}
+		else if (netID.equals("kernel-31")) {
+			netPath = "kernel_callgraphs//full.graph-2.6.31";
+			DependencyDAG.isCallgraph = true;
+		}
+		else if (netID.equals("openssh-39")) {
+			netPath = "openssh_callgraphs//full.graph-openssh-39";
+			DependencyDAG.isCallgraph = true;
+		}
 
-//		String netPath = "kernel_callgraphs//full.graph-2.6.21";
-//		String netID = "kernel-21";
-		
-//		String netPath = "kernel_callgraphs//full.graph-2.6.31";
-//		String netID = "kernel-31";
-		
-//		String netPath = "openssh_callgraphs//full.graph-openssh-39";
-//		String netID = "openssh-39";
-//		
 		DependencyDAG dependencyDAG = new DependencyDAG(netPath);
-//		printNetworkStat(dependencyDAG);
+		printNetworkStat(dependencyDAG);
 //		dependencyDAG.printNetworkMetrics();
 		
 //		DistributionAnalysis.printCentralityRanks(dependencyDAG, netID);
-		DistributionAnalysis.getCentralityCCDF(dependencyDAG, netID, 2);
-		DistributionAnalysis.getCentralityCCDF(dependencyDAG, netID, 3);
-		DistributionAnalysis.getCentralityCCDF(dependencyDAG, netID, 4);
+		int centralityIndex = 1;
+		DistributionAnalysis.getCentralityCCDF(dependencyDAG, netID, centralityIndex);
 		
-//		WaistDetection.runPCWaistDetection(dependencyDAG, netID);
-//		DistributionAnalysis.printSourceVsTargetCompression(dependencyDAG, netID);
+		WaistDetection.runPCWaistDetection(dependencyDAG, netID);
 	}
 	
 	public static void doSyntheticNetworkAnalysis() throws Exception {
-		String versions[] = {"NLHGDAG", "NLNHGDAGa0", "NLNHGDAGa1"};
+		DependencyDAG.isSynthetic = true;
+//		String versions[] = {"NLHGDAG", "NLNHGDAGa0.0", "NLNHGDAGa0.5", "NLNHGDAGa1.0"};
 //		String versions[] = {"rectangleDAG", "noisyRectangleDAG", "trapezoidDAG", "diamondDAG", "hourglassDAG"};
-		
+		String versions[] = {"NLNHGDAGa0.5"};
 		for (int i = 0; i < versions.length; ++i) {
-			if (i < 1) continue;			
+//			if (i < 1) continue;			
 			String networkID = versions[i];
 			System.out.println("Working on: " + networkID);
 			DependencyDAG dependencyDAG = new DependencyDAG("synthetic_callgraphs//" + networkID + ".txt");
 			printNetworkStat(dependencyDAG);
+			dependencyDAG.printNetworkMetrics();
 			
 //			DistributionAnalysis.targetEdgeConcentration(dependencyDAG);
 //			DistributionAnalysis.getAveragePathLenth(dependencyDAG);
-			DistributionAnalysis.getCentralityCCDF(dependencyDAG, networkID, 1);
+//			DistributionAnalysis.getCentralityCCDF(dependencyDAG, networkID, 1);
 //			DistributionAnalysis.getReachabilityCount(dependencyDAG);
 //			DistributionAnalysis.printSourceVsTargetCompression(dependencyDAG, networkID);
 			
@@ -63,6 +73,7 @@ public class Manager {
 	}
 	
 	public static void doToyNetworkAnalysis() throws Exception {
+		DependencyDAG.isSynthetic = true;
 		DependencyDAG dependencyDAG = new DependencyDAG("toy_networks//toy_dag.txt");
 		String netID = "toy_dag";
 //		printNetworkStat(dependencyDAG);
@@ -74,8 +85,8 @@ public class Manager {
 	}
 
 	public static void main(String[] args) throws Exception {		
-		Manager.doSyntheticNetworkAnalysis();
-//		Manager.doRealNetworkAnalysis();
+//		Manager.doSyntheticNetworkAnalysis();
+		Manager.doRealNetworkAnalysis();
 //		Manager.doToyNetworkAnalysis();
 		System.out.println("Done!");
 	}

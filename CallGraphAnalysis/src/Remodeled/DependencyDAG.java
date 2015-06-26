@@ -45,11 +45,11 @@ public class DependencyDAG {
 
 	HashMap<String, Set<String>> dependentsReachable;
 	HashMap<String, Set<String>> serversReachable;
-	HashMap<String, Integer> targetsReachable;
-	HashMap<String, Integer> sourcesReachable;
+	HashMap<String, Integer> targetsReachable; // for iCentrality
+	HashMap<String, Integer> sourcesReachable; // for iCentrality
 	
-	HashMap<String, Double> pagerankSourceCompression;
-	HashMap<String, Double> pagerankTargetCompression;
+	HashMap<String, Double> pagerankSourceCompression; // for prCentrality
+	HashMap<String, Double> pagerankTargetCompression; // for prCentrality
 	HashMap<String, Double> geometricMeanPagerankCentrality;
 	HashMap<String, Double> harmonicMeanPagerankCentrality;
 		
@@ -59,6 +59,11 @@ public class DependencyDAG {
 	
 	boolean canReachTarget;
 	boolean canReachSource;
+	
+	static boolean isSynthetic = false;
+	static boolean isCallgraph = false;
+	static boolean isMetabolic = false;
+	static boolean isCourtcase = false;
 	
 	DependencyDAG() { 
 		functions = new TreeSet();
@@ -107,9 +112,14 @@ public class DependencyDAG {
 			
 		// load & initialize the attributes of the dependency graph
 		loadCallGraph(dependencyGraphID);
-		removeCycles(); // or should I only ignore cycles?
-//		removeIsolatedNodes();
-		removeDisconnectedNodes();
+		if (isCallgraph) {
+			removeCycles(); // or should I only ignore cycles?
+		}
+		if (isSynthetic) {
+			removeDisconnectedNodesForSyntheticNetworks();
+		}
+		removeIsolatedNodes();
+		
 		loadDegreeMetric();
 		
 		loadPathStatistics();
@@ -176,7 +186,7 @@ public class DependencyDAG {
 		}
 	}
 	
-	private void removeDisconnectedNodes() {
+	private void removeDisconnectedNodesForSyntheticNetworks() {
 		HashSet<String> tempFunctions = new HashSet(functions);
 		for (String s: tempFunctions) {
 			int index = Integer.parseInt(s);
@@ -196,53 +206,60 @@ public class DependencyDAG {
 			while (scanner.hasNext()) {
 				String line = scanner.nextLine();
 				String tokens[] = line.split("\\s+");
-//				String tokens[] = line.split("[,]");
-				if (tokens.length < 2)
+				if (tokens.length < 2) {
 					continue;
+				}
 
-//				if (tokens[1].equals("->")) // for call graphs
-				{
-					String server = tokens[0]; // for space separated DAG: a b or a,b
-					String dependent = tokens[1]; // for space separated DAG: a b or a,b
-					
-//					desparetely need to clean all the datasets
-//					if (Integer.parseInt(dependent) < Integer.parseInt(server)) { // for court cases
-//						System.out.println(dependent + " citing " + server);
-//						continue;
-//					}
-					
-//					String dependent = tokens[0].substring(0, tokens[0].length()); // for cobjdump: a -> b;
-//					String server = tokens[2].substring(0, tokens[2].length() - 1); // for cobjdump: a -> b;
-					
-//					String server = tokens[2].substring(0, tokens[2].length()); // for cdepn: a -> b
-//					System.out.println(dependent + "\t" + server);
-					
-//					if (server.equals("mcount"))  // no more location metric noise! // compiler generated
-//						continue;
-					
-					functions.add(dependent);
-					functions.add(server);
-					
-					if (dependent.equals(server)) { // loop, do not add the edge
+				String server = "", dependent = "";
+
+				if (isCallgraph) {
+					if (tokens[1].equals("->")) {
+						dependent = tokens[0].substring(0, tokens[0].length());					
+						server = tokens[2].substring(0, tokens[2].length() - 1); // for cobjdump: a -> b;
+//						String server = tokens[2].substring(0, tokens[2].length()); // for cdepn: a -> b
+//						if (server.equals("mcount")) {  // no more location metric noise! // compiler generated
+//							continue;
+//						}
+					}
+				}
+				
+				if (isMetabolic || isSynthetic) {
+//					for metabolic and synthetic networks
+					server = tokens[0]; 
+					dependent = tokens[1];
+				}
+				
+				if (isCourtcase) {					
+					server = tokens[1]; 
+					dependent = tokens[0]; // for space separated DAG: a b or a,b					
+					if (Integer.parseInt(dependent) < Integer.parseInt(server)) { // for court cases
+//						System.out.println(dependent + " citing " + server);  // cycle
 						continue;
 					}
-					
-					if (serves.containsKey(server)) {
-						serves.get(server).add(dependent);
-					} else {
-						HashSet<String> hs = new HashSet();
-						hs.add(dependent);
-						serves.put(server, hs);
-					}
+				}
 
-					if (depends.containsKey(dependent)) {
-						depends.get(dependent).add(server);
-					} else {
-						HashSet<String> hs = new HashSet();
-						hs.add(server);
-						depends.put(dependent, hs);
-					}
-				} 
+				functions.add(dependent);
+				functions.add(server);
+
+				if (dependent.equals(server)) { // loop, do not add the edge
+					continue;
+				}
+
+				if (serves.containsKey(server)) {
+					serves.get(server).add(dependent);
+				} else {
+					HashSet<String> hs = new HashSet();
+					hs.add(dependent);
+					serves.put(server, hs);
+				}
+
+				if (depends.containsKey(dependent)) {
+					depends.get(dependent).add(server);
+				} else {
+					HashSet<String> hs = new HashSet();
+					hs.add(server);
+					depends.put(dependent, hs);
+				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -452,7 +469,7 @@ public class DependencyDAG {
 		}		
 	}
 		
-	private void reachableUpwardsNodes(String node) { // towards root
+	public void reachableUpwardsNodes(String node) { // towards root
 		if (visited.contains(node)) { // node already traversed
 			return;
 		}
@@ -469,7 +486,7 @@ public class DependencyDAG {
 		}
 	}
 	
-	private void reachableDownwardsNodes(String node) { // towards leaves
+	public void reachableDownwardsNodes(String node) { // towards leaves
 		if (visited.contains(node)) { // node already traversed
 			return;
 		}
@@ -493,14 +510,14 @@ public class DependencyDAG {
 			kounter = 0;
 			reachableUpwardsNodes(s); // how many nodes are using her
 			visited.remove(s); // remove ifself
-//			dependentsReachable.put(s, new HashSet(visited));
+//			dependentsReachable.put(s, new HashSet(visited)); // too heavy for court case
 			targetsReachable.put(s, kounter);
 			
 			visited.clear();
 			kounter = 0;
 			reachableDownwardsNodes(s); // how many nodes she is using
 			visited.remove(s); // remove itself
-//			serversReachable.put(s, new HashSet(visited));
+//			serversReachable.put(s, new HashSet(visited)); // too heavy for court case
 			sourcesReachable.put(s, kounter);
 		}
 	}
@@ -586,6 +603,7 @@ public class DependencyDAG {
 			harmonicMeanPathCentrality.put(s, harmonicMean);
 			geometricMeanPathCentrality.put(s, geometricMean);	
 			normalizedPathCentrality.put(s, numOfTargetPath.get(s) * numOfSourcePath.get(s) / nTotalPath);
+//			normalizedPathCentrality.put(s, numOfTargetPath.get(s) * numOfSourcePath.get(s));
 			
 //			I-Centrality
 			double stPairsConnected = targetsReachable.get(s) * sourcesReachable.get(s);
@@ -594,17 +612,35 @@ public class DependencyDAG {
 	}
 	
 	public void printNetworkMetrics() {
-		for (String s: functions) {
-			System.out.print(s + "\t");
-//			System.out.print(inDegree.get(s) + "\t");
-//			System.out.print(outDegree.get(s) + "\t");
-//			System.out.print(location.get(s) + "\t");
-			System.out.print(normalizedPathCentrality.get(s) + "\t");
-//			System.out.print(pagerankTargetCompression.get(s) + "\t");
-//			System.out.print(pagerankSourceCompression.get(s) + "\t");
-			System.out.print(harmonicMeanPagerankCentrality.get(s) + "\t");
-			System.out.print(iCentrality.get(s) + "\t");
-			System.out.println();
+//		for (String s: functions) {
+//			System.out.print(s + "\t");
+////			System.out.print(inDegree.get(s) + "\t");
+////			System.out.print(outDegree.get(s) + "\t");
+////			System.out.print(location.get(s) + "\t");
+//			System.out.print(normalizedPathCentrality.get(s) + "\t");
+////			System.out.print(pagerankTargetCompression.get(s) + "\t");
+////			System.out.print(pagerankSourceCompression.get(s) + "\t");
+//			System.out.print(harmonicMeanPagerankCentrality.get(s) + "\t");
+//			System.out.print(iCentrality.get(s) + "\t");
+//			System.out.println();
+//		}
+		
+		for (String s : functions) {
+			if (depends.containsKey(s)) {
+				System.out.print(s + " depends on ");
+				for (String r : depends.get(s)) {
+					System.out.print("\t" + r);
+				}
+				System.out.println();
+			}
+			
+			if (serves.containsKey(s)) {
+				System.out.print(s + " serves ");
+				for (String r : serves.get(s)) {
+					System.out.print("\t" + r);
+				}
+				System.out.println();
+			}
 		}
 	}
 }

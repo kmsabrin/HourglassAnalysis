@@ -34,9 +34,9 @@ public class WaistDetection {
 			Collection<String> nodes = centralitySortedNodes.get(pC);
 			for (String s : nodes) {
 				tempTopKNodes.add(s);
-				if (dependencyDAG.depends.containsKey(s) && dependencyDAG.serves.containsKey(s)) {
-					// System.out.println(s + "\t" + dependencyDAG.geometricMeanPathCentrality.get(s) + "\t" + dependencyDAG.geometricMeanPagerankCentrality.get(s));
-				}
+//				if (dependencyDAG.depends.containsKey(s) && dependencyDAG.serves.containsKey(s)) {
+//					 System.out.println(s + "\t" + dependencyDAG.geometricMeanPathCentrality.get(s) + "\t" + dependencyDAG.geometricMeanPagerankCentrality.get(s));
+//				}
 			}
 
 			if (tempTopKNodes.size() >= k) {
@@ -51,16 +51,43 @@ public class WaistDetection {
 			dependencyDAG.loadPathStatistics();
 			individualCumulativePaths += dependencyDAG.numOfTargetPath.get(s) * dependencyDAG.numOfSourcePath.get(s);
 			topKNodes.add(s);
-//			System.out.println(s + "\t" + dependencyDAG.numOfTargetPath.get(s) + "\t" + dependencyDAG.numOfSourcePath.get(s) + "\t" + individualCumulativePaths);
+			System.out.println(s + "\t" + dependencyDAG.numOfTargetPath.get(s) * dependencyDAG.numOfSourcePath.get(s) / tPath );
 			double pathCoverage = individualCumulativePaths / tPath;
 			pw.println(topKNodes.size() + " " + pathCoverage);
 
 			if (pathCoverage > 0.99) {
 				break;
 			}
+			
+			if (topKNodes.size() > 100) {
+				break;
+			}
 		}
 		
+		getONodes(dependencyDAG);
 		pw.close();
+	}
+	
+	public static void getONodes(DependencyDAG dependencyDAG) {
+		HashSet<String> waistNodeCoverage = new HashSet();
+
+		for (String s: topKNodes) {
+			dependencyDAG.visited.clear();
+			dependencyDAG.kounter = 0;
+			dependencyDAG.reachableUpwardsNodes(s); // how many nodes are using her
+			dependencyDAG.visited.remove(s); // remove ifself
+			waistNodeCoverage.addAll(dependencyDAG.visited);
+			
+			dependencyDAG.visited.clear();
+			dependencyDAG.kounter = 0;
+			dependencyDAG.reachableDownwardsNodes(s); // how many nodes are using her
+			dependencyDAG.visited.remove(s); // remove ifself
+			waistNodeCoverage.addAll(dependencyDAG.visited);			
+		}
+		
+		System.out.println("Waist Size: " + topKNodes.size());
+		System.out.print("Waist Coverage: " + waistNodeCoverage.size() + " of " + dependencyDAG.functions.size() + " i.e. ");
+		System.out.println(waistNodeCoverage.size() * 100.0 / dependencyDAG.functions.size() + "%%");
 	}
 	
 /*	
