@@ -1,7 +1,7 @@
 package Remodeled;
 
 import org.apache.commons.math3.distribution.AbstractRealDistribution;
-import org.apache.commons.math3.distribution.NormalDistribution;
+import org.apache.commons.math3.distribution.UniformIntegerDistribution;
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 
 public class StatisticalUtilTest {
@@ -45,24 +45,24 @@ public class StatisticalUtilTest {
 //			System.out.println(random.nextDouble());
 //		}
 		
-//		int n = 3;
-//		ZipfDistribution zipfDistribution = new ZipfDistribution(n, 1);
+//		int n = 10;
+//		ZipfDistribution zipfDistribution = new ZipfDistribution(n, 0.5);
 //		for (int i = 0; i <= n + 1; ++i) {
 //			System.out.println(i + "\t" + zipfDistribution.probability(i));
 //		}
 //		
 //		System.out.println("----------");
 //		
-//		n = 3;
-//		UniformIntegerDistribution uniformIntegerDistribution = new UniformIntegerDistribution(1, n);
-//		for (int i = 0; i <= n + 1; ++i) {
-//			System.out.println(i + "\t" + uniformIntegerDistribution.probability(i));
-//		}
-
-		NormalDistribution normalDistribution = new NormalDistribution(4, 1);
-		
-		for (int i = 1; i < 1000; ++i) {
-			System.out.println(normalDistribution.sample());
+		int n = 1;
+		UniformIntegerDistribution uniformIntegerDistribution = new UniformIntegerDistribution(1, n + 1);
+		for (int i = 1; i <= n; ++i) {
+			System.out.println(i + "\t" + uniformIntegerDistribution.probability(i));
 		}
+
+//		NormalDistribution normalDistribution = new NormalDistribution(4, 1);
+//		
+//		for (int i = 1; i < 1000; ++i) {
+//			System.out.println(normalDistribution.sample());
+//		}
 	}
 }
