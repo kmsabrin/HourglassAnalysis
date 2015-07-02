@@ -112,12 +112,15 @@ public class DependencyDAG {
 			
 		// load & initialize the attributes of the dependency graph
 		loadCallGraph(dependencyGraphID);
+		
 		if (isCallgraph) {
 			removeCycles(); // or should I only ignore cycles?
 		}
+		
 		if (isSynthetic) {
 			removeDisconnectedNodesForSyntheticNetworks();
 		}
+		
 		removeIsolatedNodes();
 		
 		loadDegreeMetric();
@@ -217,9 +220,9 @@ public class DependencyDAG {
 						dependent = tokens[0].substring(0, tokens[0].length());					
 						server = tokens[2].substring(0, tokens[2].length() - 1); // for cobjdump: a -> b;
 //						String server = tokens[2].substring(0, tokens[2].length()); // for cdepn: a -> b
-//						if (server.equals("mcount")) {  // no more location metric noise! // compiler generated
-//							continue;
-//						}
+						if (server.equals("mcount")) {  // no more location metric noise! // compiler generated
+							continue;
+						}
 					}
 				}
 				
@@ -621,7 +624,7 @@ public class DependencyDAG {
 ////			System.out.print(pagerankTargetCompression.get(s) + "\t");
 ////			System.out.print(pagerankSourceCompression.get(s) + "\t");
 //			System.out.print(harmonicMeanPagerankCentrality.get(s) + "\t");
-//			System.out.print(iCentrality.get(s) + "\t");
+////			System.out.print(iCentrality.get(s) + "\t");
 //			System.out.println();
 //		}
 		

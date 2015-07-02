@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 
 import com.google.common.collect.Ordering;
@@ -17,16 +18,14 @@ public class WaistDetection {
 		
 		TreeMultimap<Double, String> centralitySortedNodes = TreeMultimap.create(Ordering.natural().reverse(), Ordering.natural());
 		for (String s : dependencyDAG.functions) {
-//			if (dependencyDAG.depends.containsKey(s) && dependencyDAG.serves.containsKey(s)) {
-//				centralitySortedNodes.put(dependencyDAG.harmonicMeanPathCentrality.get(s), s);
-//			}
-			centralitySortedNodes.put(dependencyDAG.normalizedPathCentrality.get(s), s);
+			if (dependencyDAG.depends.containsKey(s) && dependencyDAG.serves.containsKey(s)) {
+				centralitySortedNodes.put(dependencyDAG.normalizedPathCentrality.get(s), s);
+			}
 		}
 		
 		int k = 1000;
 		ArrayList<String> tempTopKNodes;
 		double tPath = dependencyDAG.nTotalPath;
-//		System.out.println(tPath);
 		topKNodes = new HashSet();
 		tempTopKNodes = new ArrayList();
 
@@ -34,36 +33,74 @@ public class WaistDetection {
 			Collection<String> nodes = centralitySortedNodes.get(pC);
 			for (String s : nodes) {
 				tempTopKNodes.add(s);
-//				if (dependencyDAG.depends.containsKey(s) && dependencyDAG.serves.containsKey(s)) {
-//					 System.out.println(s + "\t" + dependencyDAG.geometricMeanPathCentrality.get(s) + "\t" + dependencyDAG.geometricMeanPagerankCentrality.get(s));
-//				}
 			}
-
 			if (tempTopKNodes.size() >= k) {
 				break;
 			}
 		}
 
+		TreeMultimap<Double, String> pathCoverageSortedNodes = TreeMultimap.create(Ordering.natural().reverse(), Ordering.natural());
 		double individualCumulativePaths = 0;
 		for (String s : tempTopKNodes) {
 			dependencyDAG.numOfTargetPath.clear();
 			dependencyDAG.numOfSourcePath.clear();
 			dependencyDAG.loadPathStatistics();
-			individualCumulativePaths += dependencyDAG.numOfTargetPath.get(s) * dependencyDAG.numOfSourcePath.get(s);
+			double individualPaths = dependencyDAG.numOfTargetPath.get(s) * dependencyDAG.numOfSourcePath.get(s);
+			individualCumulativePaths += individualPaths;
 			topKNodes.add(s);
-			System.out.println(s + "\t" + dependencyDAG.numOfTargetPath.get(s) * dependencyDAG.numOfSourcePath.get(s) / tPath );
 			double pathCoverage = individualCumulativePaths / tPath;
-			pw.println(topKNodes.size() + " " + pathCoverage);
-
-			if (pathCoverage > 0.99) {
+//			pw.println(topKNodes.size() + " " + pathCoverage);
+			
+			pathCoverageSortedNodes.put(individualPaths / tPath, s);
+			if (pathCoverage > 0.9999) {
 				break;
 			}
 			
-			if (topKNodes.size() > 100) {
+//			if (topKNodes.size() > 100) {
+//				break;
+//			}
+		}
+		
+		tempTopKNodes.clear();
+		topKNodes.clear();
+		tempTopKNodes.clear();
+		
+		for (double pC : pathCoverageSortedNodes.keySet()) {
+			Collection<String> nodes = pathCoverageSortedNodes.get(pC);
+			for (String s : nodes) {
+				tempTopKNodes.add(s);
+			}
+			if (tempTopKNodes.size() >= k) {
 				break;
 			}
 		}
-		
+
+		individualCumulativePaths = 0;
+		for (String s : tempTopKNodes) {
+			dependencyDAG.numOfTargetPath.clear();
+			dependencyDAG.numOfSourcePath.clear();
+			dependencyDAG.loadPathStatistics();
+			double individualPaths = dependencyDAG.numOfTargetPath.get(s) * dependencyDAG.numOfSourcePath.get(s);
+			individualCumulativePaths += individualPaths;
+			topKNodes.add(s);
+			double pathCoverage = individualCumulativePaths / tPath;
+			pw.println(topKNodes.size() + " " + pathCoverage);	
+			
+			System.out.println(s);
+
+			if (pathCoverage > 0.9999) {
+				break;
+			}
+			
+			if (individualPaths < 0.000001) {
+				break;
+			}
+			
+//			if (topKNodes.size() > 100) {
+//				break;
+//			}
+		}
+				
 		getONodes(dependencyDAG);
 		pw.close();
 	}

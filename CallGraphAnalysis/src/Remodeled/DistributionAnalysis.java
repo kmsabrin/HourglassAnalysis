@@ -11,7 +11,19 @@ import java.util.TreeMap;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.TreeMultimap;
 
-public class DistributionAnalysis {	
+public class DistributionAnalysis {
+	
+	public static void printSyntheticPC(DependencyDAG dependencyDAG, String filePath) throws Exception {		
+		PrintWriter pw = new PrintWriter(new File("analysis//centrality-histo-" + filePath + ".txt"));
+
+		for (String s: dependencyDAG.functions) {
+			pw.println(s + "\t" + dependencyDAG.normalizedPathCentrality.get(s));
+		}	
+		
+		pw.close();
+	}
+	
+	
 	public static void printCentralityDistribution(DependencyDAG dependencyDAG, String filePath) throws Exception {		
 		PrintWriter pw = new PrintWriter(new File("analysis//centrality-distribution-" + filePath + ".txt"));
 
@@ -88,7 +100,7 @@ public class DistributionAnalysis {
 		double cumulativeSum = 0;
 		for (double d: histogram.keySet()) {
 			double v = histogram.get(d);
-			System.out.println(d + "\t" + v);
+//			System.out.println(d + "\t" + v);
 			cumulativeSum += v;
 			CDF.put(d, cumulativeSum / dependencyDAG.functions.size());
 		}

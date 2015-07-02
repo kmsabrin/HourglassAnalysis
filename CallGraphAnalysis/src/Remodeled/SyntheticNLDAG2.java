@@ -10,17 +10,18 @@ import org.apache.commons.math3.distribution.ZipfDistribution;
 
 public class SyntheticNLDAG2 {
 	static Random random = new Random(System.nanoTime());
-	static double alpha = 1.0;
+	static double alpha = 0.0;
+	static boolean alphaNegative = false;
 	
-//	static int nT = 200; // no. of T(arget) nodes
-//	static int nI = 1600; // no. of I(ntermediate) nodes
-//	static int nS = 200; // no. of S(ource) nodes
-//
-//	static int sT = 1; // start of Target
-//	static int sI = 201; // start of Intermediate
-//	static int sS = 1801; // start of source
+	static int nT = 100; // no. of T(arget) nodes
+	static int nI = 800; // no. of I(ntermediate) nodes
+	static int nS = 100; // no. of S(ource) nodes
+
+	static int sT = 1; // start of Target
+	static int sI = 101; // start of Intermediate
+	static int sS = 901; // start of source
 	
-//	toy
+//	toy test
 //	static int nT = 4; // no. of T(arget) nodes
 //	static int nI = 8; // no. of I(ntermediate) nodes
 //	static int nS = 4; // no. of S(ource) nodes
@@ -29,13 +30,14 @@ public class SyntheticNLDAG2 {
 //	static int sI = 5; // start of Intermediate
 //	static int sS = 13; // start of source
 	
-	static int nT = 1; // no. of T(arget) nodes
-	static int nI = 998; // no. of I(ntermediate) nodes
-	static int nS = 1; // no. of S(ource) nodes
-
-	static int sT = 1; // start of Target
-	static int sI = 2; // start of Intermediate
-	static int sS = 1000; // start of source
+//	simplified analysis model	
+//	static int nT = 1; // no. of T(arget) nodes
+//	static int nI = 998; // no. of I(ntermediate) nodes
+//	static int nS = 1; // no. of S(ource) nodes
+//
+//	static int sT = 1; // start of Target
+//	static int sI = 2; // start of Intermediate
+//	static int sS = 1000; // start of source
 
 	static HashMap<Integer, Integer> outDegree = new HashMap();
 	
@@ -48,10 +50,10 @@ public class SyntheticNLDAG2 {
 	}
 	
 	public static int getInDegree() {
-//		int values[] = {1, 2, 3, 4, 5};
+		int values[] = {2, 3, 4, 5};
 //		int values[] = {7, 8, 9, 10};
-//		return values[random.nextInt(2)];
-		return 3;
+		return values[random.nextInt(4)];
+//		return 6;
 	}
 	
 	public static int getNodeFromZipfDistribution(int startNodeIndex, int endNodeIndex) {
@@ -60,7 +62,13 @@ public class SyntheticNLDAG2 {
 		double p = random.nextDouble();
 		double cumulativeProbability = 0;
 		for (int i = 1; i <= nElements; ++i) {
-			cumulativeProbability += zipfDistribution.probability(i);
+			if (alphaNegative == true) {
+				cumulativeProbability += zipfDistribution.probability(nElements - i + 1);
+			}
+			else {
+				cumulativeProbability += zipfDistribution.probability(i);
+			}
+			
 			if (p < cumulativeProbability + epsilon) {
 				return startNodeIndex + i - 1;
 			}
@@ -84,7 +92,9 @@ public class SyntheticNLDAG2 {
 	}
 	
 	public static void generateNLDAG(PrintWriter pw) throws Exception {				
-		for (int productIndex = sS - 1; productIndex > 0; --productIndex) {			
+		for (int productIndex = sS - 1; productIndex > 0; --productIndex) {	
+			System.out.println(productIndex);
+			
 			int startNodeIndex = -1, endNodeIndex = -1;
 			if (productIndex < sI) {
 				startNodeIndex = sI;
@@ -93,25 +103,28 @@ public class SyntheticNLDAG2 {
 				startNodeIndex = productIndex + 1;
 			}
 			endNodeIndex = sS + nS - 1;
-			zipfDistribution = new ZipfDistribution(endNodeIndex - startNodeIndex + 1, alpha);
-			
-			if (startNodeIndex < endNodeIndex) {
-				uniformIntegerDistribution = new UniformIntegerDistribution(startNodeIndex, endNodeIndex);
+			if (Math.abs(alpha) < 0.000001) {
+				if (startNodeIndex < endNodeIndex) {
+					uniformIntegerDistribution = new UniformIntegerDistribution(startNodeIndex, endNodeIndex);
+				}
+				else {
+					outDegree.put(sS, 1);
+					continue;
+				}
 			}
-			else {
-				outDegree.put(sS, 1);
-				continue;
+			else {				
+				zipfDistribution = new ZipfDistribution(endNodeIndex - startNodeIndex + 1, alpha);
 			}
 			
 			int k = getInDegree();
 			
 			for (int j = 0; j < k; ++j) {
 				int substrateIndex;
-				if (alpha > 0) {
-					substrateIndex = getNodeFromZipfDistribution(startNodeIndex, endNodeIndex);
+				if (Math.abs(alpha) < 0.000001) {
+					substrateIndex = getNodeFromUniformDistribution(startNodeIndex, endNodeIndex);
 				} 
 				else {
-					substrateIndex = getNodeFromUniformDistribution(startNodeIndex, endNodeIndex);
+					substrateIndex = getNodeFromZipfDistribution(startNodeIndex, endNodeIndex);
 				}
 				pw.println(substrateIndex + " " + productIndex);
 
@@ -130,32 +143,26 @@ public class SyntheticNLDAG2 {
 	public static void main(String[] args) throws Exception {
 		getNLNHGDAG();
 		
-		int N = nT + nI + nS;
-		for (int nodeIndex = sS; nodeIndex > 0; --nodeIndex) {
-//			System.out.println(nodeIndex);
-			double expectedOutDeg = 0;
-			for (int product = nodeIndex - 1; product > 0; --product) {
-				ZipfDistribution zipfDistribution = new ZipfDistribution(N - product, alpha);				
-				expectedOutDeg += 1.0 - Math.pow(1.0 - zipfDistribution.probability(nodeIndex - product), getInDegree());
-			
-//				if (product + 1 < N) {
-//					UniformIntegerDistribution uniformIntegerDistribution = new UniformIntegerDistribution(product + 1, N);
-//					expectedOutDeg += 1.0 - Math.pow(1.0 - uniformIntegerDistribution.probability(nodeIndex), getInDegree());
-//				}
+//		int N = nT + nI + nS;
+//		for (int nodeIndex = sS; nodeIndex > 0; --nodeIndex) {
+//			double expectedOutDeg = 0;
+//			for (int product = nodeIndex - 1; product > 0; --product) {
+//				if (alpha > 0) {
+//					ZipfDistribution zipfDistribution = new ZipfDistribution(N - product, alpha);
+//					expectedOutDeg += 1.0 - Math.pow(1.0 - zipfDistribution.probability(nodeIndex - product), getInDegree());
+//				} 
 //				else {
-//					expectedOutDeg = 1;
+//					if (product + 1 < N) {
+//						UniformIntegerDistribution uniformIntegerDistribution = new UniformIntegerDistribution(product + 1, N);
+//						expectedOutDeg += 1.0 - Math.pow(1.0 - uniformIntegerDistribution.probability(nodeIndex), getInDegree());
+//					} else {
+//						expectedOutDeg = 1;
+//					}
 //				}
-				
-//				System.out.print(product + "\t");
-//				System.out.print(uniformIntegerDistribution.probability(nodeIndex) + "\t");
-//				System.out.print(1.0 - uniformIntegerDistribution.probability(nodeIndex) + "\t");
-//				System.out.print(Math.pow(1.0 - uniformIntegerDistribution.probability(nodeIndex),getInDegree()) + "\t");
-//				System.out.println(1.0 - Math.pow(1.0 - uniformIntegerDistribution.probability(nodeIndex),getInDegree()));
-			}
-			
-			System.out.println(nodeIndex + "\t" + outDegree.get(nodeIndex) + "\t" + expectedOutDeg);
-
-		}
+//			}
+//			System.out.println(nodeIndex + "\t" + outDegree.get(nodeIndex) + "\t" + expectedOutDeg);
+//		}
+//		
 		
 		System.out.println("Done!");
 	}

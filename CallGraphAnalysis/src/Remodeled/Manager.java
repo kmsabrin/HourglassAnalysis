@@ -42,33 +42,34 @@ public class Manager {
 //		dependencyDAG.printNetworkMetrics();
 		
 //		DistributionAnalysis.printCentralityRanks(dependencyDAG, netID);
-		int centralityIndex = 1;
-		DistributionAnalysis.getCentralityCCDF(dependencyDAG, netID, centralityIndex);
+//		int centralityIndex = 1;
+//		DistributionAnalysis.getCentralityCCDF(dependencyDAG, netID, centralityIndex);
 		
 		WaistDetection.runPCWaistDetection(dependencyDAG, netID);
 	}
 	
 	public static void doSyntheticNetworkAnalysis() throws Exception {
 		DependencyDAG.isSynthetic = true;
-//		String versions[] = {"NLHGDAG", "NLNHGDAGa0.0", "NLNHGDAGa0.5", "NLNHGDAGa1.0"};
+		String versions[] = {"NLNHGDAGa0.0", "NLNHGDAGa0.5", "NLNHGDAGa1.0", "NLNHGDAGa-0.5", "NLNHGDAGa-1.0"};
 //		String versions[] = {"rectangleDAG", "noisyRectangleDAG", "trapezoidDAG", "diamondDAG", "hourglassDAG"};
-		String versions[] = {"NLNHGDAGa0.5"};
+//		String versions[] = {"NLNHGDAGa0.5"};
 		for (int i = 0; i < versions.length; ++i) {
-//			if (i < 1) continue;			
+//			if (i != 2) continue;			
 			String networkID = versions[i];
 			System.out.println("Working on: " + networkID);
 			DependencyDAG dependencyDAG = new DependencyDAG("synthetic_callgraphs//" + networkID + ".txt");
 			printNetworkStat(dependencyDAG);
-			dependencyDAG.printNetworkMetrics();
+//			dependencyDAG.printNetworkMetrics();
 			
+//			DistributionAnalysis.printSyntheticPC(dependencyDAG, networkID);
 //			DistributionAnalysis.targetEdgeConcentration(dependencyDAG);
 //			DistributionAnalysis.getAveragePathLenth(dependencyDAG);
-//			DistributionAnalysis.getCentralityCCDF(dependencyDAG, networkID, 1);
+			DistributionAnalysis.getCentralityCCDF(dependencyDAG, networkID, 1);
 //			DistributionAnalysis.getReachabilityCount(dependencyDAG);
 //			DistributionAnalysis.printSourceVsTargetCompression(dependencyDAG, networkID);
 			
 //			new GradientFilterAnalysis().getSampleGradientsQuartileInterval(dependencyDAG, networkID);
-//			WaistDetection.runPCWaistDetection(dependencyDAG, networkID);
+			WaistDetection.runPCWaistDetection(dependencyDAG, networkID);
 		}
 	}
 	
@@ -77,9 +78,9 @@ public class Manager {
 		DependencyDAG dependencyDAG = new DependencyDAG("toy_networks//toy_dag.txt");
 		String netID = "toy_dag";
 //		printNetworkStat(dependencyDAG);
-		dependencyDAG.printNetworkMetrics();
+//		dependencyDAG.printNetworkMetrics();
 //		DistributionAnalysis.printCentralityRanks(dependencyDAG, netID);
-		DistributionAnalysis.getCentralityCCDF(dependencyDAG, netID, 1);
+//		DistributionAnalysis.getCentralityCCDF(dependencyDAG, netID, 1);		
 //		WaistDetection.runPCWaistDetection(dependencyDAG, netID);
 //		DistributionAnalysis.printSourceVsTargetCompression(dependencyDAG, netID);
 	}
