@@ -18,7 +18,8 @@ public class WaistDetection {
 		
 		TreeMultimap<Double, String> centralitySortedNodes = TreeMultimap.create(Ordering.natural().reverse(), Ordering.natural());
 		for (String s : dependencyDAG.functions) {
-			if (dependencyDAG.depends.containsKey(s) && dependencyDAG.serves.containsKey(s)) {
+//			if (dependencyDAG.depends.containsKey(s) && dependencyDAG.serves.containsKey(s)) 
+			{
 				centralitySortedNodes.put(dependencyDAG.normalizedPathCentrality.get(s), s);
 			}
 		}
@@ -86,7 +87,7 @@ public class WaistDetection {
 			double pathCoverage = individualCumulativePaths / tPath;
 			pw.println(topKNodes.size() + " " + pathCoverage);	
 			
-			System.out.println(s);
+//			System.out.println(s);
 
 			if (pathCoverage > 0.9999) {
 				break;

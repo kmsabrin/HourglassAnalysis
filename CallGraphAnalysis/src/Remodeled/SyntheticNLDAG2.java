@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Random;
+import java.util.TreeMap;
 
 import org.apache.commons.math3.distribution.UniformIntegerDistribution;
 import org.apache.commons.math3.distribution.ZipfDistribution;
@@ -13,13 +14,13 @@ public class SyntheticNLDAG2 {
 	static double alpha = 0.0;
 	static boolean alphaNegative = false;
 	
-	static int nT = 100; // no. of T(arget) nodes
-	static int nI = 800; // no. of I(ntermediate) nodes
-	static int nS = 100; // no. of S(ource) nodes
+	static int nT = 172; // no. of T(arget) nodes
+	static int nI = 767; // no. of I(ntermediate) nodes
+	static int nS = 430; // no. of S(ource) nodes
 
 	static int sT = 1; // start of Target
-	static int sI = 101; // start of Intermediate
-	static int sS = 901; // start of source
+	static int sI = 173; // start of Intermediate
+	static int sS = 940; // start of source
 	
 //	toy test
 //	static int nT = 4; // no. of T(arget) nodes
@@ -44,16 +45,34 @@ public class SyntheticNLDAG2 {
 	static ZipfDistribution zipfDistribution;
 	static UniformIntegerDistribution uniformIntegerDistribution;
 	
+	static DependencyDAG dependencyDAG;
+	
+	static TreeMap<Integer, Integer> inDegreeHistogram;
+	static int numOfNonzeroIndegreeNodes;
+	
 	public static void getNLNHGDAG() throws Exception {
-		PrintWriter pw = new PrintWriter(new File("synthetic_callgraphs//NLNHGDAGa" + alpha + ".txt"));
+		String negate = "";
+		if (alphaNegative) negate += "-";
+		
+		PrintWriter pw = new PrintWriter(new File("synthetic_callgraphs//NLNHGDAGa" + negate + alpha + ".txt"));
 		generateNLDAG(pw);
 	}
 	
 	public static int getInDegree() {
-		int values[] = {2, 3, 4, 5};
+//		int values[] = {2, 3, 4, 5};
 //		int values[] = {7, 8, 9, 10};
-		return values[random.nextInt(4)];
+//		return values[random.nextInt(4)];
 //		return 6;
+		
+//		TreeMap<Integer, Integer> inDegreeHistogram = DistributionAnalysis.getInDegreeHistogram(dependencyDAG);
+		double rv = random.nextDouble();
+		double cp = 0;
+		for (int i: inDegreeHistogram.keySet()) {
+			cp += 1.0 * inDegreeHistogram.get(i) / numOfNonzeroIndegreeNodes;
+			if (rv < cp) return i;
+		}
+		
+		return inDegreeHistogram.get(inDegreeHistogram.firstKey());
 	}
 	
 	public static int getNodeFromZipfDistribution(int startNodeIndex, int endNodeIndex) {
@@ -91,9 +110,11 @@ public class SyntheticNLDAG2 {
 		return endNodeIndex;
 	}
 	
-	public static void generateNLDAG(PrintWriter pw) throws Exception {				
+	public static void generateNLDAG(PrintWriter pw) throws Exception {	
+//		System.out.println(SyntheticNLDAG2.nS + "\t" + SyntheticNLDAG2.nI + "\t" + SyntheticNLDAG2.nT);
+
 		for (int productIndex = sS - 1; productIndex > 0; --productIndex) {	
-			System.out.println(productIndex);
+//			System.out.println(productIndex);
 			
 			int startNodeIndex = -1, endNodeIndex = -1;
 			if (productIndex < sI) {
@@ -117,6 +138,7 @@ public class SyntheticNLDAG2 {
 			}
 			
 			int k = getInDegree();
+//			System.out.println(k);
 			
 			for (int j = 0; j < k; ++j) {
 				int substrateIndex;
@@ -141,7 +163,18 @@ public class SyntheticNLDAG2 {
 	}
 
 	public static void main(String[] args) throws Exception {
-		getNLNHGDAG();
+		for (double d = -1.0; d < 1.1; d += 0.2) {
+			if (d < 0) {
+				alphaNegative = true;
+			}
+			else {
+				alphaNegative = false;
+			}
+			alpha = Math.abs(d);
+			random = new Random(System.nanoTime());
+			
+			getNLNHGDAG();
+		}
 		
 //		int N = nT + nI + nS;
 //		for (int nodeIndex = sS; nodeIndex > 0; --nodeIndex) {
@@ -163,7 +196,6 @@ public class SyntheticNLDAG2 {
 //			System.out.println(nodeIndex + "\t" + outDegree.get(nodeIndex) + "\t" + expectedOutDeg);
 //		}
 //		
-		
 		System.out.println("Done!");
 	}
 }

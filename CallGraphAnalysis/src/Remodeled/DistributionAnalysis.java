@@ -242,4 +242,37 @@ public class DistributionAnalysis {
 		
 		System.out.println(rSum / participant);
 	}
+	
+	public static TreeMap<Integer, Integer> getInDegreeHistogram(DependencyDAG dependencyDAG) {
+		ArrayList<Integer> inDegree = new ArrayList();
+		ArrayList<Integer> outDegree = new ArrayList();;
+		
+		TreeMap<Integer, Integer> inDegreeHistogram = new TreeMap();
+		
+		for (String s: dependencyDAG.inDegree.keySet()) {
+			int iDeg = dependencyDAG.inDegree.get(s);
+			if (iDeg > 0) {
+				inDegree.add(iDeg);
+				if (inDegreeHistogram.containsKey(iDeg)) {
+					int v = inDegreeHistogram.get(iDeg);
+					inDegreeHistogram.put(iDeg, v + 1);
+				}
+				else inDegreeHistogram.put(iDeg, 1);
+			}
+		}
+		
+		
+//		k = 0;
+//		for (String s : dependencyDAG.outDegree.keySet()) {
+//			outDegree[k++] = dependencyDAG.outDegree.get(s);
+//		}
+		
+//		System.out.println(" Indegree:" + " Mean: " + StatUtils.mean(inDegree) + " StD: " + Math.sqrt(StatUtils.variance(inDegree)));
+//		System.out.println("Outdegree:" + " Mean: " + StatUtils.mean(outDegree) + " StD: " + Math.sqrt(StatUtils.variance(outDegree)));
+		
+//		System.out.println(" Indegree:" + " 10p: " + StatUtils.percentile(inDegree.toArray(a), 30) + " 50p: " + StatUtils.percentile(inDegree, 50) + " 90p: " + StatUtils.percentile(inDegree, 90));
+//		System.out.println("Outdegree:" + " 10p: " + StatUtils.percentile(outDegree, 10) + " 50p: " + StatUtils.percentile(outDegree, 50) + " 90p: " + StatUtils.percentile(outDegree, 90));
+	
+		return inDegreeHistogram;
+	}
 }

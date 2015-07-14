@@ -14,7 +14,7 @@ public class DependencyDAG {
 	double nSources; // source =  simple module, zero in degree, depends on none
 	double nTargets; // target = complex module, zero out degree, serves none (or external api)
 
-	Set<String> functions;
+	public Set<String> functions;
 	Map<String, Set<String>> serves; 
 	Map<String, Set<String>> depends; 
 	
@@ -193,7 +193,7 @@ public class DependencyDAG {
 		HashSet<String> tempFunctions = new HashSet(functions);
 		for (String s: tempFunctions) {
 			int index = Integer.parseInt(s);
-			if (index >= SyntheticNLDAG2.sI && index < SyntheticNLDAG2.sS) {
+			if (index >= SyntheticNLDAG2.sI && index < SyntheticNLDAG2.sS) { // so bad, so so bad
 				checkReach(s);
 				if (!canReachTarget || !canReachSource) {
 					removeNode(s);

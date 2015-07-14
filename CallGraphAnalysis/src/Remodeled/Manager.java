@@ -1,5 +1,8 @@
 package Remodeled;
 
+import java.util.Random;
+import java.util.TreeMap;
+
 public class Manager {	
 	private static void printNetworkStat(DependencyDAG dependencyDAG) {
 		System.out.println("S: " + dependencyDAG.nSources);
@@ -8,9 +11,38 @@ public class Manager {
 		System.out.println("N: " + dependencyDAG.functions.size());
 	}
 	
+	private static void generateSyntheticFromReal(DependencyDAG dependencyDAG) throws Exception {
+		SyntheticNLDAG2.inDegreeHistogram = DistributionAnalysis.getInDegreeHistogram(dependencyDAG);
+		SyntheticNLDAG2.numOfNonzeroIndegreeNodes = 0;
+		for (int i: SyntheticNLDAG2.inDegreeHistogram.keySet()) {
+			SyntheticNLDAG2.numOfNonzeroIndegreeNodes += SyntheticNLDAG2.inDegreeHistogram.get(i);
+		}
+		SyntheticNLDAG2.dependencyDAG = dependencyDAG;		
+		SyntheticNLDAG2.nS = (int)dependencyDAG.nSources;
+		SyntheticNLDAG2.nT = (int)dependencyDAG.nTargets;
+		SyntheticNLDAG2.nI = (int)(dependencyDAG.functions.size() - dependencyDAG.nSources - dependencyDAG.nTargets);		
+		SyntheticNLDAG2.sT = 1;
+		SyntheticNLDAG2.sI = SyntheticNLDAG2.nS + 1;
+		SyntheticNLDAG2.sS = SyntheticNLDAG2.nS + SyntheticNLDAG2.nI + 1;
+//		double d = 0.6;
+		for (double d = 0.0; d < 0.6; d += 0.2) 
+		{
+			if (d < 0) {
+				SyntheticNLDAG2.alphaNegative = true;
+			}
+			else {
+				SyntheticNLDAG2.alphaNegative = false;
+			}
+			SyntheticNLDAG2.alpha = Math.abs(d);
+			SyntheticNLDAG2.random = new Random(System.nanoTime());
+			System.out.println("Alpha: " + d);
+			SyntheticNLDAG2.getNLNHGDAG();
+		}		
+	}
+	
 	public static void doRealNetworkAnalysis() throws Exception {
 		String netPath = "";
-		String netID = "rat";
+		String netID = "openssh-39";
 		
 		if (netID.equals("rat")) {
 			netPath = "metabolic_networks//rat-consolidated.txt";
@@ -38,26 +70,32 @@ public class Manager {
 		}
 
 		DependencyDAG dependencyDAG = new DependencyDAG(netPath);
+		
+		generateSyntheticFromReal(dependencyDAG);
+		
 		printNetworkStat(dependencyDAG);
 //		dependencyDAG.printNetworkMetrics();
 		
+//		DistributionAnalysis.getDegreeStatistics(dependencyDAG);
 //		DistributionAnalysis.printCentralityRanks(dependencyDAG, netID);
 //		int centralityIndex = 1;
-//		DistributionAnalysis.getCentralityCCDF(dependencyDAG, netID, centralityIndex);
+		DistributionAnalysis.getCentralityCCDF(dependencyDAG, netID, 1);
 		
-		WaistDetection.runPCWaistDetection(dependencyDAG, netID);
+//		WaistDetection.runPCWaistDetection(dependencyDAG, netID);
 	}
 	
 	public static void doSyntheticNetworkAnalysis() throws Exception {
 		DependencyDAG.isSynthetic = true;
-		String versions[] = {"NLNHGDAGa0.0", "NLNHGDAGa0.5", "NLNHGDAGa1.0", "NLNHGDAGa-0.5", "NLNHGDAGa-1.0"};
+		String DAGType = "NLNHGDAG";
+//		String alpha[] = {"-1.0", "-0.8", "-0.6", "-0.4", "-0.2", "0.0", "0.2", "0.4", "0.6", "0.8", "1.0"};
+		String alpha[] = {"0.0", "0.2", "0.4", "0.6", "0.8", "1.0"};
 //		String versions[] = {"rectangleDAG", "noisyRectangleDAG", "trapezoidDAG", "diamondDAG", "hourglassDAG"};
-//		String versions[] = {"NLNHGDAGa0.5"};
-		for (int i = 0; i < versions.length; ++i) {
-//			if (i != 2) continue;			
-			String networkID = versions[i];
+
+		for (String a: alpha) {
+//			if (!a.equals("0.6")) continue;			
+			String networkID = DAGType + "a" + a;
 			System.out.println("Working on: " + networkID);
-			DependencyDAG dependencyDAG = new DependencyDAG("synthetic_callgraphs//" + networkID + ".txt");
+			DependencyDAG dependencyDAG = new DependencyDAG("synthetic_callgraphs//Openssh_Synthetic//" + networkID + ".txt");
 			printNetworkStat(dependencyDAG);
 //			dependencyDAG.printNetworkMetrics();
 			
@@ -69,7 +107,7 @@ public class Manager {
 //			DistributionAnalysis.printSourceVsTargetCompression(dependencyDAG, networkID);
 			
 //			new GradientFilterAnalysis().getSampleGradientsQuartileInterval(dependencyDAG, networkID);
-			WaistDetection.runPCWaistDetection(dependencyDAG, networkID);
+//			WaistDetection.runPCWaistDetection(dependencyDAG, networkID);
 		}
 	}
 	
@@ -86,8 +124,8 @@ public class Manager {
 	}
 
 	public static void main(String[] args) throws Exception {		
-//		Manager.doSyntheticNetworkAnalysis();
-		Manager.doRealNetworkAnalysis();
+//		Manager.doRealNetworkAnalysis();
+		Manager.doSyntheticNetworkAnalysis();
 //		Manager.doToyNetworkAnalysis();
 		System.out.println("Done!");
 	}
