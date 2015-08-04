@@ -64,6 +64,7 @@ public class DependencyDAG {
 	static boolean isCallgraph = false;
 	static boolean isMetabolic = false;
 	static boolean isCourtcase = false;
+	static boolean isToy = false;
 	
 	DependencyDAG() { 
 		functions = new TreeSet();
@@ -226,7 +227,7 @@ public class DependencyDAG {
 					}
 				}
 				
-				if (isMetabolic || isSynthetic) {
+				if (isMetabolic || isSynthetic || isToy) {
 //					for metabolic and synthetic networks
 					server = tokens[0]; 
 					dependent = tokens[1];
@@ -615,35 +616,37 @@ public class DependencyDAG {
 	}
 	
 	public void printNetworkMetrics() {
-//		for (String s: functions) {
-//			System.out.print(s + "\t");
-////			System.out.print(inDegree.get(s) + "\t");
-////			System.out.print(outDegree.get(s) + "\t");
-////			System.out.print(location.get(s) + "\t");
-//			System.out.print(normalizedPathCentrality.get(s) + "\t");
-////			System.out.print(pagerankTargetCompression.get(s) + "\t");
-////			System.out.print(pagerankSourceCompression.get(s) + "\t");
+		for (String s: functions) {
+			System.out.print(s + "\t");
+//			System.out.print(inDegree.get(s) + "\t");
+//			System.out.print(outDegree.get(s) + "\t");
+//			System.out.print(location.get(s) + "\t");
+			System.out.print(normalizedPathCentrality.get(s) + "\t");
+//			System.out.print(pagerankTargetCompression.get(s) + "\t");
+//			System.out.print(pagerankSourceCompression.get(s) + "\t");
 //			System.out.print(harmonicMeanPagerankCentrality.get(s) + "\t");
-////			System.out.print(iCentrality.get(s) + "\t");
-//			System.out.println();
-//		}
-		
-		for (String s : functions) {
-			if (depends.containsKey(s)) {
-				System.out.print(s + " depends on ");
-				for (String r : depends.get(s)) {
-					System.out.print("\t" + r);
-				}
-				System.out.println();
-			}
-			
-			if (serves.containsKey(s)) {
-				System.out.print(s + " serves ");
-				for (String r : serves.get(s)) {
-					System.out.print("\t" + r);
-				}
-				System.out.println();
-			}
+//			System.out.print(iCentrality.get(s) + "\t");
+			System.out.println();
 		}
+		
+		System.out.println("Total path: " + nTotalPath);
+		
+//		for (String s : functions) {
+//			if (depends.containsKey(s)) {
+//				System.out.print(s + " depends on ");
+//				for (String r : depends.get(s)) {
+//					System.out.print("\t" + r);
+//				}
+//				System.out.println();
+//			}
+//			
+//			if (serves.containsKey(s)) {
+//				System.out.print(s + " serves ");
+//				for (String r : serves.get(s)) {
+//					System.out.print("\t" + r);
+//				}
+//				System.out.println();
+//			}
+//		}
 	}
 }

@@ -1,6 +1,7 @@
 package Remodeled;
 
 import org.apache.commons.math3.distribution.AbstractRealDistribution;
+import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.distribution.ZipfDistribution;
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 
@@ -57,7 +58,7 @@ public class StatisticalUtilTest {
 //			System.out.println(i + "\t" + uniformIntegerDistribution.probability(i));
 //		}
 
-//		NormalDistribution normalDistribution = new NormalDistribution(4, 1);
+		NormalDistribution normalDistribution = new NormalDistribution(4, 1);
 //		
 //		for (int i = 1; i < 1000; ++i) {
 //			System.out.println(normalDistribution.sample());

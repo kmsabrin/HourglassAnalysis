@@ -53,9 +53,9 @@ public class WaistDetection {
 //			pw.println(topKNodes.size() + " " + pathCoverage);
 			
 			pathCoverageSortedNodes.put(individualPaths / tPath, s);
-			if (pathCoverage > 0.9999) {
-				break;
-			}
+//			if (pathCoverage > 0.9999) {
+//				break;
+//			}
 			
 //			if (topKNodes.size() > 100) {
 //				break;
@@ -93,9 +93,9 @@ public class WaistDetection {
 				break;
 			}
 			
-			if (individualPaths < 0.000001) {
-				break;
-			}
+//			if (individualPaths < 0.000001) {
+//				break;
+//			}
 			
 //			if (topKNodes.size() > 100) {
 //				break;
@@ -124,7 +124,7 @@ public class WaistDetection {
 		}
 		
 		System.out.println("Waist Size: " + topKNodes.size());
-		System.out.print("Waist Coverage: " + waistNodeCoverage.size() + " of " + dependencyDAG.functions.size() + " i.e. ");
+		System.out.print("Waist Node Coverage: " + waistNodeCoverage.size() + " of " + dependencyDAG.functions.size() + " i.e. ");
 		System.out.println(waistNodeCoverage.size() * 100.0 / dependencyDAG.functions.size() + "%%");
 	}
 	

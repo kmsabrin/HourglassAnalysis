@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Random;
 import java.util.TreeMap;
 
+import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.distribution.UniformIntegerDistribution;
 import org.apache.commons.math3.distribution.ZipfDistribution;
 
@@ -14,22 +15,23 @@ public class SyntheticNLDAG2 {
 	static double alpha = 0.0;
 	static boolean alphaNegative = false;
 	
-	static int nT = 172; // no. of T(arget) nodes
-	static int nI = 767; // no. of I(ntermediate) nodes
-	static int nS = 430; // no. of S(ource) nodes
+//	real network matching
+	static int nT = 100; // no. of T(arget) nodes
+	static int nI = 800; // no. of I(ntermediate) nodes
+	static int nS = 100; // no. of S(ource) nodes
 
 	static int sT = 1; // start of Target
-	static int sI = 173; // start of Intermediate
-	static int sS = 940; // start of source
+	static int sI = 101; // start of Intermediate
+	static int sS = 901; // start of source
 	
 //	toy test
-//	static int nT = 4; // no. of T(arget) nodes
-//	static int nI = 8; // no. of I(ntermediate) nodes
-//	static int nS = 4; // no. of S(ource) nodes
+//	static int nT = 3; // no. of T(arget) nodes
+//	static int nI = 5; // no. of I(ntermediate) nodes
+//	static int nS = 2; // no. of S(ource) nodes
 //
 //	static int sT = 1; // start of Target
-//	static int sI = 5; // start of Intermediate
-//	static int sS = 13; // start of source
+//	static int sI = 4; // start of Intermediate
+//	static int sS = 9; // start of source
 	
 //	simplified analysis model	
 //	static int nT = 1; // no. of T(arget) nodes
@@ -44,7 +46,10 @@ public class SyntheticNLDAG2 {
 	
 	static ZipfDistribution zipfDistribution;
 	static UniformIntegerDistribution uniformIntegerDistribution;
-	
+	static double normalMean = 10.0;
+	static double normalSD = 4.0;
+	static NormalDistribution normalDistribution = new NormalDistribution(normalMean, normalSD);
+
 	static DependencyDAG dependencyDAG;
 	
 	static TreeMap<Integer, Integer> inDegreeHistogram;
@@ -63,16 +68,15 @@ public class SyntheticNLDAG2 {
 //		int values[] = {7, 8, 9, 10};
 //		return values[random.nextInt(4)];
 //		return 6;
+		return (int)Math.ceil(normalDistribution.sample());
 		
-//		TreeMap<Integer, Integer> inDegreeHistogram = DistributionAnalysis.getInDegreeHistogram(dependencyDAG);
-		double rv = random.nextDouble();
-		double cp = 0;
-		for (int i: inDegreeHistogram.keySet()) {
-			cp += 1.0 * inDegreeHistogram.get(i) / numOfNonzeroIndegreeNodes;
-			if (rv < cp) return i;
-		}
-		
-		return inDegreeHistogram.get(inDegreeHistogram.firstKey());
+//		double rv = random.nextDouble();
+//		double cp = 0;
+//		for (int i: inDegreeHistogram.keySet()) {
+//			cp += 1.0 * inDegreeHistogram.get(i) / numOfNonzeroIndegreeNodes;
+//			if (rv < cp) return i;
+//		}
+//		return inDegreeHistogram.get(inDegreeHistogram.firstKey());
 	}
 	
 	public static int getNodeFromZipfDistribution(int startNodeIndex, int endNodeIndex) {
@@ -163,7 +167,7 @@ public class SyntheticNLDAG2 {
 	}
 
 	public static void main(String[] args) throws Exception {
-		for (double d = -1.0; d < 1.1; d += 0.2) {
+		for (double d = -1.0; d < 1.1; d += 0.5) {
 			if (d < 0) {
 				alphaNegative = true;
 			}
@@ -174,6 +178,8 @@ public class SyntheticNLDAG2 {
 			random = new Random(System.nanoTime());
 			
 			getNLNHGDAG();
+			
+//			break;
 		}
 		
 //		int N = nT + nI + nS;
