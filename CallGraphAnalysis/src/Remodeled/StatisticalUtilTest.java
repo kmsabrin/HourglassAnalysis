@@ -44,10 +44,11 @@ public class StatisticalUtilTest {
 //			System.out.println(random.nextDouble());
 //		}
 		
-		int n = 10;
-		ZipfDistribution zipfDistribution = new ZipfDistribution(n, 1.0);
+		int n = 100;
+		ZipfDistribution zipfDistribution = new ZipfDistribution(10, 1.0);
 		for (int i = 1; i <= n; ++i) {
-			System.out.println(i + "\t" + zipfDistribution.probability(n - i + 1));
+//			System.out.println(i + "\t" + zipfDistribution.probability(n - i + 1));
+			System.out.println(zipfDistribution.sample());
 		}
 //		
 //		System.out.println("----------");
@@ -58,7 +59,13 @@ public class StatisticalUtilTest {
 //			System.out.println(i + "\t" + uniformIntegerDistribution.probability(i));
 //		}
 
-		NormalDistribution normalDistribution = new NormalDistribution(4, 1);
+//		NormalDistribution normalDistribution = new NormalDistribution(4, 1);
+//		
+//		for (int i = 1; i < 1000; ++i) {
+//			System.out.println(normalDistribution.sample());
+//		}
+		
+//		NormalDistribution normalDistribution = new NormalDistribution(4, 1);
 //		
 //		for (int i = 1; i < 1000; ++i) {
 //			System.out.println(normalDistribution.sample());

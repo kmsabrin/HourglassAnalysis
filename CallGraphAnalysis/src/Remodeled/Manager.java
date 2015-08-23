@@ -5,10 +5,11 @@ import java.util.TreeMap;
 
 public class Manager {	
 	private static void printNetworkStat(DependencyDAG dependencyDAG) {
-		System.out.println("S: " + dependencyDAG.nSources);
-		System.out.println("T: " + dependencyDAG.nTargets);
-		System.out.println("E: " + dependencyDAG.nEdges);
-		System.out.println("N: " + dependencyDAG.functions.size());
+		System.out.println(" S: " + dependencyDAG.nSources);
+		System.out.println(" T: " + dependencyDAG.nTargets);
+		System.out.println(" E: " + dependencyDAG.nEdges);
+		System.out.println(" N: " + dependencyDAG.functions.size());
+		System.out.println("TP: " + dependencyDAG.nTotalPath);
 	}
 	
 	private static void generateSyntheticFromReal(DependencyDAG dependencyDAG) throws Exception {
@@ -42,7 +43,7 @@ public class Manager {
 	
 	public static void doRealNetworkAnalysis() throws Exception {
 		String netPath = "";
-		String netID = "openssh-39";
+		String netID = "rat";
 		
 		if (netID.equals("rat")) {
 			netPath = "metabolic_networks//rat-consolidated.txt";
@@ -71,24 +72,25 @@ public class Manager {
 
 		DependencyDAG dependencyDAG = new DependencyDAG(netPath);
 		
-		generateSyntheticFromReal(dependencyDAG);
+//		generateSyntheticFromReal(dependencyDAG);
 		
 		printNetworkStat(dependencyDAG);
 //		dependencyDAG.printNetworkMetrics();
+//		DistributionAnalysis.getAverageInOutDegree(dependencyDAG);
 		
 //		DistributionAnalysis.getDegreeStatistics(dependencyDAG);
 //		DistributionAnalysis.printCentralityRanks(dependencyDAG, netID);
 //		int centralityIndex = 1;
-		DistributionAnalysis.getCentralityCCDF(dependencyDAG, netID, 1);
+//		DistributionAnalysis.getCentralityCCDF(dependencyDAG, netID, 1);
 		
-//		WaistDetection.runPCWaistDetection(dependencyDAG, netID);
+		WaistDetection.runPCWaistDetection(dependencyDAG, netID);
 	}
 	
 	public static void doSyntheticNetworkAnalysis() throws Exception {
 		DependencyDAG.isSynthetic = true;
 		String DAGType = "NLNHGDAG";
 //		String alpha[] = {"-1.0", "-0.8", "-0.6", "-0.4", "-0.2", "0.0", "0.2", "0.4", "0.6", "0.8", "1.0"};
-		String alpha[] = {"0.0", "-1.0", "1.0", "-0.5", "0.5"};
+		String alpha[] = {"0.0", "-1.0", "1.0"};
 //		String versions[] = {"rectangleDAG", "noisyRectangleDAG", "trapezoidDAG", "diamondDAG", "hourglassDAG"};
 
 		for (String a: alpha) {
@@ -124,8 +126,8 @@ public class Manager {
 	}
 
 	public static void main(String[] args) throws Exception {		
-//		Manager.doRealNetworkAnalysis();
-		Manager.doSyntheticNetworkAnalysis();
+		Manager.doRealNetworkAnalysis();
+//		Manager.doSyntheticNetworkAnalysis();
 //		Manager.doToyNetworkAnalysis();
 		System.out.println("Done!");
 	}

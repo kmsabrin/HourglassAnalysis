@@ -275,4 +275,17 @@ public class DistributionAnalysis {
 	
 		return inDegreeHistogram;
 	}
+	
+	public static void getAverageInOutDegree(DependencyDAG dependencyDAG) {
+		double inDeg = 0;
+		double outDeg = 0;
+		
+		for (String s: dependencyDAG.functions) {
+			inDeg += dependencyDAG.inDegree.get(s);
+			outDeg += dependencyDAG.outDegree.get(s);
+		}
+		
+		System.out.println("Avg  In Deg: " + (1.0 * inDeg / dependencyDAG.functions.size()));
+		System.out.println("Avg Out Deg: " + (1.0 * outDeg / dependencyDAG.functions.size()));
+	}
 }

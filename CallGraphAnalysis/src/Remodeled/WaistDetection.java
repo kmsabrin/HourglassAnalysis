@@ -12,13 +12,14 @@ import com.google.common.collect.TreeMultimap;
 
 public class WaistDetection {
 	static HashSet<String> topKNodes = new HashSet();
+	static double pathCoverageTau = 0.95;
 
 	public static void runPCWaistDetection(DependencyDAG dependencyDAG, String filePath) throws Exception {
 		PrintWriter pw = new PrintWriter(new File("analysis//path-cover-" + filePath + ".txt"));
 		
 		TreeMultimap<Double, String> centralitySortedNodes = TreeMultimap.create(Ordering.natural().reverse(), Ordering.natural());
 		for (String s : dependencyDAG.functions) {
-//			if (dependencyDAG.depends.containsKey(s) && dependencyDAG.serves.containsKey(s)) 
+			if (dependencyDAG.depends.containsKey(s) && dependencyDAG.serves.containsKey(s)) 
 			{
 				centralitySortedNodes.put(dependencyDAG.normalizedPathCentrality.get(s), s);
 			}
@@ -53,18 +54,20 @@ public class WaistDetection {
 //			pw.println(topKNodes.size() + " " + pathCoverage);
 			
 			pathCoverageSortedNodes.put(individualPaths / tPath, s);
-//			if (pathCoverage > 0.9999) {
-//				break;
-//			}
+			
+			if (pathCoverage > pathCoverageTau) {
+				break;
+			}
 			
 //			if (topKNodes.size() > 100) {
 //				break;
 //			}
 		}
 		
+		System.out.println("Centrality Sorted Path Coverage Waist Size: " + topKNodes.size());
+		
 		tempTopKNodes.clear();
 		topKNodes.clear();
-		tempTopKNodes.clear();
 		
 		for (double pC : pathCoverageSortedNodes.keySet()) {
 			Collection<String> nodes = pathCoverageSortedNodes.get(pC);
@@ -89,7 +92,7 @@ public class WaistDetection {
 			
 //			System.out.println(s);
 
-			if (pathCoverage > 0.9999) {
+			if (pathCoverage > pathCoverageTau) {
 				break;
 			}
 			
@@ -109,6 +112,8 @@ public class WaistDetection {
 	public static void getONodes(DependencyDAG dependencyDAG) {
 		HashSet<String> waistNodeCoverage = new HashSet();
 
+		int STNodes = 0;
+		
 		for (String s: topKNodes) {
 			dependencyDAG.visited.clear();
 			dependencyDAG.kounter = 0;
@@ -120,12 +125,22 @@ public class WaistDetection {
 			dependencyDAG.kounter = 0;
 			dependencyDAG.reachableDownwardsNodes(s); // how many nodes are using her
 			dependencyDAG.visited.remove(s); // remove ifself
-			waistNodeCoverage.addAll(dependencyDAG.visited);			
+			waistNodeCoverage.addAll(dependencyDAG.visited);
+			
+			if (!dependencyDAG.serves.containsKey(s) || !dependencyDAG.depends.containsKey(s)) {
+				++STNodes;
+			}
 		}
 		
 		System.out.println("Waist Size: " + topKNodes.size());
 		System.out.print("Waist Node Coverage: " + waistNodeCoverage.size() + " of " + dependencyDAG.functions.size() + " i.e. ");
 		System.out.println(waistNodeCoverage.size() * 100.0 / dependencyDAG.functions.size() + "%%");
+		 
+		double nonSTinWaist = (topKNodes.size() - STNodes) * 1.0 / topKNodes.size();
+		double minST = Math.min(dependencyDAG.nSources, dependencyDAG.nTargets);
+		System.out.println("nonSTinWaist: " + (topKNodes.size() - STNodes));
+		double hourglassnessScore = nonSTinWaist * ((minST - Math.min(topKNodes.size() - STNodes, minST) + 1.0) / minST);
+		System.out.println("Hourglassness: " + hourglassnessScore);
 	}
 	
 /*	

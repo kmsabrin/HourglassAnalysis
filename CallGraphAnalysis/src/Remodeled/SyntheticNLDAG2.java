@@ -45,6 +45,7 @@ public class SyntheticNLDAG2 {
 	static HashMap<Integer, Integer> outDegree = new HashMap();
 	
 	static ZipfDistribution zipfDistribution;
+	static ZipfDistribution zipfDistribution2 = new ZipfDistribution(10, 1.0);
 	static UniformIntegerDistribution uniformIntegerDistribution;
 	static double normalMean = 10.0;
 	static double normalSD = 4.0;
@@ -68,8 +69,12 @@ public class SyntheticNLDAG2 {
 //		int values[] = {7, 8, 9, 10};
 //		return values[random.nextInt(4)];
 //		return 6;
-		return (int)Math.ceil(normalDistribution.sample());
 		
+//		return (int)Math.ceil(normalDistribution.sample());
+		return zipfDistribution2.sample();
+		
+		
+//		For generating synthetic resembling real networks with given in-degree distribution
 //		double rv = random.nextDouble();
 //		double cp = 0;
 //		for (int i: inDegreeHistogram.keySet()) {
@@ -167,7 +172,7 @@ public class SyntheticNLDAG2 {
 	}
 
 	public static void main(String[] args) throws Exception {
-		for (double d = -1.0; d < 1.1; d += 0.5) {
+		for (double d = -1.0; d < 1.1; d += 1.0) {
 			if (d < 0) {
 				alphaNegative = true;
 			}
