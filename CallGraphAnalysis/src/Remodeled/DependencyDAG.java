@@ -14,7 +14,7 @@ public class DependencyDAG {
 	double nSources; // source =  simple module, zero in degree, depends on none
 	double nTargets; // target = complex module, zero out degree, serves none (or external api)
 
-	public Set<String> functions;
+	public Set<String> nodes;
 	Map<String, Set<String>> serves; 
 	Map<String, Set<String>> depends; 
 	
@@ -65,9 +65,10 @@ public class DependencyDAG {
 	static boolean isMetabolic = false;
 	static boolean isCourtcase = false;
 	static boolean isToy = false;
+	static boolean isClassDependency = false;
 	
 	DependencyDAG() { 
-		functions = new TreeSet();
+		nodes = new TreeSet();
 		serves = new HashMap();
 		depends = new HashMap();
 				
@@ -114,7 +115,7 @@ public class DependencyDAG {
 		// load & initialize the attributes of the dependency graph
 		loadCallGraph(dependencyGraphID);
 		
-		if (isCallgraph) {
+		if (isCallgraph || isClassDependency || isToy) {
 			removeCycles(); // or should I only ignore cycles?
 		}
 		
@@ -173,7 +174,7 @@ public class DependencyDAG {
 	}
 	
 	private void removeNode(String node) {
-		functions.remove(node);
+		nodes.remove(node);
 		
 		if (serves.containsKey(node)) {
 			for (String s: serves.get(node)) {
@@ -191,7 +192,7 @@ public class DependencyDAG {
 	}
 	
 	private void removeDisconnectedNodesForSyntheticNetworks() {
-		HashSet<String> tempFunctions = new HashSet(functions);
+		HashSet<String> tempFunctions = new HashSet(nodes);
 		for (String s: tempFunctions) {
 			int index = Integer.parseInt(s);
 			if (index >= SyntheticNLDAG2.sI && index < SyntheticNLDAG2.sS) { // so bad, so so bad
@@ -227,7 +228,7 @@ public class DependencyDAG {
 					}
 				}
 				
-				if (isMetabolic || isSynthetic || isToy) {
+				if (isMetabolic || isSynthetic || isToy || isClassDependency) {
 //					for metabolic and synthetic networks
 					server = tokens[0]; 
 					dependent = tokens[1];
@@ -242,8 +243,8 @@ public class DependencyDAG {
 					}
 				}
 
-				functions.add(dependent);
-				functions.add(server);
+				nodes.add(dependent);
+				nodes.add(server);
 
 				if (dependent.equals(server)) { // loop, do not add the edge
 					continue;
@@ -272,12 +273,12 @@ public class DependencyDAG {
 	
 	public void removeIsolatedNodes() {
 		HashSet<String> removable = new HashSet<String>();
-		for (String s: functions) {
+		for (String s: nodes) {
 			if (!serves.containsKey(s) && !depends.containsKey(s)) {
 				removable.add(s);
 			}
 		}
-		functions.removeAll(removable);
+		nodes.removeAll(removable);
 	}
 
 	private void removeCyclesTraverse(String node) {
@@ -301,7 +302,7 @@ public class DependencyDAG {
 							System.out.print(r + " ");
 						}
 						System.out.println();
-						
+						System.out.println(detectedCycles.get(detectedCycles.size() - 1).size());
 						break;
 					}
 				}
@@ -324,7 +325,7 @@ public class DependencyDAG {
 		int nCycles = 0;
 		while (loop) {
 			loop = false;
-			for (String s : functions) {
+			for (String s : nodes) {
 				visited = new HashSet();
 				cycleEdges = new HashMap();
 				cycleVisited = new HashSet();
@@ -342,10 +343,10 @@ public class DependencyDAG {
 						serves.remove(server);
 					}
 					if (!depends.containsKey(server) && !serves.containsKey(server)) {
-						functions.remove(server);
+						nodes.remove(server);
 					}
 					if (!depends.containsKey(dependent) && !serves.containsKey(dependent)) {
-						functions.remove(dependent);
+						nodes.remove(dependent);
 					}
 					--nEdges;
 					++nCycles;
@@ -360,7 +361,7 @@ public class DependencyDAG {
 	
 	public void loadDegreeMetric() {
 //		get the fanIn/Out
-		for (String s : functions) {
+		for (String s : nodes) {
 			int in = 0;
 			int out = 0;
 			
@@ -377,7 +378,7 @@ public class DependencyDAG {
 		}
 		
 		nSources = nTargets = nEdges = 0;
-		for (String s: functions) {
+		for (String s: nodes) {
 			if (!serves.containsKey(s)) ++nTargets;
 			if (!depends.containsKey(s)) {
 				++nSources;
@@ -442,17 +443,17 @@ public class DependencyDAG {
 	
 	public void loadPathStatistics() {
 //		int knt = 0;
-		for (String s: functions) {
+		for (String s: nodes) {
 //			if (!numOfSourcePath.containsKey(s)) ++knt;
 			sourcePathDepth(s);
 		}
 				
-		for (String s: functions) {
+		for (String s: nodes) {
 			targetPathDepth(s);
 		}		
 
 		nTotalPath = 0;
-		for (String s : functions) {
+		for (String s : nodes) {
 			double nPath = 1;
 			nPath = numOfTargetPath.get(s) * numOfSourcePath.get(s);
 			nodePathThrough.put(s, nPath);
@@ -466,7 +467,7 @@ public class DependencyDAG {
 	}
 	
 	public void loadLocationMetric() {
-		for (String s : functions) {
+		for (String s : nodes) {
 			double m = avgSourceDepth.get(s) / (avgTargetDepth.get(s) + avgSourceDepth.get(s));
 			m = ((int) (m * 1000.0)) / 1000.0; // round up to 2 decimal point
 			location.put(s, m);
@@ -509,7 +510,7 @@ public class DependencyDAG {
 	
 	public void loadRechablity() {
 		visited = new HashSet();
-		for (String s : functions) {
+		for (String s : nodes) {
 			visited.clear();
 			kounter = 0;
 			reachableUpwardsNodes(s); // how many nodes are using her
@@ -559,28 +560,28 @@ public class DependencyDAG {
 	
 	public void loadPagerankCentralityMetric() {		
 		// initialize target pr
-		for (String s : functions) {
+		for (String s : nodes) {
 			if (!serves.containsKey(s)) {
 				pagerankTargetCompression.put(s, 1.0 / nTargets);
 			}
 		}
 
-		for (String s : functions) {
+		for (String s : nodes) {
 			computeTargetPagerankCompression(s);
 		}
 		
 		// initialize source pr
-		for (String s: functions) {
+		for (String s: nodes) {
 			if (!depends.containsKey(s)) {
 				pagerankSourceCompression.put(s, 1.0 / nSources);
 			}
 		}
 		
-		for (String s: functions) {
+		for (String s: nodes) {
 			computeSourcePagerankCompression(s);
 		}
 		
-		for (String s: functions) {
+		for (String s: nodes) {
 //			pagerankSourceCompression.put(s, pagerankSourceCompression.get(s) / nSources);
 //			pagerankTargetCompression.put(s, pagerankTargetCompression.get(s) / nTargets);
 			
@@ -594,13 +595,13 @@ public class DependencyDAG {
 	
 	public void loadPathCentralityMetric() {
 		double connectedSTPairs = 0;
-		for (String s: functions) {
+		for (String s: nodes) {
 			if (!serves.containsKey(s)) { // is a target
 				connectedSTPairs += sourcesReachable.get(s);
 			}
 		}
 		
-		for (String s: functions) {			
+		for (String s: nodes) {			
 //			P-Centrality
 			double harmonicMean = 2.0 * numOfTargetPath.get(s) * numOfSourcePath.get(s) / (numOfTargetPath.get(s) + numOfSourcePath.get(s));
 			double geometricMean = Math.sqrt(numOfTargetPath.get(s) * numOfSourcePath.get(s));
@@ -609,6 +610,11 @@ public class DependencyDAG {
 			normalizedPathCentrality.put(s, numOfTargetPath.get(s) * numOfSourcePath.get(s) / nTotalPath);
 //			normalizedPathCentrality.put(s, numOfTargetPath.get(s) * numOfSourcePath.get(s));
 			
+			if (!(serves.containsKey(s) && depends.containsKey(s))){ // manually reset source and targets to zero
+				normalizedPathCentrality.put(s, 0.0);
+			}
+			
+			
 //			I-Centrality
 			double stPairsConnected = targetsReachable.get(s) * sourcesReachable.get(s);
 			iCentrality.put(s, stPairsConnected / connectedSTPairs);
@@ -616,7 +622,8 @@ public class DependencyDAG {
 	}
 	
 	public void printNetworkMetrics() {
-		for (String s: functions) {
+		for (String s: nodes) {
+//			if (normalizedPathCentrality.get(s) < 0.4) continue;
 			System.out.print(s + "\t");
 //			System.out.print(inDegree.get(s) + "\t");
 //			System.out.print(outDegree.get(s) + "\t");

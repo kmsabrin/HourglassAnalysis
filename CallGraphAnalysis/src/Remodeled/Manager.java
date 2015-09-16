@@ -8,8 +8,8 @@ public class Manager {
 		System.out.println(" S: " + dependencyDAG.nSources);
 		System.out.println(" T: " + dependencyDAG.nTargets);
 		System.out.println(" E: " + dependencyDAG.nEdges);
-		System.out.println(" N: " + dependencyDAG.functions.size());
-		System.out.println("TP: " + dependencyDAG.nTotalPath);
+		System.out.println(" N: " + dependencyDAG.nodes.size());
+		System.out.println("Toal Path: " + dependencyDAG.nTotalPath);
 	}
 	
 	private static void generateSyntheticFromReal(DependencyDAG dependencyDAG) throws Exception {
@@ -21,7 +21,7 @@ public class Manager {
 		SyntheticNLDAG2.dependencyDAG = dependencyDAG;		
 		SyntheticNLDAG2.nS = (int)dependencyDAG.nSources;
 		SyntheticNLDAG2.nT = (int)dependencyDAG.nTargets;
-		SyntheticNLDAG2.nI = (int)(dependencyDAG.functions.size() - dependencyDAG.nSources - dependencyDAG.nTargets);		
+		SyntheticNLDAG2.nI = (int)(dependencyDAG.nodes.size() - dependencyDAG.nSources - dependencyDAG.nTargets);		
 		SyntheticNLDAG2.sT = 1;
 		SyntheticNLDAG2.sI = SyntheticNLDAG2.nS + 1;
 		SyntheticNLDAG2.sS = SyntheticNLDAG2.nS + SyntheticNLDAG2.nI + 1;
@@ -43,7 +43,8 @@ public class Manager {
 	
 	public static void doRealNetworkAnalysis() throws Exception {
 		String netPath = "";
-		String netID = "rat";
+//		String netID = "jdk1.7";
+		String netID = "openssh-39";
 		
 		if (netID.equals("rat")) {
 			netPath = "metabolic_networks//rat-consolidated.txt";
@@ -69,21 +70,44 @@ public class Manager {
 			netPath = "openssh_callgraphs//full.graph-openssh-39";
 			DependencyDAG.isCallgraph = true;
 		}
+		else if (netID.equals("apache-commons-3.4")) {
+			netPath = "jdk_class_dependency//apache-commons-3.4-callgraph-consolidated.txt";
+			DependencyDAG.isClassDependency = true;
+		}
+		else if (netID.equals("jdk1.7")) {
+//			netPath = "jdk_class_dependency//jdk1.7-callgraph-callgraph-consolidated.txt";
+			DependencyDAG.isClassDependency = true;			
+			netPath = "jdk_class_dependency//jdk1.7-callgraph.txt";
+//			DependencyDAG.isCallgraph = true;
+		}
+		else if (netID.equals("google-guava")) {
+			netPath = "jdk_class_dependency//google-guava-callgraph-consolidated.txt";
+			DependencyDAG.isClassDependency = true;
+		}
+		else if (netID.equals("commons-math")) {
+			netPath = "jdk_class_dependency//commons-math-callgraph-consolidated.txt";
+			DependencyDAG.isClassDependency = true;
+		}
 
 		DependencyDAG dependencyDAG = new DependencyDAG(netPath);
 		
 //		generateSyntheticFromReal(dependencyDAG);
 		
-		printNetworkStat(dependencyDAG);
+//		printNetworkStat(dependencyDAG);
 //		dependencyDAG.printNetworkMetrics();
 //		DistributionAnalysis.getAverageInOutDegree(dependencyDAG);
+//		DistributionAnalysis.getAveragePathLenth(dependencyDAG);
+//		DistributionAnalysis.findWeaklyConnectedComponents(dependencyDAG);
 		
 //		DistributionAnalysis.getDegreeStatistics(dependencyDAG);
 //		DistributionAnalysis.printCentralityRanks(dependencyDAG, netID);
 //		int centralityIndex = 1;
 //		DistributionAnalysis.getCentralityCCDF(dependencyDAG, netID, 1);
+//		DistributionAnalysis.printEdgeList(dependencyDAG, netID);
 		
-		WaistDetection.runPCWaistDetection(dependencyDAG, netID);
+//		WaistDetection.runPCWaistDetection(dependencyDAG, netID);
+		
+		MaxFlowReduction.reduceToMaxFlowMinCutNetwork(dependencyDAG, netID);
 	}
 	
 	public static void doSyntheticNetworkAnalysis() throws Exception {
@@ -109,7 +133,7 @@ public class Manager {
 //			DistributionAnalysis.printSourceVsTargetCompression(dependencyDAG, networkID);
 			
 //			new GradientFilterAnalysis().getSampleGradientsQuartileInterval(dependencyDAG, networkID);
-			WaistDetection.runPCWaistDetection(dependencyDAG, networkID);
+//			WaistDetection.runPCWaistDetection(dependencyDAG, networkID);
 		}
 	}
 	
@@ -121,14 +145,16 @@ public class Manager {
 		dependencyDAG.printNetworkMetrics();
 //		DistributionAnalysis.printCentralityRanks(dependencyDAG, netID);
 //		DistributionAnalysis.getCentralityCCDF(dependencyDAG, netID, 1);		
-		WaistDetection.runPCWaistDetection(dependencyDAG, netID);
+//		WaistDetection.runPCWaistDetection(dependencyDAG, netID);
 //		DistributionAnalysis.printSourceVsTargetCompression(dependencyDAG, netID);
+		
+		MaxFlowReduction.reduceToMaxFlowMinCutNetwork(dependencyDAG, netID);
 	}
 
 	public static void main(String[] args) throws Exception {		
-		Manager.doRealNetworkAnalysis();
+//		Manager.doRealNetworkAnalysis();
 //		Manager.doSyntheticNetworkAnalysis();
-//		Manager.doToyNetworkAnalysis();
+		Manager.doToyNetworkAnalysis();
 		System.out.println("Done!");
 	}
 }

@@ -36,7 +36,7 @@ public class TarjanSCC {
 		id = new HashMap();
 		low = new HashMap();
 		
-		for (String v : G.functions) {
+		for (String v : G.nodes) {
 			if (!marked.contains(v)) {
 				dfs(G, v);
 			}
@@ -70,7 +70,7 @@ public class TarjanSCC {
 		do {
 			w = stack.pop();
 			id.put(w, count);
-			low.put(w, G.functions.size());
+			low.put(w, G.nodes.size());
 		} while (!w.equals(v));
 		count++;
 	}
@@ -82,16 +82,21 @@ public class TarjanSCC {
 	}
 
 	
-//	Are vertices <tt>v</tt> and <tt>w</tt> in the same strong component?
+//	Are vertices v and w in the same strong component?
 	private boolean stronglyConnected(String v, String w) {
 		return id.get(v) == id.get(w);
 	}
 	
 	public static void main(String[] args) throws Exception {
-		PrintWriter pw = new PrintWriter(new File("metabolic_networks//monkey-consolidated.txt"));
-		
 		DependencyDAG G = new DependencyDAG(); 
-		G.loadCallGraph("metabolic_networks//monkey-links.txt"); // "metabolic_networks//rat-links.txt"
+		
+//		PrintWriter pw = new PrintWriter(new File("metabolic_networks//monkey-consolidated.txt"));		
+//		G.isMetabolic = true;
+//		G.loadCallGraph("metabolic_networks//monkey-links.txt"); // "metabolic_networks//rat-links.txt"
+		
+		PrintWriter pw = new PrintWriter(new File("jdk_class_dependency//commons-math-callgraph-consolidated.txt"));		
+		G.isClassDependency = true;
+		G.loadCallGraph("jdk_class_dependency//commons-math-callgraph.txt"); // "metabolic_networks//rat-links.txt"
 		
 		TarjanSCC scc = new TarjanSCC(G);
 		// number of connected components
@@ -99,12 +104,12 @@ public class TarjanSCC {
 //		for (int i = 1; i <= M; ++i) {
 //			System.out.println(i + " \"scc-" + i + "\"");
 //		}
-		System.out.println(M + " components from " + G.functions.size() + " metabolites");
+		System.out.println(M + " components from " + G.nodes.size() + " initial nodes");
 
 		HashMap<String, String> sccIdMap = new HashMap();
 		HashMap<String, HashSet<String>> sccs = new HashMap();
 		
-		for (String v : G.functions) {
+		for (String v : G.nodes) {
 			String sccId = String.valueOf(scc.id.get(v) + 1);
 			sccIdMap.put(v, sccId);
 //			System.out.println(v + "\t" + sccId);
@@ -119,15 +124,20 @@ public class TarjanSCC {
 			}
 		}
 		
+		int kNonTrivialSCC = 0;
 		for (String s: sccs.keySet()) {
+			if (sccs.get(s).size() < 2) continue; // show the non-trivial SCCs only
+			++kNonTrivialSCC;
 			System.out.print(s + "\t");
 			for (String r: sccs.get(s)) {
 				System.out.print(r + ", ");
 			}
 			System.out.println();
+			System.out.println(sccs.get(s).size());
 		}
+		System.out.println("Number of Non-trivial SCCs: " + kNonTrivialSCC);
 		
-		for (String v: G.functions) {
+		for (String v: G.nodes) {
 			String srcSCCId = sccIdMap.get(v);
 			if (G.serves.containsKey(v)) {
 				for (String r: G.serves.get(v)) {

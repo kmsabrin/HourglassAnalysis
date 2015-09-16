@@ -1,5 +1,9 @@
 package Remodeled;
 
+import java.io.File;
+import java.io.PrintWriter;
+import java.util.Scanner;
+
 import org.apache.commons.math3.distribution.AbstractRealDistribution;
 import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.distribution.ZipfDistribution;
@@ -26,7 +30,23 @@ public class StatisticalUtilTest {
 		System.out.println(mannWhitneyUTest.mannWhitneyUTest(x, y));		
 	}
 	
-	public static void main(String[] args) {
+	public static void extractJavaClassDependency() throws Exception {
+		Scanner scanner = new Scanner(new File("jdk_class_dependency//commons-math-dependency.txt"));
+//		PrintWriter pw = new PrintWriter(new File("jdk_class_dependency//jdk1.7-class-dependency.txt"));
+		PrintWriter pw = new PrintWriter(new File("jdk_class_dependency//commons-math-callgraph.txt"));
+		
+		while (scanner.hasNext()) {
+			String line = scanner.nextLine();
+			if(!line.startsWith("M:")) continue;
+			String tokens[] = line.split("\\s+");
+			String dependent = tokens[0].substring(2);
+			String server = tokens[1].substring(3);
+			pw.println(server + "\t" + dependent);
+		}
+		pw.close();
+	}
+	
+	public static void main(String[] args) throws Exception {
 //		getCCDF(new ExponentialDistribution(0.5));
 //		getCCDF(new LogNormalDistribution());
 //		getCCDF(new NormalDistribution(4.0, 1.0));
@@ -43,6 +63,8 @@ public class StatisticalUtilTest {
 //		while (i-- > 0) {
 //			System.out.println(random.nextDouble());
 //		}
+		
+		extractJavaClassDependency();
 		
 		int n = 100;
 		ZipfDistribution zipfDistribution = new ZipfDistribution(10, 1.0);
@@ -71,4 +93,6 @@ public class StatisticalUtilTest {
 //			System.out.println(normalDistribution.sample());
 //		}
 	}
+	
+	
 }

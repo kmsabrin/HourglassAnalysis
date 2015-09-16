@@ -18,14 +18,14 @@ public class WaistDetection {
 		PrintWriter pw = new PrintWriter(new File("analysis//path-cover-" + filePath + ".txt"));
 		
 		TreeMultimap<Double, String> centralitySortedNodes = TreeMultimap.create(Ordering.natural().reverse(), Ordering.natural());
-		for (String s : dependencyDAG.functions) {
-			if (dependencyDAG.depends.containsKey(s) && dependencyDAG.serves.containsKey(s)) 
+		for (String s : dependencyDAG.nodes) {
+//			if (dependencyDAG.depends.containsKey(s) && dependencyDAG.serves.containsKey(s)) 
 			{
 				centralitySortedNodes.put(dependencyDAG.normalizedPathCentrality.get(s), s);
 			}
 		}
 		
-		int k = 1000;
+		int k = 500;
 		ArrayList<String> tempTopKNodes;
 		double tPath = dependencyDAG.nTotalPath;
 		topKNodes = new HashSet();
@@ -36,13 +36,15 @@ public class WaistDetection {
 			for (String s : nodes) {
 				tempTopKNodes.add(s);
 			}
+			
 			if (tempTopKNodes.size() >= k) {
-				break;
+//				break;
 			}
 		}
 
 		TreeMultimap<Double, String> pathCoverageSortedNodes = TreeMultimap.create(Ordering.natural().reverse(), Ordering.natural());
 		double individualCumulativePaths = 0;
+		double pathCoverage = 0;
 		for (String s : tempTopKNodes) {
 			dependencyDAG.numOfTargetPath.clear();
 			dependencyDAG.numOfSourcePath.clear();
@@ -50,10 +52,13 @@ public class WaistDetection {
 			double individualPaths = dependencyDAG.numOfTargetPath.get(s) * dependencyDAG.numOfSourcePath.get(s);
 			individualCumulativePaths += individualPaths;
 			topKNodes.add(s);
-			double pathCoverage = individualCumulativePaths / tPath;
-//			pw.println(topKNodes.size() + " " + pathCoverage);
+			pathCoverage = individualCumulativePaths / tPath;
 			
-			pathCoverageSortedNodes.put(individualPaths / tPath, s);
+			
+//			if (individualPaths > 0.000001) 
+			{ // skip the nodes covering zero unique paths
+				pathCoverageSortedNodes.put(individualPaths / tPath, s);
+			}
 			
 			if (pathCoverage > pathCoverageTau) {
 				break;
@@ -64,7 +69,9 @@ public class WaistDetection {
 //			}
 		}
 		
-		System.out.println("Centrality Sorted Path Coverage Waist Size: " + topKNodes.size());
+		
+//		System.out.println("New Waist !!! " + pathCoverageSortedNodes.size());
+//		System.out.println("Centrality Sorted Path Coverage Waist Size: " + topKNodes.size());
 		
 		tempTopKNodes.clear();
 		topKNodes.clear();
@@ -74,20 +81,23 @@ public class WaistDetection {
 			for (String s : nodes) {
 				tempTopKNodes.add(s);
 			}
-			if (tempTopKNodes.size() >= k) {
-				break;
-			}
+			
+//			if (tempTopKNodes.size() >= k) {
+//				break;
+//			}
 		}
 
 		individualCumulativePaths = 0;
+		double zeroPathContributors = 0;
 		for (String s : tempTopKNodes) {
 			dependencyDAG.numOfTargetPath.clear();
 			dependencyDAG.numOfSourcePath.clear();
 			dependencyDAG.loadPathStatistics();
 			double individualPaths = dependencyDAG.numOfTargetPath.get(s) * dependencyDAG.numOfSourcePath.get(s);
+			
 			individualCumulativePaths += individualPaths;
 			topKNodes.add(s);
-			double pathCoverage = individualCumulativePaths / tPath;
+			pathCoverage = individualCumulativePaths / tPath;
 			pw.println(topKNodes.size() + " " + pathCoverage);	
 			
 //			System.out.println(s);
@@ -96,15 +106,21 @@ public class WaistDetection {
 				break;
 			}
 			
-//			if (individualPaths < 0.000001) {
+			System.out.println("Individual path coverage of " + s + " : " + individualPaths);
+			
+			if (individualPaths < 0.000001) {
+//				continue;
 //				break;
-//			}
+				++zeroPathContributors;
+			}
 			
 //			if (topKNodes.size() > 100) {
 //				break;
 //			}
 		}
 				
+		System.out.println("Zero path contributors: " + zeroPathContributors);
+		System.out.println("Achieved path coverge: " + pathCoverage);
 		getONodes(dependencyDAG);
 		pw.close();
 	}
@@ -133,14 +149,14 @@ public class WaistDetection {
 		}
 		
 		System.out.println("Waist Size: " + topKNodes.size());
-		System.out.print("Waist Node Coverage: " + waistNodeCoverage.size() + " of " + dependencyDAG.functions.size() + " i.e. ");
-		System.out.println(waistNodeCoverage.size() * 100.0 / dependencyDAG.functions.size() + "%%");
+		System.out.print("Waist Node Coverage: " + waistNodeCoverage.size() + " of " + dependencyDAG.nodes.size() + " i.e. ");
+		System.out.println(waistNodeCoverage.size() * 100.0 / dependencyDAG.nodes.size() + "%%");
 		 
 		double nonSTinWaist = (topKNodes.size() - STNodes) * 1.0 / topKNodes.size();
 		double minST = Math.min(dependencyDAG.nSources, dependencyDAG.nTargets);
-		System.out.println("nonSTinWaist: " + (topKNodes.size() - STNodes));
+//		System.out.println("nonSTinWaist: " + (topKNodes.size() - STNodes));
 		double hourglassnessScore = nonSTinWaist * ((minST - Math.min(topKNodes.size() - STNodes, minST) + 1.0) / minST);
-		System.out.println("Hourglassness: " + hourglassnessScore);
+//		System.out.println("Hourglassness: " + hourglassnessScore);
 	}
 	
 /*	
