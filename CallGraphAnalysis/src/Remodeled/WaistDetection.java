@@ -12,7 +12,7 @@ import com.google.common.collect.TreeMultimap;
 
 public class WaistDetection {
 	static HashSet<String> topKNodes = new HashSet();
-	static double pathCoverageTau = 0.95;
+	static double pathCoverageTau = 0.99;
 
 	public static void runPCWaistDetection(DependencyDAG dependencyDAG, String filePath) throws Exception {
 		PrintWriter pw = new PrintWriter(new File("analysis//path-cover-" + filePath + ".txt"));
@@ -101,17 +101,20 @@ public class WaistDetection {
 			pw.println(topKNodes.size() + " " + pathCoverage);	
 			
 //			System.out.println(s);
-
-			if (pathCoverage > pathCoverageTau) {
-				break;
-			}
+			System.out.println(s + "\t" + individualPaths);
 			
-			System.out.println("Individual path coverage of " + s + " : " + individualPaths);
+			
+			
+//			System.out.println("Individual path coverage of " + s + " : " + individualPaths);
 			
 			if (individualPaths < 0.000001) {
 //				continue;
 //				break;
 				++zeroPathContributors;
+			}
+			
+			if (pathCoverage > pathCoverageTau) {
+				break;
 			}
 			
 //			if (topKNodes.size() > 100) {
