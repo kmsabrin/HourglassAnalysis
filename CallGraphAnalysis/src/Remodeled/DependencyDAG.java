@@ -133,7 +133,7 @@ public class DependencyDAG {
 		loadRechablity();		
 		
 		loadPathCentralityMetric();
-		loadPagerankCentralityMetric();		
+//		loadPagerankCentralityMetric();		
 	}
 	
 	private void checkTargetReachability(String node) {

@@ -44,7 +44,7 @@ public class Manager {
 	public static void doRealNetworkAnalysis() throws Exception {
 		String netPath = "";
 //		String netID = "jdk1.7";
-		String netID = "court";
+		String netID = "rat";
 		
 		if (netID.equals("rat")) {
 			netPath = "metabolic_networks//rat-consolidated.txt";
@@ -93,22 +93,23 @@ public class Manager {
 		
 //		generateSyntheticFromReal(dependencyDAG);
 		
-//		printNetworkStat(dependencyDAG);
+		printNetworkStat(dependencyDAG);
 //		dependencyDAG.printNetworkMetrics();
-//		DistributionAnalysis.getAverageInOutDegree(dependencyDAG);
-//		DistributionAnalysis.getAveragePathLenth(dependencyDAG);
-//		DistributionAnalysis.findWeaklyConnectedComponents(dependencyDAG);
 		
+		DistributionAnalysis.getAverageInOutDegree(dependencyDAG);
+//		DistributionAnalysis.getAveragePathLenth(dependencyDAG);
+//		DistributionAnalysis.findWeaklyConnectedComponents(dependencyDAG);		
 //		DistributionAnalysis.getDegreeStatistics(dependencyDAG);
 //		DistributionAnalysis.printCentralityRanks(dependencyDAG, netID);
 //		int centralityIndex = 1;
 //		DistributionAnalysis.getCentralityCCDF(dependencyDAG, netID, 1);
 //		DistributionAnalysis.printEdgeList(dependencyDAG, netID);
+//		DistributionAnalysis.printAllCentralities(dependencyDAG, netID);
 		
-		WaistDetection.runPCWaistDetection(dependencyDAG, netID);
+//		WaistDetection.runPCWaistDetection(dependencyDAG, netID);
 		
 //		MaxFlowReduction.reduceToMaxFlowMinCutNetwork(dependencyDAG, netID);
-		MaxFlowReduction.analyzeMinCut(dependencyDAG, "reduced_maxflow_graphs//" + netID + "_min_cut.txt");
+//		MaxFlowReduction.analyzeMinCut(dependencyDAG, "reduced_maxflow_graphs//" + netID + "_min_cut.txt");
 	}
 	
 	public static void doSyntheticNetworkAnalysis() throws Exception {
@@ -144,11 +145,14 @@ public class Manager {
 		String netID = "toy_dag";
 		printNetworkStat(dependencyDAG);
 		dependencyDAG.printNetworkMetrics();
+		
+		DistributionAnalysis.printEdgeList(dependencyDAG, netID);
 //		DistributionAnalysis.printCentralityRanks(dependencyDAG, netID);
 //		DistributionAnalysis.getCentralityCCDF(dependencyDAG, netID, 1);		
-//		WaistDetection.runPCWaistDetection(dependencyDAG, netID);
 //		DistributionAnalysis.printSourceVsTargetCompression(dependencyDAG, netID);
-		
+
+//		WaistDetection.runPCWaistDetection(dependencyDAG, netID);
+
 		MaxFlowReduction.reduceToMaxFlowMinCutNetwork(dependencyDAG, netID);
 	}
 

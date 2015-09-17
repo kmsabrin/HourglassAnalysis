@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Scanner;
 import java.util.TreeMap;
 
 import org.apache.commons.math3.stat.StatUtils;
@@ -327,13 +328,16 @@ public class DistributionAnalysis {
 		double inDeg = 0;
 		double outDeg = 0;
 		
+		double avgInVsOut = 0;
 		for (String s: dependencyDAG.nodes) {
 			inDeg += dependencyDAG.inDegree.get(s);
 			outDeg += dependencyDAG.outDegree.get(s);
+			avgInVsOut += inDeg * 1.0 / outDeg;
 		}
 		
 		System.out.println("Avg  In Deg: " + (1.0 * inDeg / dependencyDAG.nodes.size()));
 		System.out.println("Avg Out Deg: " + (1.0 * outDeg / dependencyDAG.nodes.size()));
+		System.out.println("Avg In/Out Deg: " + (1.0 *  avgInVsOut / dependencyDAG.nodes.size()));
 	}
 	
 	public static void printEdgeList(DependencyDAG dependencyDAG, String filePath) throws Exception {
@@ -341,10 +345,33 @@ public class DistributionAnalysis {
 		for (String s: dependencyDAG.nodes) {
 			if (dependencyDAG.serves.containsKey(s)) {
 				for (String r: dependencyDAG.serves.get(s)) {
-					pw.println(s + "\t" + r + "\t" + 1.0);
+					pw.println(s + "\t" + r);
 				}
 			}
 		}
 		pw.close();
 	}
+	
+	public static void printAllCentralities(DependencyDAG dependencyDAG, String filePath) throws Exception {
+		/*************************************************************/
+		/*** order indeg outdeg closeness betwenness location path ***/
+		/*************************************************************/
+		
+		Scanner scanner = new Scanner(new File("python_centralities//" + filePath + "_centralities.txt"));
+		PrintWriter pw = new PrintWriter(new File("analysis//" + filePath + "_all_centralities.txt"));
+		
+		while (scanner.hasNext()) {
+			String node = scanner.next();
+			float indeg_c = scanner.nextFloat();
+			float outdeg_c = scanner.nextFloat();
+			float closeness_c = scanner.nextFloat();
+			float betwenness_c = scanner.nextFloat();
+			pw.println(node + " " + indeg_c + " " + outdeg_c + " " + closeness_c + " " + betwenness_c + " " + dependencyDAG.location.get(node) + " " + dependencyDAG.normalizedPathCentrality.get(node));
+		}
+		
+		scanner.close();
+		pw.close();
+	}
+	
+	
 }
