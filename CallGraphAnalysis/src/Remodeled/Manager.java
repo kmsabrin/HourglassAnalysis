@@ -44,7 +44,7 @@ public class Manager {
 	public static void doRealNetworkAnalysis() throws Exception {
 		String netPath = "";
 //		String netID = "jdk1.7";
-		String netID = "rat";
+		String netID = "openssh-39";
 		
 		if (netID.equals("rat")) {
 			netPath = "metabolic_networks//rat-consolidated.txt";
@@ -96,13 +96,13 @@ public class Manager {
 		printNetworkStat(dependencyDAG);
 //		dependencyDAG.printNetworkMetrics();
 		
-		DistributionAnalysis.getAverageInOutDegree(dependencyDAG);
+//		DistributionAnalysis.getAverageInOutDegree(dependencyDAG);
 //		DistributionAnalysis.getAveragePathLenth(dependencyDAG);
 //		DistributionAnalysis.findWeaklyConnectedComponents(dependencyDAG);		
 //		DistributionAnalysis.getDegreeStatistics(dependencyDAG);
 //		DistributionAnalysis.printCentralityRanks(dependencyDAG, netID);
 //		int centralityIndex = 1;
-//		DistributionAnalysis.getCentralityCCDF(dependencyDAG, netID, 1);
+		DistributionAnalysis.getCentralityCCDF(dependencyDAG, netID, 1);
 //		DistributionAnalysis.printEdgeList(dependencyDAG, netID);
 //		DistributionAnalysis.printAllCentralities(dependencyDAG, netID);
 		

@@ -607,8 +607,8 @@ public class DependencyDAG {
 			double geometricMean = Math.sqrt(numOfTargetPath.get(s) * numOfSourcePath.get(s));
 			harmonicMeanPathCentrality.put(s, harmonicMean);
 			geometricMeanPathCentrality.put(s, geometricMean);	
-			normalizedPathCentrality.put(s, numOfTargetPath.get(s) * numOfSourcePath.get(s) / nTotalPath);
-//			normalizedPathCentrality.put(s, numOfTargetPath.get(s) * numOfSourcePath.get(s));
+//			normalizedPathCentrality.put(s, numOfTargetPath.get(s) * numOfSourcePath.get(s) / nTotalPath);
+			normalizedPathCentrality.put(s, numOfTargetPath.get(s) * numOfSourcePath.get(s));
 			
 			if (!(serves.containsKey(s) && depends.containsKey(s))){ // manually reset source and targets to zero
 				normalizedPathCentrality.put(s, 0.0);

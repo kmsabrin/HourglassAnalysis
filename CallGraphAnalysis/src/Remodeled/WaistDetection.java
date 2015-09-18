@@ -12,7 +12,7 @@ import com.google.common.collect.TreeMultimap;
 
 public class WaistDetection {
 	static HashSet<String> topKNodes = new HashSet();
-	static double pathCoverageTau = 0.99;
+	static double pathCoverageTau = 0.95;
 
 	public static void runPCWaistDetection(DependencyDAG dependencyDAG, String filePath) throws Exception {
 		PrintWriter pw = new PrintWriter(new File("analysis//path-cover-" + filePath + ".txt"));
