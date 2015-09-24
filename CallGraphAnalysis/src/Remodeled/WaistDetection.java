@@ -12,14 +12,53 @@ import com.google.common.collect.TreeMultimap;
 
 public class WaistDetection {
 	static HashSet<String> topKNodes = new HashSet();
-	static double pathCoverageTau = 0.95;
+	static double pathCoverageTau = 1.00;
 
+	public static void heuristicWaistDetection(DependencyDAG dependencyDAG, String filePath) throws Exception {
+		PrintWriter pw = new PrintWriter(new File("analysis//path-cover-2-" + filePath + ".txt"));
+		double cumulativePathsTraversed = 0;
+		double tPath = dependencyDAG.nTotalPath;
+		
+		while(true) {
+			double maxPathThrough = 0;
+			String maxPathNode = "";
+			for (String s: dependencyDAG.nodes) {
+				// skip if source or target
+				if (!dependencyDAG.serves.containsKey(s) || !dependencyDAG.depends.containsKey(s)) {
+					continue;
+				}
+				
+				// find the node with largest through path
+				double nPathThrough = dependencyDAG.numOfSourcePath.get(s) * dependencyDAG.numOfTargetPath.get(s);
+				if (nPathThrough > maxPathThrough) {
+					maxPathThrough = nPathThrough;
+					maxPathNode = s;
+				}
+			}
+			
+			// record the largest through path node
+			cumulativePathsTraversed += maxPathThrough;
+			System.out.println(maxPathNode + "\t" + maxPathThrough + "\t" + cumulativePathsTraversed);
+			
+			// if all paths have been traversed (except direct s-t edges), then break out
+			if (cumulativePathsTraversed >= tPath - dependencyDAG.nDirectSourceTargetEdges) {
+				break;
+			}
+			
+			// remove the largest through path node, recompute through paths for all remaining nodes
+			topKNodes.add(maxPathNode);
+			dependencyDAG.numOfTargetPath.clear();
+			dependencyDAG.numOfSourcePath.clear();
+			dependencyDAG.loadPathStatistics();
+		}
+	}
+	
 	public static void runPCWaistDetection(DependencyDAG dependencyDAG, String filePath) throws Exception {
 		PrintWriter pw = new PrintWriter(new File("analysis//path-cover-" + filePath + ".txt"));
 		
 		TreeMultimap<Double, String> centralitySortedNodes = TreeMultimap.create(Ordering.natural().reverse(), Ordering.natural());
 		for (String s : dependencyDAG.nodes) {
-//			if (dependencyDAG.depends.containsKey(s) && dependencyDAG.serves.containsKey(s)) 
+			if (dependencyDAG.depends.containsKey(s) && dependencyDAG.serves.containsKey(s)) 
 			{
 				centralitySortedNodes.put(dependencyDAG.normalizedPathCentrality.get(s), s);
 			}
@@ -60,9 +99,9 @@ public class WaistDetection {
 				pathCoverageSortedNodes.put(individualPaths / tPath, s);
 			}
 			
-			if (pathCoverage > pathCoverageTau) {
-				break;
-			}
+//			if (pathCoverage + 0.00000001 >= pathCoverageTau) {
+//				break;
+//			}
 			
 //			if (topKNodes.size() > 100) {
 //				break;
@@ -101,8 +140,8 @@ public class WaistDetection {
 			pw.println(topKNodes.size() + " " + pathCoverage);	
 			
 //			System.out.println(s);
-			System.out.println(s + "\t" + individualPaths);
-			
+//			System.out.println(s + "\t" + individualPaths + "\t" + (individualCumulativePaths / (tPath  - dependencyDAG.nDirectSourceTargetEdges)));
+			System.out.println(s + "\t" + individualPaths + "\t" + individualCumulativePaths);
 			
 			
 //			System.out.println("Individual path coverage of " + s + " : " + individualPaths);
@@ -113,9 +152,16 @@ public class WaistDetection {
 				++zeroPathContributors;
 			}
 			
-			if (pathCoverage > pathCoverageTau) {
+			if (individualCumulativePaths >= tPath - dependencyDAG.nDirectSourceTargetEdges) {
+//				System.out.println(individualCumulativePaths + "vs" + (tPath  - dependencyDAG.nDirectSourceTargetEdges));
 				break;
 			}
+			
+			if (pathCoverage + 1e-5 >= pathCoverageTau) {
+//				break;
+			}
+			
+			
 			
 //			if (topKNodes.size() > 100) {
 //				break;
@@ -124,6 +170,7 @@ public class WaistDetection {
 				
 		System.out.println("Zero path contributors: " + zeroPathContributors);
 		System.out.println("Achieved path coverge: " + pathCoverage);
+		System.out.println("Path convered: " + individualCumulativePaths);
 		getONodes(dependencyDAG);
 		pw.close();
 	}

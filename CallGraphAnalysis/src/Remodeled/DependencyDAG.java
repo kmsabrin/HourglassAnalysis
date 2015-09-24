@@ -67,6 +67,8 @@ public class DependencyDAG {
 	static boolean isToy = false;
 	static boolean isClassDependency = false;
 	
+	static int nDirectSourceTargetEdges = 0;
+	
 	DependencyDAG() { 
 		nodes = new TreeSet();
 		serves = new HashMap();
@@ -607,8 +609,12 @@ public class DependencyDAG {
 			double geometricMean = Math.sqrt(numOfTargetPath.get(s) * numOfSourcePath.get(s));
 			harmonicMeanPathCentrality.put(s, harmonicMean);
 			geometricMeanPathCentrality.put(s, geometricMean);	
-//			normalizedPathCentrality.put(s, numOfTargetPath.get(s) * numOfSourcePath.get(s) / nTotalPath);
-			normalizedPathCentrality.put(s, numOfTargetPath.get(s) * numOfSourcePath.get(s));
+			
+			
+			double npc = numOfTargetPath.get(s) * numOfSourcePath.get(s) * 1.0 / nTotalPath;
+//			npc = ((int) npc * 1000.0) / 1000.0;
+			normalizedPathCentrality.put(s, npc);
+//			normalizedPathCentrality.put(s, numOfTargetPath.get(s) * numOfSourcePath.get(s));
 			
 			if (!(serves.containsKey(s) && depends.containsKey(s))){ // manually reset source and targets to zero
 				normalizedPathCentrality.put(s, 0.0);

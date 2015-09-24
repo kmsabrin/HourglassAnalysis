@@ -72,7 +72,9 @@ public class DistributionAnalysis {
 		PrintWriter pw = new PrintWriter(new File("analysis//centrality-distribution-" + filePath + ".txt"));
 
 		for (String s: dependencyDAG.nodes) {
-			pw.println(dependencyDAG.geometricMeanPathCentrality.get(s));
+			if (dependencyDAG.serves.containsKey(s) && dependencyDAG.depends.containsKey(s)) { // only intermediate nodes			
+				pw.println(dependencyDAG.normalizedPathCentrality.get(s));
+			}
 		}	
 		
 		pw.close();
@@ -371,6 +373,22 @@ public class DistributionAnalysis {
 		
 		scanner.close();
 		pw.close();
+	}
+	
+	public static void findNDirectSrcTgtBypasses(DependencyDAG dependencyDAG, String filePath) {
+		int knt = 0;
+		for (String n: dependencyDAG.nodes) {
+			if (!dependencyDAG.depends.containsKey(n)) {
+				for (String r: dependencyDAG.serves.get(n)) {
+					if (!dependencyDAG.serves.containsKey(r)) {
+						++knt;
+					}
+				}
+			}
+		}
+		
+		dependencyDAG.nDirectSourceTargetEdges = knt;
+		System.out.println("Direct source to target edges: " + knt);
 	}
 	
 	

@@ -44,7 +44,7 @@ public class Manager {
 	public static void doRealNetworkAnalysis() throws Exception {
 		String netPath = "";
 //		String netID = "jdk1.7";
-		String netID = "openssh-39";
+		String netID = "court";
 		
 		if (netID.equals("rat")) {
 			netPath = "metabolic_networks//rat-consolidated.txt";
@@ -102,11 +102,14 @@ public class Manager {
 //		DistributionAnalysis.getDegreeStatistics(dependencyDAG);
 //		DistributionAnalysis.printCentralityRanks(dependencyDAG, netID);
 //		int centralityIndex = 1;
-		DistributionAnalysis.getCentralityCCDF(dependencyDAG, netID, 1);
+//		DistributionAnalysis.getCentralityCCDF(dependencyDAG, netID, 1);
+//		DistributionAnalysis.printCentralityDistribution(dependencyDAG, netID);
 //		DistributionAnalysis.printEdgeList(dependencyDAG, netID);
 //		DistributionAnalysis.printAllCentralities(dependencyDAG, netID);
+		DistributionAnalysis.findNDirectSrcTgtBypasses(dependencyDAG, netID);
 		
 //		WaistDetection.runPCWaistDetection(dependencyDAG, netID);
+		WaistDetection.heuristicWaistDetection(dependencyDAG, netID);
 		
 //		MaxFlowReduction.reduceToMaxFlowMinCutNetwork(dependencyDAG, netID);
 //		MaxFlowReduction.analyzeMinCut(dependencyDAG, "reduced_maxflow_graphs//" + netID + "_min_cut.txt");
@@ -153,7 +156,8 @@ public class Manager {
 
 //		WaistDetection.runPCWaistDetection(dependencyDAG, netID);
 
-		MaxFlowReduction.reduceToMaxFlowMinCutNetwork(dependencyDAG, netID);
+		WaistDetection.heuristicWaistDetection(dependencyDAG, netID);
+//		MaxFlowReduction.reduceToMaxFlowMinCutNetwork(dependencyDAG, netID);
 	}
 
 	public static void main(String[] args) throws Exception {		
