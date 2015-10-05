@@ -13,7 +13,7 @@ public class Manager {
 	}
 	
 	private static void generateSyntheticFromReal(DependencyDAG dependencyDAG) throws Exception {
-		SyntheticNLDAG2.inDegreeHistogram = DistributionAnalysis.getInDegreeHistogram(dependencyDAG);
+		SyntheticNLDAG2.inDegreeHistogram = DistributionAnalysis.getDegreeHistogram(dependencyDAG);
 		SyntheticNLDAG2.numOfNonzeroIndegreeNodes = 0;
 		for (int i: SyntheticNLDAG2.inDegreeHistogram.keySet()) {
 			SyntheticNLDAG2.numOfNonzeroIndegreeNodes += SyntheticNLDAG2.inDegreeHistogram.get(i);
@@ -48,6 +48,7 @@ public class Manager {
 		
 		if (netID.equals("rat")) {
 			netPath = "metabolic_networks//rat-consolidated.txt";
+//			netPath = "metabolic_networks//rat-links.txt";
 			DependencyDAG.isMetabolic = true;
 		}
 		else if (netID.equals("monkey")) {
@@ -94,12 +95,19 @@ public class Manager {
 //		generateSyntheticFromReal(dependencyDAG);
 		
 		printNetworkStat(dependencyDAG);
-//		dependencyDAG.printNetworkMetrics();
+		dependencyDAG.printNetworkMetrics();
 		
+//		for (String s: dependencyDAG.nodes) {
+//			if (dependencyDAG.outDegree.get(s) == 248) {
+//				System.out.println(s + "\t" + dependencyDAG.normalizedPathCentrality.get(s));
+//			}
+//		}
+		
+//		DistributionAnalysis.printEdgeList(dependencyDAG, netID);
 //		DistributionAnalysis.getAverageInOutDegree(dependencyDAG);
 //		DistributionAnalysis.getAveragePathLenth(dependencyDAG);
+//		DistributionAnalysis.getDegreeHistogram(dependencyDAG);
 //		DistributionAnalysis.findWeaklyConnectedComponents(dependencyDAG);		
-//		DistributionAnalysis.getDegreeStatistics(dependencyDAG);
 //		DistributionAnalysis.printCentralityRanks(dependencyDAG, netID);
 //		int centralityIndex = 1;
 //		DistributionAnalysis.getCentralityCCDF(dependencyDAG, netID, 1);
@@ -109,7 +117,9 @@ public class Manager {
 //		DistributionAnalysis.findNDirectSrcTgtBypasses(dependencyDAG, netID);
 		
 //		WaistDetection.runPCWaistDetection(dependencyDAG, netID);
-		WaistDetection.heuristicWaistDetection(dependencyDAG, netID);
+//		WaistDetection.heuristicWaistDetection(dependencyDAG, netID);
+		WaistDetection.randomizedWaistDetection(dependencyDAG, netID);
+//		WaistDetection.pathCoverageThresholdDetection(dependencyDAG, netID);
 		
 //		MaxFlowReduction.reduceToMaxFlowMinCutNetwork(dependencyDAG, netID);
 //		MaxFlowReduction.analyzeMinCut(dependencyDAG, "reduced_maxflow_graphs//" + netID + "_min_cut.txt");
@@ -149,14 +159,18 @@ public class Manager {
 		printNetworkStat(dependencyDAG);
 		dependencyDAG.printNetworkMetrics();
 		
-		DistributionAnalysis.printEdgeList(dependencyDAG, netID);
+//		DistributionAnalysis.printEdgeList(dependencyDAG, netID);
+
+		DistributionAnalysis.getDegreeHistogram(dependencyDAG);
 //		DistributionAnalysis.printCentralityRanks(dependencyDAG, netID);
 //		DistributionAnalysis.getCentralityCCDF(dependencyDAG, netID, 1);		
 //		DistributionAnalysis.printSourceVsTargetCompression(dependencyDAG, netID);
 
 //		WaistDetection.runPCWaistDetection(dependencyDAG, netID);
 
-		WaistDetection.heuristicWaistDetection(dependencyDAG, netID);
+//		WaistDetection.heuristicWaistDetection(dependencyDAG, netID);
+//		WaistDetection.randomizedWaistDetection(dependencyDAG, netID);
+		
 //		MaxFlowReduction.reduceToMaxFlowMinCutNetwork(dependencyDAG, netID);
 	}
 

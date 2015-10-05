@@ -119,6 +119,14 @@ public class DistributionAnalysis {
 		pw.close();
 	}
 	
+	public static void printLogBinnedHistogram(DependencyDAG dependencyDAG, String filePath) throws Exception {
+		double startValue = 1;
+		for (int i = 1; ; ++i) {
+			
+		}
+		
+	}
+	
 	public static TreeMap<Double, Double> getCentralityCCDF(DependencyDAG dependencyDAG, String filePath, int key) throws Exception {		
 		String[] centrality = {"p-", "i-", "hpr-", "gpr-"};
 		
@@ -173,42 +181,46 @@ public class DistributionAnalysis {
 		pw.close();
 	}
 	
-	private static HashMap<String, Integer> rankData(DependencyDAG dependencyDAG, HashMap<String, Double> values) {
-		HashMap<String, Integer> nodeRank = new HashMap();
+	public static void rankNodeByCentrality(DependencyDAG dependencyDAG, HashMap<String, Double> values) {
 		TreeMultimap<Double, String> sortedNodes = TreeMultimap.create(Ordering.natural().reverse(), Ordering.natural());
 		for (String s : dependencyDAG.nodes) {
 			sortedNodes.put(values.get(s), s);
 		}
 		
 		int rank = 1;
+		
+		// print top 50
+		int top50 = 50;
 		for (double v: sortedNodes.keySet()) {
 			Collection<String> nodes = sortedNodes.get(v);
 			for (String s: nodes) {
-				nodeRank.put(s, rank);
+				dependencyDAG.centralityRank.put(s, rank);
+				
+//				if (top50-- > 0) System.out.println(s + "\t" + v);
 			}
 			++rank;
 		}
-		return nodeRank;
 	}
 	
-	public static void printCentralityRanks(DependencyDAG dependencyDAG, String filePath) throws Exception {
-		PrintWriter pw = new PrintWriter(new File("analysis//pcentrality-and-pagerank-" + filePath + ".txt"));
-		
-		HashMap<String, Integer> pCGMRank = rankData(dependencyDAG, dependencyDAG.geometricMeanPathCentrality);
-		HashMap<String, Integer> pCHMRank = rankData(dependencyDAG, dependencyDAG.harmonicMeanPathCentrality);
-		HashMap<String, Integer> pRGMRank = rankData(dependencyDAG, dependencyDAG.geometricMeanPagerankCentrality);
-		HashMap<String, Integer> pRHMRank = rankData(dependencyDAG, dependencyDAG.harmonicMeanPagerankCentrality);
-		
-		for (String s: dependencyDAG.nodes) {
-			pw.println(s + "\t" + pCGMRank.get(s) + "\t" + pCHMRank.get(s) + "\t" + pRGMRank.get(s) + "\t" + pRHMRank.get(s));
-		}
-		pw.close();
-		
-		for (String s: dependencyDAG.nodes) {
-			System.out.print(s + "\t" + dependencyDAG.geometricMeanPathCentrality.get(s) + "\t" + dependencyDAG.harmonicMeanPathCentrality.get(s));
-			System.out.println("\t" + dependencyDAG.geometricMeanPagerankCentrality.get(s) + "\t" + dependencyDAG.harmonicMeanPagerankCentrality.get(s));
-		}
-	}
+//	public static void printCentralityRanks(DependencyDAG dependencyDAG, String filePath) throws Exception {
+//		PrintWriter pw = new PrintWriter(new File("analysis//pcentrality-and-pagerank-" + filePath + ".txt"));
+//		rankData(dependencyDAG, dependencyDAG.normalizedPathCentrality);
+//		
+////		HashMap<String, Integer> pCGMRank = rankData(dependencyDAG, dependencyDAG.geometricMeanPathCentrality);
+////		HashMap<String, Integer> pCHMRank = rankData(dependencyDAG, dependencyDAG.harmonicMeanPathCentrality);
+////		HashMap<String, Integer> pRGMRank = rankData(dependencyDAG, dependencyDAG.geometricMeanPagerankCentrality);
+////		HashMap<String, Integer> pRHMRank = rankData(dependencyDAG, dependencyDAG.harmonicMeanPagerankCentrality);
+////		
+////		for (String s: dependencyDAG.nodes) {
+////			pw.println(s + "\t" + pCGMRank.get(s) + "\t" + pCHMRank.get(s) + "\t" + pRGMRank.get(s) + "\t" + pRHMRank.get(s));
+////		}
+////		pw.close();
+////		
+////		for (String s: dependencyDAG.nodes) {
+////			System.out.print(s + "\t" + dependencyDAG.geometricMeanPathCentrality.get(s) + "\t" + dependencyDAG.harmonicMeanPathCentrality.get(s));
+////			System.out.println("\t" + dependencyDAG.geometricMeanPagerankCentrality.get(s) + "\t" + dependencyDAG.harmonicMeanPagerankCentrality.get(s));
+////		}
+//	}
 	
 	public static void getAveragePathLenth(DependencyDAG dependencyDAG) {
 		double avgPLength = 0;
@@ -222,7 +234,8 @@ public class DistributionAnalysis {
 			}
 		}
 		
-		System.out.println("Average Path Length: " + avgPLength / knt);
+//		System.out.println("Average Path Length: " + avgPLength / knt);
+		System.out.println("Max Path Length: " + StatUtils.max(pathLengths));
 		System.out.println("Mean Path Length: " + StatUtils.mean(pathLengths));
 		System.out.println("STD Path Length: " + Math.sqrt(StatUtils.variance(pathLengths)));
 	}
@@ -293,22 +306,39 @@ public class DistributionAnalysis {
 		System.out.println(rSum / participant);
 	}
 	
-	public static TreeMap<Integer, Integer> getInDegreeHistogram(DependencyDAG dependencyDAG) {
+	public static TreeMap<Integer, Integer> getDegreeHistogram(DependencyDAG dependencyDAG) {
 		ArrayList<Integer> inDegree = new ArrayList();
 		ArrayList<Integer> outDegree = new ArrayList();;
 		
 		TreeMap<Integer, Integer> inDegreeHistogram = new TreeMap();
+		TreeMap<Integer, Integer> outDegreeHistogram = new TreeMap();
 		
-		for (String s: dependencyDAG.inDegree.keySet()) {
+		for (String s: dependencyDAG.nodes) {
 			int iDeg = dependencyDAG.inDegree.get(s);
-			if (iDeg > 0) {
-				inDegree.add(iDeg);
-				if (inDegreeHistogram.containsKey(iDeg)) {
-					int v = inDegreeHistogram.get(iDeg);
-					inDegreeHistogram.put(iDeg, v + 1);
-				}
-				else inDegreeHistogram.put(iDeg, 1);
+			int oDeg = dependencyDAG.outDegree.get(s);
+//			System.out.println(s + "\t" + iDeg + "\t" + oDeg);
+			if (inDegreeHistogram.containsKey(iDeg)) {
+				int v = inDegreeHistogram.get(iDeg);
+				inDegreeHistogram.put(iDeg, v + 1);
 			}
+			else inDegreeHistogram.put(iDeg, 1);
+		
+			if (outDegreeHistogram.containsKey(oDeg)) {
+				int v = outDegreeHistogram.get(oDeg);
+				outDegreeHistogram.put(oDeg, v + 1);
+			}
+			else outDegreeHistogram.put(oDeg, 1);
+
+			inDegree.add(iDeg);
+			outDegree.add(oDeg);
+		}
+		
+		for (int i: inDegreeHistogram.keySet()) {
+//			System.out.println(i + "\t" + inDegreeHistogram.get(i));
+		}
+		
+		for (int i: outDegreeHistogram.keySet()) {
+			System.out.println(i + "\t" + outDegreeHistogram.get(i));
 		}
 		
 		
@@ -388,7 +418,7 @@ public class DistributionAnalysis {
 		}
 		
 		dependencyDAG.nDirectSourceTargetEdges = knt;
-		System.out.println("Direct source to target edges: " + knt);
+//		System.out.println("Direct source to target edges: " + knt);
 	}
 	
 	

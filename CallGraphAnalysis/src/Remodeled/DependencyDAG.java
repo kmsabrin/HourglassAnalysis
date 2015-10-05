@@ -31,6 +31,7 @@ public class DependencyDAG {
 	HashMap<String, Double> geometricMeanPathCentrality;
 	HashMap<String, Double> harmonicMeanPathCentrality;
 	HashMap<String, Double> normalizedPathCentrality;
+	HashMap<String, Integer> centralityRank;
 	
 	HashMap<String, Double> iCentrality;
 	
@@ -86,6 +87,7 @@ public class DependencyDAG {
 		geometricMeanPathCentrality = new HashMap();
 		harmonicMeanPathCentrality = new HashMap();
 		normalizedPathCentrality = new HashMap();
+		centralityRank = new HashMap();
 		
 		iCentrality = new HashMap();
 		
@@ -109,7 +111,7 @@ public class DependencyDAG {
 		WaistDetection.topRemovedWaistNodes.clear();
 	}
 	
-	DependencyDAG(String dependencyGraphID) {
+	DependencyDAG(String dependencyGraphID) throws Exception {
 		this();
 		
 		this.dependencyGraphID = dependencyGraphID;
@@ -117,7 +119,7 @@ public class DependencyDAG {
 		// load & initialize the attributes of the dependency graph
 		loadCallGraph(dependencyGraphID);
 		
-		if (isCallgraph || isClassDependency || isToy) {
+		if (isCallgraph || isClassDependency || isToy || isMetabolic) {
 			removeCycles(); // or should I only ignore cycles?
 		}
 		
@@ -136,6 +138,8 @@ public class DependencyDAG {
 		
 		loadPathCentralityMetric();
 //		loadPagerankCentralityMetric();		
+		
+		DistributionAnalysis.rankNodeByCentrality(this, this.normalizedPathCentrality);
 	}
 	
 	private void checkTargetReachability(String node) {
@@ -206,71 +210,73 @@ public class DependencyDAG {
 		}
 	}
 
-	public void loadCallGraph(String fileName) {
-		try {
-			Scanner scanner = new Scanner(new File(fileName));
+	public void loadCallGraph(String fileName) throws Exception {
+		Scanner scanner = new Scanner(new File(fileName));
 
-			while (scanner.hasNext()) {
-				String line = scanner.nextLine();
-				String tokens[] = line.split("\\s+");
-				if (tokens.length < 2) {
-					continue;
-				}
+		int violation = 0;
+		while (scanner.hasNext()) {
+			String line = scanner.nextLine();
+			String tokens[] = line.split("\\s+");
+			if (tokens.length < 2) {
+				continue;
+			}
 
-				String server = "", dependent = "";
+			String server = "", dependent = "";
 
-				if (isCallgraph) {
-					if (tokens[1].equals("->")) {
-						dependent = tokens[0].substring(0, tokens[0].length());					
-						server = tokens[2].substring(0, tokens[2].length() - 1); // for cobjdump: a -> b;
-//						String server = tokens[2].substring(0, tokens[2].length()); // for cdepn: a -> b
-						if (server.equals("mcount")) {  // no more location metric noise! // compiler generated
-							continue;
-						}
-					}
-				}
-				
-				if (isMetabolic || isSynthetic || isToy || isClassDependency) {
-//					for metabolic and synthetic networks
-					server = tokens[0]; 
-					dependent = tokens[1];
-				}
-				
-				if (isCourtcase) {					
-					server = tokens[1]; 
-					dependent = tokens[0]; // for space separated DAG: a b or a,b					
-					if (Integer.parseInt(dependent) < Integer.parseInt(server)) { // for court cases
-//						System.out.println(dependent + " citing " + server);  // cycle
+			if (isCallgraph) {
+				if (tokens[1].equals("->")) {
+					dependent = tokens[0].substring(0, tokens[0].length());
+					server = tokens[2].substring(0, tokens[2].length() - 1); // for cobjdump: a-> b;
+					// String server = tokens[2].substring(0, tokens[2].length()); // for cdepn: a -> b
+					if (server.equals("mcount")) { 
+						// no more location metric noise! 
+						// compiler generated
 						continue;
 					}
 				}
+			}
 
-				nodes.add(dependent);
-				nodes.add(server);
+			if (isMetabolic || isSynthetic || isToy || isClassDependency) {
+				// for metabolic and synthetic networks
+				server = tokens[0];
+				dependent = tokens[1];
+			}
 
-				if (dependent.equals(server)) { // loop, do not add the edge
+			if (isCourtcase) {
+				server = tokens[1];
+				dependent = tokens[0]; // for space separated DAG: a b or a,b
+				if (Integer.parseInt(dependent) < Integer.parseInt(server)) { // for court cases
+				// System.out.println(dependent + " citing " + server); // cycle
+					++violation;
 					continue;
 				}
-
-				if (serves.containsKey(server)) {
-					serves.get(server).add(dependent);
-				} else {
-					HashSet<String> hs = new HashSet();
-					hs.add(dependent);
-					serves.put(server, hs);
-				}
-
-				if (depends.containsKey(dependent)) {
-					depends.get(dependent).add(server);
-				} else {
-					HashSet<String> hs = new HashSet();
-					hs.add(server);
-					depends.put(dependent, hs);
-				}
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
+
+			nodes.add(dependent);
+			nodes.add(server);
+
+			if (dependent.equals(server)) { // loop, do not add the edge
+				continue;
+			}
+
+			if (serves.containsKey(server)) {
+				serves.get(server).add(dependent);
+			} else {
+				HashSet<String> hs = new HashSet();
+				hs.add(dependent);
+				serves.put(server, hs);
+			}
+
+			if (depends.containsKey(dependent)) {
+				depends.get(dependent).add(server);
+			} else {
+				HashSet<String> hs = new HashSet();
+				hs.add(server);
+				depends.put(dependent, hs);
+			}
 		}
+
+//		System.out.println(violation);
 	}
 	
 	public void removeIsolatedNodes() {
@@ -510,7 +516,7 @@ public class DependencyDAG {
 		}
 	}
 	
-	public void loadRechablity() {
+	public void loadRechablityAll() {
 		visited = new HashSet();
 		for (String s : nodes) {
 			visited.clear();
@@ -527,6 +533,25 @@ public class DependencyDAG {
 //			serversReachable.put(s, new HashSet(visited)); // too heavy for court case
 			sourcesReachable.put(s, kounter);
 		}
+	}
+	
+	public void loadRechablity(String s) {
+			visited = new HashSet();
+			visited.clear();
+			kounter = 0;
+			reachableUpwardsNodes(s); // how many nodes are using her
+			visited.remove(s); // remove ifself
+//			dependentsReachable.put(s, new HashSet(visited)); // too heavy for court case
+			targetsReachable.put(s, kounter);
+			System.out.println("Targets reached: " + kounter);
+			
+			visited.clear();
+			kounter = 0;
+			reachableDownwardsNodes(s); // how many nodes she is using
+			visited.remove(s); // remove itself
+//			serversReachable.put(s, new HashSet(visited)); // too heavy for court case
+			sourcesReachable.put(s, kounter);
+			System.out.println("Source reached: " + kounter);
 	}
 	
 	private void computeTargetPagerankCompression(String node) {
@@ -596,6 +621,7 @@ public class DependencyDAG {
 	}
 	
 	public void loadPathCentralityMetric() {
+		int tubes = 0;
 		for (String s: nodes) {			
 //			P-Centrality
 			// variations
@@ -608,8 +634,13 @@ public class DependencyDAG {
 			double npc = numOfTargetPath.get(s) * numOfSourcePath.get(s) * 1.0 / nTotalPath;
 //			npc = ((int) npc * 1000.0) / 1000.0;
 			normalizedPathCentrality.put(s, npc);
+						
 			if (!(serves.containsKey(s) && depends.containsKey(s))){ // manually reset source and targets to zero
 				normalizedPathCentrality.put(s, 0.0);
+			}
+			else {
+				if (numOfTargetPath.get(s) * numOfSourcePath.get(s) < 10e30) 
+					++tubes;
 			}
 			
 //			I-Centrality
@@ -623,7 +654,9 @@ public class DependencyDAG {
 			double stPairsConnected = targetsReachable.get(s) * sourcesReachable.get(s);
 			iCentrality.put(s, stPairsConnected / connectedSTPairs);
 			*/
-		}				
+		}			
+		
+		System.out.println("Tubes: " + tubes);
 	}
 	
 	public void printNetworkMetrics() {
