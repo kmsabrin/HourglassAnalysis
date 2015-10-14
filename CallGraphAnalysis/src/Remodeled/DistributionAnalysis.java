@@ -421,5 +421,36 @@ public class DistributionAnalysis {
 //		System.out.println("Direct source to target edges: " + knt);
 	}
 	
+	private static void helper(DependencyDAG dependencyDAG, PrintWriter pw, String c) {
+		if (visited.contains(c)) return;
+		visited.add(c);
+		
+		if(dependencyDAG.depends.containsKey(c)) {
+			for (String s: dependencyDAG.depends.get(c)) {
+				pw.println(s + "\t" + c);
+				helper(dependencyDAG, pw, s);
+			}
+		}
+		
+		if(dependencyDAG.serves.containsKey(c)) {
+			for (String s: dependencyDAG.serves.get(c)) {
+				pw.println(c + "\t" + s);
+				helper(dependencyDAG, pw, s);
+			}
+		}
+	}
 	
+	public static void createSubnetwork(DependencyDAG dependencyDAG, String filePath) throws Exception {
+		PrintWriter pw = new PrintWriter(new File("supremecourt_networks//" + filePath + "_case-monopoly.txt"));
+		
+		String cases[] = {"9808", "11860", "12036", "12612", "13180","14097", "18375","18502", "26386"};
+		visited = new HashSet();
+		
+		for (String c: cases) {
+			helper(dependencyDAG, pw, c);
+		}
+		
+		System.out.println(visited.size());
+		pw.close();
+	}
 }

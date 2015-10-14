@@ -9,7 +9,7 @@ import java.util.Random;
 
 public class WaistDetection {
 	static HashSet<String> topRemovedWaistNodes = new HashSet();
-	static double pathCoverageTau = 0.88;
+	static double pathCoverageTau = 0.95;
 	static HashMap<String, Double> averageWaistRank;
 
 	public static void heuristicWaistDetection(DependencyDAG dependencyDAG, String filePath) throws Exception {
@@ -109,6 +109,7 @@ public class WaistDetection {
 			dependencyDAG.numOfSourcePath.clear();
 			dependencyDAG.loadPathStatistics();
 			
+			averageWaistRank = new HashMap();
 			heuristicWaistDetection(dependencyDAG, filePath);
 			int currentWaistSize = topRemovedWaistNodes.size();
 			System.out.println(currentWaistSize + "\t" + pathCoverageTau);

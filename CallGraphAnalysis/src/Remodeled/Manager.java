@@ -44,7 +44,8 @@ public class Manager {
 	public static void doRealNetworkAnalysis() throws Exception {
 		String netPath = "";
 //		String netID = "jdk1.7";
-		String netID = "rat";
+		
+		String netID = "court";
 		
 		if (netID.equals("rat")) {
 			netPath = "metabolic_networks//rat-consolidated.txt";
@@ -56,6 +57,8 @@ public class Manager {
 			DependencyDAG.isMetabolic = true;
 		}
 		else if (netID.equals("court")) {
+			CourtCaseCornellParser.caseTopic = "monopoly";
+			CourtCaseCornellParser.loadCuratedCaseIDs();
 			netPath = "supremecourt_networks//court.txt";
 			DependencyDAG.isCourtcase = true;
 		}
@@ -95,7 +98,7 @@ public class Manager {
 //		generateSyntheticFromReal(dependencyDAG);
 		
 		printNetworkStat(dependencyDAG);
-		dependencyDAG.printNetworkMetrics();
+//		dependencyDAG.printNetworkMetrics();
 		
 //		for (String s: dependencyDAG.nodes) {
 //			if (dependencyDAG.outDegree.get(s) == 248) {
@@ -115,6 +118,7 @@ public class Manager {
 //		DistributionAnalysis.printEdgeList(dependencyDAG, netID);
 //		DistributionAnalysis.printAllCentralities(dependencyDAG, netID);
 //		DistributionAnalysis.findNDirectSrcTgtBypasses(dependencyDAG, netID);
+//		DistributionAnalysis.createSubnetwork(dependencyDAG, netID);
 		
 //		WaistDetection.runPCWaistDetection(dependencyDAG, netID);
 //		WaistDetection.heuristicWaistDetection(dependencyDAG, netID);
