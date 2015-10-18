@@ -70,6 +70,8 @@ public class DependencyDAG {
 	
 	static int nDirectSourceTargetEdges = 0;
 	
+	static HashSet<String> largestWCCNodes;
+	
 	DependencyDAG() { 
 		nodes = new TreeSet();
 		serves = new HashMap();
@@ -107,6 +109,8 @@ public class DependencyDAG {
 		
 		targetsReachable = new HashMap();
 		sourcesReachable = new HashMap();
+	
+//		largestWCCNodes = new HashSet();
 		
 		WaistDetection.topRemovedWaistNodes.clear();
 	}
@@ -119,7 +123,7 @@ public class DependencyDAG {
 		// load & initialize the attributes of the dependency graph
 		loadCallGraph(dependencyGraphID);
 		
-		if (isCallgraph || isClassDependency || isToy || isMetabolic) {
+		if (isCallgraph || isClassDependency || isToy || isMetabolic || isCourtcase) {
 			removeCycles(); // or should I only ignore cycles?
 		}
 		
@@ -236,17 +240,28 @@ public class DependencyDAG {
 				}
 			}
 
-			if (isMetabolic || isSynthetic || isToy || isClassDependency) {
+			if (isSynthetic || isToy) {
 				// for metabolic and synthetic networks
 				server = tokens[0];
 				dependent = tokens[1];
+			}
+			
+			if (isMetabolic || isClassDependency) {
+				// for metabolic and synthetic networks
+				server = tokens[0];
+				dependent = tokens[1];
+				if (largestWCCNodes.contains(server) == false || largestWCCNodes.contains(dependent) == false) {
+					continue;
+				}
 			}
 
 			if (isCourtcase) {
 				server = tokens[1];
 				dependent = tokens[0]; // for space separated DAG: a b or a,b
 				
-				if (!(CourtCaseCornellParser.caseIDs.contains(server) && CourtCaseCornellParser.caseIDs.contains(dependent))) continue;
+				if (CourtCaseCornellParser.caseIDs.contains(server) == false || CourtCaseCornellParser.caseIDs.contains(dependent) == false) {
+					continue;
+				}
 //				if (!CourtCaseCornellParser.caseIDs.contains(server) && !CourtCaseCornellParser.caseIDs.contains(dependent)) continue;
 //				if (!CourtCaseCornellParser.caseIDs.contains(dependent)) continue;
 				
@@ -487,7 +502,7 @@ public class DependencyDAG {
 		}		
 	}
 		
-	public void reachableUpwardsNodes(String node) { // towards root
+	public void reachableUpwardsNodes(String node) { // towards targets
 		if (visited.contains(node)) { // node already traversed
 			return;
 		}
@@ -504,7 +519,7 @@ public class DependencyDAG {
 		}
 	}
 	
-	public void reachableDownwardsNodes(String node) { // towards leaves
+	public void reachableDownwardsNodes(String node) { // towards sources
 		if (visited.contains(node)) { // node already traversed
 			return;
 		}

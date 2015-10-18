@@ -17,7 +17,6 @@ import com.google.common.collect.TreeMultimap;
 
 
 public class DistributionAnalysis {
-
 	static HashSet<String> visited;
 	static int wccSize;
 	
@@ -44,7 +43,12 @@ public class DistributionAnalysis {
 		}
 	}
 	
-	public static void findWeaklyConnectedComponents(DependencyDAG dependencyDAG) throws Exception {
+	public static void findWeaklyConnectedComponents(DependencyDAG dependencyDAG, String filePath) throws Exception {
+		PrintWriter pw = new PrintWriter(new File("analysis//largestWCC-" + filePath + ".txt"));
+
+		int largestWCCSize = 0;
+		String largestWCCSeed = "";
+		
 		visited = new HashSet();
 		int nWCC = 0;
 		for (String s : dependencyDAG.nodes) {
@@ -53,8 +57,19 @@ public class DistributionAnalysis {
 				++nWCC;
 				WCCHelper(s, dependencyDAG);
 				System.out.println("Component " + nWCC + " with size " + wccSize);
+				if (wccSize > largestWCCSize) {
+					largestWCCSize = wccSize;
+					largestWCCSeed = s;
+				}
 			}
 		}
+		
+		visited.clear();
+		WCCHelper(largestWCCSeed, dependencyDAG);
+		for (String s: visited) {
+			pw.println(s);
+		}
+		pw.close();
 	}
 	
 	public static void printSyntheticPC(DependencyDAG dependencyDAG, String filePath) throws Exception {		

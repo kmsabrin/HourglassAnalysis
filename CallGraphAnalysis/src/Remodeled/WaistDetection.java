@@ -103,7 +103,9 @@ public class WaistDetection {
 	}
 	
 	public static void pathCoverageThresholdDetection(DependencyDAG dependencyDAG, String filePath) throws Exception {
-		for (pathCoverageTau = 0.51; pathCoverageTau < 1.0; pathCoverageTau += 0.01) {
+		PrintWriter pw = new PrintWriter(new File("analysis//coverage-threshold-" + filePath + ".txt"));
+		
+		for (pathCoverageTau = 0.50; pathCoverageTau < 1.0; pathCoverageTau += 0.01) {
 			topRemovedWaistNodes.clear();
 			dependencyDAG.numOfTargetPath.clear();
 			dependencyDAG.numOfSourcePath.clear();
@@ -112,15 +114,17 @@ public class WaistDetection {
 			averageWaistRank = new HashMap();
 			heuristicWaistDetection(dependencyDAG, filePath);
 			int currentWaistSize = topRemovedWaistNodes.size();
-			System.out.println(currentWaistSize + "\t" + pathCoverageTau);
+			pw.println(currentWaistSize + "\t" + pathCoverageTau);
 		}
+		
+		pw.close();
 	}
 	
 	public static void randomizedWaistDetection(DependencyDAG dependencyDAG, String filePath) throws Exception {
 		HashMap<String, Integer> nodeFrequencyInWaist = new HashMap();
 		HashMap<Integer, Integer> waistSizeFrequencey = new HashMap();
 		
-		int nRuns = 300;
+		int nRuns = 200;
 		averageWaistRank = new HashMap();
 		for (int i = 1; i <= nRuns; ++i) {
 			topRemovedWaistNodes.clear();
@@ -142,8 +146,9 @@ public class WaistDetection {
 					int	freq = nodeFrequencyInWaist.get(n);
 					nodeFrequencyInWaist.put(n, freq + 1);
 				}
-				else 
+				else {
 					nodeFrequencyInWaist.put(n, 1);
+				}
 			}			
 		}
 		
@@ -161,6 +166,8 @@ public class WaistDetection {
 			System.out.println(n + "\t" + (nodeFrequencyInWaist.get(n) * 1.0 / nRuns) +
 					"\t" + averageWaistRank.get(n) + "\t" + dependencyDAG.normalizedPathCentrality.get(n));
 		}
+		
+		getONodes(dependencyDAG);
 	}
 
 	/*
@@ -261,41 +268,29 @@ public class WaistDetection {
 	public static void getONodes(DependencyDAG dependencyDAG) {
 		HashSet<String> waistNodeCoverage = new HashSet();
 
-		int STNodes = 0;
-
-		for (String s : topRemovedWaistNodes) {
+		for (String s : averageWaistRank.keySet()) {
 			dependencyDAG.visited.clear();
 			dependencyDAG.kounter = 0;
-			dependencyDAG.reachableUpwardsNodes(s); // how many nodes are using
-													// her
-			dependencyDAG.visited.remove(s); // remove ifself
+			dependencyDAG.reachableUpwardsNodes(s); // how many nodes are using her
+//			dependencyDAG.visited.remove(s); // remove ifself
 			waistNodeCoverage.addAll(dependencyDAG.visited);
 
 			dependencyDAG.visited.clear();
 			dependencyDAG.kounter = 0;
-			dependencyDAG.reachableDownwardsNodes(s); // how many nodes are
-														// using her
-			dependencyDAG.visited.remove(s); // remove ifself
+			dependencyDAG.reachableDownwardsNodes(s); // how many nodes are using her
+//			dependencyDAG.visited.remove(s); // remove ifself
 			waistNodeCoverage.addAll(dependencyDAG.visited);
 
-			if (!dependencyDAG.serves.containsKey(s)
-					|| !dependencyDAG.depends.containsKey(s)) {
-				++STNodes;
-			}
 		}
 
-		System.out.println("Waist Size: " + topRemovedWaistNodes.size());
-		System.out.print("Waist Node Coverage: " + waistNodeCoverage.size()
-				+ " of " + dependencyDAG.nodes.size() + " i.e. ");
-		System.out.println(waistNodeCoverage.size() * 100.0
-				/ dependencyDAG.nodes.size() + "%%");
+		System.out.println("Waist Size: " + averageWaistRank.size());
+		System.out.print("Waist Node Coverage: " + waistNodeCoverage.size() + " of " + dependencyDAG.nodes.size() + " i.e. ");
+		System.out.println(waistNodeCoverage.size() * 100.0 / dependencyDAG.nodes.size() + "%%");
 
-		double nonSTinWaist = (topRemovedWaistNodes.size() - STNodes) * 1.0
-				/ topRemovedWaistNodes.size();
-		double minST = Math.min(dependencyDAG.nSources, dependencyDAG.nTargets);
+//		double minST = Math.min(dependencyDAG.nSources, dependencyDAG.nTargets);
 		// System.out.println("nonSTinWaist: " + (topKNodes.size() - STNodes));
-		double hourglassnessScore = nonSTinWaist
-				* ((minST - Math.min(topRemovedWaistNodes.size() - STNodes, minST) + 1.0) / minST);
+//		double hourglassnessScore = nonSTinWaist
+//				* ((minST - Math.min(topRemovedWaistNodes.size() - STNodes, minST) + 1.0) / minST);
 		// System.out.println("Hourglassness: " + hourglassnessScore);
 	}
 	

@@ -1,7 +1,9 @@
 package Remodeled;
 
+import java.io.File;
+import java.util.HashSet;
 import java.util.Random;
-import java.util.TreeMap;
+import java.util.Scanner;
 
 public class Manager {	
 	private static void printNetworkStat(DependencyDAG dependencyDAG) {
@@ -41,11 +43,25 @@ public class Manager {
 		}		
 	}
 	
+	private static void loadLargestWCC(String filePath) throws Exception {
+		DependencyDAG.largestWCCNodes = new HashSet();
+		Scanner scanner = new Scanner(new File("analysis//largestWCC-" + filePath + ".txt"));
+		while (scanner.hasNext()) {
+			String line = scanner.next();
+//			System.out.println(line);
+			DependencyDAG.largestWCCNodes.add(line);
+		}
+		
+		scanner.close();
+	}
+	
 	public static void doRealNetworkAnalysis() throws Exception {
 		String netPath = "";
-//		String netID = "jdk1.7";
-		
-		String netID = "court";
+//		String netID = "rat";
+//		String netID = "court";
+//		String netID = "monkey";
+		String netID = "commons-math";
+		loadLargestWCC(netID);
 		
 		if (netID.equals("rat")) {
 			netPath = "metabolic_networks//rat-consolidated.txt";
@@ -110,7 +126,7 @@ public class Manager {
 //		DistributionAnalysis.getAverageInOutDegree(dependencyDAG);
 //		DistributionAnalysis.getAveragePathLenth(dependencyDAG);
 //		DistributionAnalysis.getDegreeHistogram(dependencyDAG);
-//		DistributionAnalysis.findWeaklyConnectedComponents(dependencyDAG);		
+//		DistributionAnalysis.findWeaklyConnectedComponents(dependencyDAG, netID);		
 //		DistributionAnalysis.printCentralityRanks(dependencyDAG, netID);
 //		int centralityIndex = 1;
 //		DistributionAnalysis.getCentralityCCDF(dependencyDAG, netID, 1);
@@ -123,6 +139,7 @@ public class Manager {
 //		WaistDetection.runPCWaistDetection(dependencyDAG, netID);
 //		WaistDetection.heuristicWaistDetection(dependencyDAG, netID);
 		WaistDetection.randomizedWaistDetection(dependencyDAG, netID);
+		
 //		WaistDetection.pathCoverageThresholdDetection(dependencyDAG, netID);
 		
 //		MaxFlowReduction.reduceToMaxFlowMinCutNetwork(dependencyDAG, netID);
