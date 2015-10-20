@@ -58,10 +58,11 @@ public class Manager {
 	public static void doRealNetworkAnalysis() throws Exception {
 		String netPath = "";
 //		String netID = "rat";
-//		String netID = "court";
+		String netID = "court";
 //		String netID = "monkey";
-		String netID = "commons-math";
-		loadLargestWCC(netID);
+//		String netID = "commons-math";
+		
+//		loadLargestWCC(netID);
 		
 		if (netID.equals("rat")) {
 			netPath = "metabolic_networks//rat-consolidated.txt";

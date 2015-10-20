@@ -14,7 +14,7 @@ public class CourtCaseCornellParser {
 	static HashSet<String> caseIDs;
 	static HashMap<String, String> caseNameID;
 	static HashMap<String, String> caseNameMatching;
-	static String caseTopic = "monopoly";
+	static String caseTopic = "";
 	
 	public static void htmlParse(String filePath) throws Exception {
 		Scanner scanner = new Scanner(new File(filePath));

@@ -259,10 +259,11 @@ public class DependencyDAG {
 				server = tokens[1];
 				dependent = tokens[0]; // for space separated DAG: a b or a,b
 				
-				if (CourtCaseCornellParser.caseIDs.contains(server) == false || CourtCaseCornellParser.caseIDs.contains(dependent) == false) {
-					continue;
-				}
-//				if (!CourtCaseCornellParser.caseIDs.contains(server) && !CourtCaseCornellParser.caseIDs.contains(dependent)) continue;
+//				if (CourtCaseCornellParser.caseIDs.contains(server) == false || CourtCaseCornellParser.caseIDs.contains(dependent) == false) {
+//					continue;
+//				}
+				
+				if (CourtCaseCornellParser.caseIDs.contains(server) == false && CourtCaseCornellParser.caseIDs.contains(dependent) == false) continue;
 //				if (!CourtCaseCornellParser.caseIDs.contains(dependent)) continue;
 				
 				if (Integer.parseInt(dependent) < Integer.parseInt(server)) { // for court cases
