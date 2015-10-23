@@ -138,7 +138,7 @@ public class DependencyDAG {
 		loadPathStatistics();
 		loadLocationMetric(); // must load degree metric before
 		
-//		loadRechablity();		
+		loadReachablityAll();		
 		
 		loadPathCentralityMetric();
 //		loadPagerankCentralityMetric();		
@@ -232,7 +232,7 @@ public class DependencyDAG {
 					dependent = tokens[0].substring(0, tokens[0].length());
 					server = tokens[2].substring(0, tokens[2].length() - 1); // for cobjdump: a-> b;
 					// String server = tokens[2].substring(0, tokens[2].length()); // for cdepn: a -> b
-					if (server.equals("mcount")) { 
+					if (dependent.equals("do_log") || server.equals("do_log")) { 
 						// no more location metric noise! 
 						// compiler generated
 						continue;
@@ -240,13 +240,13 @@ public class DependencyDAG {
 				}
 			}
 
-			if (isSynthetic || isToy) {
+			if (isSynthetic || isToy || isClassDependency) {
 				// for metabolic and synthetic networks
 				server = tokens[0];
 				dependent = tokens[1];
 			}
 			
-			if (isMetabolic || isClassDependency) {
+			if (isMetabolic) {
 				// for metabolic and synthetic networks
 				server = tokens[0];
 				dependent = tokens[1];
@@ -259,11 +259,16 @@ public class DependencyDAG {
 				server = tokens[1];
 				dependent = tokens[0]; // for space separated DAG: a b or a,b
 				
-//				if (CourtCaseCornellParser.caseIDs.contains(server) == false || CourtCaseCornellParser.caseIDs.contains(dependent) == false) {
+//				if (largestWCCNodes.contains(server) == false || largestWCCNodes.contains(dependent) == false) {
 //					continue;
 //				}
 				
-				if (CourtCaseCornellParser.caseIDs.contains(server) == false && CourtCaseCornellParser.caseIDs.contains(dependent) == false) continue;
+//				if (CourtCaseCornellParser.caseIDs.contains(server) == false || CourtCaseCornellParser.caseIDs.contains(dependent) == false) {
+//					continue;
+//				}
+				if (CourtCaseCornellParser.caseIDs.contains(server) == false && CourtCaseCornellParser.caseIDs.contains(dependent) == false) {
+					continue;
+				}
 //				if (!CourtCaseCornellParser.caseIDs.contains(dependent)) continue;
 				
 				if (Integer.parseInt(dependent) < Integer.parseInt(server)) { // for court cases
@@ -298,6 +303,26 @@ public class DependencyDAG {
 		}
 
 //		System.out.println(violation);
+		
+//		if (isCourtcase) {
+////			fix Leaves
+//			HashSet<String> toRemove = new HashSet();
+//			for (String s: nodes) {
+//				if(!depends.containsKey(s) && serves.containsKey(s) && CourtCaseCornellParser.caseIDs.contains(s)) {
+////					HashSet<String> hs = new HashSet();
+////					hs.add("-1");
+////					depends.put(s, hs);
+//					toRemove.add(s);
+//				}
+//				else if (depends.containsKey(s) && !serves.containsKey(s) && CourtCaseCornellParser.caseIDs.contains(s)) {
+//					toRemove.add(s);
+//				}
+//			}
+//			
+//			for (String s: toRemove) {
+//				removeNode(s);
+//			}
+//		}
 	}
 	
 	public void removeIsolatedNodes() {
@@ -508,10 +533,10 @@ public class DependencyDAG {
 			return;
 		}
 		
+		++kounter;
 		visited.add(node);
 				
 		if (!serves.containsKey(node)) { // is a target
-			++kounter;
 			return;
 		}
 		
@@ -525,10 +550,10 @@ public class DependencyDAG {
 			return;
 		}
 		
+		++kounter;
 		visited.add(node);
 		
 		if (!depends.containsKey(node)) { // is a source
-			++kounter;
 			return;
 		}
 		
@@ -537,7 +562,7 @@ public class DependencyDAG {
 		}
 	}
 	
-	public void loadRechablityAll() {
+	public void loadReachablityAll() {
 		visited = new HashSet();
 		for (String s : nodes) {
 			visited.clear();
@@ -683,16 +708,18 @@ public class DependencyDAG {
 	public void printNetworkMetrics() {
 		for (String s: nodes) {
 //			if (normalizedPathCentrality.get(s) < 0.4) continue;
-			System.out.print(s + "\t");
+//			System.out.print(s + "\t");
 //			System.out.print(inDegree.get(s) + "\t");
 //			System.out.print(outDegree.get(s) + "\t");
 //			System.out.print(location.get(s) + "\t");
-			System.out.print(normalizedPathCentrality.get(s) + "\t");
+//			System.out.print(normalizedPathCentrality.get(s) + "\t");
 //			System.out.print(pagerankTargetCompression.get(s) + "\t");
 //			System.out.print(pagerankSourceCompression.get(s) + "\t");
 //			System.out.print(harmonicMeanPagerankCentrality.get(s) + "\t");
 //			System.out.print(iCentrality.get(s) + "\t");
-			System.out.println();
+//			System.out.print(sourcesReachable.get(s) + "\t");
+//			System.out.print(targetsReachable.get(s) + "\t");
+//			System.out.println();
 		}
 		
 		System.out.println("Total path: " + nTotalPath);

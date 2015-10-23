@@ -62,7 +62,9 @@ public class Manager {
 //		String netID = "monkey";
 //		String netID = "commons-math";
 		
-//		loadLargestWCC(netID);
+		if (netID.equals("rat") || netID.equals("monkey")) {
+			loadLargestWCC(netID);
+		}
 		
 		if (netID.equals("rat")) {
 			netPath = "metabolic_networks//rat-consolidated.txt";
@@ -74,19 +76,19 @@ public class Manager {
 			DependencyDAG.isMetabolic = true;
 		}
 		else if (netID.equals("court")) {
-			CourtCaseCornellParser.caseTopic = "monopoly";
+			CourtCaseCornellParser.caseTopic = "abortion";
 			CourtCaseCornellParser.loadCuratedCaseIDs();
 			netPath = "supremecourt_networks//court.txt";
 			DependencyDAG.isCourtcase = true;
 		}
-		else if (netID.equals("kernel-21")) {
-			netPath = "kernel_callgraphs//full.graph-2.6.21";
-			DependencyDAG.isCallgraph = true;
-		}
-		else if (netID.equals("kernel-31")) {
-			netPath = "kernel_callgraphs//full.graph-2.6.31";
-			DependencyDAG.isCallgraph = true;
-		}
+//		else if (netID.equals("kernel-21")) {
+//			netPath = "kernel_callgraphs//full.graph-2.6.21";
+//			DependencyDAG.isCallgraph = true;
+//		}
+//		else if (netID.equals("kernel-31")) {
+//			netPath = "kernel_callgraphs//full.graph-2.6.31";
+//			DependencyDAG.isCallgraph = true;
+//		}
 		else if (netID.equals("openssh-39")) {
 			netPath = "openssh_callgraphs//full.graph-openssh-39";
 			DependencyDAG.isCallgraph = true;
@@ -95,22 +97,23 @@ public class Manager {
 			netPath = "jdk_class_dependency//apache-commons-3.4-callgraph-consolidated.txt";
 			DependencyDAG.isClassDependency = true;
 		}
-		else if (netID.equals("jdk1.7")) {
-//			netPath = "jdk_class_dependency//jdk1.7-callgraph-callgraph-consolidated.txt";
-			DependencyDAG.isClassDependency = true;			
-			netPath = "jdk_class_dependency//jdk1.7-callgraph.txt";
-//			DependencyDAG.isCallgraph = true;
-		}
-		else if (netID.equals("google-guava")) {
-			netPath = "jdk_class_dependency//google-guava-callgraph-consolidated.txt";
-			DependencyDAG.isClassDependency = true;
-		}
+//		else if (netID.equals("jdk1.7")) {
+////			netPath = "jdk_class_dependency//jdk1.7-callgraph-callgraph-consolidated.txt";
+//			DependencyDAG.isClassDependency = true;			
+//			netPath = "jdk_class_dependency//jdk1.7-callgraph.txt";
+////			DependencyDAG.isCallgraph = true;
+//		}
+//		else if (netID.equals("google-guava")) {
+//			netPath = "jdk_class_dependency//google-guava-callgraph-consolidated.txt";
+//			DependencyDAG.isClassDependency = true;
+//		}
 		else if (netID.equals("commons-math")) {
 			netPath = "jdk_class_dependency//commons-math-callgraph-consolidated.txt";
 			DependencyDAG.isClassDependency = true;
 		}
 
 		DependencyDAG dependencyDAG = new DependencyDAG(netPath);
+		
 		
 //		generateSyntheticFromReal(dependencyDAG);
 		
@@ -123,6 +126,7 @@ public class Manager {
 //			}
 //		}
 		
+//		DistributionAnalysis.crossCheck(dependencyDAG, netID);
 //		DistributionAnalysis.printEdgeList(dependencyDAG, netID);
 //		DistributionAnalysis.getAverageInOutDegree(dependencyDAG);
 //		DistributionAnalysis.getAveragePathLenth(dependencyDAG);
@@ -139,9 +143,9 @@ public class Manager {
 		
 //		WaistDetection.runPCWaistDetection(dependencyDAG, netID);
 //		WaistDetection.heuristicWaistDetection(dependencyDAG, netID);
-		WaistDetection.randomizedWaistDetection(dependencyDAG, netID);
+//		WaistDetection.randomizedWaistDetection(dependencyDAG, netID);
 		
-//		WaistDetection.pathCoverageThresholdDetection(dependencyDAG, netID);
+		WaistDetection.pathCoverageThresholdDetection(dependencyDAG, netID);
 		
 //		MaxFlowReduction.reduceToMaxFlowMinCutNetwork(dependencyDAG, netID);
 //		MaxFlowReduction.analyzeMinCut(dependencyDAG, "reduced_maxflow_graphs//" + netID + "_min_cut.txt");

@@ -468,4 +468,14 @@ public class DistributionAnalysis {
 		System.out.println(visited.size());
 		pw.close();
 	}
+	
+	public static void crossCheck(DependencyDAG dependencyDAG, String filePath) throws Exception {
+		for (String s: dependencyDAG.nodes) {
+			if(dependencyDAG.serves.containsKey(s) && dependencyDAG.depends.containsKey(s)) {
+				if (!CourtCaseCornellParser.caseIDs.contains(s)) {
+					System.out.println("WHY?:  " + s);
+				}
+			}
+		}
+	}
 }

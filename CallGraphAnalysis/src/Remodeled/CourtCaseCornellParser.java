@@ -14,7 +14,7 @@ public class CourtCaseCornellParser {
 	static HashSet<String> caseIDs;
 	static HashMap<String, String> caseNameID;
 	static HashMap<String, String> caseNameMatching;
-	static String caseTopic = "";
+	static String caseTopic = "pension";
 	
 	public static void htmlParse(String filePath) throws Exception {
 		Scanner scanner = new Scanner(new File(filePath));
@@ -172,11 +172,6 @@ public class CourtCaseCornellParser {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		caseNames = new TreeSet();
-		caseIDs = new HashSet();
-		caseNameID = new HashMap();
-		caseNameMatching = new HashMap();
-		htmlParse("supremecourt_networks//case-" + caseTopic + ".html");
-		findUSCaseNum("supremecourt_networks//judicial.csv");
+		evokeCaseByNameParsing();
 	}
 }

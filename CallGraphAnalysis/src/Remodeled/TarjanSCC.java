@@ -90,13 +90,13 @@ public class TarjanSCC {
 	public static void main(String[] args) throws Exception {
 		DependencyDAG G = new DependencyDAG(); 
 		
-//		PrintWriter pw = new PrintWriter(new File("metabolic_networks//monkey-consolidated.txt"));		
-//		G.isMetabolic = true;
-//		G.loadCallGraph("metabolic_networks//monkey-links.txt"); // "metabolic_networks//rat-links.txt"
+		PrintWriter pw = new PrintWriter(new File("metabolic_networks//monkey-consolidated.txt"));		
+		G.isMetabolic = true;
+		G.loadCallGraph("metabolic_networks//monkey-links.txt"); // "metabolic_networks//rat-links.txt"
 		
-		PrintWriter pw = new PrintWriter(new File("jdk_class_dependency//commons-math-callgraph-consolidated.txt"));		
-		G.isClassDependency = true;
-		G.loadCallGraph("jdk_class_dependency//commons-math-callgraph.txt"); // "metabolic_networks//rat-links.txt"
+//		PrintWriter pw = new PrintWriter(new File("jdk_class_dependency//commons-math-callgraph-consolidated.txt"));		
+//		G.isClassDependency = true;
+//		G.loadCallGraph("jdk_class_dependency//commons-math-callgraph.txt"); // "metabolic_networks//rat-links.txt"
 		
 //		PrintWriter pw = new PrintWriter(new File("openssh_callgraphs//full.graph-openssh-39-consolidated"));		
 //		G.isCallgraph = true;
