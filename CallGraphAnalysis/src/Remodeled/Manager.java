@@ -15,31 +15,31 @@ public class Manager {
 	}
 	
 	private static void generateSyntheticFromReal(DependencyDAG dependencyDAG) throws Exception {
-		SyntheticNLDAG2.inDegreeHistogram = DistributionAnalysis.getDegreeHistogram(dependencyDAG);
-		SyntheticNLDAG2.numOfNonzeroIndegreeNodes = 0;
-		for (int i: SyntheticNLDAG2.inDegreeHistogram.keySet()) {
-			SyntheticNLDAG2.numOfNonzeroIndegreeNodes += SyntheticNLDAG2.inDegreeHistogram.get(i);
+		SimpleModelDAG.inDegreeHistogram = DistributionAnalysis.getDegreeHistogram(dependencyDAG);
+		SimpleModelDAG.numOfNonzeroIndegreeNodes = 0;
+		for (int i: SimpleModelDAG.inDegreeHistogram.keySet()) {
+			SimpleModelDAG.numOfNonzeroIndegreeNodes += SimpleModelDAG.inDegreeHistogram.get(i);
 		}
-		SyntheticNLDAG2.dependencyDAG = dependencyDAG;		
-		SyntheticNLDAG2.nS = (int)dependencyDAG.nSources;
-		SyntheticNLDAG2.nT = (int)dependencyDAG.nTargets;
-		SyntheticNLDAG2.nI = (int)(dependencyDAG.nodes.size() - dependencyDAG.nSources - dependencyDAG.nTargets);		
-		SyntheticNLDAG2.sT = 1;
-		SyntheticNLDAG2.sI = SyntheticNLDAG2.nS + 1;
-		SyntheticNLDAG2.sS = SyntheticNLDAG2.nS + SyntheticNLDAG2.nI + 1;
+		SimpleModelDAG.dependencyDAG = dependencyDAG;		
+		SimpleModelDAG.nS = (int)dependencyDAG.nSources;
+		SimpleModelDAG.nT = (int)dependencyDAG.nTargets;
+		SimpleModelDAG.nI = (int)(dependencyDAG.nodes.size() - dependencyDAG.nSources - dependencyDAG.nTargets);		
+		SimpleModelDAG.sT = 1;
+		SimpleModelDAG.sI = SimpleModelDAG.nS + 1;
+		SimpleModelDAG.sS = SimpleModelDAG.nS + SimpleModelDAG.nI + 1;
 //		double d = 0.6;
 		for (double d = 0.0; d < 0.6; d += 0.2) 
 		{
 			if (d < 0) {
-				SyntheticNLDAG2.alphaNegative = true;
+				SimpleModelDAG.alphaNegative = true;
 			}
 			else {
-				SyntheticNLDAG2.alphaNegative = false;
+				SimpleModelDAG.alphaNegative = false;
 			}
-			SyntheticNLDAG2.alpha = Math.abs(d);
-			SyntheticNLDAG2.random = new Random(System.nanoTime());
+			SimpleModelDAG.alpha = Math.abs(d);
+			SimpleModelDAG.random = new Random(System.nanoTime());
 			System.out.println("Alpha: " + d);
-			SyntheticNLDAG2.getNLNHGDAG();
+			SimpleModelDAG.getNLNHGDAG();
 		}		
 	}
 	
@@ -58,9 +58,13 @@ public class Manager {
 	public static void doRealNetworkAnalysis() throws Exception {
 		String netPath = "";
 //		String netID = "rat";
-		String netID = "court";
 //		String netID = "monkey";
+		
 //		String netID = "commons-math";
+//		String netID = "openssh-39";
+//		String netID = "apache-commons-3.4";
+		
+		String netID = "court";
 		
 		if (netID.equals("rat") || netID.equals("monkey")) {
 			loadLargestWCC(netID);
@@ -77,6 +81,7 @@ public class Manager {
 		}
 		else if (netID.equals("court")) {
 			CourtCaseCornellParser.caseTopic = "abortion";
+//			CourtCaseCornellParser.caseTopic = "pension";
 			CourtCaseCornellParser.loadCuratedCaseIDs();
 			netPath = "supremecourt_networks//court.txt";
 			DependencyDAG.isCourtcase = true;
@@ -135,7 +140,7 @@ public class Manager {
 //		DistributionAnalysis.printCentralityRanks(dependencyDAG, netID);
 //		int centralityIndex = 1;
 //		DistributionAnalysis.getCentralityCCDF(dependencyDAG, netID, 1);
-//		DistributionAnalysis.printCentralityDistribution(dependencyDAG, netID);
+		DistributionAnalysis.printCentralityDistribution(dependencyDAG, netID);
 //		DistributionAnalysis.printEdgeList(dependencyDAG, netID);
 //		DistributionAnalysis.printAllCentralities(dependencyDAG, netID);
 //		DistributionAnalysis.findNDirectSrcTgtBypasses(dependencyDAG, netID);
@@ -145,7 +150,7 @@ public class Manager {
 //		WaistDetection.heuristicWaistDetection(dependencyDAG, netID);
 //		WaistDetection.randomizedWaistDetection(dependencyDAG, netID);
 		
-		WaistDetection.pathCoverageThresholdDetection(dependencyDAG, netID);
+//		WaistDetection.pathCoverageThresholdDetection(dependencyDAG, netID);
 		
 //		MaxFlowReduction.reduceToMaxFlowMinCutNetwork(dependencyDAG, netID);
 //		MaxFlowReduction.analyzeMinCut(dependencyDAG, "reduced_maxflow_graphs//" + netID + "_min_cut.txt");
@@ -153,14 +158,14 @@ public class Manager {
 	
 	public static void doSyntheticNetworkAnalysis() throws Exception {
 		DependencyDAG.isSynthetic = true;
-		String DAGType = "NLNHGDAG";
+		String DAGType = "AlphaDAG";
 //		String alpha[] = {"-1.0", "-0.8", "-0.6", "-0.4", "-0.2", "0.0", "0.2", "0.4", "0.6", "0.8", "1.0"};
-		String alpha[] = {"0.0", "-1.0", "1.0"};
+		String alpha[] = {"-1.0", "-0.5", "0.0", "0.5", "1.0"};
 //		String versions[] = {"rectangleDAG", "noisyRectangleDAG", "trapezoidDAG", "diamondDAG", "hourglassDAG"};
 
 		for (String a: alpha) {
 //			if (!a.equals("-1.0")) continue;			
-			String networkID = DAGType + "a" + a;
+			String networkID = DAGType + "-a" + a;
 			System.out.println("Working on: " + networkID);
 			DependencyDAG dependencyDAG = new DependencyDAG("synthetic_callgraphs//" + networkID + ".txt");
 			printNetworkStat(dependencyDAG);
@@ -169,7 +174,7 @@ public class Manager {
 //			DistributionAnalysis.printSyntheticPC(dependencyDAG, networkID);
 //			DistributionAnalysis.targetEdgeConcentration(dependencyDAG);
 //			DistributionAnalysis.getAveragePathLenth(dependencyDAG);
-//			DistributionAnalysis.getCentralityCCDF(dependencyDAG, networkID, 1);
+			DistributionAnalysis.getCentralityCCDF(dependencyDAG, networkID, 1);
 //			DistributionAnalysis.getReachabilityCount(dependencyDAG);
 //			DistributionAnalysis.printSourceVsTargetCompression(dependencyDAG, networkID);
 			
@@ -201,8 +206,8 @@ public class Manager {
 	}
 
 	public static void main(String[] args) throws Exception {		
-		Manager.doRealNetworkAnalysis();
-//		Manager.doSyntheticNetworkAnalysis();
+//		Manager.doRealNetworkAnalysis();
+		Manager.doSyntheticNetworkAnalysis();
 //		Manager.doToyNetworkAnalysis();
 		System.out.println("Done!");
 	}

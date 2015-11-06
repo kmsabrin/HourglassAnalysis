@@ -10,15 +10,15 @@ import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.distribution.UniformIntegerDistribution;
 import org.apache.commons.math3.distribution.ZipfDistribution;
 
-public class SyntheticNLDAG2 {
+public class SimpleModelDAG {
 	static Random random = new Random(System.nanoTime());
 	static double alpha = 0.0;
 	static boolean alphaNegative = false;
 	
 //	real network matching
-	static int nT = 100; // no. of T(arget) nodes
-	static int nI = 800; // no. of I(ntermediate) nodes
-	static int nS = 100; // no. of S(ource) nodes
+	static int nT = 100; // no. of (T)arget nodes
+	static int nI = 800; // no. of (I)ntermediate nodes
+	static int nS = 100; // no. of (S)ource nodes
 
 	static int sT = 1; // start of Target
 	static int sI = 101; // start of Intermediate
@@ -60,7 +60,7 @@ public class SyntheticNLDAG2 {
 		String negate = "";
 		if (alphaNegative) negate += "-";
 		
-		PrintWriter pw = new PrintWriter(new File("synthetic_callgraphs//NLNHGDAGa" + negate + alpha + ".txt"));
+		PrintWriter pw = new PrintWriter(new File("synthetic_callgraphs//SimpleModelDAGa" + negate + alpha + ".txt"));
 		generateNLDAG(pw);
 	}
 	
@@ -172,7 +172,7 @@ public class SyntheticNLDAG2 {
 	}
 
 	public static void main(String[] args) throws Exception {
-		for (double d = -1.0; d < 1.1; d += 1.0) {
+		for (double d = -1.0; d < 1.1; d += 0.5) {
 			if (d < 0) {
 				alphaNegative = true;
 			}

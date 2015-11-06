@@ -88,7 +88,7 @@ public class DistributionAnalysis {
 
 		for (String s: dependencyDAG.nodes) {
 			if (dependencyDAG.serves.containsKey(s) && dependencyDAG.depends.containsKey(s)) { // only intermediate nodes			
-				pw.println(dependencyDAG.normalizedPathCentrality.get(s));
+				pw.println(dependencyDAG.normalizedPathCentrality.get(s) * dependencyDAG.nTotalPath);
 			}
 		}	
 		

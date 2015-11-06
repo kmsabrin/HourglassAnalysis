@@ -128,7 +128,7 @@ public class DependencyDAG {
 		}
 		
 		if (isSynthetic) {
-			removeDisconnectedNodesForSyntheticNetworks();
+//			removeDisconnectedNodesForSyntheticNetworks();
 		}
 		
 		removeIsolatedNodes();
@@ -138,7 +138,7 @@ public class DependencyDAG {
 		loadPathStatistics();
 		loadLocationMetric(); // must load degree metric before
 		
-		loadReachablityAll();		
+//		loadReachablityAll();		
 		
 		loadPathCentralityMetric();
 //		loadPagerankCentralityMetric();		
@@ -147,7 +147,7 @@ public class DependencyDAG {
 	}
 	
 	private void checkTargetReachability(String node) {
-		if (Integer.parseInt(node) < SyntheticNLDAG2.sI) {
+		if (Integer.parseInt(node) < SimpleModelDAG.sI) {
 			canReachTarget = true;
 			return;
 		}
@@ -162,7 +162,7 @@ public class DependencyDAG {
 	}
 	
 	private void checkSourceReachability(String node) {
-		if (Integer.parseInt(node) >= SyntheticNLDAG2.sS) {
+		if (Integer.parseInt(node) >= SimpleModelDAG.sS) {
 			canReachSource = true;
 			return;
 		}
@@ -205,7 +205,7 @@ public class DependencyDAG {
 		HashSet<String> tempFunctions = new HashSet(nodes);
 		for (String s: tempFunctions) {
 			int index = Integer.parseInt(s);
-			if (index >= SyntheticNLDAG2.sI && index < SyntheticNLDAG2.sS) { // so bad, so so bad
+			if (index >= SimpleModelDAG.sI && index < SimpleModelDAG.sS) { // so bad, so so bad
 				checkReach(s);
 				if (!canReachTarget || !canReachSource) {
 					removeNode(s);
@@ -232,6 +232,8 @@ public class DependencyDAG {
 					dependent = tokens[0].substring(0, tokens[0].length());
 					server = tokens[2].substring(0, tokens[2].length() - 1); // for cobjdump: a-> b;
 					// String server = tokens[2].substring(0, tokens[2].length()); // for cdepn: a -> b
+					
+					
 					if (dependent.equals("do_log") || server.equals("do_log")) { 
 						// no more location metric noise! 
 						// compiler generated
@@ -587,17 +589,17 @@ public class DependencyDAG {
 			kounter = 0;
 			reachableUpwardsNodes(s); // how many nodes are using her
 			visited.remove(s); // remove ifself
-//			dependentsReachable.put(s, new HashSet(visited)); // too heavy for court case
+			dependentsReachable.put(s, new HashSet(visited)); // too heavy for court case
 			targetsReachable.put(s, kounter);
-			System.out.println("Targets reached: " + kounter);
+//			System.out.println("Targets reached: " + kounter);
 			
 			visited.clear();
 			kounter = 0;
 			reachableDownwardsNodes(s); // how many nodes she is using
 			visited.remove(s); // remove itself
-//			serversReachable.put(s, new HashSet(visited)); // too heavy for court case
+			serversReachable.put(s, new HashSet(visited)); // too heavy for court case
 			sourcesReachable.put(s, kounter);
-			System.out.println("Source reached: " + kounter);
+//			System.out.println("Source reached: " + kounter);
 	}
 	
 	private void computeTargetPagerankCompression(String node) {
