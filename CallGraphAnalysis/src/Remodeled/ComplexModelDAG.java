@@ -26,7 +26,7 @@ public class ComplexModelDAG {
 	public static void getAlphaDAG() throws Exception {
 		String negate = "";
 		if (alphaNegative) negate += "-";
-		PrintWriter pw = new PrintWriter(new File("synthetic_callgraphs//ComplexModelDAG-a" + negate + alpha + ".txt"));
+		PrintWriter pw = new PrintWriter(new File("synthetic_callgraphs//ComplexModelDAGa" + negate + alpha + ".txt"));
 		generateLayeredDAG(pw);
 	}
 	

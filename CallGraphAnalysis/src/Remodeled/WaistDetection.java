@@ -13,7 +13,9 @@ public class WaistDetection {
 	static HashMap<String, Double> averageWaistRank;
 
 	public static void heuristicWaistDetection(DependencyDAG dependencyDAG, String filePath) throws Exception {
-		PrintWriter pw = new PrintWriter(new File("analysis//path-cover-2-" + filePath + ".txt"));
+//		PrintWriter pw0 = new PrintWriter(new File("analysis//path-cover-2-" + filePath + ".txt"));
+		PrintWriter pw1 = new PrintWriter(new File("analysis//coverage-threshold-" + filePath + ".txt"));
+
 		double cumulativePathsTraversed = 0;
 		double tPath = dependencyDAG.nTotalPath;
 		int nodeRank = 0;
@@ -22,7 +24,7 @@ public class WaistDetection {
 		HashSet<String> tempTiedNodeSet = new HashSet();
 		
 		DistributionAnalysis.findNDirectSrcTgtBypasses(dependencyDAG, "xxx");
-//		System.out.println(tPath);
+		System.out.println("Direct Tubes:" + DependencyDAG.nDirectSourceTargetEdges);
 		
 		while (true) {
 			double maxPathThrough = 0;
@@ -51,6 +53,8 @@ public class WaistDetection {
 					tempTiedNodeSet.add(s);
 				}
 			}
+			
+			if (maxPathThrough == 0) break;
 			
 //			System.out.println("Max centrality node: " + maxPathNode + " with unique paths: " + maxPathThrough);
 //			System.out.println("Source path: " + dependencyDAG.numOfSourcePath.get(maxPathNode) + " Target path: " + dependencyDAG.numOfTargetPath.get(maxPathNode));
@@ -83,9 +87,17 @@ public class WaistDetection {
 			}
 
 //			if all paths have been traversed (except direct s-t edges), then break out
-			if (cumulativePathsTraversed >= ((tPath - dependencyDAG.nDirectSourceTargetEdges) * pathCoverageTau)) {
+//			if (cumulativePathsTraversed >= ((tPath - dependencyDAG.nDirectSourceTargetEdges) * pathCoverageTau)) {
+//				break;
+//			}
+			
+			pw1.println(topRemovedWaistNodes.size() + "\t" + (cumulativePathsTraversed / tPath));
+			
+			if (cumulativePathsTraversed >= (tPath * 0.9999)) {
 				break;
 			}
+			
+			if (topRemovedWaistNodes.size() > dependencyDAG.nodes.size() / 2) break;
 
 //			remove the largest through path node, recompute through paths for all remaining nodes
 			dependencyDAG.numOfTargetPath.clear();
@@ -99,10 +111,16 @@ public class WaistDetection {
 //			if (!topRemovedWaistNodes.contains(s)) {
 //				System.out.println(s);
 //			}
-//		}		
+//		}
+		
+		pw1.close();
 	}
 	
 	public static void pathCoverageThresholdDetection(DependencyDAG dependencyDAG, String filePath) throws Exception {
+		averageWaistRank = new HashMap();
+		heuristicWaistDetection(dependencyDAG, filePath);
+		
+		/*
 		PrintWriter pw1 = new PrintWriter(new File("analysis//coverage-threshold-" + filePath + ".txt"));
 //		PrintWriter pw2 = new PrintWriter(new File("analysis//node-coverage-threshold-" + filePath + ".txt"));
 		
@@ -117,11 +135,13 @@ public class WaistDetection {
 			int currentWaistSize = topRemovedWaistNodes.size();
 //			pw1.println(currentWaistSize + "\t" + pathCoverageTau + "\t" + ((1.0 - pathCoverageTau) * currentWaistSize));
 			
-			double nodeCoverage = getNodeCoverage(dependencyDAG);
-			pw1.println(currentWaistSize + "\t" + pathCoverageTau + "\t" + nodeCoverage);
+			pw1.println(currentWaistSize + "\t" + pathCoverageTau);
+//			double nodeCoverage = getNodeCoverage(dependencyDAG);
+//			pw1.println(currentWaistSize + "\t" + pathCoverageTau + "\t" + nodeCoverage);
 		}
 		
 		pw1.close();
+		*/
 	}
 	
 	public static void randomizedWaistDetection(DependencyDAG dependencyDAG, String filePath) throws Exception {

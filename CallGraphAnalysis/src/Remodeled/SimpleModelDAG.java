@@ -42,46 +42,49 @@ public class SimpleModelDAG {
 //	static int sI = 2; // start of Intermediate
 //	static int sS = 1000; // start of source
 
-	static HashMap<Integer, Integer> outDegree = new HashMap();
+//	static HashMap<Integer, Integer> outDegree = new HashMap();
 	
 	static ZipfDistribution zipfDistribution;
-	static ZipfDistribution zipfDistribution2 = new ZipfDistribution(10, 1.0);
+//	static ZipfDistribution zipfDistribution2 = new ZipfDistribution(10, 1.0);
 	static UniformIntegerDistribution uniformIntegerDistribution;
-	static double normalMean = 10.0;
-	static double normalSD = 4.0;
-	static NormalDistribution normalDistribution = new NormalDistribution(normalMean, normalSD);
+	
+//	static double normalMean = 10.0;
+//	static double normalSD = 4.0;
+//	static NormalDistribution normalDistribution = new NormalDistribution(normalMean, normalSD);
 
 	static DependencyDAG dependencyDAG;
 	
 	static TreeMap<Integer, Integer> inDegreeHistogram;
 	static int numOfNonzeroIndegreeNodes;
 	
-	public static void getNLNHGDAG() throws Exception {
+	public static void getSimpleModelDAG() throws Exception {
 		String negate = "";
 		if (alphaNegative) negate += "-";
 		
 		PrintWriter pw = new PrintWriter(new File("synthetic_callgraphs//SimpleModelDAGa" + negate + alpha + ".txt"));
-		generateNLDAG(pw);
+		generateSimpleModelDAG(pw);
 	}
 	
 	public static int getInDegree() {
-//		int values[] = {2, 3, 4, 5};
-//		int values[] = {7, 8, 9, 10};
-//		return values[random.nextInt(4)];
-//		return 6;
+		return 3;
 		
-//		return (int)Math.ceil(normalDistribution.sample());
+		/*
+		int values[] = {2, 3, 4, 5};
+//		int values[] = {7, 8, 9, 10};
+		return values[random.nextInt(4)];
+		
+		return (int)Math.ceil(normalDistribution.sample());
 		return zipfDistribution2.sample();
 		
-		
 //		For generating synthetic resembling real networks with given in-degree distribution
-//		double rv = random.nextDouble();
-//		double cp = 0;
-//		for (int i: inDegreeHistogram.keySet()) {
-//			cp += 1.0 * inDegreeHistogram.get(i) / numOfNonzeroIndegreeNodes;
-//			if (rv < cp) return i;
-//		}
-//		return inDegreeHistogram.get(inDegreeHistogram.firstKey());
+		double rv = random.nextDouble();
+		double cp = 0;
+		for (int i: inDegreeHistogram.keySet()) {
+			cp += 1.0 * inDegreeHistogram.get(i) / numOfNonzeroIndegreeNodes;
+			if (rv < cp) return i;
+		}
+		return inDegreeHistogram.get(inDegreeHistogram.firstKey());
+		*/
 	}
 	
 	public static int getNodeFromZipfDistribution(int startNodeIndex, int endNodeIndex) {
@@ -119,30 +122,31 @@ public class SimpleModelDAG {
 		return endNodeIndex;
 	}
 	
-	public static void generateNLDAG(PrintWriter pw) throws Exception {	
-//		System.out.println(SyntheticNLDAG2.nS + "\t" + SyntheticNLDAG2.nI + "\t" + SyntheticNLDAG2.nT);
-
+	public static void generateSimpleModelDAG(PrintWriter pw) throws Exception {	
 		for (int productIndex = sS - 1; productIndex > 0; --productIndex) {	
 //			System.out.println(productIndex);
 			
-			int startNodeIndex = -1, endNodeIndex = -1;
-			if (productIndex < sI) {
+			int startNodeIndex = -1;
+			if (productIndex < sI) { // choosing substrates for targets
 				startNodeIndex = sI;
 			}
-			else {
+			else { // choosing substrates for intermediate nodes
 				startNodeIndex = productIndex + 1;
 			}
-			endNodeIndex = sS + nS - 1;
-			if (Math.abs(alpha) < 0.000001) {
+			int endNodeIndex = sS + nS - 1;
+			
+			if (Math.abs(alpha) < 0.000001) { // uniform distribution
 				if (startNodeIndex < endNodeIndex) {
 					uniformIntegerDistribution = new UniformIntegerDistribution(startNodeIndex, endNodeIndex);
 				}
+				/*
 				else {
 					outDegree.put(sS, 1);
 					continue;
 				}
+				*/
 			}
-			else {				
+			else { // zipf distribution				
 				zipfDistribution = new ZipfDistribution(endNodeIndex - startNodeIndex + 1, alpha);
 			}
 			
@@ -157,14 +161,17 @@ public class SimpleModelDAG {
 				else {
 					substrateIndex = getNodeFromZipfDistribution(startNodeIndex, endNodeIndex);
 				}
+				
 				pw.println(substrateIndex + " " + productIndex);
 
+				/*
 				if (outDegree.containsKey(substrateIndex)) {
 					outDegree.put(substrateIndex, outDegree.get(substrateIndex) + 1);
 				} 
 				else {
 					outDegree.put(substrateIndex, 1);
 				}
+				*/
 			}
 		}
 		
@@ -182,31 +189,33 @@ public class SimpleModelDAG {
 			alpha = Math.abs(d);
 			random = new Random(System.nanoTime());
 			
-			getNLNHGDAG();
+			getSimpleModelDAG();
 			
 //			break;
 		}
 		
-//		int N = nT + nI + nS;
-//		for (int nodeIndex = sS; nodeIndex > 0; --nodeIndex) {
-//			double expectedOutDeg = 0;
-//			for (int product = nodeIndex - 1; product > 0; --product) {
-//				if (alpha > 0) {
-//					ZipfDistribution zipfDistribution = new ZipfDistribution(N - product, alpha);
-//					expectedOutDeg += 1.0 - Math.pow(1.0 - zipfDistribution.probability(nodeIndex - product), getInDegree());
-//				} 
-//				else {
-//					if (product + 1 < N) {
-//						UniformIntegerDistribution uniformIntegerDistribution = new UniformIntegerDistribution(product + 1, N);
-//						expectedOutDeg += 1.0 - Math.pow(1.0 - uniformIntegerDistribution.probability(nodeIndex), getInDegree());
-//					} else {
-//						expectedOutDeg = 1;
-//					}
-//				}
-//			}
-//			System.out.println(nodeIndex + "\t" + outDegree.get(nodeIndex) + "\t" + expectedOutDeg);
-//		}
-//		
+		/*
+		int N = nT + nI + nS;
+		for (int nodeIndex = sS; nodeIndex > 0; --nodeIndex) {
+			double expectedOutDeg = 0;
+			for (int product = nodeIndex - 1; product > 0; --product) {
+				if (alpha > 0) {
+					ZipfDistribution zipfDistribution = new ZipfDistribution(N - product, alpha);
+					expectedOutDeg += 1.0 - Math.pow(1.0 - zipfDistribution.probability(nodeIndex - product), getInDegree());
+				} 
+				else {
+					if (product + 1 < N) {
+						UniformIntegerDistribution uniformIntegerDistribution = new UniformIntegerDistribution(product + 1, N);
+						expectedOutDeg += 1.0 - Math.pow(1.0 - uniformIntegerDistribution.probability(nodeIndex), getInDegree());
+					} else {
+						expectedOutDeg = 1;
+					}
+				}
+			}
+			System.out.println(nodeIndex + "\t" + outDegree.get(nodeIndex) + "\t" + expectedOutDeg);
+		}
+		*/
+		
 		System.out.println("Done!");
 	}
 }

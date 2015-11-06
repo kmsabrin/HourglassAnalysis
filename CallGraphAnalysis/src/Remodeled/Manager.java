@@ -39,7 +39,7 @@ public class Manager {
 			SimpleModelDAG.alpha = Math.abs(d);
 			SimpleModelDAG.random = new Random(System.nanoTime());
 			System.out.println("Alpha: " + d);
-			SimpleModelDAG.getNLNHGDAG();
+			SimpleModelDAG.getSimpleModelDAG();
 		}		
 	}
 	
@@ -158,14 +158,18 @@ public class Manager {
 	
 	public static void doSyntheticNetworkAnalysis() throws Exception {
 		DependencyDAG.isSynthetic = true;
-		String DAGType = "AlphaDAG";
+//		String DAGType = "AlphaDAG";
+		String DAGType = "SimpleModelDAG";
+		
 //		String alpha[] = {"-1.0", "-0.8", "-0.6", "-0.4", "-0.2", "0.0", "0.2", "0.4", "0.6", "0.8", "1.0"};
 		String alpha[] = {"-1.0", "-0.5", "0.0", "0.5", "1.0"};
+//		String alpha[] = {"-1.0"};
+		
 //		String versions[] = {"rectangleDAG", "noisyRectangleDAG", "trapezoidDAG", "diamondDAG", "hourglassDAG"};
 
 		for (String a: alpha) {
 //			if (!a.equals("-1.0")) continue;			
-			String networkID = DAGType + "-a" + a;
+			String networkID = DAGType + "a" + a;
 			System.out.println("Working on: " + networkID);
 			DependencyDAG dependencyDAG = new DependencyDAG("synthetic_callgraphs//" + networkID + ".txt");
 			printNetworkStat(dependencyDAG);
@@ -174,10 +178,11 @@ public class Manager {
 //			DistributionAnalysis.printSyntheticPC(dependencyDAG, networkID);
 //			DistributionAnalysis.targetEdgeConcentration(dependencyDAG);
 //			DistributionAnalysis.getAveragePathLenth(dependencyDAG);
-			DistributionAnalysis.getCentralityCCDF(dependencyDAG, networkID, 1);
+//			DistributionAnalysis.getCentralityCCDF(dependencyDAG, networkID, 1);
 //			DistributionAnalysis.getReachabilityCount(dependencyDAG);
 //			DistributionAnalysis.printSourceVsTargetCompression(dependencyDAG, networkID);
 			
+			WaistDetection.pathCoverageThresholdDetection(dependencyDAG, networkID);
 //			new GradientFilterAnalysis().getSampleGradientsQuartileInterval(dependencyDAG, networkID);
 //			WaistDetection.runPCWaistDetection(dependencyDAG, networkID);
 		}

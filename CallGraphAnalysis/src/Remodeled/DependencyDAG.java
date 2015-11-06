@@ -111,6 +111,7 @@ public class DependencyDAG {
 		sourcesReachable = new HashMap();
 	
 //		largestWCCNodes = new HashSet();
+		visited = new HashSet();
 		
 		WaistDetection.topRemovedWaistNodes.clear();
 	}
@@ -128,7 +129,7 @@ public class DependencyDAG {
 		}
 		
 		if (isSynthetic) {
-//			removeDisconnectedNodesForSyntheticNetworks();
+			removeDisconnectedNodesForSyntheticNetworks();
 		}
 		
 		removeIsolatedNodes();
@@ -686,10 +687,10 @@ public class DependencyDAG {
 			if (!(serves.containsKey(s) && depends.containsKey(s))){ // manually reset source and targets to zero
 				normalizedPathCentrality.put(s, 0.0);
 			}
-			else {
-				if (numOfTargetPath.get(s) * numOfSourcePath.get(s) < 10e30) 
-					++tubes;
-			}
+//			else {
+//				if (numOfTargetPath.get(s) * numOfSourcePath.get(s) < 10e30) 
+//					++tubes;
+//			}
 			
 //			I-Centrality
 			/*
@@ -704,7 +705,7 @@ public class DependencyDAG {
 			*/
 		}			
 		
-		System.out.println("Tubes: " + tubes);
+//		System.out.println("Tubes: " + tubes);
 	}
 	
 	public void printNetworkMetrics() {
