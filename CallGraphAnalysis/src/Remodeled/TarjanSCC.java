@@ -90,18 +90,17 @@ public class TarjanSCC {
 	public static void main(String[] args) throws Exception {
 		DependencyDAG G = new DependencyDAG(); 
 		
-		PrintWriter pw = new PrintWriter(new File("metabolic_networks//monkey-consolidated.txt"));		
+		PrintWriter pw = new PrintWriter(new File("metabolic_networks//rat-consolidated.txt"));		
 		G.isMetabolic = true;
-		G.loadCallGraph("metabolic_networks//monkey-links.txt"); // "metabolic_networks//rat-links.txt"
+		G.loadCallGraph("metabolic_networks//rat-links.txt"); // "metabolic_networks//rat-links.txt"
 		
 //		PrintWriter pw = new PrintWriter(new File("jdk_class_dependency//commons-math-callgraph-consolidated.txt"));		
 //		G.isClassDependency = true;
-//		G.loadCallGraph("jdk_class_dependency//commons-math-callgraph.txt"); // "metabolic_networks//rat-links.txt"
+//		G.loadCallGraph("jdk_class_dependency//commons-math-callgraph.txt"); 
 		
 //		PrintWriter pw = new PrintWriter(new File("openssh_callgraphs//full.graph-openssh-39-consolidated"));		
 //		G.isCallgraph = true;
-//		G.loadCallGraph("openssh_callgraphs//full.graph-openssh-39"); // "metabolic_networks//rat-links.txt"
-		
+//		G.loadCallGraph("openssh_callgraphs//full.graph-openssh-39"); 
 		
 		TarjanSCC scc = new TarjanSCC(G);
 		// number of connected components
@@ -131,7 +130,7 @@ public class TarjanSCC {
 		
 		int kNonTrivialSCC = 0;
 		for (String s: sccs.keySet()) {
-//			if (sccs.get(s).size() < 2) continue; // show the non-trivial SCCs only
+			if (sccs.get(s).size() < 2) continue; // show the non-trivial SCCs only
 			++kNonTrivialSCC;
 			System.out.print(s + "\t");
 			for (String r: sccs.get(s)) {
@@ -140,7 +139,7 @@ public class TarjanSCC {
 			System.out.println();
 //			System.out.println(sccs.get(s).size());
 		}
-//		System.out.println("Number of Non-trivial SCCs: " + kNonTrivialSCC);
+		System.out.println("Number of Non-trivial SCCs: " + kNonTrivialSCC);
 		
 		for (String v: G.nodes) {
 			String srcSCCId = sccIdMap.get(v);

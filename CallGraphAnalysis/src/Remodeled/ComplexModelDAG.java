@@ -13,8 +13,8 @@ public class ComplexModelDAG {
 	static double alpha = 0.0;
 	static boolean alphaNegative = false;
 	
-	static int nLayers = 200;
-	static int nodesPerLayer = 25;
+	static int nLayers = 5;
+	static int nodesPerLayer = 3;
 	static int[] layerStartNode = new int[nLayers];
 	static int[] layerEndNode = new int[nLayers];
 
@@ -35,9 +35,9 @@ public class ComplexModelDAG {
 //		int values[] = {7, 8, 9, 10};
 //		return values[random.nextInt(4)];
 
-		return (int)Math.ceil(normalDistribution.sample());
+//		return (int)Math.ceil(normalDistribution.sample());
 
-//		return 2;		
+		return 3;		
 	}
 	
 	public static int getNodeFromZipfDistribution(int startLayerIndex, int endLayerIndex) {
@@ -85,8 +85,9 @@ public class ComplexModelDAG {
 	public static void generateLayeredDAG(PrintWriter pw) throws Exception {
 		for (int layer = nLayers - 1; layer >= 0; --layer) {
 			for (int productIndex = layerEndNode[layer]; productIndex >= layerStartNode[layer]; --productIndex) {
-				if (layer == nLayers - 1)
-					continue;
+				if (layer == nLayers - 1) {
+					continue; // sources layer
+				}
 
 				int startLayerIndex = layer + 1;
 				int endLayerIndex = nLayers - 1;
@@ -115,7 +116,9 @@ public class ComplexModelDAG {
 		pw.close();
 	}
 
-	private static void loadLayerIndex() {
+	public static void loadLayerIndex() {
+		// layer [0] = targets
+		// layer [nLayer - 1] = sources 
 		int startIndex = 0;
 		for (int i = 0; i < nLayers; ++i) {
 			layerStartNode[i] = startIndex;
@@ -127,7 +130,8 @@ public class ComplexModelDAG {
 	public static void main(String[] args) throws Exception {
 		loadLayerIndex();
 		
-		for (double d = -1.0; d < 1.1; d += 0.5) {
+		for (double d = 5.0; d < 10.1; d += 10.5) 
+		{
 			if (d < 0) {
 				alphaNegative = true;
 			}

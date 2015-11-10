@@ -64,6 +64,7 @@ public class DistributionAnalysis {
 			}
 		}
 		
+		System.out.println("Largest WCC size: " + largestWCCSize);
 		visited.clear();
 		WCCHelper(largestWCCSeed, dependencyDAG);
 		for (String s: visited) {
@@ -250,9 +251,10 @@ public class DistributionAnalysis {
 		}
 		
 //		System.out.println("Average Path Length: " + avgPLength / knt);
-		System.out.println("Max Path Length: " + StatUtils.max(pathLengths));
-		System.out.println("Mean Path Length: " + StatUtils.mean(pathLengths));
-		System.out.println("STD Path Length: " + Math.sqrt(StatUtils.variance(pathLengths)));
+		System.out.println("Median Path Length: " + StatUtils.percentile(pathLengths, 50));
+//		System.out.println("Max Path Length: " + StatUtils.max(pathLengths));
+//		System.out.println("Mean Path Length: " + StatUtils.mean(pathLengths));
+//		System.out.println("STD Path Length: " + Math.sqrt(StatUtils.variance(pathLengths)));
 	}
 	
 	public static void targetEdgeConcentration(DependencyDAG dependencyDAG) {
@@ -349,8 +351,10 @@ public class DistributionAnalysis {
 		}
 		
 		for (int i: inDegreeHistogram.keySet()) {
-//			System.out.println(i + "\t" + inDegreeHistogram.get(i));
+			System.out.println(i + "\t" + inDegreeHistogram.get(i));
 		}
+		
+		System.out.println("------------------------");
 		
 		for (int i: outDegreeHistogram.keySet()) {
 			System.out.println(i + "\t" + outDegreeHistogram.get(i));

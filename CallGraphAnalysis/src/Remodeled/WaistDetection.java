@@ -54,7 +54,7 @@ public class WaistDetection {
 				}
 			}
 			
-			if (maxPathThrough == 0) break;
+//			if (maxPathThrough == 0) break;
 			
 //			System.out.println("Max centrality node: " + maxPathNode + " with unique paths: " + maxPathThrough);
 //			System.out.println("Source path: " + dependencyDAG.numOfSourcePath.get(maxPathNode) + " Target path: " + dependencyDAG.numOfTargetPath.get(maxPathNode));
@@ -97,7 +97,7 @@ public class WaistDetection {
 				break;
 			}
 			
-			if (topRemovedWaistNodes.size() > dependencyDAG.nodes.size() / 2) break;
+			if (topRemovedWaistNodes.size() >= (dependencyDAG.nodes.size() - dependencyDAG.nSources - dependencyDAG.nTargets)) break;
 
 //			remove the largest through path node, recompute through paths for all remaining nodes
 			dependencyDAG.numOfTargetPath.clear();

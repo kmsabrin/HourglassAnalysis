@@ -67,6 +67,8 @@ public class DependencyDAG {
 	static boolean isCourtcase = false;
 	static boolean isToy = false;
 	static boolean isClassDependency = false;
+	static boolean isSimpleModel = false;
+	static boolean isComplexModel = false;
 	
 	static int nDirectSourceTargetEdges = 0;
 	
@@ -148,9 +150,17 @@ public class DependencyDAG {
 	}
 	
 	private void checkTargetReachability(String node) {
-		if (Integer.parseInt(node) < SimpleModelDAG.sI) {
-			canReachTarget = true;
-			return;
+		if (isSimpleModel) {
+			if (Integer.parseInt(node) < SimpleModelDAG.sI) {
+				canReachTarget = true;
+				return;
+			}
+		}
+		else if (isComplexModel) {
+			if (Integer.parseInt(node) <= ComplexModelDAG.layerEndNode[0]) {
+				canReachTarget = true;
+				return;
+			}
 		}
 		
 		if (canReachTarget) return;
@@ -163,9 +173,16 @@ public class DependencyDAG {
 	}
 	
 	private void checkSourceReachability(String node) {
-		if (Integer.parseInt(node) >= SimpleModelDAG.sS) {
-			canReachSource = true;
-			return;
+		if (isSimpleModel) {
+			if (Integer.parseInt(node) >= SimpleModelDAG.sS) {
+				canReachSource = true;
+				return;
+			}
+		} else if (isComplexModel) {
+			if (Integer.parseInt(node) >= ComplexModelDAG.layerStartNode[ComplexModelDAG.nLayers - 1]) {
+				canReachSource = true;
+				return;
+			}
 		}
 		
 		if (canReachSource) return;
@@ -206,10 +223,15 @@ public class DependencyDAG {
 		HashSet<String> tempFunctions = new HashSet(nodes);
 		for (String s: tempFunctions) {
 			int index = Integer.parseInt(s);
-			if (index >= SimpleModelDAG.sI && index < SimpleModelDAG.sS) { // so bad, so so bad
+//			System.out.println("Is " + index + " disconnected?");
+//			System.out.println("If in between " + ComplexModelDAG.layerEndNode[0] + " and " + ComplexModelDAG.layerStartNode[ComplexModelDAG.nLayers - 1]);
+			if ((isSimpleModel && index >= SimpleModelDAG.sI && index < SimpleModelDAG.sS) || 
+				(isComplexModel && index > ComplexModelDAG.layerEndNode[0] && index < ComplexModelDAG.layerStartNode[ComplexModelDAG.nLayers - 1])) { // so bad, so so bad
 				checkReach(s);
+//				System.out.println("Checking reach of " + s);
 				if (!canReachTarget || !canReachSource) {
 					removeNode(s);
+//					System.out.println("YES!");
 				}
 			}
 		}
@@ -253,9 +275,9 @@ public class DependencyDAG {
 				// for metabolic and synthetic networks
 				server = tokens[0];
 				dependent = tokens[1];
-				if (largestWCCNodes.contains(server) == false || largestWCCNodes.contains(dependent) == false) {
-					continue;
-				}
+//				if (largestWCCNodes.contains(server) == false || largestWCCNodes.contains(dependent) == false) {
+//					continue;
+//				}
 			}
 
 			if (isCourtcase) {
@@ -436,7 +458,9 @@ public class DependencyDAG {
 		
 		nSources = nTargets = nEdges = 0;
 		for (String s: nodes) {
-			if (!serves.containsKey(s)) ++nTargets;
+			if (!serves.containsKey(s)) {
+				++nTargets;
+			}
 			if (!depends.containsKey(s)) {
 				++nSources;
 			}

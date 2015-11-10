@@ -135,12 +135,12 @@ public class Manager {
 //		DistributionAnalysis.printEdgeList(dependencyDAG, netID);
 //		DistributionAnalysis.getAverageInOutDegree(dependencyDAG);
 //		DistributionAnalysis.getAveragePathLenth(dependencyDAG);
-//		DistributionAnalysis.getDegreeHistogram(dependencyDAG);
+		DistributionAnalysis.getDegreeHistogram(dependencyDAG);
 //		DistributionAnalysis.findWeaklyConnectedComponents(dependencyDAG, netID);		
 //		DistributionAnalysis.printCentralityRanks(dependencyDAG, netID);
 //		int centralityIndex = 1;
 //		DistributionAnalysis.getCentralityCCDF(dependencyDAG, netID, 1);
-		DistributionAnalysis.printCentralityDistribution(dependencyDAG, netID);
+//		DistributionAnalysis.printCentralityDistribution(dependencyDAG, netID);
 //		DistributionAnalysis.printEdgeList(dependencyDAG, netID);
 //		DistributionAnalysis.printAllCentralities(dependencyDAG, netID);
 //		DistributionAnalysis.findNDirectSrcTgtBypasses(dependencyDAG, netID);
@@ -158,12 +158,16 @@ public class Manager {
 	
 	public static void doSyntheticNetworkAnalysis() throws Exception {
 		DependencyDAG.isSynthetic = true;
-//		String DAGType = "AlphaDAG";
-		String DAGType = "SimpleModelDAG";
+		String DAGType = "ComplexModelDAG";
+		DependencyDAG.isComplexModel = true;
+		ComplexModelDAG.loadLayerIndex();
+		
+//		String DAGType = "SimpleModelDAG";
+//		DependencyDAG.isSimpleModel = true;
 		
 //		String alpha[] = {"-1.0", "-0.8", "-0.6", "-0.4", "-0.2", "0.0", "0.2", "0.4", "0.6", "0.8", "1.0"};
-		String alpha[] = {"-1.0", "-0.5", "0.0", "0.5", "1.0"};
-//		String alpha[] = {"-1.0"};
+		String alpha[] = {"-5.0", "-1.0", "-0.5", "0.0", "0.5", "1.0", "5.0"};
+//		String alpha[] = {"-5.0"};
 		
 //		String versions[] = {"rectangleDAG", "noisyRectangleDAG", "trapezoidDAG", "diamondDAG", "hourglassDAG"};
 
@@ -211,8 +215,8 @@ public class Manager {
 	}
 
 	public static void main(String[] args) throws Exception {		
-//		Manager.doRealNetworkAnalysis();
-		Manager.doSyntheticNetworkAnalysis();
+		Manager.doRealNetworkAnalysis();
+//		Manager.doSyntheticNetworkAnalysis();
 //		Manager.doToyNetworkAnalysis();
 		System.out.println("Done!");
 	}

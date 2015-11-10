@@ -66,11 +66,12 @@ public class StatisticalUtilTest {
 		
 		extractJavaClassDependency();
 		
-		int n = 100;
-		ZipfDistribution zipfDistribution = new ZipfDistribution(10, 1.0);
+		int n = 30;
+		ZipfDistribution zipfDistribution = new ZipfDistribution(n, 5.0);
 		for (int i = 1; i <= n; ++i) {
 //			System.out.println(i + "\t" + zipfDistribution.probability(n - i + 1));
-			System.out.println(zipfDistribution.sample());
+//			System.out.println(zipfDistribution.sample());
+			System.out.println(i + "\t" + zipfDistribution.probability(n - i + 1));
 		}
 //		
 //		System.out.println("----------");
