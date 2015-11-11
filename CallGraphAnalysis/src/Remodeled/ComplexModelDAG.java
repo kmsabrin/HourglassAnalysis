@@ -13,8 +13,8 @@ public class ComplexModelDAG {
 	static double alpha = 0.0;
 	static boolean alphaNegative = false;
 	
-	static int nLayers = 5;
-	static int nodesPerLayer = 3;
+	static int nLayers = 4;
+	static int nodesPerLayer = 5;
 	static int[] layerStartNode = new int[nLayers];
 	static int[] layerEndNode = new int[nLayers];
 
@@ -37,7 +37,7 @@ public class ComplexModelDAG {
 
 //		return (int)Math.ceil(normalDistribution.sample());
 
-		return 3;		
+		return 2;		
 	}
 	
 	public static int getNodeFromZipfDistribution(int startLayerIndex, int endLayerIndex) {
@@ -108,7 +108,7 @@ public class ComplexModelDAG {
 						substrateIndex = getNodeFromZipfDistribution(startLayerIndex, endLayerIndex);
 					}
 					
-					pw.println(substrateIndex + " " + productIndex);
+					pw.println(substrateIndex + " -> " + productIndex + ";");
 				}
 			}
 		}
@@ -130,8 +130,9 @@ public class ComplexModelDAG {
 	public static void main(String[] args) throws Exception {
 		loadLayerIndex();
 		
-		for (double d = 5.0; d < 10.1; d += 10.5) 
-		{
+		double alphaValues[] = {-10, -1, 0, 1, 10, 20};
+		
+		for (double d: alphaValues) {
 			if (d < 0) {
 				alphaNegative = true;
 			}

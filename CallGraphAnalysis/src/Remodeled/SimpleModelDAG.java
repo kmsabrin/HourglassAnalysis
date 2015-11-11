@@ -16,13 +16,13 @@ public class SimpleModelDAG {
 	static boolean alphaNegative = false;
 	
 //	real network matching
-	static int nT = 100; // no. of (T)arget nodes
-	static int nI = 800; // no. of (I)ntermediate nodes
-	static int nS = 100; // no. of (S)ource nodes
+	static int nT = 5; // no. of (T)arget nodes
+	static int nI = 10; // no. of (I)ntermediate nodes
+	static int nS = 5; // no. of (S)ource nodes
 
-	static int sT = 1; // start of Target
-	static int sI = 101; // start of Intermediate
-	static int sS = 901; // start of source
+	static int sT = 0; // start of Target
+	static int sI = 5; // start of Intermediate
+	static int sS = 15; // start of source
 	
 //	toy test
 //	static int nT = 3; // no. of T(arget) nodes
@@ -66,7 +66,7 @@ public class SimpleModelDAG {
 	}
 	
 	public static int getInDegree() {
-		return 3;
+		return 2;
 		
 		/*
 		int values[] = {2, 3, 4, 5};
@@ -160,9 +160,13 @@ public class SimpleModelDAG {
 				} 
 				else {
 					substrateIndex = getNodeFromZipfDistribution(startNodeIndex, endNodeIndex);
+					// special case: no order among sources
+					if (substrateIndex >= sS) {
+						substrateIndex = sS + random.nextInt(nS);
+					}
 				}
 				
-				pw.println(substrateIndex + " " + productIndex);
+				pw.println(substrateIndex + " -> " + productIndex + ";");
 
 				/*
 				if (outDegree.containsKey(substrateIndex)) {
@@ -179,7 +183,9 @@ public class SimpleModelDAG {
 	}
 
 	public static void main(String[] args) throws Exception {
-		for (double d = -1.0; d < 1.1; d += 0.5) {
+		double alphaValues[] = {-10, -1, 0, 1, 10};
+		
+		for (double d: alphaValues) {
 			if (d < 0) {
 				alphaNegative = true;
 			}
