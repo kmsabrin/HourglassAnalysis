@@ -69,10 +69,13 @@ public class DependencyDAG {
 	static boolean isClassDependency = false;
 	static boolean isSimpleModel = false;
 	static boolean isComplexModel = false;
+	static boolean isWeighted = false;
 	
 	static int nDirectSourceTargetEdges = 0;
 	
 	static HashSet<String> largestWCCNodes;
+	
+	HashMap<String, Integer> edgeWeights;
 	
 	DependencyDAG() { 
 		nodes = new TreeSet();
@@ -116,6 +119,8 @@ public class DependencyDAG {
 		visited = new HashSet();
 		
 		WaistDetection.topRemovedWaistNodes.clear();
+		
+		edgeWeights = new HashMap();
 	}
 	
 	DependencyDAG(String dependencyGraphID) throws Exception {
@@ -138,7 +143,13 @@ public class DependencyDAG {
 		
 		loadDegreeMetric();
 		
-		loadPathStatistics();
+		if (isWeighted) {
+			loadWeightedPathStatistics();
+		}
+		else {
+			loadPathStatistics();
+		}
+		
 		loadLocationMetric(); // must load degree metric before
 		
 //		loadReachablityAll();		
@@ -265,10 +276,25 @@ public class DependencyDAG {
 				}
 			}
 
-			if (isSynthetic || isToy || isClassDependency) {
+			if (isClassDependency) {
 				// for metabolic and synthetic networks
 				server = tokens[0];
 				dependent = tokens[1];
+			}
+			
+			if (isSynthetic || isToy) {
+				if (isWeighted) {
+					server = tokens[0];
+					dependent = tokens[1];
+					int weight = Integer.parseInt(tokens[2]);
+					if (weight > 1) {
+						edgeWeights.put(server + "#" + dependent, weight);
+					}
+				} 
+				else {
+					server = tokens[0];
+					dependent = tokens[1];
+				}
 			}
 			
 			if (isMetabolic) {
@@ -522,10 +548,91 @@ public class DependencyDAG {
 		avgTargetDepth.put(node, sPath / nPath);
 	}
 	
-	public void loadPathStatistics() {
-//		int knt = 0;
+	private int getEdgeWeight(String n1, String n2) {
+		if (edgeWeights.containsKey(n1 + "#" + n2)) {
+			return edgeWeights.get(n1 + "#" + n2);
+		}
+		
+		return 1;
+	}
+	
+	private void weightedSourcePathDepth(String node) {
+		if (numOfSourcePath.containsKey(node)) { // node already traversed
+			return;
+		}
+		
+		if (!depends.containsKey(node) && !WaistDetection.topRemovedWaistNodes.contains(node)) { // is source
+			numOfSourcePath.put(node, 1.0);
+			sumOfSourcePath.put(node, 0.0);
+			avgSourceDepth.put(node, 0.0);
+			return;
+		}
+				
+		double nPath = 0;
+		double sPath = 0;
+		if (!WaistDetection.topRemovedWaistNodes.contains(node)) { // special condition for waist detection
+			for (String s : depends.get(node)) {
+				weightedSourcePathDepth(s);
+				nPath += numOfSourcePath.get(s) * getEdgeWeight(s, node);
+				sPath += numOfSourcePath.get(s) * getEdgeWeight(s, node) + sumOfSourcePath.get(s);
+			}
+		}
+		
+		numOfSourcePath.put(node, nPath);
+		sumOfSourcePath.put(node, sPath);
+		avgSourceDepth.put(node, sPath / nPath);
+	}
+	
+	private void weightedTargetPathDepth(String node) {
+		if (numOfTargetPath.containsKey(node)) { // node already traversed
+			return;
+		}
+		
+		if (!serves.containsKey(node) && !WaistDetection.topRemovedWaistNodes.contains(node)) { // is target
+			numOfTargetPath.put(node, 1.0);
+			sumOfTargetPath.put(node, 0.0);
+			avgTargetDepth.put(node, 0.0);
+			return;
+		}
+		
+		double nPath = 0;
+		double sPath = 0;
+		if (!WaistDetection.topRemovedWaistNodes.contains(node)) { // special condition for waist detection
+			for (String s : serves.get(node)) {
+				weightedTargetPathDepth(s);
+				nPath += numOfTargetPath.get(s) * getEdgeWeight(node, s);
+				sPath += numOfTargetPath.get(s) * getEdgeWeight(node, s) + sumOfTargetPath.get(s);
+			}
+		}
+		
+		numOfTargetPath.put(node, nPath);
+		sumOfTargetPath.put(node, sPath);
+		avgTargetDepth.put(node, sPath / nPath);
+	}
+
+	
+	public void loadWeightedPathStatistics() {
 		for (String s: nodes) {
-//			if (!numOfSourcePath.containsKey(s)) ++knt;
+			weightedSourcePathDepth(s);
+		}
+				
+		for (String s: nodes) {
+			weightedTargetPathDepth(s);
+		}		
+
+		nTotalPath = 0;
+		for (String s : nodes) {
+			double nPath = 1;
+			nPath = numOfTargetPath.get(s) * numOfSourcePath.get(s);
+			nodePathThrough.put(s, nPath);
+			if (!serves.containsKey(s)) { // is a target
+				nTotalPath += nPath;
+			}
+		}
+	}
+
+	public void loadPathStatistics() {
+		for (String s: nodes) {
 			sourcePathDepth(s);
 		}
 				
@@ -542,10 +649,8 @@ public class DependencyDAG {
 				nTotalPath += nPath;
 			}
 		}
-		
-//		System.out.println("Components " + knt);
-//		System.out.println("Total Paths: " + nTotalPath + "\n" + "####################");
 	}
+	
 	
 	public void loadLocationMetric() {
 		for (String s : nodes) {
@@ -735,21 +840,21 @@ public class DependencyDAG {
 	public void printNetworkMetrics() {
 		for (String s: nodes) {
 //			if (normalizedPathCentrality.get(s) < 0.4) continue;
-//			System.out.print(s + "\t");
+			System.out.print(s + "\t");
 //			System.out.print(inDegree.get(s) + "\t");
 //			System.out.print(outDegree.get(s) + "\t");
-//			System.out.print(location.get(s) + "\t");
-//			System.out.print(normalizedPathCentrality.get(s) + "\t");
+			System.out.print(location.get(s) + "\t");
+			System.out.print(normalizedPathCentrality.get(s) + "\t");
 //			System.out.print(pagerankTargetCompression.get(s) + "\t");
 //			System.out.print(pagerankSourceCompression.get(s) + "\t");
 //			System.out.print(harmonicMeanPagerankCentrality.get(s) + "\t");
 //			System.out.print(iCentrality.get(s) + "\t");
 //			System.out.print(sourcesReachable.get(s) + "\t");
 //			System.out.print(targetsReachable.get(s) + "\t");
-//			System.out.println();
+			System.out.println();
 		}
 		
-		System.out.println("Total path: " + nTotalPath);
+//		System.out.println("Total path: " + nTotalPath);
 		
 //		for (String s : functions) {
 //			if (depends.containsKey(s)) {

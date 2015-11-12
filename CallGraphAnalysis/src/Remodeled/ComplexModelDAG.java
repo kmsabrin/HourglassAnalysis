@@ -108,7 +108,8 @@ public class ComplexModelDAG {
 						substrateIndex = getNodeFromZipfDistribution(startLayerIndex, endLayerIndex);
 					}
 					
-					pw.println(substrateIndex + " -> " + productIndex + ";");
+					pw.println(substrateIndex + " " + productIndex);
+//					pw.println(productIndex + " -> " + substrateIndex + ";");
 				}
 			}
 		}

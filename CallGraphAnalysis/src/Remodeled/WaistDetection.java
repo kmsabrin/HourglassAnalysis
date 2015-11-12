@@ -9,7 +9,7 @@ import java.util.Random;
 
 public class WaistDetection {
 	static HashSet<String> topRemovedWaistNodes = new HashSet();
-	static double pathCoverageTau = 0.96;
+	static double pathCoverageTau = 0.95;
 	static HashMap<String, Double> averageWaistRank;
 
 	public static void heuristicWaistDetection(DependencyDAG dependencyDAG, String filePath) throws Exception {
@@ -24,7 +24,7 @@ public class WaistDetection {
 		HashSet<String> tempTiedNodeSet = new HashSet();
 		
 		DistributionAnalysis.findNDirectSrcTgtBypasses(dependencyDAG, "xxx");
-		System.out.println("Direct Tubes:" + DependencyDAG.nDirectSourceTargetEdges);
+//		System.out.println("Direct Tubes:" + DependencyDAG.nDirectSourceTargetEdges);
 		
 		while (true) {
 			double maxPathThrough = 0;
@@ -54,7 +54,11 @@ public class WaistDetection {
 				}
 			}
 			
-//			if (maxPathThrough == 0) break;
+			if (DependencyDAG.isSynthetic == true) {
+				if (maxPathThrough == 0) {
+					break;
+				}
+			}
 			
 //			System.out.println("Max centrality node: " + maxPathNode + " with unique paths: " + maxPathThrough);
 //			System.out.println("Source path: " + dependencyDAG.numOfSourcePath.get(maxPathNode) + " Target path: " + dependencyDAG.numOfTargetPath.get(maxPathNode));
@@ -93,7 +97,7 @@ public class WaistDetection {
 			
 			pw1.println(topRemovedWaistNodes.size() + "\t" + (cumulativePathsTraversed / tPath));
 			
-			if (cumulativePathsTraversed >= (tPath * 0.9999)) {
+			if (cumulativePathsTraversed >= (tPath * pathCoverageTau)) {
 				break;
 			}
 			
@@ -177,10 +181,10 @@ public class WaistDetection {
 		}
 		
 		for (int i: waistSizeFrequencey.keySet()) {
-			System.out.println(i + "\t" + (waistSizeFrequencey.get(i) * 1.0 / nRuns));
+			System.out.println("Waist size " + i + "\t with frequency " + (waistSizeFrequencey.get(i) * 1.0 / nRuns));
 		}
 		
-		System.out.println("--------------------");
+		System.out.println("-- --");
 		
 		topRemovedWaistNodes.clear();
 		dependencyDAG.numOfTargetPath.clear();
@@ -389,16 +393,17 @@ public class WaistDetection {
 			}
 		}
 		
-		System.out.println((notCoveredSource / notCovered) + "\t" + (notCoveredTarget / notCovered) + "\t" + (notCoveredMiddle / notCovered));
+//		System.out.println((notCoveredSource / notCovered) + "\t" + (notCoveredTarget / notCovered) + "\t" + (notCoveredMiddle / notCovered));
 		System.out.println("Node Coverage: " + (waistNodeCoverage.size() * 1.0 / dependencyDAG.nodes.size()));
 		System.out.println("Effective Node Coverage: " + (waistNodeCoverage.size() * 1.0 / (dependencyDAG.nodes.size() - notCoveredSpecialSource - notCoveredSpecialTarget)));
 //		System.out.println("Total Not Covered: " + waistNodeNotCoverage.size() + "\tbut kounter: " + sum);
 
-//		double minST = Math.min(dependencyDAG.nSources, dependencyDAG.nTargets);
+		
+		double minST = Math.min(dependencyDAG.nSources, dependencyDAG.nTargets);
 		// System.out.println("nonSTinWaist: " + (topKNodes.size() - STNodes));
-//		double hourglassnessScore = nonSTinWaist
-//				* ((minST - Math.min(topRemovedWaistNodes.size() - STNodes, minST) + 1.0) / minST);
-		// System.out.println("Hourglassness: " + hourglassnessScore);
+		System.out.println("MinST " + minST + " Waist Size " + averageWaistRank.size());
+		double hourglassnessScore = 1.0 - ((averageWaistRank.size() - 1.0) / minST);
+		System.out.println("Hourglassness: " + hourglassnessScore);
 		
 		return waistNodeCoverage.size() * 1.0 / dependencyDAG.nodes.size();
 	}

@@ -15,7 +15,6 @@ import org.apache.commons.math3.stat.StatUtils;
 import com.google.common.collect.Ordering;
 import com.google.common.collect.TreeMultimap;
 
-
 public class DistributionAnalysis {
 	static HashSet<String> visited;
 	static int wccSize;
@@ -82,7 +81,6 @@ public class DistributionAnalysis {
 		
 		pw.close();
 	}
-	
 	
 	public static void printCentralityDistribution(DependencyDAG dependencyDAG, String filePath) throws Exception {		
 		PrintWriter pw = new PrintWriter(new File("analysis//centrality-distribution-" + filePath + ".txt"));
@@ -218,7 +216,7 @@ public class DistributionAnalysis {
 		}
 	}
 	
-//	public static void printCentralityRanks(DependencyDAG dependencyDAG, String filePath) throws Exception {
+	public static void printCentralityRanks(DependencyDAG dependencyDAG, String filePath) throws Exception {
 //		PrintWriter pw = new PrintWriter(new File("analysis//pcentrality-and-pagerank-" + filePath + ".txt"));
 //		rankData(dependencyDAG, dependencyDAG.normalizedPathCentrality);
 //		
@@ -236,7 +234,7 @@ public class DistributionAnalysis {
 ////			System.out.print(s + "\t" + dependencyDAG.geometricMeanPathCentrality.get(s) + "\t" + dependencyDAG.harmonicMeanPathCentrality.get(s));
 ////			System.out.println("\t" + dependencyDAG.geometricMeanPagerankCentrality.get(s) + "\t" + dependencyDAG.harmonicMeanPagerankCentrality.get(s));
 ////		}
-//	}
+	}
 	
 	public static void getAveragePathLenth(DependencyDAG dependencyDAG) {
 		double avgPLength = 0;
@@ -325,7 +323,7 @@ public class DistributionAnalysis {
 	
 	public static TreeMap<Integer, Integer> getDegreeHistogram(DependencyDAG dependencyDAG) {
 		ArrayList<Integer> inDegree = new ArrayList();
-		ArrayList<Integer> outDegree = new ArrayList();;
+		ArrayList<Integer> outDegree = new ArrayList();
 		
 		TreeMap<Integer, Integer> inDegreeHistogram = new TreeMap();
 		TreeMap<Integer, Integer> outDegreeHistogram = new TreeMap();
@@ -373,6 +371,43 @@ public class DistributionAnalysis {
 //		System.out.println("Outdegree:" + " 10p: " + StatUtils.percentile(outDegree, 10) + " 50p: " + StatUtils.percentile(outDegree, 50) + " 90p: " + StatUtils.percentile(outDegree, 90));
 	
 		return inDegreeHistogram;
+	}
+	
+	public static void getDegreeHistogramSpecialized(DependencyDAG dependencyDAG) {
+		TreeMap<Integer, Integer> inDegreeHistogramNearTarget = new TreeMap();
+		TreeMap<Integer, Integer> inDegreeHistogramNearSource = new TreeMap();
+		
+		for (String s: dependencyDAG.nodes) {
+			int iDeg = dependencyDAG.inDegree.get(s);
+			if (dependencyDAG.location.get(s) > 0 && dependencyDAG.location.get(s) < 0.4) {
+				if (inDegreeHistogramNearSource.containsKey(iDeg)) {
+					int v = inDegreeHistogramNearSource.get(iDeg);
+					inDegreeHistogramNearSource.put(iDeg, v + 1);
+				} 
+				else
+					inDegreeHistogramNearSource.put(iDeg, 1);
+			}
+			
+			if (dependencyDAG.location.get(s) > 0.9) {
+				if (inDegreeHistogramNearTarget.containsKey(iDeg)) {
+					int v = inDegreeHistogramNearTarget.get(iDeg);
+					inDegreeHistogramNearTarget.put(iDeg, v + 1);
+				} 
+				else
+					inDegreeHistogramNearTarget.put(iDeg, 1);
+			}
+		}
+		
+		for (int i: inDegreeHistogramNearSource.keySet()) {
+			System.out.println(i + "\t" + inDegreeHistogramNearSource.get(i));
+		}
+		
+		System.out.println("------------------------");
+		System.out.println("------------------------");
+		
+		for (int i: inDegreeHistogramNearTarget.keySet()) {
+			System.out.println(i + "\t" + inDegreeHistogramNearTarget.get(i));
+		}
 	}
 	
 	public static void getAverageInOutDegree(DependencyDAG dependencyDAG) {
@@ -473,7 +508,7 @@ public class DistributionAnalysis {
 		pw.close();
 	}
 	
-	public static void crossCheck(DependencyDAG dependencyDAG, String filePath) throws Exception {
+	public static void crossCheckCourtCase(DependencyDAG dependencyDAG, String filePath) throws Exception {
 		for (String s: dependencyDAG.nodes) {
 			if(dependencyDAG.serves.containsKey(s) && dependencyDAG.depends.containsKey(s)) {
 				if (!CourtCaseCornellParser.caseIDs.contains(s)) {

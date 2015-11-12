@@ -123,7 +123,7 @@ public class SimpleModelDAG {
 	}
 	
 	public static void generateSimpleModelDAG(PrintWriter pw) throws Exception {	
-		for (int productIndex = sS - 1; productIndex > 0; --productIndex) {	
+		for (int productIndex = sS - 1; productIndex >= 0; --productIndex) {	
 //			System.out.println(productIndex);
 			
 			int startNodeIndex = -1;
@@ -166,7 +166,8 @@ public class SimpleModelDAG {
 					}
 				}
 				
-				pw.println(substrateIndex + " -> " + productIndex + ";");
+				pw.println(substrateIndex + " " + productIndex);
+//				pw.println(productIndex + " -> " + substrateIndex + ";");
 
 				/*
 				if (outDegree.containsKey(substrateIndex)) {
