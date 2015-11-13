@@ -377,9 +377,15 @@ public class DistributionAnalysis {
 		TreeMap<Integer, Integer> inDegreeHistogramNearTarget = new TreeMap();
 		TreeMap<Integer, Integer> inDegreeHistogramNearSource = new TreeMap();
 		
+		int maxDeg = 0;
+		double nearSourceDegSum = 0;
+		double nearTargetDegSum = 0;
 		for (String s: dependencyDAG.nodes) {
 			int iDeg = dependencyDAG.inDegree.get(s);
 			if (dependencyDAG.location.get(s) > 0 && dependencyDAG.location.get(s) < 0.4) {
+				if (iDeg > maxDeg) maxDeg = iDeg;
+				nearSourceDegSum += iDeg;
+//				System.out.println(iDeg);
 				if (inDegreeHistogramNearSource.containsKey(iDeg)) {
 					int v = inDegreeHistogramNearSource.get(iDeg);
 					inDegreeHistogramNearSource.put(iDeg, v + 1);
@@ -389,6 +395,9 @@ public class DistributionAnalysis {
 			}
 			
 			if (dependencyDAG.location.get(s) > 0.9) {
+				if (iDeg > maxDeg) maxDeg = iDeg;
+				nearTargetDegSum += iDeg;
+//				System.out.println(iDeg);
 				if (inDegreeHistogramNearTarget.containsKey(iDeg)) {
 					int v = inDegreeHistogramNearTarget.get(iDeg);
 					inDegreeHistogramNearTarget.put(iDeg, v + 1);
@@ -398,16 +407,36 @@ public class DistributionAnalysis {
 			}
 		}
 		
-		for (int i: inDegreeHistogramNearSource.keySet()) {
-			System.out.println(i + "\t" + inDegreeHistogramNearSource.get(i));
+		System.out.println("Indeg\tNear-Source\tNear-Target");
+		for (int i = 1; i <= maxDeg; ++i) {
+			System.out.print(i);
+			if (inDegreeHistogramNearSource.containsKey(i)) {
+				System.out.print("\t" + (inDegreeHistogramNearSource.get(i) * 1.0 / nearSourceDegSum));
+			}
+			else {
+				System.out.print("\t" + "0");
+			}
+			
+			if (inDegreeHistogramNearTarget.containsKey(i)) {
+				System.out.print("\t" + (inDegreeHistogramNearTarget.get(i) * 1.0 / nearTargetDegSum));
+			}
+			else {
+				System.out.print("\t" + "0");
+			}
+			
+			System.out.println();
 		}
 		
-		System.out.println("------------------------");
-		System.out.println("------------------------");
-		
-		for (int i: inDegreeHistogramNearTarget.keySet()) {
-			System.out.println(i + "\t" + inDegreeHistogramNearTarget.get(i));
-		}
+//		for (int i: inDegreeHistogramNearSource.keySet()) {
+//			System.out.println(i + "\t" + inDegreeHistogramNearSource.get(i));
+//		}
+//		
+//		System.out.println("------------------------");
+//		System.out.println("------------------------");
+//		
+//		for (int i: inDegreeHistogramNearTarget.keySet()) {
+//			System.out.println(i + "\t" + inDegreeHistogramNearTarget.get(i));
+//		}
 	}
 	
 	public static void getAverageInOutDegree(DependencyDAG dependencyDAG) {

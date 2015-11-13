@@ -57,14 +57,14 @@ public class Manager {
 	
 	public static void doRealNetworkAnalysis() throws Exception {
 		String netPath = "";
-		String netID = "rat";
+//		String netID = "rat";
 //		String netID = "monkey";
 		
 //		String netID = "commons-math";
 //		String netID = "openssh-39";
 //		String netID = "apache-commons-3.4";
 		
-//		String netID = "court";
+		String netID = "court";
 		
 		if (netID.equals("rat") || netID.equals("monkey")) {
 			loadLargestWCC(netID);
@@ -221,9 +221,9 @@ public class Manager {
 	}
 
 	public static void main(String[] args) throws Exception {		
-//		Manager.doRealNetworkAnalysis();
+		Manager.doRealNetworkAnalysis();
 //		Manager.doSyntheticNetworkAnalysis();
-		Manager.doToyNetworkAnalysis();
+//		Manager.doToyNetworkAnalysis();
 		System.out.println("Done!");
 	}
 }
