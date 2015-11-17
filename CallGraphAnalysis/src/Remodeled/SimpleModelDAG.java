@@ -16,13 +16,15 @@ public class SimpleModelDAG {
 	static boolean alphaNegative = false;
 	
 //	real network matching
-	static int nT = 5; // no. of (T)arget nodes
-	static int nI = 10; // no. of (I)ntermediate nodes
-	static int nS = 5; // no. of (S)ource nodes
+	static int nT = 2550; // no. of (T)arget nodes
+	static int nI = 2440; // no. of (I)ntermediate nodes
+	static int nS = 2000; // no. of (S)ource nodes
 
 	static int sT = 0; // start of Target
-	static int sI = 5; // start of Intermediate
-	static int sS = 15; // start of source
+	static int sI = nT; // start of Intermediate
+	static int sS = nT + nI; // start of source
+	
+	static HashMap<String, Integer> edgeWeights;
 	
 //	toy test
 //	static int nT = 3; // no. of T(arget) nodes
@@ -62,11 +64,12 @@ public class SimpleModelDAG {
 		if (alphaNegative) negate += "-";
 		
 		PrintWriter pw = new PrintWriter(new File("synthetic_callgraphs//SimpleModelDAGa" + negate + alpha + ".txt"));
+		edgeWeights = new HashMap();
 		generateSimpleModelDAG(pw);
 	}
 	
 	public static int getInDegree() {
-		return 2;
+		return 3;
 		
 		/*
 		int values[] = {2, 3, 4, 5};
@@ -166,7 +169,16 @@ public class SimpleModelDAG {
 					}
 				}
 				
-				pw.println(substrateIndex + " " + productIndex);
+				String str = substrateIndex + " " + productIndex;
+				if (edgeWeights.containsKey(str)) {
+					int v = edgeWeights.get(str);
+					edgeWeights.put(str, v + 1);
+				}
+				else {
+					edgeWeights.put(str, 1);
+				}
+				
+				
 //				pw.println(productIndex + " -> " + substrateIndex + ";");
 
 				/*
@@ -180,11 +192,17 @@ public class SimpleModelDAG {
 			}
 		}
 		
+		for (String key: edgeWeights.keySet()) {
+			int w = edgeWeights.get(key);
+			pw.println(key + " " + w);
+		}
+		
 		pw.close();
 	}
 
 	public static void main(String[] args) throws Exception {
-		double alphaValues[] = {-10, -1, 0, 1, 10};
+//		double alphaValues[] = {-5, -1, 0, 1, 5};
+		double alphaValues[] = {0.6};
 		
 		for (double d: alphaValues) {
 			if (d < 0) {

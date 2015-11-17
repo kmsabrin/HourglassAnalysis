@@ -101,7 +101,9 @@ public class WaistDetection {
 				break;
 			}
 			
-			if (topRemovedWaistNodes.size() >= (dependencyDAG.nodes.size() - dependencyDAG.nSources - dependencyDAG.nTargets)) break;
+			if (topRemovedWaistNodes.size() >= (dependencyDAG.nodes.size() - dependencyDAG.nSources - dependencyDAG.nTargets)) {
+				break;
+			}
 
 //			remove the largest through path node, recompute through paths for all remaining nodes
 			dependencyDAG.numOfTargetPath.clear();

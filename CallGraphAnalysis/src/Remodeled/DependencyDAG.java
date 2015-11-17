@@ -143,12 +143,7 @@ public class DependencyDAG {
 		
 		loadDegreeMetric();
 		
-		if (isWeighted) {
-			loadWeightedPathStatistics();
-		}
-		else {
-			loadPathStatistics();
-		}
+		loadPathStatistics();
 		
 		loadLocationMetric(); // must load degree metric before
 		
@@ -301,9 +296,9 @@ public class DependencyDAG {
 				// for metabolic and synthetic networks
 				server = tokens[0];
 				dependent = tokens[1];
-//				if (largestWCCNodes.contains(server) == false || largestWCCNodes.contains(dependent) == false) {
-//					continue;
-//				}
+				if (largestWCCNodes.contains(server) == false || largestWCCNodes.contains(dependent) == false) {
+					continue;
+				}
 			}
 
 			if (isCourtcase) {
@@ -632,6 +627,11 @@ public class DependencyDAG {
 	}
 
 	public void loadPathStatistics() {
+		if (isWeighted) {
+			loadWeightedPathStatistics();
+			return;
+		}
+		
 		for (String s: nodes) {
 			sourcePathDepth(s);
 		}

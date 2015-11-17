@@ -322,12 +322,16 @@ public class DistributionAnalysis {
 	}
 	
 	public static TreeMap<Integer, Integer> getDegreeHistogram(DependencyDAG dependencyDAG) {
-		ArrayList<Integer> inDegree = new ArrayList();
-		ArrayList<Integer> outDegree = new ArrayList();
+		double inDegrees[] = new double[dependencyDAG.nodes.size()];
+		double outDegrees[] = new double[dependencyDAG.nodes.size()];
 		
 		TreeMap<Integer, Integer> inDegreeHistogram = new TreeMap();
 		TreeMap<Integer, Integer> outDegreeHistogram = new TreeMap();
 		
+		int kin = 0;
+		int kout = 0;
+		double inSum = 0;
+		double outSum = 0;
 		for (String s: dependencyDAG.nodes) {
 			int iDeg = dependencyDAG.inDegree.get(s);
 			int oDeg = dependencyDAG.outDegree.get(s);
@@ -344,31 +348,36 @@ public class DistributionAnalysis {
 			}
 			else outDegreeHistogram.put(oDeg, 1);
 
-			inDegree.add(iDeg);
-			outDegree.add(oDeg);
+			if (dependencyDAG.depends.containsKey(s)) {
+				inDegrees[kin++] = iDeg;
+				inSum++;
+//				System.out.println("here-in");
+			}
+			
+			if (dependencyDAG.serves.containsKey(s)) {
+				outDegrees[kout++] = oDeg;
+				outSum++;
+//				System.out.println("here-out");
+			}
 		}
 		
 		for (int i: inDegreeHistogram.keySet()) {
-			System.out.println(i + "\t" + inDegreeHistogram.get(i));
+			if (i < 1) continue;
+			System.out.println(i + "\t" + (inDegreeHistogram.get(i) / inSum));
 		}
 		
 		System.out.println("------------------------");
 		
 		for (int i: outDegreeHistogram.keySet()) {
-			System.out.println(i + "\t" + outDegreeHistogram.get(i));
+			if (i < 1) continue;
+			System.out.println(i + "\t" + (outDegreeHistogram.get(i) / outSum));
 		}
 		
+		System.out.println(" Indegree:" + " Mean: " + StatUtils.mean(inDegrees) + " StD: " + Math.sqrt(StatUtils.variance(inDegrees)));
+		System.out.println("Outdegree:" + " Mean: " + StatUtils.mean(outDegrees) + " StD: " + Math.sqrt(StatUtils.variance(outDegrees)));
 		
-//		k = 0;
-//		for (String s : dependencyDAG.outDegree.keySet()) {
-//			outDegree[k++] = dependencyDAG.outDegree.get(s);
-//		}
-		
-//		System.out.println(" Indegree:" + " Mean: " + StatUtils.mean(inDegree) + " StD: " + Math.sqrt(StatUtils.variance(inDegree)));
-//		System.out.println("Outdegree:" + " Mean: " + StatUtils.mean(outDegree) + " StD: " + Math.sqrt(StatUtils.variance(outDegree)));
-		
-//		System.out.println(" Indegree:" + " 10p: " + StatUtils.percentile(inDegree.toArray(a), 30) + " 50p: " + StatUtils.percentile(inDegree, 50) + " 90p: " + StatUtils.percentile(inDegree, 90));
-//		System.out.println("Outdegree:" + " 10p: " + StatUtils.percentile(outDegree, 10) + " 50p: " + StatUtils.percentile(outDegree, 50) + " 90p: " + StatUtils.percentile(outDegree, 90));
+		System.out.println(" Indegree:" + " 10p: " + StatUtils.percentile(inDegrees, 10) +  " 95p: " + StatUtils.percentile(inDegrees, 90) );
+		System.out.println("Outdegree:" + " 10p: " + StatUtils.percentile(outDegrees, 10) + " 95p: " + StatUtils.percentile(outDegrees, 90) );
 	
 		return inDegreeHistogram;
 	}
