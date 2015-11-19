@@ -60,11 +60,11 @@ public class Manager {
 //		String netID = "rat";
 //		String netID = "monkey";
 		
-		String netID = "commons-math";
+//		String netID = "commons-math";
 //		String netID = "openssh-39";
 //		String netID = "apache-commons-3.4";
 		
-//		String netID = "court";
+		String netID = "court";
 		
 		if (netID.equals("rat") || netID.equals("monkey")) {
 			loadLargestWCC(netID);
@@ -135,13 +135,13 @@ public class Manager {
 //		DistributionAnalysis.printEdgeList(dependencyDAG, netID);
 //		DistributionAnalysis.getAverageInOutDegree(dependencyDAG);
 //		DistributionAnalysis.getAveragePathLenth(dependencyDAG);
-		DistributionAnalysis.getDegreeHistogram(dependencyDAG);
+//		DistributionAnalysis.getDegreeHistogram(dependencyDAG);
 //		DistributionAnalysis.getDegreeHistogramSpecialized(dependencyDAG);
 //		DistributionAnalysis.findWeaklyConnectedComponents(dependencyDAG, netID);		
 //		DistributionAnalysis.printCentralityRanks(dependencyDAG, netID);
 //		int centralityIndex = 1;
 //		DistributionAnalysis.getCentralityCCDF(dependencyDAG, netID, 1);
-//		DistributionAnalysis.printCentralityDistribution(dependencyDAG, netID);
+		DistributionAnalysis.printCentralityDistribution(dependencyDAG, netID);
 //		DistributionAnalysis.printEdgeList(dependencyDAG, netID);
 //		DistributionAnalysis.printAllCentralities(dependencyDAG, netID);
 //		DistributionAnalysis.findNDirectSrcTgtBypasses(dependencyDAG, netID);
@@ -149,7 +149,7 @@ public class Manager {
 		
 //		WaistDetection.runPCWaistDetection(dependencyDAG, netID);
 //		WaistDetection.heuristicWaistDetection(dependencyDAG, netID);
-		WaistDetection.randomizedWaistDetection(dependencyDAG, netID);
+//		WaistDetection.randomizedWaistDetection(dependencyDAG, netID);
 		
 //		WaistDetection.pathCoverageThresholdDetection(dependencyDAG, netID);
 		
@@ -168,32 +168,40 @@ public class Manager {
 		String DAGType = "SimpleModelDAG";
 		DependencyDAG.isSimpleModel = true;
 		
-//		String alpha[] = {"-1.0", "-0.8", "-0.6", "-0.4", "-0.2", "0.0", "0.2", "0.4", "0.6", "0.8", "1.0"};
-//		String alpha[] = {"-5.0", "-1.0", "0.0", "1.0", "5.0"};
-		String alpha[] = {"0.49"};
-		
-//		String versions[] = {"rectangleDAG", "noisyRectangleDAG", "trapezoidDAG", "diamondDAG", "hourglassDAG"};
+		String alphas[] = {"-1.0", "-0.8", "-0.6", "-0.4", "-0.2", "0.0", "0.2", "0.4", "0.6", "0.8", "1.0"};
+//		String alphas[] = {"-5.0", "-1.0", "0.0", "1.0", "5.0"};
+//		String alphas[] = {"0.8", "1.0"};
+		String dins[] = {"1", "2", "3", "5", "7"};
 
-		for (String a: alpha) {
-//			if (!a.equals("-1.0")) continue;			
-			String networkID = DAGType + "a" + a;
-			System.out.println("Working on: " + networkID);
-			DependencyDAG dependencyDAG = new DependencyDAG("synthetic_callgraphs//" + networkID + ".txt");
-			printNetworkStat(dependencyDAG);
-//			dependencyDAG.printNetworkMetrics();
-			
-//			DistributionAnalysis.printSyntheticPC(dependencyDAG, networkID);
-//			DistributionAnalysis.targetEdgeConcentration(dependencyDAG);
-//			DistributionAnalysis.getAveragePathLenth(dependencyDAG);
-//			DistributionAnalysis.getCentralityCCDF(dependencyDAG, networkID, 1);
-//			DistributionAnalysis.getReachabilityCount(dependencyDAG);
-//			DistributionAnalysis.printSourceVsTargetCompression(dependencyDAG, networkID);
-			
-			WaistDetection.randomizedWaistDetection(dependencyDAG, networkID);
-//			WaistDetection.pathCoverageThresholdDetection(dependencyDAG, networkID);
-//			new GradientFilterAnalysis().getSampleGradientsQuartileInterval(dependencyDAG, networkID);
-//			WaistDetection.runPCWaistDetection(dependencyDAG, networkID);
-			System.out.println("#$#$#$#$#$ \n");
+//		double a = 1.0;
+//		int din = 1;
+		
+		for (String a : alphas) {
+			for (String din : dins) {
+				// if (!a.equals("-1.0")) continue;
+				String networkID = DAGType + "d" + din + "a" + a;
+				// System.out.println("Working on: " + networkID);
+				DependencyDAG dependencyDAG = new DependencyDAG("synthetic_callgraphs//" + networkID + ".txt");
+//				printNetworkStat(dependencyDAG);
+				// dependencyDAG.printNetworkMetrics();
+
+				// DistributionAnalysis.printSyntheticPC(dependencyDAG, networkID);
+				// DistributionAnalysis.targetEdgeConcentration(dependencyDAG);
+				// DistributionAnalysis.getAveragePathLenth(dependencyDAG);
+				// DistributionAnalysis.getCentralityCCDF(dependencyDAG, networkID, 1);
+				// DistributionAnalysis.getReachabilityCount(dependencyDAG);
+				// DistributionAnalysis.printSourceVsTargetCompression(dependencyDAG, networkID);
+
+				WaistDetection.randomizedWaistDetection(dependencyDAG, networkID);
+				// WaistDetection.pathCoverageThresholdDetection(dependencyDAG, networkID);
+				// new GradientFilterAnalysis().getSampleGradientsQuartileInterval(dependencyDAG, networkID);
+				// WaistDetection.runPCWaistDetection(dependencyDAG, networkID);
+
+				System.out.print(din + " " + a + " " + " " + WaistDetection.waistSize);
+				System.out.print(" " + WaistDetection.effectiveNodeCoverage + " " + WaistDetection.hourglassness);
+				System.out.println();
+			}
+			System.out.println();
 		}
 	}
 	
@@ -221,8 +229,8 @@ public class Manager {
 	}
 
 	public static void main(String[] args) throws Exception {		
-		Manager.doRealNetworkAnalysis();
-//		Manager.doSyntheticNetworkAnalysis();
+//		Manager.doRealNetworkAnalysis();
+		Manager.doSyntheticNetworkAnalysis();
 //		Manager.doToyNetworkAnalysis();
 		System.out.println("Done!");
 	}

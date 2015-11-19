@@ -840,11 +840,11 @@ public class DependencyDAG {
 	public void printNetworkMetrics() {
 		for (String s: nodes) {
 //			if (normalizedPathCentrality.get(s) < 0.4) continue;
-			System.out.print(s + "\t");
+//			System.out.print(s + "\t");
 //			System.out.print(inDegree.get(s) + "\t");
 //			System.out.print(outDegree.get(s) + "\t");
 			System.out.print(location.get(s) + "\t");
-			System.out.print(normalizedPathCentrality.get(s) + "\t");
+//			System.out.print(normalizedPathCentrality.get(s) + "\t");
 //			System.out.print(pagerankTargetCompression.get(s) + "\t");
 //			System.out.print(pagerankSourceCompression.get(s) + "\t");
 //			System.out.print(harmonicMeanPagerankCentrality.get(s) + "\t");

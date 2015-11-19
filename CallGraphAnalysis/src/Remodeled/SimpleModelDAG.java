@@ -2,11 +2,11 @@ package Remodeled;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Random;
 import java.util.TreeMap;
 
-import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.distribution.UniformIntegerDistribution;
 import org.apache.commons.math3.distribution.ZipfDistribution;
 
@@ -16,13 +16,13 @@ public class SimpleModelDAG {
 	static boolean alphaNegative = false;
 	
 //	real network matching
-	static int nT = 2550; // no. of (T)arget nodes
-	static int nI = 2440; // no. of (I)ntermediate nodes
-	static int nS = 2000; // no. of (S)ource nodes
+	static int nT = 100; // no. of (T)arget nodes
+	static int nI = 400; // no. of (I)ntermediate nodes
+	static int nS = 100; // no. of (S)ource nodes
 
 	static int sT = 0; // start of Target
 	static int sI = nT; // start of Intermediate
-	static int sS = nT + nI; // start of source
+	static int sS = nT + nI; // start of Source
 	
 	static HashMap<String, Integer> edgeWeights;
 	
@@ -59,17 +59,22 @@ public class SimpleModelDAG {
 	static TreeMap<Integer, Integer> inDegreeHistogram;
 	static int numOfNonzeroIndegreeNodes;
 	
+	static int din = 1;
+	
 	public static void getSimpleModelDAG() throws Exception {
 		String negate = "";
 		if (alphaNegative) negate += "-";
 		
-		PrintWriter pw = new PrintWriter(new File("synthetic_callgraphs//SimpleModelDAGa" + negate + alpha + ".txt"));
+		DecimalFormat df = new DecimalFormat();
+		df.setMaximumFractionDigits(1);
+		
+		PrintWriter pw = new PrintWriter(new File("synthetic_callgraphs//SimpleModelDAGd" + din + "a" + negate + df.format(alpha) + ".txt"));
 		edgeWeights = new HashMap();
 		generateSimpleModelDAG(pw);
 	}
 	
 	public static int getInDegree() {
-		return 3;
+		return din;
 		
 		/*
 		int values[] = {2, 3, 4, 5};
@@ -138,19 +143,19 @@ public class SimpleModelDAG {
 			}
 			int endNodeIndex = sS + nS - 1;
 			
-			if (Math.abs(alpha) < 0.000001) { // uniform distribution
-				if (startNodeIndex < endNodeIndex) {
-					uniformIntegerDistribution = new UniformIntegerDistribution(startNodeIndex, endNodeIndex);
+			if (productIndex >= sI - 1) { // don't regenerate for targets
+				if (Math.abs(alpha) < 0.000001) { // uniform distribution
+					if (startNodeIndex < endNodeIndex) {
+						uniformIntegerDistribution = new UniformIntegerDistribution(
+								startNodeIndex, endNodeIndex);
+					}
+					/*
+					 * else { outDegree.put(sS, 1); continue; }
+					 */
+				} 
+				else { // zipf distribution
+					zipfDistribution = new ZipfDistribution(endNodeIndex - startNodeIndex + 1, alpha);
 				}
-				/*
-				else {
-					outDegree.put(sS, 1);
-					continue;
-				}
-				*/
-			}
-			else { // zipf distribution				
-				zipfDistribution = new ZipfDistribution(endNodeIndex - startNodeIndex + 1, alpha);
 			}
 			
 			int k = getInDegree();
@@ -202,8 +207,9 @@ public class SimpleModelDAG {
 
 	public static void main(String[] args) throws Exception {
 //		double alphaValues[] = {-5, -1, 0, 1, 5};
-		double alphaValues[] = {0.6};
+		double alphaValues[] = {1.0};
 		
+//		for (double d = -1; d <= 1.1; d += 0.2) {
 		for (double d: alphaValues) {
 			if (d < 0) {
 				alphaNegative = true;
