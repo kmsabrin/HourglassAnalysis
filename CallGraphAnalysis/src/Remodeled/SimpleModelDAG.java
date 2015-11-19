@@ -26,6 +26,8 @@ public class SimpleModelDAG {
 	
 	static HashMap<String, Integer> edgeWeights;
 	
+	static double ratio;
+	
 //	toy test
 //	static int nT = 3; // no. of T(arget) nodes
 //	static int nI = 5; // no. of I(ntermediate) nodes
@@ -59,16 +61,17 @@ public class SimpleModelDAG {
 	static TreeMap<Integer, Integer> inDegreeHistogram;
 	static int numOfNonzeroIndegreeNodes;
 	
-	static int din = 1;
+	static int din = 3;
 	
 	public static void getSimpleModelDAG() throws Exception {
 		String negate = "";
 		if (alphaNegative) negate += "-";
 		
 		DecimalFormat df = new DecimalFormat();
-		df.setMaximumFractionDigits(1);
+		df.setMaximumFractionDigits(2);
 		
-		PrintWriter pw = new PrintWriter(new File("synthetic_callgraphs//SimpleModelDAGd" + din + "a" + negate + df.format(alpha) + ".txt"));
+		PrintWriter pw = new PrintWriter(new File("synthetic_callgraphs//SimpleModelDAG" /*+ "r" + df.format(ratio) */
+				         +  "d" + din + "a" + negate + df.format(alpha) + ".txt"));
 		edgeWeights = new HashMap();
 		generateSimpleModelDAG(pw);
 	}
@@ -146,8 +149,7 @@ public class SimpleModelDAG {
 			if (productIndex >= sI - 1) { // don't regenerate for targets
 				if (Math.abs(alpha) < 0.000001) { // uniform distribution
 					if (startNodeIndex < endNodeIndex) {
-						uniformIntegerDistribution = new UniformIntegerDistribution(
-								startNodeIndex, endNodeIndex);
+						uniformIntegerDistribution = new UniformIntegerDistribution(startNodeIndex, endNodeIndex);
 					}
 					/*
 					 * else { outDegree.put(sS, 1); continue; }
@@ -174,6 +176,7 @@ public class SimpleModelDAG {
 					}
 				}
 				
+				System.out.println(substrateIndex + " " + productIndex);
 				String str = substrateIndex + " " + productIndex;
 				if (edgeWeights.containsKey(str)) {
 					int v = edgeWeights.get(str);
@@ -207,46 +210,62 @@ public class SimpleModelDAG {
 
 	public static void main(String[] args) throws Exception {
 //		double alphaValues[] = {-5, -1, 0, 1, 5};
-		double alphaValues[] = {1.0};
+		double alphaValues[] = {10.0};
 		
-//		for (double d = -1; d <= 1.1; d += 0.2) {
-		for (double d: alphaValues) {
-			if (d < 0) {
-				alphaNegative = true;
-			}
-			else {
-				alphaNegative = false;
-			}
-			alpha = Math.abs(d);
-			random = new Random(System.nanoTime());
-			
-			getSimpleModelDAG();
-			
-//			break;
-		}
+//		for (double d = -1; d <= 1.1; d += 0.2){
+//		for (double d: alphaValues){
+		int N = 600;
+//		for (int i = 0; i < 200; i += 40) {
+//			nT = 10 + i; // no. of (T)arget nodes
+//			nS = 200 - nT; // no. of (S)ource nodes
+//			nI = N - nS - nT; // no. of (I)ntermediate nodes
+//			ratio = 1.0 * nS / (nS + nT);
 		
-		/*
-		int N = nT + nI + nS;
-		for (int nodeIndex = sS; nodeIndex > 0; --nodeIndex) {
-			double expectedOutDeg = 0;
-			for (int product = nodeIndex - 1; product > 0; --product) {
-				if (alpha > 0) {
-					ZipfDistribution zipfDistribution = new ZipfDistribution(N - product, alpha);
-					expectedOutDeg += 1.0 - Math.pow(1.0 - zipfDistribution.probability(nodeIndex - product), getInDegree());
-				} 
-				else {
-					if (product + 1 < N) {
-						UniformIntegerDistribution uniformIntegerDistribution = new UniformIntegerDistribution(product + 1, N);
-						expectedOutDeg += 1.0 - Math.pow(1.0 - uniformIntegerDistribution.probability(nodeIndex), getInDegree());
-					} else {
-						expectedOutDeg = 1;
-					}
+//		for (int i = 0; i <= 290; i += 40) {
+//			nT = 10 + i; // no. of (T)arget nodes
+//			nS = nT; // no. of (S)ource nodes
+//			nI = N - nS - nT; // no. of (I)ntermediate nodes
+//			ratio = 1.0 * nS / N;
+//			
+//			sT = 0; // start of Target
+//			sI = nT; // start of Intermediate
+//			sS = nT + nI; // start of Source
+
+//			System.out.println(sI + "\t" + sS + "\t" + ratio);
+			
+			
+			for (double d : alphaValues) {
+				if (d < 0) {
+					alphaNegative = true;
+				} else {
+					alphaNegative = false;
 				}
+				alpha = Math.abs(d);
+				random = new Random(System.nanoTime());
+
+				getSimpleModelDAG();
+
+				// break;
 			}
-			System.out.println(nodeIndex + "\t" + outDegree.get(nodeIndex) + "\t" + expectedOutDeg);
-		}
-		*/
-		
-		System.out.println("Done!");
+
+			/*
+			 * int N = nT + nI + nS; for (int nodeIndex = sS; nodeIndex > 0;
+			 * --nodeIndex) { double expectedOutDeg = 0; for (int product =
+			 * nodeIndex - 1; product > 0; --product) { if (alpha > 0) {
+			 * ZipfDistribution zipfDistribution = new ZipfDistribution(N -
+			 * product, alpha); expectedOutDeg += 1.0 - Math.pow(1.0 -
+			 * zipfDistribution.probability(nodeIndex - product),
+			 * getInDegree()); } else { if (product + 1 < N) {
+			 * UniformIntegerDistribution uniformIntegerDistribution = new
+			 * UniformIntegerDistribution(product + 1, N); expectedOutDeg += 1.0
+			 * - Math.pow(1.0 -
+			 * uniformIntegerDistribution.probability(nodeIndex),
+			 * getInDegree()); } else { expectedOutDeg = 1; } } }
+			 * System.out.println(nodeIndex + "\t" + outDegree.get(nodeIndex) +
+			 * "\t" + expectedOutDeg); }
+			 */
+
+			System.out.println("Done!");
+//		}
 	}
 }

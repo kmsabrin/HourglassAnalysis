@@ -236,7 +236,7 @@ public class DistributionAnalysis {
 ////		}
 	}
 	
-	public static void getAveragePathLenth(DependencyDAG dependencyDAG) {
+	public static double getPathLength(DependencyDAG dependencyDAG) {
 		double avgPLength = 0;
 		int knt = 0;
 		double pathLengths[] = new double[(int)dependencyDAG.nTargets];
@@ -249,10 +249,12 @@ public class DistributionAnalysis {
 		}
 		
 //		System.out.println("Average Path Length: " + avgPLength / knt);
-		System.out.println("Median Path Length: " + StatUtils.percentile(pathLengths, 50));
+//		System.out.println("Median Path Length: " + StatUtils.percentile(pathLengths, 50));
 //		System.out.println("Max Path Length: " + StatUtils.max(pathLengths));
 //		System.out.println("Mean Path Length: " + StatUtils.mean(pathLengths));
 //		System.out.println("STD Path Length: " + Math.sqrt(StatUtils.variance(pathLengths)));
+		
+		return StatUtils.percentile(pathLengths, 50);
 	}
 	
 	public static void targetEdgeConcentration(DependencyDAG dependencyDAG) {

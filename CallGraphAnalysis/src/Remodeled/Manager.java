@@ -168,38 +168,62 @@ public class Manager {
 		String DAGType = "SimpleModelDAG";
 		DependencyDAG.isSimpleModel = true;
 		
-		String alphas[] = {"-1.0", "-0.8", "-0.6", "-0.4", "-0.2", "0.0", "0.2", "0.4", "0.6", "0.8", "1.0"};
+//		String alphas[] = {"-1.0", "-0.8", "-0.6", "-0.4", "-0.2", "0.0", "0.2", "0.4", "0.6", "0.8", "1.0"};
 //		String alphas[] = {"-5.0", "-1.0", "0.0", "1.0", "5.0"};
-//		String alphas[] = {"0.8", "1.0"};
+		String alphas[] = {"10.0"};
+		
 		String dins[] = {"1", "2", "3", "5", "7"};
-
-//		double a = 1.0;
-//		int din = 1;
+//		String dins[] = {"5", "7"};
+		
+		String ratios[] = {"0.02", "0.08", "0.15", "0.22", "0.28", "0.35", "0.42", "0.48"};
+		int startIs[] = {10, 50, 90, 130, 170, 210, 250, 290};
+		int startSs[] = {590, 550, 510, 470, 430, 390, 350, 310};
+		
+//		String ratios[] = {"0.95", "0.75", "0.55", "0.35", "0.15"};
+//		int startIs[] = {10, 50, 90, 130, 170};
+//		int startSs[] = {410, 450, 490, 530, 570};
+		
+//		String ratios[] = {"0.15"};
+		
+//		String a = "0.6";
+//		String din = "3";
+		String ratio = "-";
+		int index = 0;
+		
 		
 		for (String a : alphas) {
 			for (String din : dins) {
-				// if (!a.equals("-1.0")) continue;
-				String networkID = DAGType + "d" + din + "a" + a;
-				// System.out.println("Working on: " + networkID);
-				DependencyDAG dependencyDAG = new DependencyDAG("synthetic_callgraphs//" + networkID + ".txt");
-//				printNetworkStat(dependencyDAG);
-				// dependencyDAG.printNetworkMetrics();
+//				for (String ratio: ratios) {
+//					SimpleModelDAG.sI = startIs[index];
+//					SimpleModelDAG.sS = startSs[index];
+//					++index;
+					
+//					String networkID = DAGType + "r" + ratio + "d" + din + "a" + a;
+					String networkID = DAGType + "d" + din + "a" + a;
+//					System.out.println("Working on: " + networkID);
+					DependencyDAG dependencyDAG = new DependencyDAG("synthetic_callgraphs//" + networkID + ".txt");
+//					printNetworkStat(dependencyDAG);
+//					dependencyDAG.printNetworkMetrics();
 
-				// DistributionAnalysis.printSyntheticPC(dependencyDAG, networkID);
-				// DistributionAnalysis.targetEdgeConcentration(dependencyDAG);
-				// DistributionAnalysis.getAveragePathLenth(dependencyDAG);
-				// DistributionAnalysis.getCentralityCCDF(dependencyDAG, networkID, 1);
-				// DistributionAnalysis.getReachabilityCount(dependencyDAG);
-				// DistributionAnalysis.printSourceVsTargetCompression(dependencyDAG, networkID);
+					// DistributionAnalysis.printSyntheticPC(dependencyDAG, networkID);
+					// DistributionAnalysis.targetEdgeConcentration(dependencyDAG);
+					// DistributionAnalysis.getAveragePathLenth(dependencyDAG);
+					// DistributionAnalysis.getCentralityCCDF(dependencyDAG, networkID, 1);
+					// DistributionAnalysis.getReachabilityCount(dependencyDAG);
+					// DistributionAnalysis.printSourceVsTargetCompression(dependencyDAG, networkID);
+					double medianPathLength = DistributionAnalysis.getPathLength(dependencyDAG);
 
-				WaistDetection.randomizedWaistDetection(dependencyDAG, networkID);
-				// WaistDetection.pathCoverageThresholdDetection(dependencyDAG, networkID);
-				// new GradientFilterAnalysis().getSampleGradientsQuartileInterval(dependencyDAG, networkID);
-				// WaistDetection.runPCWaistDetection(dependencyDAG, networkID);
+					WaistDetection.randomizedWaistDetection(dependencyDAG, networkID);
+					// WaistDetection.pathCoverageThresholdDetection(dependencyDAG, networkID);
+					// new GradientFilterAnalysis().getSampleGradientsQuartileInterval(dependencyDAG, networkID);
+					// WaistDetection.runPCWaistDetection(dependencyDAG, networkID);
 
-				System.out.print(din + " " + a + " " + " " + WaistDetection.waistSize);
-				System.out.print(" " + WaistDetection.effectiveNodeCoverage + " " + WaistDetection.hourglassness);
-				System.out.println();
+					System.out.println(a + "\t" + din + "\t" + WaistDetection.waistSize + "\t" + medianPathLength);
+//					System.out.print(din + " " + a + " " + ratio + " " + WaistDetection.waistSize);
+//					System.out.print(" " + WaistDetection.nodeCoverage + " " + WaistDetection.hourglassness);
+//					System.out.println();
+//				}
+//				System.out.println();
 			}
 			System.out.println();
 		}

@@ -208,6 +208,8 @@ public class DependencyDAG {
 	}
 	
 	private void removeNode(String node) {
+//		System.out.println("Removing: " + node);
+		
 		nodes.remove(node);
 		
 		if (serves.containsKey(node)) {
@@ -569,9 +571,11 @@ public class DependencyDAG {
 			for (String s : depends.get(node)) {
 				weightedSourcePathDepth(s);
 				nPath += numOfSourcePath.get(s) * getEdgeWeight(s, node);
-				sPath += numOfSourcePath.get(s) * getEdgeWeight(s, node) + sumOfSourcePath.get(s);
+				sPath += (numOfSourcePath.get(s) + sumOfSourcePath.get(s)) * getEdgeWeight(s, node);
 			}
 		}
+		
+//		System.out.println(node + "\t" + nPath + "\t" + sPath );
 		
 		numOfSourcePath.put(node, nPath);
 		sumOfSourcePath.put(node, sPath);
