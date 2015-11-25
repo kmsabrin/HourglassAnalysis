@@ -136,7 +136,7 @@ public class DependencyDAG {
 		}
 		
 		if (isSynthetic) {
-			removeDisconnectedNodesForSyntheticNetworks();
+//			removeDisconnectedNodesForSyntheticNetworks();
 		}
 		
 		removeIsolatedNodes();
@@ -152,12 +152,12 @@ public class DependencyDAG {
 		loadPathCentralityMetric();
 //		loadPagerankCentralityMetric();		
 		
-		DistributionAnalysis.rankNodeByCentrality(this, this.normalizedPathCentrality);
+//		DistributionAnalysis.rankNodeByCentrality(this, this.normalizedPathCentrality);
 	}
 	
 	private void checkTargetReachability(String node) {
 		if (isSimpleModel) {
-			if (Integer.parseInt(node) < SimpleModelDAG.sI) {
+			if (isTarget(node)) {
 				canReachTarget = true;
 				return;
 			}
@@ -180,7 +180,7 @@ public class DependencyDAG {
 	
 	private void checkSourceReachability(String node) {
 		if (isSimpleModel) {
-			if (Integer.parseInt(node) >= SimpleModelDAG.sS) {
+			if (isSource(node)) {
 				canReachSource = true;
 				return;
 			}
@@ -233,7 +233,7 @@ public class DependencyDAG {
 			int index = Integer.parseInt(s);
 //			System.out.println("Is " + index + " disconnected?");
 //			System.out.println("If in between " + ComplexModelDAG.layerEndNode[0] + " and " + ComplexModelDAG.layerStartNode[ComplexModelDAG.nLayers - 1]);
-			if ((isSimpleModel && index >= SimpleModelDAG.sI && index < SimpleModelDAG.sS) || 
+			if (isIntermediate(s) || 
 				(isComplexModel && index > ComplexModelDAG.layerEndNode[0] && index < ComplexModelDAG.layerStartNode[ComplexModelDAG.nLayers - 1])) { // so bad, so so bad
 				checkReach(s);
 //				System.out.println("Checking reach of " + s);
@@ -467,12 +467,19 @@ public class DependencyDAG {
 			int in = 0;
 			int out = 0;
 			
-			if (depends.containsKey(s)) {
+			if (isTarget(s) || isIntermediate(s)) {
 				in = depends.get(s).size();
 			}
 			
-			if (serves.containsKey(s)) {
-				out = serves.get(s).size();
+			if (isSource(s) || isIntermediate(s)) {
+				if (isSynthetic) {
+					if (serves.containsKey(s)) {
+						out = serves.get(s).size();
+					}
+				}
+				else {
+					out = serves.get(s).size();
+				}
 			}
 			
 			outDegree.put(s, out);
@@ -481,15 +488,51 @@ public class DependencyDAG {
 		
 		nSources = nTargets = nEdges = 0;
 		for (String s: nodes) {
-			if (!serves.containsKey(s)) {
+			if (isTarget(s)) {
 				++nTargets;
 			}
-			if (!depends.containsKey(s)) {
+			if (isSource(s)) {
 				++nSources;
 			}
 			else {
 				nEdges += depends.get(s).size();
 			}
+		}
+	}
+	
+	public boolean isSource(String node) {
+		if (isSynthetic) {
+			if (Integer.parseInt(node) >= SimpleModelDAG.sS) {
+				return true;
+			}
+			return false;
+		}
+		else {
+			return !depends.containsKey(node);
+		}
+	}
+	
+	public boolean isTarget(String node) {
+		if (isSynthetic) {
+			if (Integer.parseInt(node) < SimpleModelDAG.sI) {
+				return true;
+			}
+			return false;
+		}
+		else {
+			return !serves.containsKey(node);
+		}
+	}
+	
+	public boolean isIntermediate(String node) {
+		if (isSynthetic) {
+			if (Integer.parseInt(node) >= SimpleModelDAG.sI && Integer.parseInt(node) < SimpleModelDAG.sS) {
+				return true;
+			}
+			return false;
+		}
+		else {
+			return depends.containsKey(node) && serves.containsKey(node);
 		}
 	}
 		
@@ -498,7 +541,7 @@ public class DependencyDAG {
 			return;
 		}
 		
-		if (!depends.containsKey(node) && !WaistDetection.topRemovedWaistNodes.contains(node)) { // is source
+		if (isSource(node) && !WaistDetection.topRemovedWaistNodes.contains(node)) { // is source
 			numOfSourcePath.put(node, 1.0);
 			sumOfSourcePath.put(node, 0.0);
 			avgSourceDepth.put(node, 0.0);
@@ -508,10 +551,12 @@ public class DependencyDAG {
 		double nPath = 0;
 		double sPath = 0;
 		if (!WaistDetection.topRemovedWaistNodes.contains(node)) { // special condition for waist detection
-			for (String s : depends.get(node)) {
-				sourcePathDepth(s);
-				nPath += numOfSourcePath.get(s);
-				sPath += numOfSourcePath.get(s) + sumOfSourcePath.get(s);
+			if (serves.containsKey(node)) { // for synthetic disconnected nodes
+				for (String s : depends.get(node)) {
+					sourcePathDepth(s);
+					nPath += numOfSourcePath.get(s);
+					sPath += numOfSourcePath.get(s) + sumOfSourcePath.get(s);
+				}
 			}
 		}
 		numOfSourcePath.put(node, nPath);
@@ -524,7 +569,7 @@ public class DependencyDAG {
 			return;
 		}
 		
-		if (!serves.containsKey(node) && !WaistDetection.topRemovedWaistNodes.contains(node)) { // is target
+		if (isTarget(node) && !WaistDetection.topRemovedWaistNodes.contains(node)) { // is target
 			numOfTargetPath.put(node, 1.0);
 			sumOfTargetPath.put(node, 0.0);
 			avgTargetDepth.put(node, 0.0);
@@ -558,7 +603,7 @@ public class DependencyDAG {
 			return;
 		}
 		
-		if (!depends.containsKey(node) && !WaistDetection.topRemovedWaistNodes.contains(node)) { // is source
+		if (isSource(node) && !WaistDetection.topRemovedWaistNodes.contains(node)) { // is source
 			numOfSourcePath.put(node, 1.0);
 			sumOfSourcePath.put(node, 0.0);
 			avgSourceDepth.put(node, 0.0);
@@ -587,7 +632,7 @@ public class DependencyDAG {
 			return;
 		}
 		
-		if (!serves.containsKey(node) && !WaistDetection.topRemovedWaistNodes.contains(node)) { // is target
+		if (isTarget(node) && !WaistDetection.topRemovedWaistNodes.contains(node)) { // is target
 			numOfTargetPath.put(node, 1.0);
 			sumOfTargetPath.put(node, 0.0);
 			avgTargetDepth.put(node, 0.0);
@@ -597,10 +642,12 @@ public class DependencyDAG {
 		double nPath = 0;
 		double sPath = 0;
 		if (!WaistDetection.topRemovedWaistNodes.contains(node)) { // special condition for waist detection
-			for (String s : serves.get(node)) {
-				weightedTargetPathDepth(s);
-				nPath += numOfTargetPath.get(s) * getEdgeWeight(node, s);
-				sPath += numOfTargetPath.get(s) * getEdgeWeight(node, s) + sumOfTargetPath.get(s);
+			if (serves.containsKey(node)) { // for synthetic disconnected nodes
+				for (String s : serves.get(node)) {
+					weightedTargetPathDepth(s);
+					nPath += numOfTargetPath.get(s) * getEdgeWeight(node, s);
+					sPath += numOfTargetPath.get(s) * getEdgeWeight(node, s) + sumOfTargetPath.get(s);
+				}
 			}
 		}
 		
@@ -608,7 +655,6 @@ public class DependencyDAG {
 		sumOfTargetPath.put(node, sPath);
 		avgTargetDepth.put(node, sPath / nPath);
 	}
-
 	
 	public void loadWeightedPathStatistics() {
 		for (String s: nodes) {
@@ -654,8 +700,7 @@ public class DependencyDAG {
 			}
 		}
 	}
-	
-	
+		
 	public void loadLocationMetric() {
 		for (String s : nodes) {
 			double m = avgSourceDepth.get(s) / (avgTargetDepth.get(s) + avgSourceDepth.get(s));
@@ -672,12 +717,14 @@ public class DependencyDAG {
 		++kounter;
 		visited.add(node);
 				
-		if (!serves.containsKey(node)) { // is a target
+		if (isTarget(node)) { // is a target
 			return;
 		}
 		
-		for (String s : serves.get(node)) {
-			reachableUpwardsNodes(s);
+		if (serves.containsKey(node)) {
+			for (String s : serves.get(node)) {
+				reachableUpwardsNodes(s);
+			}
 		}
 	}
 	
@@ -689,7 +736,7 @@ public class DependencyDAG {
 		++kounter;
 		visited.add(node);
 		
-		if (!depends.containsKey(node)) { // is a source
+		if (isSource(node)) { // is a source
 			return;
 		}
 		
@@ -817,7 +864,7 @@ public class DependencyDAG {
 //			npc = ((int) npc * 1000.0) / 1000.0;
 			normalizedPathCentrality.put(s, npc);
 						
-			if (!(serves.containsKey(s) && depends.containsKey(s))){ // manually reset source and targets to zero
+			if (isSource(s) || isTarget(s)){ // manually reset source and targets to zero
 				normalizedPathCentrality.put(s, 0.0);
 			}
 //			else {
@@ -844,11 +891,11 @@ public class DependencyDAG {
 	public void printNetworkMetrics() {
 		for (String s: nodes) {
 //			if (normalizedPathCentrality.get(s) < 0.4) continue;
-//			System.out.print(s + "\t");
-//			System.out.print(inDegree.get(s) + "\t");
-//			System.out.print(outDegree.get(s) + "\t");
+			System.out.print(s + "\t");
+			System.out.print(inDegree.get(s) + "\t");
+			System.out.print(outDegree.get(s) + "\t");
 			System.out.print(location.get(s) + "\t");
-//			System.out.print(normalizedPathCentrality.get(s) + "\t");
+			System.out.print(normalizedPathCentrality.get(s) + "\t");
 //			System.out.print(pagerankTargetCompression.get(s) + "\t");
 //			System.out.print(pagerankSourceCompression.get(s) + "\t");
 //			System.out.print(harmonicMeanPagerankCentrality.get(s) + "\t");

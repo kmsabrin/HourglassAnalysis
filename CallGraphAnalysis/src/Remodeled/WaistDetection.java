@@ -20,7 +20,6 @@ public class WaistDetection {
 	static double hourglassSymmetry;
 	static boolean thresholdSatisfied;
 	
-
 	public static void heuristicWaistDetection(DependencyDAG dependencyDAG, String filePath) throws Exception {
 //		PrintWriter pw0 = new PrintWriter(new File("analysis//path-cover-2-" + filePath + ".txt"));
 		PrintWriter pw1 = new PrintWriter(new File("analysis//coverage-threshold-" + filePath + ".txt"));
@@ -42,7 +41,7 @@ public class WaistDetection {
 			
 			for (String s : dependencyDAG.nodes) {
 //				skip if source or target
-				if (!dependencyDAG.serves.containsKey(s) || !dependencyDAG.depends.containsKey(s)) {
+				if (dependencyDAG.isSource(s) || dependencyDAG.isTarget(s)) {
 					continue;
 				}
 
@@ -167,7 +166,7 @@ public class WaistDetection {
 		topRemovedWaistNodes.clear();
 		thresholdSatisfied = false;
 		
-		int nRuns = 20;
+		int nRuns = 1;
 		averageWaistRank = new HashMap();
 		for (int i = 1; i <= nRuns; ++i) {
 			topRemovedWaistNodes.clear();
@@ -343,6 +342,7 @@ public class WaistDetection {
 //		HashSet<String> waistNodeNotCoverage = new HashSet();
 //		int sum = 0;
 		double notCovered = dependencyDAG.nodes.size() - waistNodeCoverage.size();
+		
 		double notCoveredSource = 0;
 		double notCoveredTarget = 0;
 		double notCoveredMiddle = 0;
@@ -350,25 +350,27 @@ public class WaistDetection {
 		double notCoveredSpecialTarget = 0;
 		for (String s: dependencyDAG.nodes) {
 			if (!waistNodeCoverage.contains(s)) {
-				if(dependencyDAG.serves.containsKey(s) && !dependencyDAG.depends.containsKey(s)) 
+				if(dependencyDAG.isSource(s)) 
 				{
 					++notCoveredSource;
 					
 					int f = 0;
-					for (String r: dependencyDAG.serves.get(s)) {
-						if(dependencyDAG.serves.containsKey(r) && dependencyDAG.depends.containsKey(r)) {
-							f = 1;
-							break;
+					if (dependencyDAG.serves.containsKey(s)) {
+						for (String r : dependencyDAG.serves.get(s)) {
+							if (dependencyDAG.isIntermediate(r)) {
+								f = 1;
+								break;
+							}
 						}
 					}
-					if (f == 0) ++notCoveredSpecialSource; // only serves targets
+					if (f == 0) ++notCoveredSpecialSource; // only serves targets or none
 				}
-				else if (!dependencyDAG.serves.containsKey(s) && dependencyDAG.depends.containsKey(s)) {
+				else if (dependencyDAG.isTarget(s)) {
 					++notCoveredTarget;
 					
 					int f = 0;
 					for (String r: dependencyDAG.depends.get(s)) {
-						if(dependencyDAG.serves.containsKey(r) && dependencyDAG.depends.containsKey(r)) {
+						if(dependencyDAG.isIntermediate(r)) {
 							f = 1;
 							break;
 						}
@@ -424,11 +426,11 @@ public class WaistDetection {
 //		System.out.println("nonSTinWaist: " + (topKNodes.size() - STNodes));
 //		System.out.println("MinST " + minST + " Waist Size " + averageWaistRank.size());
 		if (waistSize == 0) {
-			hourglassness = -1;
+			hourglassness = -1001;
 		}
-		else if ((waistSize - 1.0) >= minST) {
-			hourglassness = 0;
-		}
+//		else if ((waistSize - 1.0) >= minST) {
+//			hourglassness = 0;
+//		}
 		else { 
 			hourglassness = 1.0 - ((waistSize - 1.0) / minST);
 		}

@@ -4,11 +4,13 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.util.HashMap;
+import java.util.NavigableMap;
 import java.util.Random;
 import java.util.TreeMap;
 
 import org.apache.commons.math3.distribution.UniformIntegerDistribution;
 import org.apache.commons.math3.distribution.ZipfDistribution;
+
 
 public class SimpleModelDAG {
 	static Random random = new Random(System.nanoTime());
@@ -16,9 +18,9 @@ public class SimpleModelDAG {
 	static boolean alphaNegative = false;
 	
 //	real network matching
-	static int nT = 100; // no. of (T)arget nodes
-	static int nI = 400; // no. of (I)ntermediate nodes
-	static int nS = 100; // no. of (S)ource nodes
+	static int nT = 3; // no. of (T)arget nodes
+	static int nI = 4; // no. of (I)ntermediate nodes
+	static int nS = 3; // no. of (S)ource nodes
 
 	static int sT = 0; // start of Target
 	static int sI = nT; // start of Intermediate
@@ -26,7 +28,7 @@ public class SimpleModelDAG {
 	
 	static HashMap<String, Integer> edgeWeights;
 	
-	static double ratio;
+	static double ratio = -1;
 	
 //	toy test
 //	static int nT = 3; // no. of T(arget) nodes
@@ -61,7 +63,37 @@ public class SimpleModelDAG {
 	static TreeMap<Integer, Integer> inDegreeHistogram;
 	static int numOfNonzeroIndegreeNodes;
 	
-	static int din = 3;
+	static int din = 2;
+	
+	static NavigableMap<Double, Integer> randomWeightedCollection;
+	static double randomWeightedCollectionTotal = 0;
+	
+//	RandomWeightedCollection randomWeightedCollection;
+	
+	private static class RandomWeightedCollection {
+	    private final NavigableMap<Double, Integer> map = new TreeMap();
+	    private final Random random;
+	    private double total = 0;
+
+	    public RandomWeightedCollection() {
+	        this(new Random());
+	    }
+
+	    public RandomWeightedCollection(Random random) {
+	        this.random = random;
+	    }
+
+	    public void add(double weight, int key) {
+	        if (weight <= 0) return;
+	        total += weight;
+	        map.put(total, key);
+	    }
+
+	    public int next() {
+	        double value = random.nextDouble() * total;
+	        return map.ceilingEntry(value).getValue();
+	    }
+	}
 	
 	public static void getSimpleModelDAG() throws Exception {
 		String negate = "";
@@ -70,8 +102,8 @@ public class SimpleModelDAG {
 		DecimalFormat df = new DecimalFormat();
 		df.setMaximumFractionDigits(2);
 		
-		PrintWriter pw = new PrintWriter(new File("synthetic_callgraphs//SimpleModelDAG" /*+ "r" + df.format(ratio) */
-				         +  "d" + din + "a" + negate + df.format(alpha) + ".txt"));
+		PrintWriter pw = new PrintWriter(new File("synthetic_callgraphs//SimpleModelDAG" + "r" + df.format(ratio)
+				         + "a" + negate + df.format(alpha) + "d" + din + ".txt"));
 		edgeWeights = new HashMap();
 		generateSimpleModelDAG(pw);
 	}
@@ -133,6 +165,29 @@ public class SimpleModelDAG {
 		return endNodeIndex;
 	}
 	
+	public static int getNodeFromZipfDistribution2(int startNodeIndex, int endNodeIndex) {
+		double value = random.nextDouble() * randomWeightedCollectionTotal;
+        int elementIndex = randomWeightedCollection.ceilingEntry(value).getValue();
+        return startNodeIndex + elementIndex - 1;
+	}
+	
+	public static void initiateRandomWeightedCollection(int nElements, ZipfDistribution zipfDistribution) {
+		randomWeightedCollection = new TreeMap();
+		randomWeightedCollectionTotal = 0;
+		for (int i = 1; i <= nElements; ++i) {
+			double weight = -1; 
+			if (alphaNegative == true) {
+				weight = zipfDistribution.probability(nElements - i + 1);
+			}
+			else {
+				weight = zipfDistribution.probability(i);
+			}
+			
+		    randomWeightedCollectionTotal += weight;
+		    randomWeightedCollection.put(randomWeightedCollectionTotal, i);
+		}
+	}
+	
 	public static void generateSimpleModelDAG(PrintWriter pw) throws Exception {	
 		for (int productIndex = sS - 1; productIndex >= 0; --productIndex) {	
 //			System.out.println(productIndex);
@@ -151,12 +206,11 @@ public class SimpleModelDAG {
 					if (startNodeIndex < endNodeIndex) {
 						uniformIntegerDistribution = new UniformIntegerDistribution(startNodeIndex, endNodeIndex);
 					}
-					/*
-					 * else { outDegree.put(sS, 1); continue; }
-					 */
 				} 
 				else { // zipf distribution
+//					System.out.println("Here: " + (endNodeIndex - startNodeIndex + 1) + "\t" + alpha);
 					zipfDistribution = new ZipfDistribution(endNodeIndex - startNodeIndex + 1, alpha);
+					initiateRandomWeightedCollection(endNodeIndex - startNodeIndex + 1, zipfDistribution);
 				}
 			}
 			
@@ -169,14 +223,15 @@ public class SimpleModelDAG {
 					substrateIndex = getNodeFromUniformDistribution(startNodeIndex, endNodeIndex);
 				} 
 				else {
-					substrateIndex = getNodeFromZipfDistribution(startNodeIndex, endNodeIndex);
-					// special case: no order among sources
+//					substrateIndex = getNodeFromZipfDistribution(startNodeIndex, endNodeIndex);
+					substrateIndex = getNodeFromZipfDistribution2(startNodeIndex, endNodeIndex);
+//					special case: no order among sources
 					if (substrateIndex >= sS) {
 						substrateIndex = sS + random.nextInt(nS);
 					}
 				}
 				
-				System.out.println(substrateIndex + " " + productIndex);
+//				System.out.println(substrateIndex + " " + productIndex);
 				String str = substrateIndex + " " + productIndex;
 				if (edgeWeights.containsKey(str)) {
 					int v = edgeWeights.get(str);
@@ -207,14 +262,37 @@ public class SimpleModelDAG {
 		
 		pw.close();
 	}
+	
+	public static void generateSimpleModel(double alpha, int din, int nT, int nI, int nS, double ratio) throws Exception {
+		SimpleModelDAG.alpha = alpha;
+		SimpleModelDAG.din = din;
+		SimpleModelDAG.nT = nT;
+		SimpleModelDAG.nI = nI;
+		SimpleModelDAG.nS = nS;
+		SimpleModelDAG.sT = 0; // start of Target
+		SimpleModelDAG.sI = nT; // start of Intermediate
+		SimpleModelDAG.sS = nT + nI; // start of Source
+		SimpleModelDAG.ratio = ratio;
+		
+		if (alpha < 0) {
+			alphaNegative = true;
+		} else {
+			alphaNegative = false;
+		}
+		SimpleModelDAG.alpha = Math.abs(alpha);
+
+		random = new Random(System.nanoTime());
+
+		getSimpleModelDAG();
+	}
 
 	public static void main(String[] args) throws Exception {
-//		double alphaValues[] = {-5, -1, 0, 1, 5};
-		double alphaValues[] = {10.0};
+//		double alphaValues[] = {-1.0, -0.5, 0, 0.5, 1.0};
+		double alphaValues[] = {-2.0};
 		
 //		for (double d = -1; d <= 1.1; d += 0.2){
 //		for (double d: alphaValues){
-		int N = 600;
+//		int N = 600;
 //		for (int i = 0; i < 200; i += 40) {
 //			nT = 10 + i; // no. of (T)arget nodes
 //			nS = 200 - nT; // no. of (S)ource nodes
@@ -226,13 +304,12 @@ public class SimpleModelDAG {
 //			nS = nT; // no. of (S)ource nodes
 //			nI = N - nS - nT; // no. of (I)ntermediate nodes
 //			ratio = 1.0 * nS / N;
-//			
+			
 //			sT = 0; // start of Target
 //			sI = nT; // start of Intermediate
 //			sS = nT + nI; // start of Source
 
 //			System.out.println(sI + "\t" + sS + "\t" + ratio);
-			
 			
 			for (double d : alphaValues) {
 				if (d < 0) {
@@ -247,7 +324,7 @@ public class SimpleModelDAG {
 
 				// break;
 			}
-
+			
 			/*
 			 * int N = nT + nI + nS; for (int nodeIndex = sS; nodeIndex > 0;
 			 * --nodeIndex) { double expectedOutDeg = 0; for (int product =
@@ -268,4 +345,5 @@ public class SimpleModelDAG {
 			System.out.println("Done!");
 //		}
 	}
+//	}
 }

@@ -72,6 +72,7 @@ public class DistributionAnalysis {
 		pw.close();
 	}
 	
+	/*
 	public static void printSyntheticPC(DependencyDAG dependencyDAG, String filePath) throws Exception {		
 		PrintWriter pw = new PrintWriter(new File("analysis//centrality-histo-" + filePath + ".txt"));
 
@@ -81,6 +82,7 @@ public class DistributionAnalysis {
 		
 		pw.close();
 	}
+	*/
 	
 	public static void printCentralityDistribution(DependencyDAG dependencyDAG, String filePath) throws Exception {		
 		PrintWriter pw = new PrintWriter(new File("analysis//centrality-distribution-" + filePath + ".txt"));
@@ -94,6 +96,7 @@ public class DistributionAnalysis {
 		pw.close();
 	}
 	
+	/*
 	public static void printLocationVsCentrality(DependencyDAG dependencyDAG, String filePath) throws Exception {
 		PrintWriter pw = new PrintWriter(new File("analysis//loc-vs-centrality-" + filePath + ".txt"));
 
@@ -104,7 +107,9 @@ public class DistributionAnalysis {
 		
 		pw.close();
 	}
+	*/
 	
+	/*
 	public static void printSourceVsTargetCompression(DependencyDAG dependencyDAG, String filePath) throws Exception {
 		PrintWriter pw = new PrintWriter(new File("analysis//src-vs-tgt-compression-" + filePath + ".txt"));
 
@@ -117,7 +122,9 @@ public class DistributionAnalysis {
 		
 		pw.close();
 	}
+	*/
 	
+	/*
 	public static void printTargetDependencyDistribution(DependencyDAG dependencyDAG, String filePath) throws Exception {		
 		PrintWriter pw = new PrintWriter(new File("analysis//target-dependency-distribution-" + filePath + ".txt"));
 
@@ -132,14 +139,16 @@ public class DistributionAnalysis {
 		
 		pw.close();
 	}
+	*/
 	
+	/*
 	public static void printLogBinnedHistogram(DependencyDAG dependencyDAG, String filePath) throws Exception {
 		double startValue = 1;
 		for (int i = 1; ; ++i) {
 			
 		}
-		
 	}
+	*/
 	
 	public static TreeMap<Double, Double> getCentralityCCDF(DependencyDAG dependencyDAG, String filePath, int key) throws Exception {		
 		String[] centrality = {"p-", "i-", "hpr-", "gpr-"};
@@ -185,6 +194,7 @@ public class DistributionAnalysis {
 		return ccdfMap;
 	}
 	
+	/*
 	public static void printPathCentralityVsPageRankScatter(DependencyDAG dependencyDAG, String filePath) throws Exception {
 		PrintWriter pw = new PrintWriter(new File("analysis//pcentrality-vs-pagerank-" + filePath + ".txt"));
 
@@ -194,7 +204,9 @@ public class DistributionAnalysis {
 		
 		pw.close();
 	}
+	*/
 	
+	/*
 	public static void rankNodeByCentrality(DependencyDAG dependencyDAG, HashMap<String, Double> values) {
 		TreeMultimap<Double, String> sortedNodes = TreeMultimap.create(Ordering.natural().reverse(), Ordering.natural());
 		for (String s : dependencyDAG.nodes) {
@@ -215,26 +227,29 @@ public class DistributionAnalysis {
 			++rank;
 		}
 	}
+	*/
 	
+	/*
 	public static void printCentralityRanks(DependencyDAG dependencyDAG, String filePath) throws Exception {
 //		PrintWriter pw = new PrintWriter(new File("analysis//pcentrality-and-pagerank-" + filePath + ".txt"));
 //		rankData(dependencyDAG, dependencyDAG.normalizedPathCentrality);
 //		
-////		HashMap<String, Integer> pCGMRank = rankData(dependencyDAG, dependencyDAG.geometricMeanPathCentrality);
-////		HashMap<String, Integer> pCHMRank = rankData(dependencyDAG, dependencyDAG.harmonicMeanPathCentrality);
-////		HashMap<String, Integer> pRGMRank = rankData(dependencyDAG, dependencyDAG.geometricMeanPagerankCentrality);
-////		HashMap<String, Integer> pRHMRank = rankData(dependencyDAG, dependencyDAG.harmonicMeanPagerankCentrality);
-////		
-////		for (String s: dependencyDAG.nodes) {
-////			pw.println(s + "\t" + pCGMRank.get(s) + "\t" + pCHMRank.get(s) + "\t" + pRGMRank.get(s) + "\t" + pRHMRank.get(s));
-////		}
-////		pw.close();
-////		
-////		for (String s: dependencyDAG.nodes) {
-////			System.out.print(s + "\t" + dependencyDAG.geometricMeanPathCentrality.get(s) + "\t" + dependencyDAG.harmonicMeanPathCentrality.get(s));
-////			System.out.println("\t" + dependencyDAG.geometricMeanPagerankCentrality.get(s) + "\t" + dependencyDAG.harmonicMeanPagerankCentrality.get(s));
-////		}
+//		HashMap<String, Integer> pCGMRank = rankData(dependencyDAG, dependencyDAG.geometricMeanPathCentrality);
+//		HashMap<String, Integer> pCHMRank = rankData(dependencyDAG, dependencyDAG.harmonicMeanPathCentrality);
+//		HashMap<String, Integer> pRGMRank = rankData(dependencyDAG, dependencyDAG.geometricMeanPagerankCentrality);
+//		HashMap<String, Integer> pRHMRank = rankData(dependencyDAG, dependencyDAG.harmonicMeanPagerankCentrality);
+//		
+//		for (String s: dependencyDAG.nodes) {
+//			pw.println(s + "\t" + pCGMRank.get(s) + "\t" + pCHMRank.get(s) + "\t" + pRGMRank.get(s) + "\t" + pRHMRank.get(s));
+//		}
+//		pw.close();
+//		
+//		for (String s: dependencyDAG.nodes) {
+//			System.out.print(s + "\t" + dependencyDAG.geometricMeanPathCentrality.get(s) + "\t" + dependencyDAG.harmonicMeanPathCentrality.get(s));
+//			System.out.println("\t" + dependencyDAG.geometricMeanPagerankCentrality.get(s) + "\t" + dependencyDAG.harmonicMeanPagerankCentrality.get(s));
+//		}
 	}
+	*/
 	
 	public static double getPathLength(DependencyDAG dependencyDAG) {
 		double avgPLength = 0;
@@ -257,6 +272,7 @@ public class DistributionAnalysis {
 		return StatUtils.percentile(pathLengths, 50);
 	}
 	
+	/*
 	public static void targetEdgeConcentration(DependencyDAG dependencyDAG) {
 		TreeMap<Integer, Integer> frequencyCounter = new TreeMap();
 		for (String s: dependencyDAG.nodes) {
@@ -281,7 +297,9 @@ public class DistributionAnalysis {
 			System.out.println(i + "\t" + frequencyCounter.get(i));
 		}
 	}
+	*/
 	
+	/*
 	public static void getReachabilityCount(DependencyDAG dependencyDAG) {
 		double overFlowed = 0;
 		double participant = 0;
@@ -322,6 +340,7 @@ public class DistributionAnalysis {
 		
 		System.out.println(rSum / participant);
 	}
+	*/
 	
 	public static TreeMap<Integer, Integer> getDegreeHistogram(DependencyDAG dependencyDAG) {
 		double inDegrees[] = new double[dependencyDAG.nodes.size()];
@@ -384,6 +403,7 @@ public class DistributionAnalysis {
 		return inDegreeHistogram;
 	}
 	
+	/*
 	public static void getDegreeHistogramSpecialized(DependencyDAG dependencyDAG) {
 		TreeMap<Integer, Integer> inDegreeHistogramNearTarget = new TreeMap();
 		TreeMap<Integer, Integer> inDegreeHistogramNearSource = new TreeMap();
@@ -449,6 +469,7 @@ public class DistributionAnalysis {
 //			System.out.println(i + "\t" + inDegreeHistogramNearTarget.get(i));
 //		}
 	}
+	*/
 	
 	public static void getAverageInOutDegree(DependencyDAG dependencyDAG) {
 		double inDeg = 0;
@@ -466,6 +487,7 @@ public class DistributionAnalysis {
 		System.out.println("Avg In/Out Deg: " + (1.0 *  avgInVsOut / dependencyDAG.nodes.size()));
 	}
 	
+	/*
 	public static void printEdgeList(DependencyDAG dependencyDAG, String filePath) throws Exception {
 		PrintWriter pw = new PrintWriter(new File("edgelist_graphs//" + filePath + "_edgelist.txt"));
 		for (String s: dependencyDAG.nodes) {
@@ -477,11 +499,11 @@ public class DistributionAnalysis {
 		}
 		pw.close();
 	}
+	*/
 	
+	/*
 	public static void printAllCentralities(DependencyDAG dependencyDAG, String filePath) throws Exception {
-		/*************************************************************/
-		/*** order indeg outdeg closeness betwenness location path ***/
-		/*************************************************************/
+//		order indeg outdeg closeness betwenness location path
 		
 		Scanner scanner = new Scanner(new File("python_centralities//" + filePath + "_centralities.txt"));
 		PrintWriter pw = new PrintWriter(new File("analysis//" + filePath + "_all_centralities.txt"));
@@ -498,13 +520,14 @@ public class DistributionAnalysis {
 		scanner.close();
 		pw.close();
 	}
+	 */
 	
 	public static void findNDirectSrcTgtBypasses(DependencyDAG dependencyDAG, String filePath) {
 		int knt = 0;
 		for (String n: dependencyDAG.nodes) {
-			if (!dependencyDAG.depends.containsKey(n)) {
+			if (dependencyDAG.isSource(n) && dependencyDAG.serves.containsKey(n)) {
 				for (String r: dependencyDAG.serves.get(n)) {
-					if (!dependencyDAG.serves.containsKey(r)) {
+					if (dependencyDAG.isTarget(r)) {
 						++knt;
 					}
 				}
@@ -515,6 +538,7 @@ public class DistributionAnalysis {
 //		System.out.println("Direct source to target edges: " + knt);
 	}
 	
+	/*
 	private static void helper(DependencyDAG dependencyDAG, PrintWriter pw, String c) {
 		if (visited.contains(c)) return;
 		visited.add(c);
@@ -533,8 +557,9 @@ public class DistributionAnalysis {
 			}
 		}
 	}
+	*/
 	
-	public static void createSubnetwork(DependencyDAG dependencyDAG, String filePath) throws Exception {
+	/*public static void createSubnetwork(DependencyDAG dependencyDAG, String filePath) throws Exception {
 		PrintWriter pw = new PrintWriter(new File("supremecourt_networks//" + filePath + "_case-monopoly.txt"));
 		
 		String cases[] = {"9808", "11860", "12036", "12612", "13180","14097", "18375","18502", "26386"};
@@ -546,8 +571,9 @@ public class DistributionAnalysis {
 		
 		System.out.println(visited.size());
 		pw.close();
-	}
+	}*/
 	
+	/*
 	public static void crossCheckCourtCase(DependencyDAG dependencyDAG, String filePath) throws Exception {
 		for (String s: dependencyDAG.nodes) {
 			if(dependencyDAG.serves.containsKey(s) && dependencyDAG.depends.containsKey(s)) {
@@ -557,4 +583,6 @@ public class DistributionAnalysis {
 			}
 		}
 	}
+	*/
+	
 }
