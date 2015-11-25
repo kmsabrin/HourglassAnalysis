@@ -425,13 +425,14 @@ public class WaistDetection {
 		double minST = Math.min(dependencyDAG.nSources, dependencyDAG.nTargets);
 //		System.out.println("nonSTinWaist: " + (topKNodes.size() - STNodes));
 //		System.out.println("MinST " + minST + " Waist Size " + averageWaistRank.size());
-		if (waistSize == 0) {
-			hourglassness = -1001;
-		}
+//		if (waistSize == 0) {
+//			hourglassness = -1001;
+//		}
 //		else if ((waistSize - 1.0) >= minST) {
 //			hourglassness = 0;
 //		}
-		else { 
+//		else 
+		{ 
 			hourglassness = 1.0 - ((waistSize - 1.0) / minST);
 		}
 //		System.out.println("Hourglassness: " + hourglassness);

@@ -288,7 +288,7 @@ public class SimpleModelDAG {
 
 	public static void main(String[] args) throws Exception {
 //		double alphaValues[] = {-1.0, -0.5, 0, 0.5, 1.0};
-		double alphaValues[] = {-2.0};
+		double alphaValues[] = {-0.5};
 		
 //		for (double d = -1; d <= 1.1; d += 0.2){
 //		for (double d: alphaValues){
