@@ -194,9 +194,9 @@ public class WaistDetection {
 			}			
 		}
 		
-//		for (int i: waistSizeFrequencey.keySet()) {
-//			System.out.println("Waist size " + i + "\t with frequency " + (waistSizeFrequencey.get(i) * 1.0 / nRuns));
-//		}
+		for (int i: waistSizeFrequencey.keySet()) {
+			System.out.println("Waist size " + i + "\t with frequency " + (waistSizeFrequencey.get(i) * 1.0 / nRuns));
+		}
 //		System.out.println("-- --");
 		if (thresholdSatisfied) {
 			waistSize = Collections.min(waistSizeFrequencey.keySet());

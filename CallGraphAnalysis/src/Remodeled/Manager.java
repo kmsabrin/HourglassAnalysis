@@ -59,14 +59,14 @@ public class Manager {
 	
 	public static void doRealNetworkAnalysis() throws Exception {
 		String netPath = "";
-		String netID = "rat";
+//		String netID = "rat";
 //		String netID = "monkey";
 		
 //		String netID = "commons-math";
 //		String netID = "openssh-39";
 //		String netID = "apache-commons-3.4";
 		
-//		String netID = "court";
+		String netID = "court";
 		
 		if (netID.equals("rat") || netID.equals("monkey")) {
 			loadLargestWCC(netID);
@@ -151,7 +151,7 @@ public class Manager {
 		
 //		WaistDetection.runPCWaistDetection(dependencyDAG, netID);
 //		WaistDetection.heuristicWaistDetection(dependencyDAG, netID);
-//		WaistDetection.randomizedWaistDetection(dependencyDAG, netID);
+		WaistDetection.randomizedWaistDetection(dependencyDAG, netID);
 		
 //		WaistDetection.pathCoverageThresholdDetection(dependencyDAG, netID);
 		
@@ -186,19 +186,23 @@ public class Manager {
 //		int startIs[] = {10, 50, 90, 130, 170, 190};
 //		int startSs[] = {410, 450, 490, 530, 570, 590};
 								
-//		String real[] = {"openssh", "javamath", "rat", "monkey", "abortion", "pension"};
-//		int startIs[] = {172, 0, 131, 0, 0, 323};
-//		int startSs[] = {932, 0, 433, 0, 0, 453};
+		String real[] = {"openssh", "javamath", "rat", "monkey", "abortion", "pension"};
+		int startIs[] = {172, 0, 131, 0, 0, 323};
+		int startSs[] = {932, 0, 433, 0, 0, 453};
 //		0.53,-,0.56,-,-,1.01
 
-//		String a = "0.0";
-//		String din = "2";
+		String a = "1.04";
+		String din = "2";
 		String ratio = "-1";
 //		String ratios[] = {"0.15"};
 		
-		for (String a : alphas) {
-			for (String din : dins) {		
-//				int index = 2;
+//		for (String a : alphas) {
+//			for (String din : dins) {		
+				int index = 2;
+				int nT = 323; int nI = 130; int nS = 837;
+				SimpleModelDAG.isMultigraph = false;
+				SimpleModelDAG.generateSimpleModel(Double.parseDouble(a), Integer.parseInt(din), nT, nI, nS, Double.parseDouble(ratio));
+
 //				for (String ratio: ratios) {
 //					SimpleModelDAG.sI = startIs[index];
 //					SimpleModelDAG.sS = startSs[index];
@@ -211,26 +215,26 @@ public class Manager {
 					System.out.println("Working on: " + networkID);
 					DependencyDAG dependencyDAG = new DependencyDAG("synthetic_callgraphs//" + networkID + ".txt");
 					printNetworkStat(dependencyDAG);
-					dependencyDAG.printNetworkMetrics();
+//					dependencyDAG.printNetworkMetrics();
 
-//					DistributionAnalysis.getCentralityCCDF(dependencyDAG, networkID, 1);
+					DistributionAnalysis.getCentralityCCDF(dependencyDAG, networkID, 1);
 //					double medianPathLength = DistributionAnalysis.getPathLength(dependencyDAG);
-					DistributionAnalysis.findWeaklyConnectedComponents(dependencyDAG, networkID);
+//					DistributionAnalysis.findWeaklyConnectedComponents(dependencyDAG, networkID);
 
 					WaistDetection.randomizedWaistDetection(dependencyDAG, networkID);
 //					WaistDetection.pathCoverageThresholdDetection(dependencyDAG, networkID);
 
 //					System.out.println("Waist size: " + WaistDetection.waistSize);
 //					System.out.println(a + "\t" + din + "\t" + WaistDetection.waistSize + "\t" + medianPathLength);
-					System.out.print(din + " " + a + " " + /*ratio + " "*/ + WaistDetection.waistSize);
-					System.out.print(" " + WaistDetection.nodeCoverage + " " + WaistDetection.hourglassness);
-					System.out.println();
+//					System.out.print(din + " " + a + " " + /*ratio + " "*/ + WaistDetection.waistSize);
+//					System.out.print(" " + WaistDetection.nodeCoverage + " " + WaistDetection.hourglassness);
+//					System.out.println();
 					
 //				}
 //				System.out.println();
-			}
-			System.out.println();
-		}
+//			}
+//			System.out.println();
+//		}
 	}
 	
 	public static void doToyNetworkAnalysis() throws Exception {
@@ -243,7 +247,7 @@ public class Manager {
 		
 //		DistributionAnalysis.printEdgeList(dependencyDAG, netID);
 
-//		DistributionAnalysis.getDegreeHistogram(dependencyDAG);
+		DistributionAnalysis.getDegreeHistogram(dependencyDAG);
 //		DistributionAnalysis.printCentralityRanks(dependencyDAG, netID);
 //		DistributionAnalysis.getCentralityCCDF(dependencyDAG, netID, 1);		
 //		DistributionAnalysis.printSourceVsTargetCompression(dependencyDAG, netID);
@@ -251,7 +255,7 @@ public class Manager {
 //		WaistDetection.runPCWaistDetection(dependencyDAG, netID);
 
 //		WaistDetection.heuristicWaistDetection(dependencyDAG, netID);
-		WaistDetection.randomizedWaistDetection(dependencyDAG, netID);
+//		WaistDetection.randomizedWaistDetection(dependencyDAG, netID);
 		
 //		MaxFlowReduction.reduceToMaxFlowMinCutNetwork(dependencyDAG, netID);
 	}
@@ -263,21 +267,21 @@ public class Manager {
 		DependencyDAG.isSimpleModel = true;
 		
 //		String alphas[] = {"-1", "-0.5", "0", "0.5", "1"};
-		String alphas[] = {"-1", "-0.8", "-0.6", "-0.4", "-0.2", "0", "0.2", "0.4", "0.6", "0.8", "1"};
+//		String alphas[] = {"-1", "-0.8", "-0.6", "-0.4", "-0.2", "0", "0.2", "0.4", "0.6", "0.8", "1"};
 //		String alphas[] = {"0", "0.2", "0.4", "0.6", "0.8", "1"};
-//		String alphas[] = {"0.2"};
-//		String alphas[] = {"-0.5", "0.0", "0.5"};
+		String alphas[] = {"0"};
+//		String alphas[] = {"-0.5", "0", "0.5"};
 		
-		String dins[] = {"2", "3", "5", "7"};
-//		String dins[] = {"5"};
+//		String dins[] = {"1", "2", "3", "5", "7"};
+		String dins[] = {"3"};
 		
 //		String ratios[] = {"0.02", "0.08", "0.15", "0.22", "0.28", "0.35", "0.42", "0.48"};
 //		int startIs[] = {10, 50, 90, 130, 170, 210, 250, 290};
 //		int startSs[] = {590, 550, 510, 470, 430, 390, 350, 310};
 		
-//		String ratios[] = {"0.95", "0.75", "0.55", "0.35", "0.15", "0.05"};
-//		int startIs[] = {10, 50, 90, 130, 170, 190};
-//		int startSs[] = {410, 450, 490, 530, 570, 590};
+		String ratios[] = {"0.95", "0.75", "0.55", "0.35", "0.15", "0.05"};
+		int startIs[] = {10, 50, 90, 130, 170, 190};
+		int startSs[] = {410, 450, 490, 530, 570, 590};
 								
 //		String real[] = {"openssh", "javamath", "rat", "monkey", "abortion", "pension"};
 //		int startIs[] = {172, 0, 131, 0, 0, 323};
@@ -290,26 +294,30 @@ public class Manager {
 //		String ratios[] = {"0.15"};
 		
 		for (String din : dins) {
-			for (String a : alphas) {		
-//				int index = 2;
-//				for (String ratio: ratios) {
-//					SimpleModelDAG.sI = startIs[index];
-//					SimpleModelDAG.sS = startSs[index];
-//					++index;					
-
-					int nT = 100; int nI = 400; int nS = 100; String ratio = "-1";
-
+			for (String a : alphas) {
+				
+				int  index = 0;
+				for (String ratio: ratios) {	
+					SimpleModelDAG.sI = startIs[index];
+					SimpleModelDAG.sS = startSs[index];
+					
+									
+//					int nT = 100; int nI = 400; int nS = 100; String ratio = "-1";
+//					int nT = startIs[index]; int nS = startIs[index]; int nI = 600 - nT - nS;
+					int nT = startIs[index]; int nI = startSs[index] - nT; int nS = 600 - nT - nI;
+					++index;
+					
 					String networkID = DAGType + "r" + ratio + "a" + a + "d" + din;
 //				    String networkID = DAGType + "-" + real[index];
 					
 //					System.out.println("Working on: " + networkID);
-					int nRun = 1;
+					int nRun = 10;
 					double waistSizes[] = new double[nRun];
 					double hScores[] = new double[nRun];
 					double nodeCoverages[] = new double[nRun];
 					int idx = 0;
 					for (int i = 0; i < nRun; ++i) {
-//						SimpleModelDAG.generateSimpleModel(Double.parseDouble(a), Integer.parseInt(din), nT, nI, nS, Double.parseDouble(ratio));
+						SimpleModelDAG.generateSimpleModel(Double.parseDouble(a), Integer.parseInt(din), nT, nI, nS, Double.parseDouble(ratio));
 					
 						DependencyDAG dependencyDAG = new DependencyDAG("synthetic_callgraphs//" + networkID + ".txt");
 //						printNetworkStat(dependencyDAG);
@@ -317,7 +325,7 @@ public class Manager {
 
 //						DistributionAnalysis.getCentralityCCDF(dependencyDAG, networkID, 1);
 //						double medianPathLength = DistributionAnalysis.getPathLength(dependencyDAG);
-						DistributionAnalysis.findWeaklyConnectedComponents(dependencyDAG, networkID);
+//						DistributionAnalysis.findWeaklyConnectedComponents(dependencyDAG, networkID);
 
 						WaistDetection.randomizedWaistDetection(dependencyDAG, networkID);
 //						WaistDetection.pathCoverageThresholdDetection(dependencyDAG, networkID);
@@ -337,12 +345,12 @@ public class Manager {
 						double ciWS = ConfidenceInterval.getConfidenceInterval(waistSizes);
 						double ciNC = ConfidenceInterval.getConfidenceInterval(nodeCoverages);
 						double ciHS = ConfidenceInterval.getConfidenceInterval(hScores);
-						System.out.println(a + " " + din + " " + mWS + " " + ciWS + " " + mNC + " " + ciNC + " " + mHS + " " + ciHS );
+						System.out.println(a + " " + din + " " + ratio + " " + mWS + " " + ciWS + " " + mNC + " " + ciNC + " " + mHS + " " + ciHS );
 					}
 					else {
-						System.out.println(a + " " + din + " - - - - - -");
+						System.out.println(a + " " + din + " " + ratio + " - - - - - -");
 					}
-//				}
+				}
 //				System.out.println();
 			}
 			System.out.println();
@@ -351,8 +359,8 @@ public class Manager {
 
 	public static void main(String[] args) throws Exception {		
 //		Manager.doRealNetworkAnalysis();
-//		Manager.doSyntheticNetworkAnalysis();
-		Manager.runSyntheticStatisticalSignificanceTests();
+		Manager.doSyntheticNetworkAnalysis();
+//		Manager.runSyntheticStatisticalSignificanceTests();
 //		Manager.doToyNetworkAnalysis();
 		System.out.println("Done!");
 	}

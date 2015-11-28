@@ -551,14 +551,14 @@ public class DependencyDAG {
 		double nPath = 0;
 		double sPath = 0;
 		if (!WaistDetection.topRemovedWaistNodes.contains(node)) { // special condition for waist detection
-			if (serves.containsKey(node)) { // for synthetic disconnected nodes
-				for (String s : depends.get(node)) {
-					sourcePathDepth(s);
-					nPath += numOfSourcePath.get(s);
-					sPath += numOfSourcePath.get(s) + sumOfSourcePath.get(s);
-				}
+			for (String s : depends.get(node)) {
+				sourcePathDepth(s);
+				nPath += numOfSourcePath.get(s);
+				sPath += numOfSourcePath.get(s) + sumOfSourcePath.get(s);
 			}
 		}
+		
+//		System.out.println("[S] " + node + "\t" + nPath + "\t" + sPath );
 		numOfSourcePath.put(node, nPath);
 		sumOfSourcePath.put(node, sPath);
 		avgSourceDepth.put(node, sPath / nPath);
@@ -579,12 +579,16 @@ public class DependencyDAG {
 		double nPath = 0;
 		double sPath = 0;
 		if (!WaistDetection.topRemovedWaistNodes.contains(node)) { // special condition for waist detection
-			for (String s : serves.get(node)) {
-				targetPathDepth(s);
-				nPath += numOfTargetPath.get(s);
-				sPath += numOfTargetPath.get(s) + sumOfTargetPath.get(s);
+			if (serves.containsKey(node)) { // for synthetic disconnected nodes
+				for (String s : serves.get(node)) {
+					targetPathDepth(s);
+					nPath += numOfTargetPath.get(s);
+					sPath += numOfTargetPath.get(s) + sumOfTargetPath.get(s);
+				}
 			}
 		}
+		
+//		System.out.println("[T] " + node + "\t" + nPath + "\t" + sPath );
 		numOfTargetPath.put(node, nPath);
 		sumOfTargetPath.put(node, sPath);
 		avgTargetDepth.put(node, sPath / nPath);
@@ -670,7 +674,7 @@ public class DependencyDAG {
 			double nPath = 1;
 			nPath = numOfTargetPath.get(s) * numOfSourcePath.get(s);
 			nodePathThrough.put(s, nPath);
-			if (!serves.containsKey(s)) { // is a target
+			if (isTarget(s)) { // is a target
 				nTotalPath += nPath;
 			}
 		}
@@ -693,12 +697,14 @@ public class DependencyDAG {
 		nTotalPath = 0;
 		for (String s : nodes) {
 			double nPath = 1;
+//			System.out.println(s + "\t" + numOfTargetPath.get(s) + "\t" + numOfSourcePath.get(s));
 			nPath = numOfTargetPath.get(s) * numOfSourcePath.get(s);
 			nodePathThrough.put(s, nPath);
-			if (!serves.containsKey(s)) { // is a target
+			if (isTarget(s)) { // is a target
 				nTotalPath += nPath;
 			}
 		}
+//		System.out.println(nTotalPath);
 	}
 		
 	public void loadLocationMetric() {

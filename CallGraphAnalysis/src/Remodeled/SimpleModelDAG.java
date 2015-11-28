@@ -16,6 +16,7 @@ public class SimpleModelDAG {
 	static Random random = new Random(System.nanoTime());
 	static double alpha = 0.0;
 	static boolean alphaNegative = false;
+	static boolean isMultigraph = true;
 	
 //	real network matching
 	static int nT = 3; // no. of (T)arget nodes
@@ -233,6 +234,12 @@ public class SimpleModelDAG {
 				
 //				System.out.println(substrateIndex + " " + productIndex);
 				String str = substrateIndex + " " + productIndex;
+				
+				if (isMultigraph == false && edgeWeights.containsKey(str)) {
+					--j;
+					continue;
+				}
+				
 				if (edgeWeights.containsKey(str)) {
 					int v = edgeWeights.get(str);
 					edgeWeights.put(str, v + 1);

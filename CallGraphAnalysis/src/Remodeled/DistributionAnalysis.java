@@ -3,6 +3,7 @@ package Remodeled;
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -160,7 +161,7 @@ public class DistributionAnalysis {
 		
 		for (String s: dependencyDAG.nodes) {
 			double v = 0;
-			if (key == 1) v = dependencyDAG.normalizedPathCentrality.get(s);
+			if (key == 1) v = dependencyDAG.normalizedPathCentrality.get(s) * dependencyDAG.nTotalPath;
 			if (key == 2) v = dependencyDAG.iCentrality.get(s);
 			if (key == 3) v = dependencyDAG.harmonicMeanPagerankCentrality.get(s);
 			if (key == 4) v = dependencyDAG.geometricMeanPagerankCentrality.get(s);
@@ -372,13 +373,13 @@ public class DistributionAnalysis {
 			if (dependencyDAG.depends.containsKey(s)) {
 				inDegrees[kin++] = iDeg;
 				inSum++;
-//				System.out.println("here-in");
+//				System.out.println("in Adding: " + iDeg);
 			}
 			
 			if (dependencyDAG.serves.containsKey(s)) {
 				outDegrees[kout++] = oDeg;
 				outSum++;
-//				System.out.println("here-out");
+//				System.out.println("out Adding: " + oDeg);
 			}
 		}
 		
@@ -394,11 +395,14 @@ public class DistributionAnalysis {
 			System.out.println(i + "\t" + (outDegreeHistogram.get(i) / outSum));
 		}
 		
+		inDegrees = Arrays.copyOf(inDegrees, kin);
+		outDegrees = Arrays.copyOf(outDegrees, kout);
+		System.out.println(StatUtils.percentile(inDegrees, 50) + "\t" + StatUtils.mean(inDegrees));
 		System.out.println(" Indegree:" + " Mean: " + StatUtils.mean(inDegrees) + " StD: " + Math.sqrt(StatUtils.variance(inDegrees)));
 		System.out.println("Outdegree:" + " Mean: " + StatUtils.mean(outDegrees) + " StD: " + Math.sqrt(StatUtils.variance(outDegrees)));
 		
-		System.out.println(" Indegree:" + " 10p: " + StatUtils.percentile(inDegrees, 10) +  " 95p: " + StatUtils.percentile(inDegrees, 90) );
-		System.out.println("Outdegree:" + " 10p: " + StatUtils.percentile(outDegrees, 10) + " 95p: " + StatUtils.percentile(outDegrees, 90) );
+		System.out.println(" Indegree:" + " 25p: " + StatUtils.percentile(inDegrees, 10) +  " 75p: " + StatUtils.percentile(inDegrees, 90) );
+		System.out.println("Outdegree:" + " 25p: " + StatUtils.percentile(outDegrees, 10) + " 75p: " + StatUtils.percentile(outDegrees, 90) );
 	
 		return inDegreeHistogram;
 	}
