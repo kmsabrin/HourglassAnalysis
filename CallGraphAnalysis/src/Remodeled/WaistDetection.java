@@ -10,7 +10,7 @@ import java.util.Random;
 
 public class WaistDetection {
 	static HashSet<String> topRemovedWaistNodes = new HashSet();
-	static double pathCoverageTau = 0.95;
+	static double pathCoverageTau = 0.98;
 	static HashMap<String, Double> averageWaistRank;
 	
 	static double waistSize;
@@ -213,6 +213,7 @@ public class WaistDetection {
 //			System.out.println(n + "\t" + (nodeFrequencyInWaist.get(n) * 1.0 / nRuns) + "\t" + averageWaistRank.get(n) + "\t" + dependencyDAG.normalizedPathCentrality.get(n));
 		}
 		
+		System.out.println("Waist Size: " + waistSize);
 		getNodeCoverage(dependencyDAG);
 //		nodeCentralityWRTWaist(dependencyDAG);
 	}
@@ -416,9 +417,9 @@ public class WaistDetection {
 		
 //		System.out.println((notCoveredSource / notCovered) + "\t" + (notCoveredTarget / notCovered) + "\t" + (notCoveredMiddle / notCovered));
 		nodeCoverage = waistNodeCoverage.size() * 1.0 / dependencyDAG.nodes.size();
-//		System.out.println("Node Coverage: " + nodeCoverage);
+		System.out.println("Node Coverage: " + nodeCoverage);
 		effectiveNodeCoverage = waistNodeCoverage.size() * 1.0 / (dependencyDAG.nodes.size() - notCoveredSpecialSource - notCoveredSpecialTarget);
-//		System.out.println("Effective Node Coverage: " + effectiveNodeCoverage);
+		System.out.println("Effective Node Coverage: " + effectiveNodeCoverage);
 //		System.out.println("Total Not Covered: " + waistNodeNotCoverage.size() + "\t but kounter: " + sum);
 
 		
@@ -435,7 +436,7 @@ public class WaistDetection {
 		{ 
 			hourglassness = 1.0 - ((waistSize - 1.0) / minST);
 		}
-//		System.out.println("Hourglassness: " + hourglassness);
+		System.out.println("Hourglassness: " + hourglassness);
 		
 		return waistNodeCoverage.size() * 1.0 / dependencyDAG.nodes.size();
 	}

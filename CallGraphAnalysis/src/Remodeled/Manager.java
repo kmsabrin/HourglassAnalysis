@@ -62,11 +62,11 @@ public class Manager {
 //		String netID = "rat";
 //		String netID = "monkey";
 		
-//		String netID = "commons-math";
+		String netID = "commons-math";
 //		String netID = "openssh-39";
 //		String netID = "apache-commons-3.4";
 		
-		String netID = "court";
+//		String netID = "court";
 		
 		if (netID.equals("rat") || netID.equals("monkey")) {
 			loadLargestWCC(netID);
@@ -82,8 +82,8 @@ public class Manager {
 			DependencyDAG.isMetabolic = true;
 		}
 		else if (netID.equals("court")) {
-//			CourtCaseCornellParser.caseTopic = "abortion";
-			CourtCaseCornellParser.caseTopic = "pension";
+			CourtCaseCornellParser.caseTopic = "abortion";
+//			CourtCaseCornellParser.caseTopic = "pension";
 			CourtCaseCornellParser.loadCuratedCaseIDs();
 			netPath = "supremecourt_networks//court.txt";
 			DependencyDAG.isCourtcase = true;
@@ -142,7 +142,7 @@ public class Manager {
 //		DistributionAnalysis.findWeaklyConnectedComponents(dependencyDAG, netID);		
 //		DistributionAnalysis.printCentralityRanks(dependencyDAG, netID);
 //		int centralityIndex = 1;
-		DistributionAnalysis.getCentralityCCDF(dependencyDAG, netID, 1);
+//		DistributionAnalysis.getCentralityCCDF(dependencyDAG, netID, 1);
 //		DistributionAnalysis.printCentralityDistribution(dependencyDAG, netID);
 //		DistributionAnalysis.printEdgeList(dependencyDAG, netID);
 //		DistributionAnalysis.printAllCentralities(dependencyDAG, netID);
@@ -191,15 +191,18 @@ public class Manager {
 		int startSs[] = {932, 0, 433, 0, 0, 453};
 //		0.53,-,0.56,-,-,1.01
 
-		String a = "1.04";
-		String din = "2";
+		String a = "0.53";
+		String din = "4";
 		String ratio = "-1";
 //		String ratios[] = {"0.15"};
 		
 //		for (String a : alphas) {
 //			for (String din : dins) {		
-				int index = 2;
-				int nT = 323; int nI = 130; int nS = 837;
+//				int index = 2;
+		
+				int nT = 172; int nI = 760; int nS = 435; // openssh
+//				int nT = 131; int nI = 302; int nS = 103; // rat
+//				int nT = 323; int nI = 130; int nS = 837; // pension
 				SimpleModelDAG.isMultigraph = false;
 				SimpleModelDAG.generateSimpleModel(Double.parseDouble(a), Integer.parseInt(din), nT, nI, nS, Double.parseDouble(ratio));
 
@@ -358,8 +361,8 @@ public class Manager {
 	}
 
 	public static void main(String[] args) throws Exception {		
-//		Manager.doRealNetworkAnalysis();
-		Manager.doSyntheticNetworkAnalysis();
+		Manager.doRealNetworkAnalysis();
+//		Manager.doSyntheticNetworkAnalysis();
 //		Manager.runSyntheticStatisticalSignificanceTests();
 //		Manager.doToyNetworkAnalysis();
 		System.out.println("Done!");

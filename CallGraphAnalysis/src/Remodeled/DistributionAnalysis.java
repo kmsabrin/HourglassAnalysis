@@ -161,7 +161,7 @@ public class DistributionAnalysis {
 		
 		for (String s: dependencyDAG.nodes) {
 			double v = 0;
-			if (key == 1) v = dependencyDAG.normalizedPathCentrality.get(s) * dependencyDAG.nTotalPath;
+			if (key == 1) v = dependencyDAG.normalizedPathCentrality.get(s); //* dependencyDAG.nTotalPath;
 			if (key == 2) v = dependencyDAG.iCentrality.get(s);
 			if (key == 3) v = dependencyDAG.harmonicMeanPagerankCentrality.get(s);
 			if (key == 4) v = dependencyDAG.geometricMeanPagerankCentrality.get(s);
@@ -505,7 +505,7 @@ public class DistributionAnalysis {
 	}
 	*/
 	
-	/*
+	
 	public static void printAllCentralities(DependencyDAG dependencyDAG, String filePath) throws Exception {
 //		order indeg outdeg closeness betwenness location path
 		
@@ -524,7 +524,7 @@ public class DistributionAnalysis {
 		scanner.close();
 		pw.close();
 	}
-	 */
+	 
 	
 	public static void findNDirectSrcTgtBypasses(DependencyDAG dependencyDAG, String filePath) {
 		int knt = 0;
