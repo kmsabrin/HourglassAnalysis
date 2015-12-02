@@ -8,6 +8,7 @@ import java.util.NavigableMap;
 import java.util.Random;
 import java.util.TreeMap;
 
+import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.apache.commons.math3.distribution.UniformIntegerDistribution;
 import org.apache.commons.math3.distribution.ZipfDistribution;
 
@@ -50,7 +51,8 @@ public class SimpleModelDAG {
 //	static int sS = 1000; // start of source
 
 //	static HashMap<Integer, Integer> outDegree = new HashMap();
-	
+
+	static PoissonDistribution poissonDistribution;
 	static ZipfDistribution zipfDistribution;
 //	static ZipfDistribution zipfDistribution2 = new ZipfDistribution(10, 1.0);
 	static UniformIntegerDistribution uniformIntegerDistribution;
@@ -64,7 +66,7 @@ public class SimpleModelDAG {
 	static TreeMap<Integer, Integer> inDegreeHistogram;
 	static int numOfNonzeroIndegreeNodes;
 	
-	static int din = 2;
+	static double din = 2;
 	
 	static NavigableMap<Double, Integer> randomWeightedCollection;
 	static double randomWeightedCollectionTotal = 0;
@@ -110,7 +112,13 @@ public class SimpleModelDAG {
 	}
 	
 	public static int getInDegree() {
-		return din;
+//		return din;
+		
+		int inD;
+		do {
+			inD = poissonDistribution.sample();
+		} while (inD < 1);
+		return inD;
 		
 		/*
 		int values[] = {2, 3, 4, 5};
@@ -270,7 +278,7 @@ public class SimpleModelDAG {
 		pw.close();
 	}
 	
-	public static void generateSimpleModel(double alpha, int din, int nT, int nI, int nS, double ratio) throws Exception {
+	public static void generateSimpleModel(double alpha, double din, int nT, int nI, int nS, double ratio) throws Exception {
 		SimpleModelDAG.alpha = alpha;
 		SimpleModelDAG.din = din;
 		SimpleModelDAG.nT = nT;
@@ -280,6 +288,8 @@ public class SimpleModelDAG {
 		SimpleModelDAG.sI = nT; // start of Intermediate
 		SimpleModelDAG.sS = nT + nI; // start of Source
 		SimpleModelDAG.ratio = ratio;
+		
+		poissonDistribution = new PoissonDistribution(din);
 		
 		if (alpha < 0) {
 			alphaNegative = true;

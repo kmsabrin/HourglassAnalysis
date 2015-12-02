@@ -370,44 +370,57 @@ public class DistributionAnalysis {
 			}
 			else outDegreeHistogram.put(oDeg, 1);
 
-			if (dependencyDAG.depends.containsKey(s)) {
+			if (dependencyDAG.isIntermediate(s) || dependencyDAG.isTarget(s)) {
 				inDegrees[kin++] = iDeg;
 				inSum++;
-//				System.out.println("in Adding: " + iDeg);
+//				System.out.println("in Adding: " + iDeg + " for " + s);
 			}
 			
-			if (dependencyDAG.serves.containsKey(s)) {
+			if (dependencyDAG.isIntermediate(s) || dependencyDAG.isSource(s)) {
 				outDegrees[kout++] = oDeg;
 				outSum++;
 //				System.out.println("out Adding: " + oDeg);
 			}
 		}
 		
+
+		inDegrees = Arrays.copyOf(inDegrees, kin);
+		outDegrees = Arrays.copyOf(outDegrees, kout);
+		
+		for (double i: inDegrees) {
+//			System.out.println((int)i);
+		}
+		
+		System.out.println("------------------------\n\n");
+		
+		for (double o: outDegrees) {
+//			System.out.println((int)o);
+		}
+		
 		for (int i: inDegreeHistogram.keySet()) {
 			if (i < 1) continue;
-			System.out.println(i + "\t" + (inDegreeHistogram.get(i) / inSum));
+//			System.out.println(i + "\t" + (inDegreeHistogram.get(i) / inSum));
 		}
 		
 		System.out.println("------------------------");
 		
 		for (int i: outDegreeHistogram.keySet()) {
 			if (i < 1) continue;
-			System.out.println(i + "\t" + (outDegreeHistogram.get(i) / outSum));
+//			System.out.println(i + "\t" + (outDegreeHistogram.get(i) / outSum));
 		}
 		
-		inDegrees = Arrays.copyOf(inDegrees, kin);
-		outDegrees = Arrays.copyOf(outDegrees, kout);
-		System.out.println(StatUtils.percentile(inDegrees, 50) + "\t" + StatUtils.mean(inDegrees));
-		System.out.println(" Indegree:" + " Mean: " + StatUtils.mean(inDegrees) + " StD: " + Math.sqrt(StatUtils.variance(inDegrees)));
-		System.out.println("Outdegree:" + " Mean: " + StatUtils.mean(outDegrees) + " StD: " + Math.sqrt(StatUtils.variance(outDegrees)));
-		
-		System.out.println(" Indegree:" + " 25p: " + StatUtils.percentile(inDegrees, 10) +  " 75p: " + StatUtils.percentile(inDegrees, 90) );
-		System.out.println("Outdegree:" + " 25p: " + StatUtils.percentile(outDegrees, 10) + " 75p: " + StatUtils.percentile(outDegrees, 90) );
+//		System.out.println(StatUtils.percentile(inDegrees, 50) + "\t" + StatUtils.mean(inDegrees));
+		System.out.println(" Indegree:" + " Mean: " + StatUtils.mean(inDegrees) + " Variance: " + StatUtils.variance(inDegrees));
+//		System.out.println(" Indegree:" + " Mean: " + StatUtils.mean(inDegrees) + " StD: " + Math.sqrt(StatUtils.variance(inDegrees)));
+//		System.out.println("Outdegree:" + " Mean: " + StatUtils.mean(outDegrees) + " StD: " + Math.sqrt(StatUtils.variance(outDegrees)));
+//		
+//		System.out.println(" Indegree:" + " 25p: " + StatUtils.percentile(inDegrees, 10) +  " 75p: " + StatUtils.percentile(inDegrees, 90) );
+//		System.out.println("Outdegree:" + " 25p: " + StatUtils.percentile(outDegrees, 10) + " 75p: " + StatUtils.percentile(outDegrees, 90) );
 	
 		return inDegreeHistogram;
 	}
 	
-	/*
+	
 	public static void getDegreeHistogramSpecialized(DependencyDAG dependencyDAG) {
 		TreeMap<Integer, Integer> inDegreeHistogramNearTarget = new TreeMap();
 		TreeMap<Integer, Integer> inDegreeHistogramNearSource = new TreeMap();
@@ -420,7 +433,7 @@ public class DistributionAnalysis {
 			if (dependencyDAG.location.get(s) > 0 && dependencyDAG.location.get(s) < 0.4) {
 				if (iDeg > maxDeg) maxDeg = iDeg;
 				nearSourceDegSum += iDeg;
-//				System.out.println(iDeg);
+				System.out.println(iDeg);
 				if (inDegreeHistogramNearSource.containsKey(iDeg)) {
 					int v = inDegreeHistogramNearSource.get(iDeg);
 					inDegreeHistogramNearSource.put(iDeg, v + 1);
@@ -442,25 +455,25 @@ public class DistributionAnalysis {
 			}
 		}
 		
-		System.out.println("Indeg\tNear-Source\tNear-Target");
-		for (int i = 1; i <= maxDeg; ++i) {
-			System.out.print(i);
-			if (inDegreeHistogramNearSource.containsKey(i)) {
-				System.out.print("\t" + (inDegreeHistogramNearSource.get(i) * 1.0 / nearSourceDegSum));
-			}
-			else {
-				System.out.print("\t" + "0");
-			}
-			
-			if (inDegreeHistogramNearTarget.containsKey(i)) {
-				System.out.print("\t" + (inDegreeHistogramNearTarget.get(i) * 1.0 / nearTargetDegSum));
-			}
-			else {
-				System.out.print("\t" + "0");
-			}
-			
-			System.out.println();
-		}
+//		System.out.println("Indeg\tNear-Source\tNear-Target");
+//		for (int i = 1; i <= maxDeg; ++i) {
+//			System.out.print(i);
+//			if (inDegreeHistogramNearSource.containsKey(i)) {
+//				System.out.print("\t" + (inDegreeHistogramNearSource.get(i) * 1.0 / nearSourceDegSum));
+//			}
+//			else {
+//				System.out.print("\t" + "0");
+//			}
+//			
+//			if (inDegreeHistogramNearTarget.containsKey(i)) {
+//				System.out.print("\t" + (inDegreeHistogramNearTarget.get(i) * 1.0 / nearTargetDegSum));
+//			}
+//			else {
+//				System.out.print("\t" + "0");
+//			}
+//			
+//			System.out.println();
+//		}
 		
 //		for (int i: inDegreeHistogramNearSource.keySet()) {
 //			System.out.println(i + "\t" + inDegreeHistogramNearSource.get(i));
@@ -473,7 +486,7 @@ public class DistributionAnalysis {
 //			System.out.println(i + "\t" + inDegreeHistogramNearTarget.get(i));
 //		}
 	}
-	*/
+	
 	
 	public static void getAverageInOutDegree(DependencyDAG dependencyDAG) {
 		double inDeg = 0;
@@ -507,18 +520,20 @@ public class DistributionAnalysis {
 	
 	
 	public static void printAllCentralities(DependencyDAG dependencyDAG, String filePath) throws Exception {
-//		order indeg outdeg closeness betwenness location path
+//		order: node indeg outdeg closeness betwenness location path
 		
 		Scanner scanner = new Scanner(new File("python_centralities//" + filePath + "_centralities.txt"));
 		PrintWriter pw = new PrintWriter(new File("analysis//" + filePath + "_all_centralities.txt"));
 		
 		while (scanner.hasNext()) {
 			String node = scanner.next();
-			float indeg_c = scanner.nextFloat();
-			float outdeg_c = scanner.nextFloat();
-			float closeness_c = scanner.nextFloat();
-			float betwenness_c = scanner.nextFloat();
-			pw.println(node + " " + indeg_c + " " + outdeg_c + " " + closeness_c + " " + betwenness_c + " " + dependencyDAG.location.get(node) + " " + dependencyDAG.normalizedPathCentrality.get(node));
+			double indeg_c = scanner.nextDouble();
+			double outdeg_c = scanner.nextDouble();
+			double closeness_c = scanner.nextDouble();
+			double betwenness_c = scanner.nextDouble();
+			if (dependencyDAG.nodes.contains(node) == false) continue;
+//			pw.println(node + " " + indeg_c + " " + outdeg_c + " " + closeness_c + " " + betwenness_c + " " + dependencyDAG.location.get(node) + " " + dependencyDAG.normalizedPathCentrality.get(node));
+			pw.println(indeg_c + "\t" + outdeg_c + "\t" + closeness_c + "\t" + betwenness_c + "\t" + dependencyDAG.location.get(node) + "\t" + dependencyDAG.normalizedPathCentrality.get(node));
 		}
 		
 		scanner.close();

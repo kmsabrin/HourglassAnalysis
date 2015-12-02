@@ -5,8 +5,7 @@ import java.io.PrintWriter;
 import java.util.Scanner;
 
 import org.apache.commons.math3.distribution.AbstractRealDistribution;
-import org.apache.commons.math3.distribution.NormalDistribution;
-import org.apache.commons.math3.distribution.ZipfDistribution;
+import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 
 public class StatisticalUtilTest {
@@ -46,7 +45,30 @@ public class StatisticalUtilTest {
 		pw.close();
 	}
 	
+	public static void pointLineDistance(double x1, double y1, double x2, double y2, double x0, double y0)
+	{	
+			double crossX = -1;
+			double crossY = -1;;
+			System.out.println(x1 + " " + y1 + " " + x2 + " " + y2);
+			double distance = Math.abs((x2 - x1) * (y1 - y0) - (x1 - x0) * (y2 - y1)) / Math.sqrt((y2 - y1) * (y2 - y1) + (x2 - x1) * (x2 - x1));
+//			double distance = Math.abs((y2 - y1) * x0 - (x2 - x1) * y0 + x2 * y1 - y2 * x1) / Math.sqrt((y2 - y1) * (y2 - y1) + (x2 - x1) * (x2 - x1));   
+			double d12 = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
+			double u = ((x0 - x1) * (x2 - x1) + (y0 - y1) * (y2 - y1)) / d12;
+			crossX = x1 + u * (x2 - x1);
+			crossY = y1 + u * (y2 - y1);
+			System.out.println("U: " + u);
+			System.out.println("Distance " + distance + " at " + crossX + "," + crossY);
+			double dv = Math.sqrt((crossX - x0) * (crossX - x0) + (crossY - y0) * (crossY - y0));
+			System.out.println("Verify " + dv);
+			double s1 = ((y2 - y1) / (x2 - x1)) * ((crossY - y0) / (crossX - x0));
+			System.out.println(-1 / s1); 
+	}
+	
+	
 	public static void main(String[] args) throws Exception {
+//		pointLineDistance(1, 1, 5, 5, 3, 5);
+		pointLineDistance(1, 0.608621667612025, 302, 0.9659671015314805, 30, 0.9381735677821894);
+		
 //		getCCDF(new ExponentialDistribution(0.5));
 //		getCCDF(new LogNormalDistribution());
 //		getCCDF(new NormalDistribution(4.0, 1.0));
@@ -64,15 +86,17 @@ public class StatisticalUtilTest {
 //			System.out.println(random.nextDouble());
 //		}
 		
-		extractJavaClassDependency();
-		
-		int n = 30;
-		ZipfDistribution zipfDistribution = new ZipfDistribution(n, 5.0);
-		for (int i = 1; i <= n; ++i) {
-//			System.out.println(i + "\t" + zipfDistribution.probability(n - i + 1));
-//			System.out.println(zipfDistribution.sample());
-			System.out.println(i + "\t" + zipfDistribution.probability(n - i + 1));
-		}
+//		extractJavaClassDependency();
+//		
+//		int n = 10;
+//		PoissonDistribution poissonDistribution = new PoissonDistribution(7);
+////		ZipfDistribution zipfDistribution = new ZipfDistribution(n, 5.0);
+//		for (int i = 0; i <= n; ++i) {
+////			System.out.println(i + "\t" + zipfDistribution.probability(n - i + 1));
+////			System.out.println(zipfDistribution.sample());
+////			System.out.println(i + "\t" + zipfDistribution.probability(n - i + 1));
+//			System.out.println(i + "\t" + poissonDistribution.probability(i));
+//		}
 //		
 //		System.out.println("----------");
 //		

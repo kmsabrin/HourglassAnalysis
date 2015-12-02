@@ -10,7 +10,7 @@ import java.util.Random;
 
 public class WaistDetection {
 	static HashSet<String> topRemovedWaistNodes = new HashSet();
-	static double pathCoverageTau = 0.98;
+	static double pathCoverageTau = 0.9537;
 	static HashMap<String, Double> averageWaistRank;
 	
 	static double waistSize;
@@ -19,6 +19,9 @@ public class WaistDetection {
 	static double hourglassness;
 	static double hourglassSymmetry;
 	static boolean thresholdSatisfied;
+	
+	static ArrayList<Double> ws = new ArrayList();
+	static ArrayList<Double> pc = new ArrayList();
 	
 	public static void heuristicWaistDetection(DependencyDAG dependencyDAG, String filePath) throws Exception {
 //		PrintWriter pw0 = new PrintWriter(new File("analysis//path-cover-2-" + filePath + ".txt"));
@@ -104,6 +107,8 @@ public class WaistDetection {
 //			}
 			
 			pw1.println(topRemovedWaistNodes.size() + "\t" + (cumulativePathsTraversed / tPath));
+			ws.add(topRemovedWaistNodes.size() * 1.0);
+			pc.add(cumulativePathsTraversed / tPath);
 			
 			if (cumulativePathsTraversed >= (tPath * pathCoverageTau)) {
 				thresholdSatisfied = true;
@@ -133,7 +138,48 @@ public class WaistDetection {
 	
 	public static void pathCoverageThresholdDetection(DependencyDAG dependencyDAG, String filePath) throws Exception {
 		averageWaistRank = new HashMap();
+		pathCoverageTau = 1.0;
+		ws = new ArrayList();
+		pc = new ArrayList();
 		heuristicWaistDetection(dependencyDAG, filePath);
+		
+		double x1 = ws.get(0);
+		double y1 = pc.get(0);
+		double x2 = ws.get(ws.size() - 1);
+		double y2 = pc.get(pc.size() - 1);
+		double maxDistance = 0;
+		double minWS = 1;
+		double tau = 0;
+		double crossX = -1;
+		double crossY = -1;
+		double maxD = -1;
+		System.out.println(x1 + " " + y1 + " " + x2 + " " + y2);
+		for (int i = 0; i < ws.size(); ++i) {
+			double x0 = ws.get(i);
+			double y0 = pc.get(i);
+			
+			double distance = Math.abs((x2 - x1) * (y1 - y0) - (x1 - x0) * (y2 - y1)) / Math.sqrt((y2 - y1) * (y2 - y1) + (x2 - x1) * (x2 - x1));
+//			double distance = Math.abs((y2 - y1) * x0 - (x2 - x1) * y0 + x2 * y1 - y2 * x1) / Math.sqrt((y2 - y1) * (y2 - y1) + (x2 - x1) * (x2 - x1));   
+			if (distance > maxDistance) {
+				maxDistance = distance;
+				minWS = x0;
+				tau = y0;
+				
+				double d12 = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
+				double u = ((x0 - x1) * (x2 - x1) + (y0 - y1) * (y2 - y1)) / d12;
+				crossX = x1 + u * (x2 - x1);
+				crossY = y1 + u * (y2 - y1);
+				
+				maxD = (x0 - crossX) * (x0 - crossX) + (y0 - crossY) * (y0 - crossY);
+				maxD = Math.sqrt(maxD);
+			}
+			
+			
+		}
+		
+//		System.out.println("Max D: " + maxD);
+		
+		System.out.println(minWS + " with distance " + maxDistance + " and tau " + tau + " and intersected at " + crossX + "," + crossY);
 		
 		/*
 		PrintWriter pw1 = new PrintWriter(new File("analysis//coverage-threshold-" + filePath + ".txt"));
@@ -166,7 +212,7 @@ public class WaistDetection {
 		topRemovedWaistNodes.clear();
 		thresholdSatisfied = false;
 		
-		int nRuns = 1;
+		int nRuns = 10;
 		averageWaistRank = new HashMap();
 		for (int i = 1; i <= nRuns; ++i) {
 			topRemovedWaistNodes.clear();
@@ -195,7 +241,7 @@ public class WaistDetection {
 		}
 		
 		for (int i: waistSizeFrequencey.keySet()) {
-			System.out.println("Waist size " + i + "\t with frequency " + (waistSizeFrequencey.get(i) * 1.0 / nRuns));
+//			System.out.println("Waist size " + i + "\t with frequency " + (waistSizeFrequencey.get(i) * 1.0 / nRuns));
 		}
 //		System.out.println("-- --");
 		if (thresholdSatisfied) {
@@ -210,7 +256,7 @@ public class WaistDetection {
 		dependencyDAG.numOfSourcePath.clear();
 		dependencyDAG.loadPathStatistics();
 		for (String n: nodeFrequencyInWaist.keySet()) {
-//			System.out.println(n + "\t" + (nodeFrequencyInWaist.get(n) * 1.0 / nRuns) + "\t" + averageWaistRank.get(n) + "\t" + dependencyDAG.normalizedPathCentrality.get(n));
+			System.out.println(n + "\t" + (nodeFrequencyInWaist.get(n) * 1.0 / nRuns) + "\t" + averageWaistRank.get(n) /*+ "\t" + dependencyDAG.normalizedPathCentrality.get(n)*/);
 		}
 		
 		System.out.println("Waist Size: " + waistSize);

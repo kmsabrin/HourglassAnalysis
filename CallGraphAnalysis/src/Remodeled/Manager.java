@@ -62,8 +62,8 @@ public class Manager {
 //		String netID = "rat";
 //		String netID = "monkey";
 		
-		String netID = "commons-math";
-//		String netID = "openssh-39";
+//		String netID = "commons-math";
+		String netID = "openssh-39";
 //		String netID = "apache-commons-3.4";
 		
 //		String netID = "court";
@@ -82,8 +82,8 @@ public class Manager {
 			DependencyDAG.isMetabolic = true;
 		}
 		else if (netID.equals("court")) {
-			CourtCaseCornellParser.caseTopic = "abortion";
-//			CourtCaseCornellParser.caseTopic = "pension";
+//			CourtCaseCornellParser.caseTopic = "abortion";
+			CourtCaseCornellParser.caseTopic = "pension";
 			CourtCaseCornellParser.loadCuratedCaseIDs();
 			netPath = "supremecourt_networks//court.txt";
 			DependencyDAG.isCourtcase = true;
@@ -137,7 +137,7 @@ public class Manager {
 //		DistributionAnalysis.printEdgeList(dependencyDAG, netID);
 //		DistributionAnalysis.getAverageInOutDegree(dependencyDAG);
 //		DistributionAnalysis.getAveragePathLenth(dependencyDAG);
-//		DistributionAnalysis.getDegreeHistogram(dependencyDAG);
+		DistributionAnalysis.getDegreeHistogram(dependencyDAG);
 //		DistributionAnalysis.getDegreeHistogramSpecialized(dependencyDAG);
 //		DistributionAnalysis.findWeaklyConnectedComponents(dependencyDAG, netID);		
 //		DistributionAnalysis.printCentralityRanks(dependencyDAG, netID);
@@ -151,10 +151,10 @@ public class Manager {
 		
 //		WaistDetection.runPCWaistDetection(dependencyDAG, netID);
 //		WaistDetection.heuristicWaistDetection(dependencyDAG, netID);
-		WaistDetection.randomizedWaistDetection(dependencyDAG, netID);
+//		WaistDetection.randomizedWaistDetection(dependencyDAG, netID);
 		
 //		WaistDetection.pathCoverageThresholdDetection(dependencyDAG, netID);
-		
+//		
 //		MaxFlowReduction.reduceToMaxFlowMinCutNetwork(dependencyDAG, netID);
 //		MaxFlowReduction.analyzeMinCut(dependencyDAG, "reduced_maxflow_graphs//" + netID + "_min_cut.txt");
 	}
@@ -172,7 +172,7 @@ public class Manager {
 		
 //		String alphas[] = {"-1.0", "-0.5", "0.0", "0.5", "1.0"};
 //		String alphas[] = {"-1.0", "-0.8", "-0.6", "-0.4", "-0.2", "0.0", "0.2", "0.4", "0.6", "0.8", "1.0"};
-		String alphas[] = {"-0.5"};
+//		String alphas[] = {"-0.5"};
 //		String alphas[] = {"-0.5", "0.0", "0.5"};
 		
 //		String dins[] = {"1", "2", "3", "5", "7"};
@@ -186,13 +186,13 @@ public class Manager {
 //		int startIs[] = {10, 50, 90, 130, 170, 190};
 //		int startSs[] = {410, 450, 490, 530, 570, 590};
 								
-		String real[] = {"openssh", "javamath", "rat", "monkey", "abortion", "pension"};
-		int startIs[] = {172, 0, 131, 0, 0, 323};
-		int startSs[] = {932, 0, 433, 0, 0, 453};
+//		String real[] = {"openssh", "javamath", "rat", "monkey", "abortion", "pension"};
+//		int startIs[] = {172, 0, 131, 0, 0, 323};
+//		int startSs[] = {932, 0, 433, 0, 0, 453};
 //		0.53,-,0.56,-,-,1.01
 
-		String a = "0.53";
-		String din = "4";
+		String a = "1.08";
+		String din = "1.255"; //4.2223. 1.1418, 1.255
 		String ratio = "-1";
 //		String ratios[] = {"0.15"};
 		
@@ -200,11 +200,11 @@ public class Manager {
 //			for (String din : dins) {		
 //				int index = 2;
 		
-				int nT = 172; int nI = 760; int nS = 435; // openssh
+//				int nT = 172; int nI = 760; int nS = 435; // openssh
 //				int nT = 131; int nI = 302; int nS = 103; // rat
-//				int nT = 323; int nI = 130; int nS = 837; // pension
+				int nT = 323; int nI = 130; int nS = 837; // pension
 				SimpleModelDAG.isMultigraph = false;
-				SimpleModelDAG.generateSimpleModel(Double.parseDouble(a), Integer.parseInt(din), nT, nI, nS, Double.parseDouble(ratio));
+				SimpleModelDAG.generateSimpleModel(Double.parseDouble(a), Double.parseDouble(din), nT, nI, nS, Double.parseDouble(ratio));
 
 //				for (String ratio: ratios) {
 //					SimpleModelDAG.sI = startIs[index];
@@ -270,21 +270,21 @@ public class Manager {
 		DependencyDAG.isSimpleModel = true;
 		
 //		String alphas[] = {"-1", "-0.5", "0", "0.5", "1"};
-//		String alphas[] = {"-1", "-0.8", "-0.6", "-0.4", "-0.2", "0", "0.2", "0.4", "0.6", "0.8", "1"};
+		String alphas[] = {"-1", "-0.8", "-0.6", "-0.4", "-0.2", "0", "0.2", "0.4", "0.6", "0.8", "1"};
 //		String alphas[] = {"0", "0.2", "0.4", "0.6", "0.8", "1"};
-		String alphas[] = {"0"};
+//		String alphas[] = {"0"};
 //		String alphas[] = {"-0.5", "0", "0.5"};
 		
-//		String dins[] = {"1", "2", "3", "5", "7"};
-		String dins[] = {"3"};
+		String dins[] = {"1", "2", "3", "5", "7"};
+//		String dins[] = {"7"};
 		
 //		String ratios[] = {"0.02", "0.08", "0.15", "0.22", "0.28", "0.35", "0.42", "0.48"};
 //		int startIs[] = {10, 50, 90, 130, 170, 210, 250, 290};
 //		int startSs[] = {590, 550, 510, 470, 430, 390, 350, 310};
 		
-		String ratios[] = {"0.95", "0.75", "0.55", "0.35", "0.15", "0.05"};
-		int startIs[] = {10, 50, 90, 130, 170, 190};
-		int startSs[] = {410, 450, 490, 530, 570, 590};
+//		String ratios[] = {"0.95", "0.75", "0.55", "0.35", "0.15", "0.05"};
+//		int startIs[] = {10, 50, 90, 130, 170, 190};
+//		int startSs[] = {410, 450, 490, 530, 570, 590};
 								
 //		String real[] = {"openssh", "javamath", "rat", "monkey", "abortion", "pension"};
 //		int startIs[] = {172, 0, 131, 0, 0, 323};
@@ -296,19 +296,25 @@ public class Manager {
 //		String ratio = "-";
 //		String ratios[] = {"0.15"};
 		
+
+
+
 		for (String din : dins) {
-			for (String a : alphas) {
-				
-				int  index = 0;
-				for (String ratio: ratios) {	
-					SimpleModelDAG.sI = startIs[index];
-					SimpleModelDAG.sS = startSs[index];
+		for (String a : alphas) {
+			
+
+			
+//				int  index = 0;
+//				for (String ratio: ratios) {	
+//					SimpleModelDAG.sI = startIs[index];
+//					SimpleModelDAG.sS = startSs[index];
 					
 									
-//					int nT = 100; int nI = 400; int nS = 100; String ratio = "-1";
+					int nT = 100; int nI = 400; int nS = 100; String ratio = "-1";
+					
 //					int nT = startIs[index]; int nS = startIs[index]; int nI = 600 - nT - nS;
-					int nT = startIs[index]; int nI = startSs[index] - nT; int nS = 600 - nT - nI;
-					++index;
+//					int nT = startIs[index]; int nI = startSs[index] - nT; int nS = 600 - nT - nI;
+//					++index;
 					
 					String networkID = DAGType + "r" + ratio + "a" + a + "d" + din;
 //				    String networkID = DAGType + "-" + real[index];
@@ -353,7 +359,7 @@ public class Manager {
 					else {
 						System.out.println(a + " " + din + " " + ratio + " - - - - - -");
 					}
-				}
+//				}
 //				System.out.println();
 			}
 			System.out.println();
