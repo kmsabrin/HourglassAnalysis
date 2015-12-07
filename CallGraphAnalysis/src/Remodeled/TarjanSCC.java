@@ -130,7 +130,7 @@ public class TarjanSCC {
 		
 		int kNonTrivialSCC = 0;
 		for (String s: sccs.keySet()) {
-			if (sccs.get(s).size() < 2) continue; // show the non-trivial SCCs only
+//			if (sccs.get(s).size() < 2) continue; // show the non-trivial SCCs only
 			++kNonTrivialSCC;
 			System.out.print(s + "\t");
 			for (String r: sccs.get(s)) {

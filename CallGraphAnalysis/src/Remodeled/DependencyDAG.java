@@ -1,6 +1,7 @@
 package Remodeled;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -298,9 +299,9 @@ public class DependencyDAG {
 				// for metabolic and synthetic networks
 				server = tokens[0];
 				dependent = tokens[1];
-				if (largestWCCNodes.contains(server) == false || largestWCCNodes.contains(dependent) == false) {
-					continue;
-				}
+//				if (largestWCCNodes.contains(server) == false || largestWCCNodes.contains(dependent) == false) {
+//					continue;
+//				}
 			}
 
 			if (isCourtcase) {
@@ -900,7 +901,7 @@ public class DependencyDAG {
 			System.out.print(s + "\t");
 			System.out.print(inDegree.get(s) + "\t");
 			System.out.print(outDegree.get(s) + "\t");
-			System.out.print(location.get(s) + "\t");
+//			System.out.print(location.get(s) + "\t");
 			System.out.print(normalizedPathCentrality.get(s) + "\t");
 //			System.out.print(pagerankTargetCompression.get(s) + "\t");
 //			System.out.print(pagerankSourceCompression.get(s) + "\t");
@@ -930,5 +931,13 @@ public class DependencyDAG {
 //				System.out.println();
 //			}
 //		}
+	}
+	
+	public class PathCentralityComparator<String> implements Comparator<String> {
+		public int compare(String s1, String s2) {
+			double nPathThroughs1 = numOfSourcePath.get(s1) * numOfTargetPath.get(s1);
+			double nPathThroughs2 = numOfSourcePath.get(s2) * numOfTargetPath.get(s2);
+			return (int)(nPathThroughs2 - nPathThroughs1);
+		}
 	}
 }

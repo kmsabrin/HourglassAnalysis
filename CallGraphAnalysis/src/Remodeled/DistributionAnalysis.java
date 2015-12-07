@@ -267,8 +267,8 @@ public class DistributionAnalysis {
 //		System.out.println("Average Path Length: " + avgPLength / knt);
 //		System.out.println("Median Path Length: " + StatUtils.percentile(pathLengths, 50));
 //		System.out.println("Max Path Length: " + StatUtils.max(pathLengths));
-//		System.out.println("Mean Path Length: " + StatUtils.mean(pathLengths));
-//		System.out.println("STD Path Length: " + Math.sqrt(StatUtils.variance(pathLengths)));
+		System.out.println("Mean Path Length: " + StatUtils.mean(pathLengths));
+		System.out.println("STD Path Length: " + Math.sqrt(StatUtils.variance(pathLengths)));
 		
 		return StatUtils.percentile(pathLengths, 50);
 	}
@@ -504,21 +504,29 @@ public class DistributionAnalysis {
 		System.out.println("Avg In/Out Deg: " + (1.0 *  avgInVsOut / dependencyDAG.nodes.size()));
 	}
 	
-	/*
+	
 	public static void printEdgeList(DependencyDAG dependencyDAG, String filePath) throws Exception {
-		PrintWriter pw = new PrintWriter(new File("edgelist_graphs//" + filePath + "_edgelist.txt"));
+		PrintWriter pw = new PrintWriter(new File("edgelist_graphs//" + filePath + "_edgelist_indexed.txt"));
+		
+		HashMap<String, Integer> nodeIndex = new HashMap();
+		int i = 0;
+		for (String s: dependencyDAG.nodes) {
+			System.out.println(s + "\t" + i);
+			nodeIndex.put(s, i++);			
+		}
+		
 		for (String s: dependencyDAG.nodes) {
 			if (dependencyDAG.serves.containsKey(s)) {
 				for (String r: dependencyDAG.serves.get(s)) {
-					pw.println(s + "\t" + r);
+//					pw.println(s + "\t" + r);
+					pw.println(nodeIndex.get(s) + "\t" + nodeIndex.get(r));
 				}
 			}
 		}
 		pw.close();
 	}
-	*/
 	
-	
+		
 	public static void printAllCentralities(DependencyDAG dependencyDAG, String filePath) throws Exception {
 //		order: node indeg outdeg closeness betwenness location path
 		

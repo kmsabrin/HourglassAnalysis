@@ -62,8 +62,8 @@ public class Manager {
 //		String netID = "rat";
 //		String netID = "monkey";
 		
-//		String netID = "commons-math";
-		String netID = "openssh-39";
+		String netID = "commons-math";
+//		String netID = "openssh-39";
 //		String netID = "apache-commons-3.4";
 		
 //		String netID = "court";
@@ -136,15 +136,15 @@ public class Manager {
 //		DistributionAnalysis.crossCheck(dependencyDAG, netID);
 //		DistributionAnalysis.printEdgeList(dependencyDAG, netID);
 //		DistributionAnalysis.getAverageInOutDegree(dependencyDAG);
-//		DistributionAnalysis.getAveragePathLenth(dependencyDAG);
-		DistributionAnalysis.getDegreeHistogram(dependencyDAG);
+//		DistributionAnalysis.getPathLength(dependencyDAG);
+//		DistributionAnalysis.getDegreeHistogram(dependencyDAG);
 //		DistributionAnalysis.getDegreeHistogramSpecialized(dependencyDAG);
 //		DistributionAnalysis.findWeaklyConnectedComponents(dependencyDAG, netID);		
 //		DistributionAnalysis.printCentralityRanks(dependencyDAG, netID);
 //		int centralityIndex = 1;
 //		DistributionAnalysis.getCentralityCCDF(dependencyDAG, netID, 1);
 //		DistributionAnalysis.printCentralityDistribution(dependencyDAG, netID);
-//		DistributionAnalysis.printEdgeList(dependencyDAG, netID);
+		DistributionAnalysis.printEdgeList(dependencyDAG, netID);
 //		DistributionAnalysis.printAllCentralities(dependencyDAG, netID);
 //		DistributionAnalysis.findNDirectSrcTgtBypasses(dependencyDAG, netID);
 //		DistributionAnalysis.createSubnetwork(dependencyDAG, netID);
@@ -243,14 +243,14 @@ public class Manager {
 	public static void doToyNetworkAnalysis() throws Exception {
 		DependencyDAG.isToy = true;
 //		DependencyDAG.isWeighted = true;
-		DependencyDAG dependencyDAG = new DependencyDAG("toy_networks//toy_dag.txt");
+		DependencyDAG dependencyDAG = new DependencyDAG("toy_networks//toy_dag_2.txt");
 		String netID = "toy_dag";
 		printNetworkStat(dependencyDAG);
 		dependencyDAG.printNetworkMetrics();
-		
+		System.out.println("\n###\n");
 //		DistributionAnalysis.printEdgeList(dependencyDAG, netID);
 
-		DistributionAnalysis.getDegreeHistogram(dependencyDAG);
+//		DistributionAnalysis.getDegreeHistogram(dependencyDAG);
 //		DistributionAnalysis.printCentralityRanks(dependencyDAG, netID);
 //		DistributionAnalysis.getCentralityCCDF(dependencyDAG, netID, 1);		
 //		DistributionAnalysis.printSourceVsTargetCompression(dependencyDAG, netID);
@@ -258,7 +258,7 @@ public class Manager {
 //		WaistDetection.runPCWaistDetection(dependencyDAG, netID);
 
 //		WaistDetection.heuristicWaistDetection(dependencyDAG, netID);
-//		WaistDetection.randomizedWaistDetection(dependencyDAG, netID);
+		WaistDetection.randomizedWaistDetection(dependencyDAG, netID);
 		
 //		MaxFlowReduction.reduceToMaxFlowMinCutNetwork(dependencyDAG, netID);
 	}

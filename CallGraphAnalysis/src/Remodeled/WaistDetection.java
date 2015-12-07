@@ -6,11 +6,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.PriorityQueue;
 import java.util.Random;
+
+import Remodeled.DependencyDAG.PathCentralityComparator;
 
 public class WaistDetection {
 	static HashSet<String> topRemovedWaistNodes = new HashSet();
-	static double pathCoverageTau = 0.9537;
+	static double pathCoverageTau = 0.95;
 	static HashMap<String, Double> averageWaistRank;
 	
 	static double waistSize;
@@ -22,6 +25,11 @@ public class WaistDetection {
 	
 	static ArrayList<Double> ws = new ArrayList();
 	static ArrayList<Double> pc = new ArrayList();
+	
+	static ArrayList<HashSet<String>> waistSets = new ArrayList();
+	static double minWaistSize;
+	static int randomPerturbation = 3;
+	static HashSet<String> uniqueWaistNodes = new HashSet();
 	
 	public static void heuristicWaistDetection(DependencyDAG dependencyDAG, String filePath) throws Exception {
 //		PrintWriter pw0 = new PrintWriter(new File("analysis//path-cover-2-" + filePath + ".txt"));
@@ -42,12 +50,15 @@ public class WaistDetection {
 			String maxPathNode = "";
 			int ties = 0;
 			
+			PriorityQueue<String> pq = new PriorityQueue(randomPerturbation, dependencyDAG.new PathCentralityComparator());
 			for (String s : dependencyDAG.nodes) {
 //				skip if source or target
 				if (dependencyDAG.isSource(s) || dependencyDAG.isTarget(s)) {
 					continue;
 				}
 
+				pq.add(s);
+				
 //				find the node with largest through path
 				double nPathThrough = dependencyDAG.numOfSourcePath.get(s) * dependencyDAG.numOfTargetPath.get(s);
 				if (nPathThrough > maxPathThrough) {
@@ -83,11 +94,15 @@ public class WaistDetection {
 //				System.out.println("Randomly chosen node: " + maxPathNode);	
 //				tiedNodeSet.addAll(tempTiedNodeSet);
 			}
+	
+			/*****random top-k *****/
+//			maxPathNode = (String)pq.toArray()[new Random(System.nanoTime()).nextInt(randomPerturbation)];
+//			maxPathThrough = dependencyDAG.numOfSourcePath.get(maxPathNode) * dependencyDAG.numOfTargetPath.get(maxPathNode);
 			
 //			record the largest through path node
 			cumulativePathsTraversed += maxPathThrough;			
 //			System.out.println(maxPathThrough / tPath * 100.0);
-//			System.out.println(maxPathNode + "\t" + maxPathThrough + "\t" + cumulativePathsTraversed);
+			System.out.println(maxPathNode + "\t" + maxPathThrough + "\t" + cumulativePathsTraversed);
 
 //			add to waist
 			topRemovedWaistNodes.add(maxPathNode);
@@ -133,6 +148,20 @@ public class WaistDetection {
 //			}
 //		}
 		
+		if (thresholdSatisfied) {
+			if (topRemovedWaistNodes.size() < minWaistSize) {
+				minWaistSize = topRemovedWaistNodes.size();
+				waistSets.clear();
+				uniqueWaistNodes.clear();
+				waistSets.add(new HashSet(topRemovedWaistNodes));
+				uniqueWaistNodes.addAll(topRemovedWaistNodes);
+			}
+			else if (topRemovedWaistNodes.size() == minWaistSize) {
+				waistSets.add(new HashSet(topRemovedWaistNodes));
+				uniqueWaistNodes.addAll(topRemovedWaistNodes);
+			}
+		}
+		
 		pw1.close();
 	}
 	
@@ -153,7 +182,7 @@ public class WaistDetection {
 		double crossX = -1;
 		double crossY = -1;
 		double maxD = -1;
-		System.out.println(x1 + " " + y1 + " " + x2 + " " + y2);
+//		System.out.println(x1 + " " + y1 + " " + x2 + " " + y2);
 		for (int i = 0; i < ws.size(); ++i) {
 			double x0 = ws.get(i);
 			double y0 = pc.get(i);
@@ -164,21 +193,16 @@ public class WaistDetection {
 				maxDistance = distance;
 				minWS = x0;
 				tau = y0;
-				
 				double d12 = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
 				double u = ((x0 - x1) * (x2 - x1) + (y0 - y1) * (y2 - y1)) / d12;
 				crossX = x1 + u * (x2 - x1);
-				crossY = y1 + u * (y2 - y1);
-				
+				crossY = y1 + u * (y2 - y1);	
 				maxD = (x0 - crossX) * (x0 - crossX) + (y0 - crossY) * (y0 - crossY);
 				maxD = Math.sqrt(maxD);
 			}
-			
-			
 		}
 		
 //		System.out.println("Max D: " + maxD);
-		
 		System.out.println(minWS + " with distance " + maxDistance + " and tau " + tau + " and intersected at " + crossX + "," + crossY);
 		
 		/*
@@ -212,7 +236,8 @@ public class WaistDetection {
 		topRemovedWaistNodes.clear();
 		thresholdSatisfied = false;
 		
-		int nRuns = 10;
+		int nRuns = 1;
+		minWaistSize = 100000;
 		averageWaistRank = new HashMap();
 		for (int i = 1; i <= nRuns; ++i) {
 			topRemovedWaistNodes.clear();
@@ -240,6 +265,22 @@ public class WaistDetection {
 			}			
 		}
 		
+		System.out.println("Unique Waist Size: " + uniqueWaistNodes.size());
+		for (String s: uniqueWaistNodes) {
+			System.out.println(s);
+		}
+
+		System.out.println("-+-+-+-+-+-+-+-+-+-+-+");
+		System.out.println("Num of different waist " + waistSets.size());
+//		System.out.println("All Waists");
+//		for (HashSet<String> hs: waistSets) {
+//			for (String s: hs) {
+//				System.out.print(s + "  ");
+//			}
+//			System.out.println();
+//		}
+//		System.out.println("-+-+-+-+-+-+-+-+-+-+-+");
+		
 		for (int i: waistSizeFrequencey.keySet()) {
 //			System.out.println("Waist size " + i + "\t with frequency " + (waistSizeFrequencey.get(i) * 1.0 / nRuns));
 		}
@@ -256,7 +297,7 @@ public class WaistDetection {
 		dependencyDAG.numOfSourcePath.clear();
 		dependencyDAG.loadPathStatistics();
 		for (String n: nodeFrequencyInWaist.keySet()) {
-			System.out.println(n + "\t" + (nodeFrequencyInWaist.get(n) * 1.0 / nRuns) + "\t" + averageWaistRank.get(n) /*+ "\t" + dependencyDAG.normalizedPathCentrality.get(n)*/);
+//			System.out.println(n + "\t" + (nodeFrequencyInWaist.get(n) * 1.0 / nRuns) + "\t" + averageWaistRank.get(n) /*+ "\t" + dependencyDAG.normalizedPathCentrality.get(n)*/);
 		}
 		
 		System.out.println("Waist Size: " + waistSize);
