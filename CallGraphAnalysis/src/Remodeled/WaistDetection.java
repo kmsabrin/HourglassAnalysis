@@ -13,7 +13,7 @@ import Remodeled.DependencyDAG.PathCentralityComparator;
 
 public class WaistDetection {
 	static HashSet<String> topRemovedWaistNodes = new HashSet();
-	static double pathCoverageTau = 0.95;
+	static double pathCoverageTau = 0.94;
 	static HashMap<String, Double> averageWaistRank;
 	
 	static double waistSize;
@@ -96,13 +96,13 @@ public class WaistDetection {
 			}
 	
 			/*****random top-k *****/
-//			maxPathNode = (String)pq.toArray()[new Random(System.nanoTime()).nextInt(randomPerturbation)];
-//			maxPathThrough = dependencyDAG.numOfSourcePath.get(maxPathNode) * dependencyDAG.numOfTargetPath.get(maxPathNode);
+			maxPathNode = (String)pq.toArray()[new Random(System.nanoTime()).nextInt(randomPerturbation)];
+			maxPathThrough = dependencyDAG.numOfSourcePath.get(maxPathNode) * dependencyDAG.numOfTargetPath.get(maxPathNode);
 			
 //			record the largest through path node
 			cumulativePathsTraversed += maxPathThrough;			
 //			System.out.println(maxPathThrough / tPath * 100.0);
-			System.out.println(maxPathNode + "\t" + maxPathThrough + "\t" + cumulativePathsTraversed);
+//			System.out.println(maxPathNode + "\t" + maxPathThrough + "\t" + cumulativePathsTraversed);
 
 //			add to waist
 			topRemovedWaistNodes.add(maxPathNode);
@@ -236,7 +236,7 @@ public class WaistDetection {
 		topRemovedWaistNodes.clear();
 		thresholdSatisfied = false;
 		
-		int nRuns = 1;
+		int nRuns = 500;
 		minWaistSize = 100000;
 		averageWaistRank = new HashMap();
 		for (int i = 1; i <= nRuns; ++i) {
@@ -270,8 +270,8 @@ public class WaistDetection {
 			System.out.println(s);
 		}
 
-		System.out.println("-+-+-+-+-+-+-+-+-+-+-+");
-		System.out.println("Num of different waist " + waistSets.size());
+//		System.out.println("-+-+-+-+-+-+-+-+-+-+-+");
+//		System.out.println("Num of different waist " + waistSets.size());
 //		System.out.println("All Waists");
 //		for (HashSet<String> hs: waistSets) {
 //			for (String s: hs) {

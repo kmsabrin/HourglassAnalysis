@@ -59,10 +59,10 @@ public class Manager {
 	
 	public static void doRealNetworkAnalysis() throws Exception {
 		String netPath = "";
-//		String netID = "rat";
+		String netID = "rat";
 //		String netID = "monkey";
 		
-		String netID = "commons-math";
+//		String netID = "commons-math";
 //		String netID = "openssh-39";
 //		String netID = "apache-commons-3.4";
 		
@@ -124,7 +124,7 @@ public class Manager {
 		
 //		generateSyntheticFromReal(dependencyDAG);
 		
-		printNetworkStat(dependencyDAG);
+//		printNetworkStat(dependencyDAG);
 //		dependencyDAG.printNetworkMetrics();
 		
 //		for (String s: dependencyDAG.nodes) {
@@ -144,14 +144,14 @@ public class Manager {
 //		int centralityIndex = 1;
 //		DistributionAnalysis.getCentralityCCDF(dependencyDAG, netID, 1);
 //		DistributionAnalysis.printCentralityDistribution(dependencyDAG, netID);
-		DistributionAnalysis.printEdgeList(dependencyDAG, netID);
+//		DistributionAnalysis.printEdgeList(dependencyDAG, netID);
 //		DistributionAnalysis.printAllCentralities(dependencyDAG, netID);
 //		DistributionAnalysis.findNDirectSrcTgtBypasses(dependencyDAG, netID);
 //		DistributionAnalysis.createSubnetwork(dependencyDAG, netID);
 		
 //		WaistDetection.runPCWaistDetection(dependencyDAG, netID);
 //		WaistDetection.heuristicWaistDetection(dependencyDAG, netID);
-//		WaistDetection.randomizedWaistDetection(dependencyDAG, netID);
+		WaistDetection.randomizedWaistDetection(dependencyDAG, netID);
 		
 //		WaistDetection.pathCoverageThresholdDetection(dependencyDAG, netID);
 //		
