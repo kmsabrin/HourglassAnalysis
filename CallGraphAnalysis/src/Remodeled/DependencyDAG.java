@@ -19,6 +19,9 @@ public class DependencyDAG {
 	Map<String, Set<String>> serves; 
 	Map<String, Set<String>> depends; 
 	
+	HashSet<String> targets;
+	HashSet<String> sources;
+	
 	Map<String, Double> numOfTargetPath;
 	Map<String, Double> sumOfTargetPath;
 	Map<String, Double> numOfSourcePath;
@@ -72,6 +75,8 @@ public class DependencyDAG {
 	static boolean isComplexModel = false;
 	static boolean isWeighted = false;
 	
+	static boolean isRandomized = false;
+	
 	static int nDirectSourceTargetEdges = 0;
 	
 	static HashSet<String> largestWCCNodes;
@@ -82,6 +87,9 @@ public class DependencyDAG {
 		nodes = new TreeSet();
 		serves = new HashMap();
 		depends = new HashMap();
+		
+		targets = new HashSet();
+		sources = new HashSet();
 				
 		numOfTargetPath = new HashMap();
 		sumOfTargetPath = new HashMap();
@@ -149,6 +157,7 @@ public class DependencyDAG {
 		loadLocationMetric(); // must load degree metric before
 		
 //		loadReachablityAll();		
+		loadServerReachabilityAll();
 		
 		loadPathCentralityMetric();
 //		loadPagerankCentralityMetric();		
@@ -264,13 +273,18 @@ public class DependencyDAG {
 					dependent = tokens[0].substring(0, tokens[0].length());
 					server = tokens[2].substring(0, tokens[2].length() - 1); // for cobjdump: a-> b;
 					// String server = tokens[2].substring(0, tokens[2].length()); // for cdepn: a -> b
-					
-					
-					if (dependent.equals("do_log") || server.equals("do_log")) { 
-						// no more location metric noise! 
-						// compiler generated
-						continue;
-					}
+				}
+				
+//				else {
+//					// for scc-consolidated graph
+//					dependent = tokens[0].substring(0, tokens[0].length());
+//					server = tokens[1].substring(0, tokens[1].length()); // for scc-consolidation: a b
+//				}
+				
+				if (dependent.equals("do_log") || server.equals("do_log")) { 
+					// no more location metric noise! 
+					// compiler generated
+					continue;
 				}
 			}
 
@@ -463,6 +477,17 @@ public class DependencyDAG {
 	}
 	
 	public void loadDegreeMetric() {
+		if (isRandomized == false) {
+			for (String s : nodes) {
+				if (serves.containsKey(s) == false) {
+					targets.add(s);
+				}
+				if (depends.containsKey(s) == false) {
+					sources.add(s);
+				}
+			}
+		}
+		
 //		get the fanIn/Out
 		for (String s : nodes) {
 			int in = 0;
@@ -508,6 +533,9 @@ public class DependencyDAG {
 			}
 			return false;
 		}
+		else if (isRandomized){
+			return sources.contains(node);
+		}
 		else {
 			return !depends.containsKey(node);
 		}
@@ -520,6 +548,9 @@ public class DependencyDAG {
 			}
 			return false;
 		}
+		else if (isRandomized){
+			return targets.contains(node);
+		}
 		else {
 			return !serves.containsKey(node);
 		}
@@ -531,6 +562,9 @@ public class DependencyDAG {
 				return true;
 			}
 			return false;
+		}
+		else if (isRandomized){
+			return !targets.contains(node) && !sources.contains(node);
 		}
 		else {
 			return depends.containsKey(node) && serves.containsKey(node);
@@ -682,6 +716,7 @@ public class DependencyDAG {
 	}
 
 	public void loadPathStatistics() {
+		
 		if (isWeighted) {
 			loadWeightedPathStatistics();
 			return;
@@ -768,6 +803,17 @@ public class DependencyDAG {
 			visited.remove(s); // remove itself
 //			serversReachable.put(s, new HashSet(visited)); // too heavy for court case
 			sourcesReachable.put(s, kounter);
+		}
+	}
+	
+	public void loadServerReachabilityAll() {
+		visited = new HashSet();
+		for (String s : nodes) {
+			visited.clear();
+			kounter = 0;
+			reachableDownwardsNodes(s); // how many nodes she is using
+			visited.remove(s); // remove itself
+			serversReachable.put(s, new HashSet(visited)); // too heavy for court case
 		}
 	}
 	
@@ -895,7 +941,7 @@ public class DependencyDAG {
 //		System.out.println("Tubes: " + tubes);
 	}
 	
-	public void printNetworkMetrics() {
+	public void printNetworkProperties() {
 		for (String s: nodes) {
 //			if (normalizedPathCentrality.get(s) < 0.4) continue;
 			System.out.print(s + "\t");
@@ -914,23 +960,23 @@ public class DependencyDAG {
 		
 //		System.out.println("Total path: " + nTotalPath);
 		
-//		for (String s : functions) {
-//			if (depends.containsKey(s)) {
-//				System.out.print(s + " depends on ");
-//				for (String r : depends.get(s)) {
-//					System.out.print("\t" + r);
-//				}
-//				System.out.println();
-//			}
-//			
-//			if (serves.containsKey(s)) {
-//				System.out.print(s + " serves ");
-//				for (String r : serves.get(s)) {
-//					System.out.print("\t" + r);
-//				}
-//				System.out.println();
-//			}
-//		}
+		for (String s : nodes) {
+			if (depends.containsKey(s)) {
+				System.out.print(s + " depends on ");
+				for (String r : depends.get(s)) {
+					System.out.print("\t" + r);
+				}
+				System.out.println();
+			}
+			
+			if (serves.containsKey(s)) {
+				System.out.print(s + " serves ");
+				for (String r : serves.get(s)) {
+					System.out.print("\t" + r);
+				}
+				System.out.println();
+			}
+		}
 	}
 	
 	public class PathCentralityComparator<String> implements Comparator<String> {
@@ -939,5 +985,50 @@ public class DependencyDAG {
 			double nPathThroughs2 = numOfSourcePath.get(s2) * numOfTargetPath.get(s2);
 			return (int)(nPathThroughs2 - nPathThroughs1);
 		}
+	}
+	
+	public void resetAuxiliary() {
+		nTotalPath = 0;
+		nDirectSourceTargetEdges = 0;
+
+		numOfTargetPath = new HashMap();
+		sumOfTargetPath = new HashMap();
+		avgTargetDepth = new HashMap();
+		numOfSourcePath = new HashMap();
+		sumOfSourcePath = new HashMap();
+		avgSourceDepth = new HashMap();
+		location = new HashMap();
+
+		nodePathThrough = new HashMap();
+		geometricMeanPathCentrality = new HashMap();
+		harmonicMeanPathCentrality = new HashMap();
+		normalizedPathCentrality = new HashMap();
+		centralityRank = new HashMap();
+		
+		iCentrality = new HashMap();
+		
+		outDegree = new HashMap();
+		inDegree = new HashMap();
+		
+		geometricMeanPagerankCentrality = new HashMap();
+		harmonicMeanPagerankCentrality = new HashMap();
+		pagerankSourceCompression = new HashMap();
+		pagerankTargetCompression = new HashMap();
+		
+		detectedCycles = new ArrayList();
+		cycleEdges = new HashMap();
+
+		dependentsReachable = new HashMap();
+		serversReachable = new HashMap();
+		
+		targetsReachable = new HashMap();
+		sourcesReachable = new HashMap();
+	
+//		largestWCCNodes = new HashSet();
+		visited = new HashSet();
+		
+		WaistDetection.topRemovedWaistNodes.clear();
+		
+		edgeWeights = new HashMap();
 	}
 }

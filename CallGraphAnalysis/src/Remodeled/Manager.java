@@ -57,13 +57,24 @@ public class Manager {
 		scanner.close();
 	}
 	
+	public static void checkNewHGSampleNetworks() throws Exception {
+		DependencyDAG.isCallgraph = true;
+		String swName = "Sqlite";
+		String netPath = "sw_callgraphs//full-graph-" + swName;
+		String netID = swName;
+		
+		DependencyDAG dependencyDAG = new DependencyDAG(netPath);
+		printNetworkStat(dependencyDAG);
+		WaistDetection.randomizedWaistDetection(dependencyDAG, netID);
+	}
+	
 	public static void doRealNetworkAnalysis() throws Exception {
 		String netPath = "";
-		String netID = "rat";
+//		String netID = "rat";
 //		String netID = "monkey";
 		
 //		String netID = "commons-math";
-//		String netID = "openssh-39";
+		String netID = "openssh-39";
 //		String netID = "apache-commons-3.4";
 		
 //		String netID = "court";
@@ -124,7 +135,7 @@ public class Manager {
 		
 //		generateSyntheticFromReal(dependencyDAG);
 		
-//		printNetworkStat(dependencyDAG);
+		printNetworkStat(dependencyDAG);
 //		dependencyDAG.printNetworkMetrics();
 		
 //		for (String s: dependencyDAG.nodes) {
@@ -157,6 +168,10 @@ public class Manager {
 //		
 //		MaxFlowReduction.reduceToMaxFlowMinCutNetwork(dependencyDAG, netID);
 //		MaxFlowReduction.analyzeMinCut(dependencyDAG, "reduced_maxflow_graphs//" + netID + "_min_cut.txt");
+		
+		UpstreamRandomize.randomizeDAG(dependencyDAG);
+		printNetworkStat(dependencyDAG);
+		WaistDetection.randomizedWaistDetection(dependencyDAG, netID);
 	}
 	
 	public static void doSyntheticNetworkAnalysis() throws Exception {
@@ -243,11 +258,10 @@ public class Manager {
 	public static void doToyNetworkAnalysis() throws Exception {
 		DependencyDAG.isToy = true;
 //		DependencyDAG.isWeighted = true;
-		DependencyDAG dependencyDAG = new DependencyDAG("toy_networks//toy_dag_2.txt");
+		DependencyDAG toyDependencyDAG = new DependencyDAG("toy_networks//toy_dag.txt");
 		String netID = "toy_dag";
-		printNetworkStat(dependencyDAG);
-		dependencyDAG.printNetworkMetrics();
-		System.out.println("\n###\n");
+		printNetworkStat(toyDependencyDAG);
+		toyDependencyDAG.printNetworkProperties();
 //		DistributionAnalysis.printEdgeList(dependencyDAG, netID);
 
 //		DistributionAnalysis.getDegreeHistogram(dependencyDAG);
@@ -258,9 +272,14 @@ public class Manager {
 //		WaistDetection.runPCWaistDetection(dependencyDAG, netID);
 
 //		WaistDetection.heuristicWaistDetection(dependencyDAG, netID);
-		WaistDetection.randomizedWaistDetection(dependencyDAG, netID);
+		WaistDetection.randomizedWaistDetection(toyDependencyDAG, netID);
+		System.out.println("\n###\n");
 		
 //		MaxFlowReduction.reduceToMaxFlowMinCutNetwork(dependencyDAG, netID);
+		
+		UpstreamRandomize.randomizeDAG(toyDependencyDAG);
+		printNetworkStat(toyDependencyDAG);
+		WaistDetection.randomizedWaistDetection(toyDependencyDAG, netID);
 	}
 	
 	public static void runSyntheticStatisticalSignificanceTests() throws Exception {
@@ -371,6 +390,7 @@ public class Manager {
 //		Manager.doSyntheticNetworkAnalysis();
 //		Manager.runSyntheticStatisticalSignificanceTests();
 //		Manager.doToyNetworkAnalysis();
+//		Manager.checkNewHGSampleNetworks();
 		System.out.println("Done!");
 	}
 }

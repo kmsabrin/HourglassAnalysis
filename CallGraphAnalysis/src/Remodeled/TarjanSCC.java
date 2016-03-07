@@ -90,17 +90,19 @@ public class TarjanSCC {
 	public static void main(String[] args) throws Exception {
 		DependencyDAG G = new DependencyDAG(); 
 		
-		PrintWriter pw = new PrintWriter(new File("metabolic_networks//rat-consolidated.txt"));		
-		G.isMetabolic = true;
-		G.loadCallGraph("metabolic_networks//rat-links.txt"); // "metabolic_networks//rat-links.txt"
+//		PrintWriter pw = new PrintWriter(new File("metabolic_networks//rat-consolidated.txt"));		
+//		G.isMetabolic = true;
+//		G.loadCallGraph("metabolic_networks//rat-links.txt"); // "metabolic_networks//rat-links.txt"
 		
 //		PrintWriter pw = new PrintWriter(new File("jdk_class_dependency//commons-math-callgraph-consolidated.txt"));		
 //		G.isClassDependency = true;
 //		G.loadCallGraph("jdk_class_dependency//commons-math-callgraph.txt"); 
 		
-//		PrintWriter pw = new PrintWriter(new File("openssh_callgraphs//full.graph-openssh-39-consolidated"));		
-//		G.isCallgraph = true;
-//		G.loadCallGraph("openssh_callgraphs//full.graph-openssh-39"); 
+//		openssh_callgraphs//full.graph-openssh-39
+		String graphFile = "sw_callgraphs//full-graph-Sqlite";
+		PrintWriter pw = new PrintWriter(new File(graphFile + "-consolidated"));		
+		G.isCallgraph = true;
+		G.loadCallGraph(graphFile); 
 		
 		TarjanSCC scc = new TarjanSCC(G);
 		// number of connected components
