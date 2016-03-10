@@ -1,4 +1,4 @@
-package Remodeled;
+package Final;
 
 import java.io.File;
 import java.util.HashSet;
@@ -72,6 +72,7 @@ public class Manager {
 	
 	public static void doRealNetworkAnalysis() throws Exception {
 		String netPath = "";
+		
 //		String netID = "rat";
 //		String netID = "monkey";
 		
@@ -101,14 +102,6 @@ public class Manager {
 			netPath = "supremecourt_networks//court.txt";
 			DependencyDAG.isCourtcase = true;
 		}
-//		else if (netID.equals("kernel-21")) {
-//			netPath = "kernel_callgraphs//full.graph-2.6.21";
-//			DependencyDAG.isCallgraph = true;
-//		}
-//		else if (netID.equals("kernel-31")) {
-//			netPath = "kernel_callgraphs//full.graph-2.6.31";
-//			DependencyDAG.isCallgraph = true;
-//		}
 		else if (netID.equals("openssh-39")) {
 			netPath = "openssh_callgraphs//full.graph-openssh-39";
 			DependencyDAG.isCallgraph = true;
@@ -117,16 +110,6 @@ public class Manager {
 			netPath = "jdk_class_dependency//apache-commons-3.4-callgraph-consolidated.txt";
 			DependencyDAG.isClassDependency = true;
 		}
-//		else if (netID.equals("jdk1.7")) {
-////			netPath = "jdk_class_dependency//jdk1.7-callgraph-callgraph-consolidated.txt";
-//			DependencyDAG.isClassDependency = true;			
-//			netPath = "jdk_class_dependency//jdk1.7-callgraph.txt";
-////			DependencyDAG.isCallgraph = true;
-//		}
-//		else if (netID.equals("google-guava")) {
-//			netPath = "jdk_class_dependency//google-guava-callgraph-consolidated.txt";
-//			DependencyDAG.isClassDependency = true;
-//		}
 		else if (netID.equals("commons-math")) {
 			netPath = "jdk_class_dependency//commons-math-callgraph-consolidated.txt";
 			DependencyDAG.isClassDependency = true;
@@ -134,19 +117,12 @@ public class Manager {
 
 		DependencyDAG dependencyDAG = new DependencyDAG(netPath);
 		
-		
 //		generateSyntheticFromReal(dependencyDAG);
 		
 //		printNetworkStat(dependencyDAG);
 		dependencyDAG.printNetworkProperties();
 		
-//		for (String s: dependencyDAG.nodes) {
-//			if (dependencyDAG.outDegree.get(s) == 248) {
-//				System.out.println(s + "\t" + dependencyDAG.normalizedPathCentrality.get(s));
-//			}
-//		}
 		
-//		DistributionAnalysis.crossCheck(dependencyDAG, netID);
 //		DistributionAnalysis.printEdgeList(dependencyDAG, netID);
 //		DistributionAnalysis.getAverageInOutDegree(dependencyDAG);
 //		DistributionAnalysis.getPathLength(dependencyDAG);
@@ -160,22 +136,19 @@ public class Manager {
 //		DistributionAnalysis.printEdgeList(dependencyDAG, netID);
 //		DistributionAnalysis.printAllCentralities(dependencyDAG, netID);
 //		DistributionAnalysis.findNDirectSrcTgtBypasses(dependencyDAG, netID);
-//		DistributionAnalysis.createSubnetwork(dependencyDAG, netID);
 		
-//		WaistDetection.runPCWaistDetection(dependencyDAG, netID);
+//		Core Detection
 //		WaistDetection.heuristicWaistDetection(dependencyDAG, netID);
 		WaistDetection.randomizedWaistDetection(dependencyDAG, netID);
-		
 //		WaistDetection.pathCoverageThresholdDetection(dependencyDAG, netID);
-//		
-//		MaxFlowReduction.reduceToMaxFlowMinCutNetwork(dependencyDAG, netID);
-//		MaxFlowReduction.analyzeMinCut(dependencyDAG, "reduced_maxflow_graphs//" + netID + "_min_cut.txt");
-		
+
+//		Randomization Experiments
 //		UpstreamRandomize.randomizeDAG(dependencyDAG);
 //		printNetworkStat(dependencyDAG);
 //		WaistDetection.randomizedWaistDetection(dependencyDAG, netID);
 	}
 	
+	/*
 	public static void doSyntheticNetworkAnalysis() throws Exception {
 		DependencyDAG.isSynthetic = true;
 		DependencyDAG.isWeighted = true;
@@ -246,7 +219,7 @@ public class Manager {
 
 //					System.out.println("Waist size: " + WaistDetection.waistSize);
 //					System.out.println(a + "\t" + din + "\t" + WaistDetection.waistSize + "\t" + medianPathLength);
-//					System.out.print(din + " " + a + " " + /*ratio + " "*/ + WaistDetection.waistSize);
+//					System.out.print(din + " " + a + " " + ratio + " " + WaistDetection.waistSize);
 //					System.out.print(" " + WaistDetection.nodeCoverage + " " + WaistDetection.hourglassness);
 //					System.out.println();
 					
@@ -256,6 +229,7 @@ public class Manager {
 //			System.out.println();
 //		}
 	}
+	*/
 	
 	public static void doToyNetworkAnalysis() throws Exception {
 		DependencyDAG.isToy = true;
@@ -318,20 +292,13 @@ public class Manager {
 //		String ratio = "-";
 //		String ratios[] = {"0.15"};
 		
-
-
-
 		for (String din : dins) {
-		for (String a : alphas) {
-			
-
-			
+			for (String a : alphas) {
 //				int  index = 0;
 //				for (String ratio: ratios) {	
 //					SimpleModelDAG.sI = startIs[index];
 //					SimpleModelDAG.sS = startSs[index];
-					
-									
+											
 					int nT = 100; int nI = 400; int nS = 100; String ratio = "-1";
 					
 //					int nT = startIs[index]; int nS = startIs[index]; int nI = 600 - nT - nS;
