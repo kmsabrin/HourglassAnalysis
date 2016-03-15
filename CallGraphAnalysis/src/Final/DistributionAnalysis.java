@@ -72,9 +72,9 @@ public class DistributionAnalysis {
 		PrintWriter pw = new PrintWriter(new File("analysis//centrality-distribution-" + filePath + ".txt"));
 
 		for (String s: dependencyDAG.nodes) {
-			if (dependencyDAG.serves.containsKey(s) && dependencyDAG.depends.containsKey(s)) { // only intermediate nodes			
+//			if (dependencyDAG.serves.containsKey(s) && dependencyDAG.depends.containsKey(s)) { // only intermediate nodes			
 				pw.println(dependencyDAG.normalizedPathCentrality.get(s) * dependencyDAG.nTotalPath);
-			}
+//			}
 		}	
 		
 		pw.close();

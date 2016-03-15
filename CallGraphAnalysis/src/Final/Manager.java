@@ -76,11 +76,11 @@ public class Manager {
 //		String netID = "rat";
 //		String netID = "monkey";
 		
-		String netID = "commons-math";
+//		String netID = "commons-math";
 //		String netID = "openssh-39";
 //		String netID = "apache-commons-3.4";
 		
-//		String netID = "court";
+		String netID = "court";
 		
 		if (netID.equals("rat") || netID.equals("monkey")) {
 			loadLargestWCC(netID);
@@ -139,12 +139,14 @@ public class Manager {
 		
 //		Core Detection
 //		WaistDetection.heuristicWaistDetection(dependencyDAG, netID);
-		WaistDetection.randomizedWaistDetection(dependencyDAG, netID);
+//		WaistDetection.randomizedWaistDetection(dependencyDAG, netID);
 //		WaistDetection.pathCoverageThresholdDetection(dependencyDAG, netID);
 
 //		Randomization Experiments
-//		UpstreamRandomize.randomizeDAG(dependencyDAG);
+		UpstreamRandomize.randomizeDAG(dependencyDAG);
 //		printNetworkStat(dependencyDAG);
+		netID += "-randomized";
+		DistributionAnalysis.printCentralityDistribution(dependencyDAG, netID);
 //		WaistDetection.randomizedWaistDetection(dependencyDAG, netID);
 	}
 	
@@ -249,19 +251,19 @@ public class Manager {
 
 //		WaistDetection.heuristicWaistDetection(dependencyDAG, netID);
 //		WaistDetection.randomizedWaistDetection(toyDependencyDAG, netID);
-		System.out.println("\n###\n");
+//		System.out.println("\n###\n");
 		
 //		MaxFlowReduction.reduceToMaxFlowMinCutNetwork(dependencyDAG, netID);
 		
 		UpstreamRandomize.randomizeDAG(toyDependencyDAG);
 //		printNetworkStat(toyDependencyDAG);
 		toyDependencyDAG.printNetworkProperties();
-		WaistDetection.randomizedWaistDetection(toyDependencyDAG, netID);
+//		WaistDetection.randomizedWaistDetection(toyDependencyDAG, netID);
 	}
 	
 	public static void runSyntheticStatisticalSignificanceTests() throws Exception {
 		DependencyDAG.isSynthetic = true;
-		DependencyDAG.isWeighted = true;
+		DependencyDAG.isWeighted = false;
 		String DAGType = "SimpleModelDAG";
 		DependencyDAG.isSimpleModel = true;
 		
@@ -271,7 +273,7 @@ public class Manager {
 //		String alphas[] = {"0"};
 //		String alphas[] = {"-0.5", "0", "0.5"};
 		
-		String dins[] = {"1", "2", "3", "5", "7"};
+		String dins[] = {"2", "3"};
 //		String dins[] = {"7"};
 		
 //		String ratios[] = {"0.02", "0.08", "0.15", "0.22", "0.28", "0.35", "0.42", "0.48"};
@@ -299,7 +301,7 @@ public class Manager {
 //					SimpleModelDAG.sI = startIs[index];
 //					SimpleModelDAG.sS = startSs[index];
 											
-					int nT = 100; int nI = 400; int nS = 100; String ratio = "-1";
+					int nT = 200; int nI = 600; int nS = 200; String ratio = "-1";
 					
 //					int nT = startIs[index]; int nS = startIs[index]; int nI = 600 - nT - nS;
 //					int nT = startIs[index]; int nI = startSs[index] - nT; int nS = 600 - nT - nI;
@@ -359,13 +361,13 @@ public class Manager {
 		
 		for (int i = 0; i < 1; ++i) {
 			DependencyDAG.isRandomized = false;
-			Manager.doRealNetworkAnalysis();
+//			Manager.doRealNetworkAnalysis();
 			System.out.println("\n");
 		}
 		
 //		Manager.doSyntheticNetworkAnalysis();
 //		Manager.runSyntheticStatisticalSignificanceTests();
-//		Manager.doToyNetworkAnalysis();
+		Manager.doToyNetworkAnalysis();
 //		Manager.checkNewHGSampleNetworks();
 		System.out.println("Done!");
 	}
