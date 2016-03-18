@@ -9,10 +9,13 @@ import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Random;
 
+import org.apache.commons.math3.stat.StatUtils;
+
 public class WaistDetection {
 	static HashSet<String> topRemovedWaistNodes = new HashSet();
 	static HashMap<String, Double> averageWaistRank;
-	static double pathCoverageTau = 0.95;
+	static HashMap<String, Double> averageCoveredPath;
+ 	static double pathCoverageTau = 0.95;
 	
 	static double nodeCoverage;
 	static double effectiveNodeCoverage;
@@ -108,13 +111,15 @@ public class WaistDetection {
 //			add to waist
 			topRemovedWaistNodes.add(maxPathNode);
 			
-//			update average waist entry rank
+//			update average waist entry rank and path contribution
 			if (averageWaistRank.containsKey(maxPathNode)) {
 				double currentRank = averageWaistRank.get(maxPathNode);
 				averageWaistRank.put(maxPathNode, (currentRank + nodeRank) * 0.5 );
+				averageCoveredPath.put(maxPathNode, (averageCoveredPath.get(maxPathNode) + maxPathThrough) * 0.5);
 			}
 			else {
 				averageWaistRank.put(maxPathNode, nodeRank * 1.0);
+				averageCoveredPath.put(maxPathNode, maxPathThrough);
 			}
 
 //			if all paths have been traversed (except direct s-t edges), then break out
@@ -168,6 +173,7 @@ public class WaistDetection {
 	
 	public static void pathCoverageThresholdDetection(DependencyDAG dependencyDAG, String filePath) throws Exception {
 		averageWaistRank = new HashMap();
+		averageCoveredPath = new HashMap();
 		pathCoverageTau = 1.0;
 		ws = new ArrayList();
 		pc = new ArrayList();
@@ -204,7 +210,9 @@ public class WaistDetection {
 		}
 		
 //		System.out.println("Max D: " + maxD);
-		System.out.println(minWS + " with distance " + maxDistance + " and tau " + tau + " and intersected at " + crossX + "," + crossY);
+		pathCoverageTau = tau;
+		System.out.println("Core-size; " + minWS + " and Path-coverage-threshold " + tau );
+		System.out.println("Min-disatnce-line distance: " +  maxDistance + " intersected at: " + crossX + "," + crossY);
 		
 		/*
 		PrintWriter pw1 = new PrintWriter(new File("analysis//coverage-threshold-" + filePath + ".txt"));
@@ -310,6 +318,8 @@ public class WaistDetection {
 			getNodeCoverage(dependencyDAG);
 		}
 //		nodeCentralityWRTWaist(dependencyDAG);
+		
+		coreLocationAnalysis(dependencyDAG);
 	}
 
 	public static double getNodeCoverage(DependencyDAG dependencyDAG) {
@@ -432,43 +442,70 @@ public class WaistDetection {
 		{ 
 			hourglassness = 1.0 - ((waistSize - 1.0) / minST);
 		}
-//		System.out.println("Hourglassness: " + hourglassness);
+		System.out.println("Hourglassness: " + hourglassness);
 		
 		return waistNodeCoverage.size() * 1.0 / dependencyDAG.nodes.size();
 	}
 	
-	public static void nodeCentralityWRTWaist(DependencyDAG dependencyDAG) {
-		double uSet = dependencyDAG.nTargets; 
-		double dSet = dependencyDAG.nSources;
-		
-		for (String s: dependencyDAG.nodes) {
-			int servesWaist = 0, dependsOnWaist = 0;
-			if (dependencyDAG.serves.containsKey(s) && dependencyDAG.depends.containsKey(s)) { // intermediate node
-				if (!averageWaistRank.containsKey(s)) { // not a waist node
-					dependencyDAG.loadRechablity(s); // find reachable nodes
-					
-					for (String r: averageWaistRank.keySet()) {
-						if (dependencyDAG.dependentsReachable.get(s).contains(r)) { // serving some waist node
-							++servesWaist;
-						}
-				
-						if (dependencyDAG.serversReachable.get(s).contains(r)) { // depending on some waist node
-							++dependsOnWaist;
-						}
-					}
+//	public static void nodeCentralityWRTWaist(DependencyDAG dependencyDAG) {
+//		double uSet = dependencyDAG.nTargets; 
+//		double dSet = dependencyDAG.nSources;
+//		
+//		for (String s: dependencyDAG.nodes) {
+//			int servesWaist = 0, dependsOnWaist = 0;
+//			if (dependencyDAG.serves.containsKey(s) && dependencyDAG.depends.containsKey(s)) { // intermediate node
+//				if (!averageWaistRank.containsKey(s)) { // not a waist node
+//					dependencyDAG.loadRechablity(s); // find reachable nodes
+//					
+//					for (String r: averageWaistRank.keySet()) {
+//						if (dependencyDAG.dependentsReachable.get(s).contains(r)) { // serving some waist node
+//							++servesWaist;
+//						}
+//				
+//						if (dependencyDAG.serversReachable.get(s).contains(r)) { // depending on some waist node
+//							++dependsOnWaist;
+//						}
+//					}
+//			
+//					System.out.println(s + "\t" + (dependencyDAG.normalizedPathCentrality.get(s) / pathCoverageTau) + "\t" + servesWaist + "\t" + dependsOnWaist);
+//				}
+//			}
+//			
+//			if (servesWaist >= dependsOnWaist) {
+//				++dSet;
+//			}
+//			else {
+//				++uSet;
+//			}
+//		}
+//		
+//		System.out.println("Symmetry: " + ((uSet - dSet) / (uSet + dSet)));
+//	}
+	
+	public static void coreLocationAnalysis(DependencyDAG dependencyDAG) {
+//		double coreLocations[] = new double[averageWaistRank.size()];	
+//		int index = 0;
+//		int histogramBins[] = new int[11];
+		double weightedCoreLocation = 0;
+		double corePathContribution = 0;
+		for (String s: averageWaistRank.keySet()) {
+//			double loc = dependencyDAG.location.get(s);
+//			coreLocations[index++] = loc;
+//			int binIndex = (int)(loc * 10);
+//			histogramBins[binIndex]++;
+//			System.out.println(averageWaistRank.get(s) + "\t" + loc);
 			
-					System.out.println(s + "\t" + (dependencyDAG.normalizedPathCentrality.get(s) / pathCoverageTau) + "\t" + servesWaist + "\t" + dependsOnWaist);
-				}
-			}
-			
-			if (servesWaist >= dependsOnWaist) {
-				++dSet;
-			}
-			else {
-				++uSet;
-			}
+			weightedCoreLocation += dependencyDAG.location.get(s) * averageCoveredPath.get(s);
+			corePathContribution += averageCoveredPath.get(s);
 		}
 		
-		System.out.println("Symmetry: " + ((uSet - dSet) / (uSet + dSet)));
+		weightedCoreLocation /= corePathContribution;
+		System.out.println("WeightedCoreLocation: " + weightedCoreLocation);
+		
+//		for (int i = 0; i < 11; ++i) {
+//			System.out.println("Bin-" + i + " Frequency " + histogramBins[i]);
+//		}
+//		System.out.println(StatUtils.percentile(coreLocations, 10) + "\t" + StatUtils.percentile(coreLocations, 50) + "\t" + StatUtils.percentile(coreLocations, 90));
 	}
+	
 }

@@ -864,7 +864,7 @@ public class DependencyDAG {
 //			System.out.print(inDegree.get(s) + "\t");
 //			System.out.print(outDegree.get(s) + "\t");
 //			System.out.print(location.get(s) + "\t");
-//			System.out.print(normalizedPathCentrality.get(s) * nTotalPath + "\t");
+			System.out.print(normalizedPathCentrality.get(s) * nTotalPath + "\t");
 //			System.out.print(pagerankTargetCompression.get(s) + "\t");
 //			System.out.print(pagerankSourceCompression.get(s) + "\t");
 //			System.out.print(harmonicMeanPagerankCentrality.get(s) + "\t");

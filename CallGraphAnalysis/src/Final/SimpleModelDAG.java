@@ -115,9 +115,13 @@ public class SimpleModelDAG {
 //		return din;
 		
 		int inD;
-		do {
-			inD = poissonDistribution.sample();
-		} while (inD < 1);
+//		do {
+//			inD = poissonDistribution.sample();
+//		} while (inD < 1);
+		
+		inD = poissonDistribution.sample();
+		++inD;
+		
 		return inD;
 		
 		/*
