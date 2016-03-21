@@ -9,8 +9,6 @@ import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Random;
 
-import org.apache.commons.math3.stat.StatUtils;
-
 public class WaistDetection {
 	static HashSet<String> topRemovedWaistNodes = new HashSet();
 	static HashMap<String, Double> averageWaistRank;
@@ -196,7 +194,7 @@ public class WaistDetection {
 			
 			double distance = Math.abs((x2 - x1) * (y1 - y0) - (x1 - x0) * (y2 - y1)) / Math.sqrt((y2 - y1) * (y2 - y1) + (x2 - x1) * (x2 - x1));
 //			double distance = Math.abs((y2 - y1) * x0 - (x2 - x1) * y0 + x2 * y1 - y2 * x1) / Math.sqrt((y2 - y1) * (y2 - y1) + (x2 - x1) * (x2 - x1));   
-			if (distance > maxDistance) {
+			if (!(distance < maxDistance)) {
 				maxDistance = distance;
 				minWS = x0;
 				tau = y0;
@@ -250,7 +248,7 @@ public class WaistDetection {
 		pc.clear();
 		waistSets.clear();
 		
-		int nRuns = 1;
+		int nRuns = 10;
 		minWaistSize = 100000;
 		averageWaistRank = new HashMap();
 		for (int i = 1; i <= nRuns; ++i) {
@@ -337,7 +335,7 @@ public class WaistDetection {
 			dependencyDAG.reachableDownwardsNodes(s); // how many nodes are using her
 //			dependencyDAG.visited.remove(s); // remove ifself
 			waistNodeCoverage.addAll(dependencyDAG.visited);
-//			System.out.println(s + "\t" + averageWaistRank.get(s) + "\t" + dependencyDAG.location.get(s));
+			System.out.println(s + "\t" + averageWaistRank.get(s) + "\t" + dependencyDAG.location.get(s));
 		}
 
 //		System.out.println("Waist Size: " + averageWaistRank.size());
@@ -423,8 +421,8 @@ public class WaistDetection {
 		
 //		System.out.println((notCoveredSource / notCovered) + "\t" + (notCoveredTarget / notCovered) + "\t" + (notCoveredMiddle / notCovered));
 		nodeCoverage = waistNodeCoverage.size() * 1.0 / dependencyDAG.nodes.size();
-//		System.out.println("Node Coverage: " + nodeCoverage);
-		effectiveNodeCoverage = waistNodeCoverage.size() * 1.0 / (dependencyDAG.nodes.size() - notCoveredSpecialSource - notCoveredSpecialTarget);
+		System.out.println("Node Coverage: " + nodeCoverage);
+//		effectiveNodeCoverage = waistNodeCoverage.size() * 1.0 / (dependencyDAG.nodes.size() - notCoveredSpecialSource - notCoveredSpecialTarget);
 //		System.out.println("Effective Node Coverage: " + effectiveNodeCoverage);
 //		System.out.println("Total Not Covered: " + waistNodeNotCoverage.size() + "\t but kounter: " + sum);
 
@@ -506,6 +504,12 @@ public class WaistDetection {
 //			System.out.println("Bin-" + i + " Frequency " + histogramBins[i]);
 //		}
 //		System.out.println(StatUtils.percentile(coreLocations, 10) + "\t" + StatUtils.percentile(coreLocations, 50) + "\t" + StatUtils.percentile(coreLocations, 90));
+		
+		for (String s: averageWaistRank.keySet()) {
+			double loc = dependencyDAG.location.get(s);
+			double weight = averageCoveredPath.get(s) / corePathContribution;
+//			System.out.println(loc + "\t" + weight);
+		}
 	}
 	
 }

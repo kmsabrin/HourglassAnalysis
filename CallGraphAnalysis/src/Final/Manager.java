@@ -78,10 +78,10 @@ public class Manager {
 //		String netID = "monkey";
 		
 //		String netID = "commons-math";
-//		String netID = "openssh-39";
+		String netID = "openssh-39";
 //		String netID = "apache-commons-3.4";
 		
-		String netID = "court";
+//		String netID = "court";
 		
 		if (netID.equals("rat") || netID.equals("monkey")) {
 			loadLargestWCC(netID);
@@ -97,8 +97,8 @@ public class Manager {
 			DependencyDAG.isMetabolic = true;
 		}
 		else if (netID.equals("court")) {
-//			CourtCaseCornellParser.caseTopic = "abortion";
-			CourtCaseCornellParser.caseTopic = "pension";
+			CourtCaseCornellParser.caseTopic = "abortion";
+//			CourtCaseCornellParser.caseTopic = "pension";
 			CourtCaseCornellParser.loadCuratedCaseIDs();
 			netPath = "supremecourt_networks//court.txt";
 			DependencyDAG.isCourtcase = true;
@@ -121,7 +121,7 @@ public class Manager {
 //		generateSyntheticFromReal(dependencyDAG);
 		
 //		printNetworkStat(dependencyDAG);
-//		dependencyDAG.printNetworkProperties();
+		dependencyDAG.printNetworkProperties();
 		
 		
 //		DistributionAnalysis.printEdgeList(dependencyDAG, netID);
@@ -139,8 +139,8 @@ public class Manager {
 //		DistributionAnalysis.findNDirectSrcTgtBypasses(dependencyDAG, netID);
 		
 //		Core Detection
-		WaistDetection.pathCoverageThresholdDetection(dependencyDAG, netID);
-		WaistDetection.randomizedWaistDetection(dependencyDAG, netID);
+//		WaistDetection.pathCoverageThresholdDetection(dependencyDAG, netID);
+//		WaistDetection.randomizedWaistDetection(dependencyDAG, netID);
 //		WaistDetection.heuristicWaistDetection(dependencyDAG, netID);
 
 //		Randomization Experiments
@@ -238,8 +238,8 @@ public class Manager {
 	public static void doToyNetworkAnalysis() throws Exception {
 		DependencyDAG.isToy = true;
 //		DependencyDAG.isWeighted = true;
-//		DependencyDAG toyDependencyDAG = new DependencyDAG("toy_networks//toy_dag_paper.txt");
-		DependencyDAG toyDependencyDAG = new DependencyDAG("synthetic_callgraphs//draw//SimpleModelDAGr-1a-3d2.0.txt");
+		DependencyDAG toyDependencyDAG = new DependencyDAG("toy_networks//toy_dag_paper.txt");
+//		DependencyDAG toyDependencyDAG = new DependencyDAG("synthetic_callgraphs//toy_dag_paper.txt");
 		String netID = "toy_dag";
 		printNetworkStat(toyDependencyDAG);
 		toyDependencyDAG.printNetworkProperties();
@@ -251,7 +251,7 @@ public class Manager {
 //		DistributionAnalysis.printSourceVsTargetCompression(dependencyDAG, netID);
 
 		WaistDetection.pathCoverageThresholdDetection(toyDependencyDAG, netID);
-		WaistDetection.randomizedWaistDetection(toyDependencyDAG, netID);
+//		WaistDetection.randomizedWaistDetection(toyDependencyDAG, netID);
 //		WaistDetection.heuristicWaistDetection(toyDependencyDAG, netID);
 //		WaistDetection.runPCWaistDetection(dependencyDAG, netID);
 //		System.out.println("\n###\n");
@@ -415,10 +415,10 @@ public class Manager {
 	}
 	
 	public static void main(String[] args) throws Exception {		
-		Manager.doRealNetworkAnalysis();
+//		Manager.doRealNetworkAnalysis();
 //		Manager.doSyntheticNetworkAnalysis();
 //		Manager.runSyntheticStatisticalSignificanceTests();
-//		Manager.doToyNetworkAnalysis();
+		Manager.doToyNetworkAnalysis();
 //		Manager.checkNewHGSampleNetworks();
 //		randomizationTests();
 		System.out.println("Done!");
