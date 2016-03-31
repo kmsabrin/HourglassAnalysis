@@ -74,11 +74,11 @@ public class Manager {
 	public static void doRealNetworkAnalysis() throws Exception {
 		String netPath = "";
 		
-//		String netID = "rat";
+		String netID = "rat";
 //		String netID = "monkey";
 		
 //		String netID = "commons-math";
-		String netID = "openssh-39";
+//		String netID = "openssh-39";
 //		String netID = "apache-commons-3.4";
 		
 //		String netID = "court";
@@ -97,8 +97,8 @@ public class Manager {
 			DependencyDAG.isMetabolic = true;
 		}
 		else if (netID.equals("court")) {
-			CourtCaseCornellParser.caseTopic = "abortion";
-//			CourtCaseCornellParser.caseTopic = "pension";
+//			CourtCaseCornellParser.caseTopic = "abortion";
+			CourtCaseCornellParser.caseTopic = "pension";
 			CourtCaseCornellParser.loadCuratedCaseIDs();
 			netPath = "supremecourt_networks//court.txt";
 			DependencyDAG.isCourtcase = true;
@@ -121,7 +121,7 @@ public class Manager {
 //		generateSyntheticFromReal(dependencyDAG);
 		
 //		printNetworkStat(dependencyDAG);
-		dependencyDAG.printNetworkProperties();
+//		dependencyDAG.printNetworkProperties();
 		
 		
 //		DistributionAnalysis.printEdgeList(dependencyDAG, netID);
@@ -139,8 +139,8 @@ public class Manager {
 //		DistributionAnalysis.findNDirectSrcTgtBypasses(dependencyDAG, netID);
 		
 //		Core Detection
-//		WaistDetection.pathCoverageThresholdDetection(dependencyDAG, netID);
-//		WaistDetection.randomizedWaistDetection(dependencyDAG, netID);
+		WaistDetection.pathCoverageThresholdDetection(dependencyDAG, netID);
+		WaistDetection.randomizedWaistDetection(dependencyDAG, netID);
 //		WaistDetection.heuristicWaistDetection(dependencyDAG, netID);
 
 //		Randomization Experiments
@@ -238,8 +238,8 @@ public class Manager {
 	public static void doToyNetworkAnalysis() throws Exception {
 		DependencyDAG.isToy = true;
 //		DependencyDAG.isWeighted = true;
-		DependencyDAG toyDependencyDAG = new DependencyDAG("toy_networks//toy_dag_paper.txt");
-//		DependencyDAG toyDependencyDAG = new DependencyDAG("synthetic_callgraphs//toy_dag_paper.txt");
+//		DependencyDAG toyDependencyDAG = new DependencyDAG("toy_networks//toy_dag_paper.txt");
+		DependencyDAG toyDependencyDAG = new DependencyDAG("synthetic_callgraphs//draw//SimpleModelDAGr-1a3d2.0.txt");
 		String netID = "toy_dag";
 		printNetworkStat(toyDependencyDAG);
 		toyDependencyDAG.printNetworkProperties();
@@ -251,7 +251,7 @@ public class Manager {
 //		DistributionAnalysis.printSourceVsTargetCompression(dependencyDAG, netID);
 
 		WaistDetection.pathCoverageThresholdDetection(toyDependencyDAG, netID);
-//		WaistDetection.randomizedWaistDetection(toyDependencyDAG, netID);
+		WaistDetection.randomizedWaistDetection(toyDependencyDAG, netID);
 //		WaistDetection.heuristicWaistDetection(toyDependencyDAG, netID);
 //		WaistDetection.runPCWaistDetection(dependencyDAG, netID);
 //		System.out.println("\n###\n");
@@ -272,8 +272,8 @@ public class Manager {
 		DependencyDAG.isSimpleModel = true;
 		
 //		String alphas[] = {"-1", "-0.5", "0", "0.5", "1"};
-//		String alphas[] = {"-1", "-0.8", "-0.6", "-0.4", "-0.2", "0", "0.2", "0.4", "0.6", "0.8", "1"};
-		String alphas[] = {"0", "0.2", "0.4", "0.6", "0.8", "1"};
+		String alphas[] = {"-1", "-0.8", "-0.6", "-0.4", "-0.2", "0", "0.2", "0.4", "0.6", "0.8", "1"};
+//		String alphas[] = {"0", "0.2", "0.4", "0.6", "0.8", "1"};
 //		String alphas[] = {"1"};
 //		String alphas[] = {"-0.5", "0", "0.5"};
 		
@@ -319,6 +319,7 @@ public class Manager {
 					double waistSizes[] = new double[nRun];
 					double hScores[] = new double[nRun];
 					double nodeCoverages[] = new double[nRun];
+					double weightedCoreLocation[] = new double[nRun];
 					ArrayList<Double> coreLocations = new ArrayList();
 					int idx = 0;
 					for (int i = 0; i < nRun; ++i) {
@@ -332,30 +333,34 @@ public class Manager {
 //						double medianPathLength = DistributionAnalysis.getPathLength(dependencyDAG);
 //						DistributionAnalysis.findWeaklyConnectedComponents(dependencyDAG, networkID);
 
-						WaistDetection.pathCoverageThresholdDetection(dependencyDAG, networkID);
+//						WaistDetection.pathCoverageThresholdDetection(dependencyDAG, networkID);
 						WaistDetection.randomizedWaistDetection(dependencyDAG, networkID);
 						
 						if (WaistDetection.waistSize > 0) {
 							waistSizes[idx] = WaistDetection.waistSize;
 							nodeCoverages[idx] = WaistDetection.nodeCoverage;
 							hScores[idx] = WaistDetection.hourglassness;
+							weightedCoreLocation[idx] = WaistDetection.weightedCoreLocation;
 							++idx;
 						}
 						
-						for (String s: WaistDetection.averageWaistRank.keySet()) {
-							double loc = dependencyDAG.location.get(s);
-							coreLocations.add(loc);
-						}
+//						for (String s: WaistDetection.averageWaistRank.keySet()) {
+//							double loc = dependencyDAG.location.get(s);
+//							coreLocations.add(loc);
+//						}
 					}
 					
 					if (idx > nRun / 2) {
 						double mWS = StatUtils.mean(waistSizes);
 						double mNC = StatUtils.mean(nodeCoverages);
 						double mHS = StatUtils.mean(hScores);
+						double mWCL = StatUtils.mean(weightedCoreLocation);
 						double ciWS = ConfidenceInterval.getConfidenceInterval(waistSizes);
 						double ciNC = ConfidenceInterval.getConfidenceInterval(nodeCoverages);
 						double ciHS = ConfidenceInterval.getConfidenceInterval(hScores);
-//						System.out.println(a + " " + din + " " + ratio + " " + mWS + " " + ciWS + " " + mNC + " " + ciNC + " " + mHS + " " + ciHS );
+						double ciWCL = ConfidenceInterval.getConfidenceInterval(weightedCoreLocation);
+						System.out.println(a + " " + din + " " + ratio + " " + mWS + " " + ciWS + " " + mNC + " " + ciNC + " " 
+						+ mHS + " " + ciHS + " " + mWCL + " " + ciWCL );
 					}
 					else {
 //						System.out.println(a + " " + din + " " + ratio + " - - - - - -");
@@ -367,8 +372,7 @@ public class Manager {
 						cL[idx++] = d;
 					}
 					
-					System.out.println(a + " " + din + " " + ratio  + " " + 
-					                   StatUtils.percentile(cL, 10) + " " + StatUtils.percentile(cL, 50) + " " + StatUtils.percentile(cL, 90));
+//					System.out.println(a + " " + din + " " + ratio  + " " + StatUtils.percentile(cL, 10) + " " + StatUtils.percentile(cL, 50) + " " + StatUtils.percentile(cL, 90));
 //				}
 //				System.out.println();
 			}
@@ -415,10 +419,10 @@ public class Manager {
 	}
 	
 	public static void main(String[] args) throws Exception {		
-//		Manager.doRealNetworkAnalysis();
+		Manager.doRealNetworkAnalysis();
 //		Manager.doSyntheticNetworkAnalysis();
 //		Manager.runSyntheticStatisticalSignificanceTests();
-		Manager.doToyNetworkAnalysis();
+//		Manager.doToyNetworkAnalysis();
 //		Manager.checkNewHGSampleNetworks();
 //		randomizationTests();
 		System.out.println("Done!");

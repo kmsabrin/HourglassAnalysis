@@ -52,6 +52,7 @@ public class DependencyDAG {
 	HashMap<String, Set<String>> serversReachable;
 	HashMap<String, Integer> targetsReachable; // for iCentrality
 	HashMap<String, Integer> sourcesReachable; // for iCentrality
+	HashMap<String, HashSet<String>> nodesReachable;
 	
 	HashMap<String, Double> pagerankSourceCompression; // for prCentrality
 	HashMap<String, Double> pagerankTargetCompression; // for prCentrality
@@ -123,6 +124,8 @@ public class DependencyDAG {
 		
 		targetsReachable = new HashMap();
 		sourcesReachable = new HashMap();
+		
+		nodesReachable = new HashMap();
 	
 //		largestWCCNodes = new HashSet();
 		visited = new HashSet();
@@ -822,8 +825,11 @@ public class DependencyDAG {
 	public void loadRechablity(String s) {
 			visited = new HashSet();
 			visited.clear();
+//			nodesReachable.clear();
+			
 			kounter = 0;
 			reachableUpwardsNodes(s); // how many nodes are using her
+			nodesReachable.put(s, new HashSet(visited));
 			visited.remove(s); // remove ifself
 			dependentsReachable.put(s, new HashSet(visited)); // too heavy for court case
 			targetsReachable.put(s, kounter);
@@ -832,6 +838,7 @@ public class DependencyDAG {
 			visited.clear();
 			kounter = 0;
 			reachableDownwardsNodes(s); // how many nodes she is using
+			nodesReachable.get(s).addAll(visited);
 			visited.remove(s); // remove itself
 			serversReachable.put(s, new HashSet(visited)); // too heavy for court case
 			sourcesReachable.put(s, kounter);

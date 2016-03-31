@@ -12,7 +12,7 @@ import java.util.Random;
 public class WaistDetection {
 	static HashSet<String> topRemovedWaistNodes = new HashSet();
 	static HashMap<String, Double> averageWaistRank;
-	static HashMap<String, Double> averageCoveredPath;
+	static HashMap<String, Double> averagePathCovered;
  	static double pathCoverageTau = 0.95;
 	
 	static double nodeCoverage;
@@ -30,113 +30,144 @@ public class WaistDetection {
 	static int randomPerturbation = 1;
 	static HashSet<String> uniqueWaistNodes = new HashSet();
 	
+	static double weightedCoreLocation = 0;
+	static boolean printInfo = false;
+	
 	public static void heuristicWaistDetection(DependencyDAG dependencyDAG, String filePath) throws Exception {
 //		PrintWriter pw0 = new PrintWriter(new File("analysis//path-cover-2-" + filePath + ".txt"));
 		PrintWriter pw1 = new PrintWriter(new File("analysis//coverage-threshold-" + filePath + ".txt"));
 
-		double cumulativePathsTraversed = 0;
+		double cumulativePathsCovered = 0;
 		double tPath = dependencyDAG.nTotalPath;
 		int nodeRank = 0;
 		
 		HashSet<String> tiedNodeSet = new HashSet();
-		HashSet<String> tempTiedNodeSet = new HashSet();
+		HashSet<String> tiedMaxPathCentralityNodes = new HashSet();
 		
 //		DistributionAnalysis.findNDirectSrcTgtBypasses(dependencyDAG, "xxx");
 //		System.out.println("Direct Tubes:" + DependencyDAG.nDirectSourceTargetEdges);
 		
 		while (true) {
-			double maxPathThrough = 0;
-			String maxPathNode = "";
-			int ties = 0;
+			double maxPathCovered = 0;
+			String maxPathCoveredNode = "";
+			int numOfTies = 0;
 			
 			PriorityQueue<String> pq = new PriorityQueue(randomPerturbation, dependencyDAG.new PathCentralityComparator());
 			
 			for (String s : dependencyDAG.nodes) {
-//				skip if source or target
+				/*
+				skip if source or target
 				if (dependencyDAG.isSource(s) || dependencyDAG.isTarget(s)) {
-//					continue;
+					continue;
 				}
+				*/
 
 				pq.add(s);
 				
 //				find the node with largest through path
-				double nPathThrough = dependencyDAG.numOfSourcePath.get(s) * dependencyDAG.numOfTargetPath.get(s);
-				if (nPathThrough > maxPathThrough) {
-					maxPathThrough = nPathThrough;
-					maxPathNode = s;
+				double numPathCovered = dependencyDAG.numOfSourcePath.get(s) * dependencyDAG.numOfTargetPath.get(s);
+				if (numPathCovered > maxPathCovered) {
+					maxPathCovered = numPathCovered;
+					maxPathCoveredNode = s;
 					
-					ties = 0;
-					tempTiedNodeSet.clear();
-					tempTiedNodeSet.add(s);
+					numOfTies = 0;
+					tiedMaxPathCentralityNodes.clear();
+					tiedMaxPathCentralityNodes.add(s);
 				}
-				// count ties
-				else if (Math.abs(nPathThrough - maxPathThrough) < 0.0001) { // is a tie
-					++ties;
-					tempTiedNodeSet.add(s);
+//				update ties
+				else if (Math.abs(numPathCovered - maxPathCovered) < 0.0001) { // is a tie
+					++numOfTies;
+					tiedMaxPathCentralityNodes.add(s);
 				}
 			}
 			
+			/** Detect exact path equivalent nodes **/
+			if (printInfo) {
+				System.out.print("Tied nodes: ");
+				for (String s : tiedMaxPathCentralityNodes) {
+					System.out.print(s + "  ");
+					dependencyDAG.loadRechablity(s);
+				}
+				System.out.println();
+
+				for (String s : tiedMaxPathCentralityNodes) {
+					for (String r : tiedMaxPathCentralityNodes) {
+						if (!s.equals(r)) {
+							if (dependencyDAG.nodesReachable.get(s).equals(dependencyDAG.nodesReachable.get(r))) {
+								System.out.println("Path equivalent: " + s + " & " + r);
+							}
+						}
+					}
+				}
+			}
+			/** --- --- --- **/
+			
+//			not required anymore after considering source/targets for core
 			if (DependencyDAG.isSynthetic == true) {
-				if (maxPathThrough == 0) {
+				if (maxPathCovered == 0) {
 					break;
 				}
 			}
 			
-//			System.out.println("Max centrality node: " + maxPathNode + " with unique paths: " + maxPathThrough);
-//			System.out.println("Source path: " + dependencyDAG.numOfSourcePath.get(maxPathNode) + " Target path: " + dependencyDAG.numOfTargetPath.get(maxPathNode));
+			//System.out.println("Max centrality node: " + maxPathNode + " with unique paths: " + maxPathThrough);
+			//System.out.println("Source path: " + dependencyDAG.numOfSourcePath.get(maxPathNode) + " Target path: " + dependencyDAG.numOfTargetPath.get(maxPathNode));
 			
-//			print tie information
+
 			++nodeRank;
-			if (ties > 0) {
-//				System.out.println("Tie for maximum: " + tempTiedNodeSet.size() + " at node rank: " + nodeRank);
+			if (numOfTies > 0) {
+//				print tie information
+//				System.out.println("Node Rank: " + nodeRank + " Tied for maximum: " + tiedMaxPathCentralityNodes.size());
+				
 //				randomly pick one of the largest centrality nodes
-				maxPathNode = new ArrayList<String>(tempTiedNodeSet).get(new Random(System.nanoTime()).nextInt(tempTiedNodeSet.size()));
-//				System.out.println("Randomly chosen node: " + maxPathNode);	
-//				tiedNodeSet.addAll(tempTiedNodeSet);
+				maxPathCoveredNode = new ArrayList<String>(tiedMaxPathCentralityNodes).get(new Random(System.nanoTime()).nextInt(tiedMaxPathCentralityNodes.size()));
+				//System.out.println("Randomly chosen node: " + maxPathNode);	
+				//tiedNodeSet.addAll(tempTiedNodeSet);
 			}
 	
-			/*****random top-k *****/
+//			/*****random top-k *****/
 			/*
 			maxPathNode = (String)pq.toArray()[new Random(System.nanoTime()).nextInt(randomPerturbation)];
 			maxPathThrough = dependencyDAG.numOfSourcePath.get(maxPathNode) * dependencyDAG.numOfTargetPath.get(maxPathNode);
 			*/
 			
 //			record the largest through path node
-			cumulativePathsTraversed += maxPathThrough;			
-//			System.out.println(maxPathThrough / tPath * 100.0);
-//			System.out.println(maxPathNode + "\t" + maxPathThrough + "\t" + cumulativePathsTraversed);
+			cumulativePathsCovered += maxPathCovered;			
+//			System.out.println("Cumulative Coverage: " + cumulativePathsCovered / tPath * 100.0);
+			//System.out.println(maxPathNode + "\t" + maxPathThrough + "\t" + cumulativePathsTraversed);
+
+//			System.out.println("Node Rank: " + nodeRank + " Tied for maximum: " + tiedMaxPathCentralityNodes.size() + " Cumulative Coverage: " + (cumulativePathsCovered  / tPath));
 
 //			add to waist
-			topRemovedWaistNodes.add(maxPathNode);
+			topRemovedWaistNodes.add(maxPathCoveredNode);
 			
 //			update average waist entry rank and path contribution
-			if (averageWaistRank.containsKey(maxPathNode)) {
-				double currentRank = averageWaistRank.get(maxPathNode);
-				averageWaistRank.put(maxPathNode, (currentRank + nodeRank) * 0.5 );
-				averageCoveredPath.put(maxPathNode, (averageCoveredPath.get(maxPathNode) + maxPathThrough) * 0.5);
+			if (averageWaistRank.containsKey(maxPathCoveredNode)) {
+				double currentRank = averageWaistRank.get(maxPathCoveredNode);
+				averageWaistRank.put(maxPathCoveredNode, (currentRank + nodeRank) * 0.5 );
+				averagePathCovered.put(maxPathCoveredNode, (averagePathCovered.get(maxPathCoveredNode) + maxPathCovered) * 0.5);
 			}
 			else {
-				averageWaistRank.put(maxPathNode, nodeRank * 1.0);
-				averageCoveredPath.put(maxPathNode, maxPathThrough);
+				averageWaistRank.put(maxPathCoveredNode, nodeRank * 1.0);
+				averagePathCovered.put(maxPathCoveredNode, maxPathCovered);
 			}
 
 //			if all paths have been traversed (except direct s-t edges), then break out
-//			if (cumulativePathsTraversed >= ((tPath - dependencyDAG.nDirectSourceTargetEdges) * pathCoverageTau)) {
-//				break;
-//			}
+			//if (cumulativePathsTraversed >= ((tPath - dependencyDAG.nDirectSourceTargetEdges) * pathCoverageTau)) {
+			//	break;
+			//}
 			
-			pw1.println(topRemovedWaistNodes.size() + "\t" + (cumulativePathsTraversed / tPath));
+			pw1.println(topRemovedWaistNodes.size() + "\t" + (cumulativePathsCovered / tPath));
 			ws.add(topRemovedWaistNodes.size() * 1.0);
-			pc.add(cumulativePathsTraversed / tPath);
+			pc.add(cumulativePathsCovered / tPath);
 			
-			if (cumulativePathsTraversed >= (tPath * pathCoverageTau)) {
+			if (cumulativePathsCovered >= (tPath * pathCoverageTau)) {
 				thresholdSatisfied = true;
 				break;
 			}
 			
-			if (topRemovedWaistNodes.size() >= (dependencyDAG.nodes.size() - dependencyDAG.nSources - dependencyDAG.nTargets)) {
-//				break;
-			}
+			//if (topRemovedWaistNodes.size() >= (dependencyDAG.nodes.size() - dependencyDAG.nSources - dependencyDAG.nTargets)) {
+			//	break;
+			//}
 
 //			remove the largest through path node, recompute through paths for all remaining nodes
 			dependencyDAG.numOfTargetPath.clear();
@@ -144,7 +175,7 @@ public class WaistDetection {
 			dependencyDAG.loadPathStatistics();
 		}
 		
-//		System.out.println("Waist size: " + topRemovedWaistNodes.size() + " with nodes: " + topRemovedWaistNodes);
+		//System.out.println("Waist size: " + topRemovedWaistNodes.size() + " with nodes: " + topRemovedWaistNodes);
 		
 //		for (String s: tiedNodeSet) {
 //			if (!topRemovedWaistNodes.contains(s)) {
@@ -171,7 +202,7 @@ public class WaistDetection {
 	
 	public static void pathCoverageThresholdDetection(DependencyDAG dependencyDAG, String filePath) throws Exception {
 		averageWaistRank = new HashMap();
-		averageCoveredPath = new HashMap();
+		averagePathCovered = new HashMap();
 		pathCoverageTau = 1.0;
 		ws = new ArrayList();
 		pc = new ArrayList();
@@ -209,8 +240,8 @@ public class WaistDetection {
 		
 //		System.out.println("Max D: " + maxD);
 		pathCoverageTau = tau;
-		System.out.println("Core-size; " + minWS + " and Path-coverage-threshold " + tau );
-		System.out.println("Min-disatnce-line distance: " +  maxDistance + " intersected at: " + crossX + "," + crossY);
+		System.out.println("Core-size: " + minWS + " Path-coverage-threshold: " + tau);
+//		System.out.println("Min-disatnce-line distance: " +  maxDistance + " intersected at: " + crossX + "," + crossY);
 		
 		/*
 		PrintWriter pw1 = new PrintWriter(new File("analysis//coverage-threshold-" + filePath + ".txt"));
@@ -242,13 +273,19 @@ public class WaistDetection {
 		averageWaistRank = new HashMap();
 		topRemovedWaistNodes.clear();
 		thresholdSatisfied = false;
+		printInfo = true;
+		
+		averagePathCovered = new HashMap();
+//		ws = new ArrayList();
+//		pc = new ArrayList();
+//		
 		
 		uniqueWaistNodes.clear();
 		ws.clear();
 		pc.clear();
 		waistSets.clear();
 		
-		int nRuns = 10;
+		int nRuns = 1;
 		minWaistSize = 100000;
 		averageWaistRank = new HashMap();
 		for (int i = 1; i <= nRuns; ++i) {
@@ -258,6 +295,7 @@ public class WaistDetection {
 			dependencyDAG.loadPathStatistics();
 			
 			heuristicWaistDetection(dependencyDAG, filePath);
+			
 			int currentWaistSize = topRemovedWaistNodes.size();
 			if (waistSizeFrequencey.containsKey(currentWaistSize)) {
 				int freq = waistSizeFrequencey.get(currentWaistSize);
@@ -308,10 +346,10 @@ public class WaistDetection {
 		dependencyDAG.numOfSourcePath.clear();
 		dependencyDAG.loadPathStatistics();
 		for (String n: nodeFrequencyInWaist.keySet()) {
-//			System.out.println(n + "\t" + (nodeFrequencyInWaist.get(n) * 1.0 / nRuns) + "\t" + averageWaistRank.get(n) /*+ "\t" + dependencyDAG.normalizedPathCentrality.get(n)*/);
+			System.out.println(n + "\t" + (nodeFrequencyInWaist.get(n) * 1.0 / nRuns) + "\t" + averageWaistRank.get(n) /*+ "\t" + dependencyDAG.normalizedPathCentrality.get(n)*/);
 		}
 		
-		System.out.println("Waist Size: " + waistSize);
+//		System.out.println("Waist Size: " + waistSize);
 		if (waistSize > 0) {
 			getNodeCoverage(dependencyDAG);
 		}
@@ -335,7 +373,7 @@ public class WaistDetection {
 			dependencyDAG.reachableDownwardsNodes(s); // how many nodes are using her
 //			dependencyDAG.visited.remove(s); // remove ifself
 			waistNodeCoverage.addAll(dependencyDAG.visited);
-			System.out.println(s + "\t" + averageWaistRank.get(s) + "\t" + dependencyDAG.location.get(s));
+//			System.out.println(s + "\t" + averageWaistRank.get(s) + "\t" + dependencyDAG.location.get(s));
 		}
 
 //		System.out.println("Waist Size: " + averageWaistRank.size());
@@ -421,7 +459,7 @@ public class WaistDetection {
 		
 //		System.out.println((notCoveredSource / notCovered) + "\t" + (notCoveredTarget / notCovered) + "\t" + (notCoveredMiddle / notCovered));
 		nodeCoverage = waistNodeCoverage.size() * 1.0 / dependencyDAG.nodes.size();
-		System.out.println("Node Coverage: " + nodeCoverage);
+//		System.out.println("Node Coverage: " + nodeCoverage);
 //		effectiveNodeCoverage = waistNodeCoverage.size() * 1.0 / (dependencyDAG.nodes.size() - notCoveredSpecialSource - notCoveredSpecialTarget);
 //		System.out.println("Effective Node Coverage: " + effectiveNodeCoverage);
 //		System.out.println("Total Not Covered: " + waistNodeNotCoverage.size() + "\t but kounter: " + sum);
@@ -440,7 +478,7 @@ public class WaistDetection {
 		{ 
 			hourglassness = 1.0 - ((waistSize - 1.0) / minST);
 		}
-		System.out.println("Hourglassness: " + hourglassness);
+//		System.out.println("Hourglassness: " + hourglassness);
 		
 		return waistNodeCoverage.size() * 1.0 / dependencyDAG.nodes.size();
 	}
@@ -484,7 +522,7 @@ public class WaistDetection {
 //		double coreLocations[] = new double[averageWaistRank.size()];	
 //		int index = 0;
 //		int histogramBins[] = new int[11];
-		double weightedCoreLocation = 0;
+		weightedCoreLocation = 0;
 		double corePathContribution = 0;
 		for (String s: averageWaistRank.keySet()) {
 //			double loc = dependencyDAG.location.get(s);
@@ -493,12 +531,12 @@ public class WaistDetection {
 //			histogramBins[binIndex]++;
 //			System.out.println(averageWaistRank.get(s) + "\t" + loc);
 			
-			weightedCoreLocation += dependencyDAG.location.get(s) * averageCoveredPath.get(s);
-			corePathContribution += averageCoveredPath.get(s);
+			weightedCoreLocation += dependencyDAG.location.get(s) * averagePathCovered.get(s);
+			corePathContribution += averagePathCovered.get(s);
 		}
 		
 		weightedCoreLocation /= corePathContribution;
-		System.out.println("WeightedCoreLocation: " + weightedCoreLocation);
+//		System.out.println("WeightedCoreLocation: " + weightedCoreLocation);
 		
 //		for (int i = 0; i < 11; ++i) {
 //			System.out.println("Bin-" + i + " Frequency " + histogramBins[i]);
@@ -507,7 +545,7 @@ public class WaistDetection {
 		
 		for (String s: averageWaistRank.keySet()) {
 			double loc = dependencyDAG.location.get(s);
-			double weight = averageCoveredPath.get(s) / corePathContribution;
+			double weight = averagePathCovered.get(s) / corePathContribution;
 //			System.out.println(loc + "\t" + weight);
 		}
 	}
