@@ -8,12 +8,15 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Random;
+import java.util.TreeSet;
+
+import org.apache.commons.math3.stat.correlation.Covariance;
 
 public class WaistDetection {
 	static HashSet<String> topRemovedWaistNodes = new HashSet();
 	static HashMap<String, Double> averageWaistRank;
 	static HashMap<String, Double> averagePathCovered;
- 	static double pathCoverageTau = 0.95;
+ 	static double pathCoverageTau = 0.94;
 	
 	static double nodeCoverage;
 	static double effectiveNodeCoverage;
@@ -32,6 +35,108 @@ public class WaistDetection {
 	
 	static double weightedCoreLocation = 0;
 	static boolean printInfo = false;
+	
+	static HashSet<TreeSet<String>> coreSet;
+	
+	static double currentLeaf;
+
+	public static void traverseTieTreeHelper(DependencyDAG dependencyDAG, double cumulativePathCovered, double totalPath, double nodeRank, double nLeaves) {
+		if (!(cumulativePathCovered < (totalPath * pathCoverageTau))) {
+//			print current core
+//			System.out.println("Core: " + topRemovedWaistNodes);
+			coreSet.add(new TreeSet(topRemovedWaistNodes));			
+			System.out.println((++currentLeaf) /*+ "\t" + nLeaves + "\t" + topRemovedWaistNodes.size()*/);
+			return;
+		}
+		
+//		recompute through paths for all nodes
+		dependencyDAG.numOfTargetPath.clear();
+		dependencyDAG.numOfSourcePath.clear();
+		dependencyDAG.loadPathStatistics();
+
+		double maxPathCovered = 0;
+		String maxPathCoveredNode = "";
+		int numOfTies = 0;
+		HashSet<String> tiedMaxPathCentralityNodes = new HashSet();
+		for (String s : dependencyDAG.nodes) {
+//			find the node with largest through path
+			double numPathCovered = dependencyDAG.numOfSourcePath.get(s) * dependencyDAG.numOfTargetPath.get(s);
+			if (numPathCovered > maxPathCovered) {
+				maxPathCovered = numPathCovered;
+				maxPathCoveredNode = s;
+				
+				numOfTies = 0;
+				tiedMaxPathCentralityNodes.clear();
+				tiedMaxPathCentralityNodes.add(s);
+			}
+//			update ties
+			else if (Math.abs(numPathCovered - maxPathCovered) < 0.0001) { // is a tie
+				++numOfTies;
+				tiedMaxPathCentralityNodes.add(s);
+			}
+		}
+					
+		HashMap<HashSet<String>, TreeSet<String>> pathEquivalentNodeSet = new HashMap();
+//		/** Detect exact path equivalent nodes **/
+		for (String s : tiedMaxPathCentralityNodes) {
+			dependencyDAG.loadRechablity(s);
+			HashSet<String> nodesReachable = dependencyDAG.nodesReachable.get(s);
+			if (pathEquivalentNodeSet.containsKey(nodesReachable)) {
+				pathEquivalentNodeSet.get(nodesReachable).add(s);
+			}
+			else {
+				TreeSet<String> firstElement = new TreeSet();
+				firstElement.add(s);
+				pathEquivalentNodeSet.put(nodesReachable, firstElement);
+			}
+		}
+		
+//		for (HashSet<String> equivalanceKey: pathEquivalentNodeSet.keySet()) {
+//			System.out.println("Rank " + nodeRank);
+//			TreeSet<String> equivalentNodes = pathEquivalentNodeSet.get(equivalanceKey);
+//			System.out.println(equivalentNodes);
+//		}
+		
+		if (pathEquivalentNodeSet.size() > 1) {
+//			System.out.println("Node rank: " + nodeRank + " branching for " + pathEquivalentNodeSet.size());
+		}
+		
+		for (HashSet<String> equivalanceKey: pathEquivalentNodeSet.keySet()) {
+//			System.out.println("Rank " + nodeRank);
+			TreeSet<String> equivalentNodes = pathEquivalentNodeSet.get(equivalanceKey);
+//			System.out.println(equivalentNodes);
+			String representative = equivalentNodes.first();
+//			if (equivalentNodes.size() > 1) representative += "+";
+//			add to waist and remove from the network
+			topRemovedWaistNodes.add(representative);
+//			recurse
+			traverseTieTreeHelper(dependencyDAG, cumulativePathCovered + maxPathCovered, totalPath, nodeRank + 1, nLeaves * pathEquivalentNodeSet.size());
+//			remove from waist
+			topRemovedWaistNodes.remove(representative);
+			
+//			break;
+		}
+	}
+	
+	public static void traverseTieTree(DependencyDAG dependencyDAG, String filePath) {
+		topRemovedWaistNodes.clear();
+		
+//		compute through paths for all nodes
+		dependencyDAG.numOfTargetPath.clear();
+		dependencyDAG.numOfSourcePath.clear();
+		dependencyDAG.loadPathStatistics();
+		
+		coreSet = new HashSet();
+		System.out.println("Path Covrerge Threshold: " + pathCoverageTau);
+		traverseTieTreeHelper(dependencyDAG, 0, dependencyDAG.nTotalPath, 1, 1);
+		
+//		double kount = 1;
+		currentLeaf = 0;
+		System.out.println("Number of coreSet: " + coreSet.size());
+		for (TreeSet<String> hsS: coreSet) {
+			System.out.println(hsS);
+		}
+	}
 	
 	public static void heuristicWaistDetection(DependencyDAG dependencyDAG, String filePath) throws Exception {
 //		PrintWriter pw0 = new PrintWriter(new File("analysis//path-cover-2-" + filePath + ".txt"));
