@@ -36,16 +36,44 @@ public class WaistDetection {
 	static double weightedCoreLocation = 0;
 	static boolean printInfo = false;
 	
-	static HashSet<TreeSet<String>> coreSet;
+	static HashMap<TreeSet<String>, Double> coreSet;
 	
 	static double currentLeaf;
+	
+	static HashMap<Integer, HashSet<HashSet<String>>> visitedCoreByDepth = new HashMap();
+	static double minCoreSize;
+	static double maxCoreCoverage;
 
-	public static void traverseTieTreeHelper(DependencyDAG dependencyDAG, double cumulativePathCovered, double totalPath, double nodeRank, double nLeaves) {
+	public static void traverseTieTreeHelper(DependencyDAG dependencyDAG, double cumulativePathCovered, double totalPath, int nodeRank, double nLeaves) {
+//		check/mark visited state
+		if (nodeRank > 0) {
+			if (visitedCoreByDepth.containsKey(nodeRank)) {
+				if (visitedCoreByDepth.get(nodeRank).contains(topRemovedWaistNodes)) {
+					// visited before
+					return;
+				}
+				else {
+					visitedCoreByDepth.get(nodeRank).add(new HashSet(topRemovedWaistNodes));
+				}
+			}
+			else {
+				HashSet<HashSet<String>> markedCores = new HashSet();
+				markedCores.add(new HashSet(topRemovedWaistNodes));
+				visitedCoreByDepth.put(nodeRank, markedCores);
+			}
+		}
+		
 		if (!(cumulativePathCovered < (totalPath * pathCoverageTau))) {
 //			print current core
 //			System.out.println("Core: " + topRemovedWaistNodes);
-			coreSet.add(new TreeSet(topRemovedWaistNodes));			
-			System.out.println((++currentLeaf) /*+ "\t" + nLeaves + "\t" + topRemovedWaistNodes.size()*/);
+			coreSet.put(new TreeSet(topRemovedWaistNodes), cumulativePathCovered);			
+//			System.out.println((++currentLeaf) /*+ "\t" + nLeaves + "\t" + topRemovedWaistNodes.size()*/);
+			if (topRemovedWaistNodes.size() < minCoreSize) {
+				minCoreSize = topRemovedWaistNodes.size();
+				if (cumulativePathCovered > maxCoreCoverage) {
+					maxCoreCoverage = cumulativePathCovered;
+				}
+			}
 			return;
 		}
 		
@@ -97,9 +125,9 @@ public class WaistDetection {
 //			System.out.println(equivalentNodes);
 //		}
 		
-		if (pathEquivalentNodeSet.size() > 1) {
+//		if (pathEquivalentNodeSet.size() > 1) {
 //			System.out.println("Node rank: " + nodeRank + " branching for " + pathEquivalentNodeSet.size());
-		}
+//		}
 		
 		for (HashSet<String> equivalanceKey: pathEquivalentNodeSet.keySet()) {
 //			System.out.println("Rank " + nodeRank);
@@ -121,21 +149,29 @@ public class WaistDetection {
 	public static void traverseTieTree(DependencyDAG dependencyDAG, String filePath) {
 		topRemovedWaistNodes.clear();
 		
+		minCoreSize = 10e10;
+		maxCoreCoverage = -1;
+		
 //		compute through paths for all nodes
 		dependencyDAG.numOfTargetPath.clear();
 		dependencyDAG.numOfSourcePath.clear();
 		dependencyDAG.loadPathStatistics();
 		
-		coreSet = new HashSet();
-		System.out.println("Path Covrerge Threshold: " + pathCoverageTau);
+		coreSet = new HashMap();
+//		System.out.println("Path Covrerge Threshold: " + pathCoverageTau);
 		traverseTieTreeHelper(dependencyDAG, 0, dependencyDAG.nTotalPath, 1, 1);
 		
 //		double kount = 1;
 		currentLeaf = 0;
-		System.out.println("Number of coreSet: " + coreSet.size());
-		for (TreeSet<String> hsS: coreSet) {
-			System.out.println(hsS);
+		int optimalCoreCount = 0;
+		for (TreeSet<String> hsS: coreSet.keySet()) {
+			System.out.println(hsS.size() + "\t" + coreSet.get(hsS));
+			if (Math.abs(hsS.size() - minCoreSize) < 0.0001 && Math.abs(coreSet.get(hsS) - maxCoreCoverage) < 0.0001) { 
+//				System.out.println(hsS.size() + "\t" + coreSet.get(hsS));
+				++optimalCoreCount;
+			}
 		}
+		System.out.println("Number of coreSet: " + optimalCoreCount);
 	}
 	
 	public static void heuristicWaistDetection(DependencyDAG dependencyDAG, String filePath) throws Exception {
