@@ -130,7 +130,7 @@ public class DependencyDAG {
 //		largestWCCNodes = new HashSet();
 		visited = new HashSet();
 		
-		WaistDetection.topRemovedWaistNodes.clear();
+		CoreDetection.topRemovedWaistNodes.clear();
 		
 		edgeWeights = new HashMap();
 	}
@@ -318,9 +318,9 @@ public class DependencyDAG {
 				// for metabolic and synthetic networks
 				server = tokens[0];
 				dependent = tokens[1];
-//				if (largestWCCNodes.contains(server) == false || largestWCCNodes.contains(dependent) == false) {
-//					continue;
-//				}
+				if (largestWCCNodes.contains(server) == false || largestWCCNodes.contains(dependent) == false) {
+					continue;
+				}
 			}
 
 			if (isCourtcase) {
@@ -582,7 +582,7 @@ public class DependencyDAG {
 			return;
 		}
 		
-		if (isSource(node) && !WaistDetection.topRemovedWaistNodes.contains(node)) { // is source
+		if (isSource(node) && !CoreDetection.topRemovedWaistNodes.contains(node)) { // is source
 			numOfSourcePath.put(node, 1.0);
 			sumOfSourcePath.put(node, 0.0);
 			avgSourceDepth.put(node, 0.0);
@@ -591,7 +591,7 @@ public class DependencyDAG {
 				
 		double nPath = 0;
 		double sPath = 0;
-		if (!WaistDetection.topRemovedWaistNodes.contains(node)) { // special condition for waist detection
+		if (!CoreDetection.topRemovedWaistNodes.contains(node)) { // special condition for waist detection
 			for (String s : depends.get(node)) {
 				sourcePathDepth(s);
 				nPath += numOfSourcePath.get(s);
@@ -610,7 +610,7 @@ public class DependencyDAG {
 			return;
 		}
 		
-		if (isTarget(node) && !WaistDetection.topRemovedWaistNodes.contains(node)) { // is target
+		if (isTarget(node) && !CoreDetection.topRemovedWaistNodes.contains(node)) { // is target
 			numOfTargetPath.put(node, 1.0);
 			sumOfTargetPath.put(node, 0.0);
 			avgTargetDepth.put(node, 0.0);
@@ -619,7 +619,7 @@ public class DependencyDAG {
 		
 		double nPath = 0;
 		double sPath = 0;
-		if (!WaistDetection.topRemovedWaistNodes.contains(node)) { // special condition for waist detection
+		if (!CoreDetection.topRemovedWaistNodes.contains(node)) { // special condition for waist detection
 			if (serves.containsKey(node)) { // for synthetic disconnected nodes
 				for (String s : serves.get(node)) {
 					targetPathDepth(s);
@@ -648,7 +648,7 @@ public class DependencyDAG {
 			return;
 		}
 		
-		if (isSource(node) && !WaistDetection.topRemovedWaistNodes.contains(node)) { // is source
+		if (isSource(node) && !CoreDetection.topRemovedWaistNodes.contains(node)) { // is source
 			numOfSourcePath.put(node, 1.0);
 			sumOfSourcePath.put(node, 0.0);
 			avgSourceDepth.put(node, 0.0);
@@ -657,7 +657,7 @@ public class DependencyDAG {
 				
 		double nPath = 0;
 		double sPath = 0;
-		if (!WaistDetection.topRemovedWaistNodes.contains(node)) { // special condition for waist detection
+		if (!CoreDetection.topRemovedWaistNodes.contains(node)) { // special condition for waist detection
 			for (String s : depends.get(node)) {
 				weightedSourcePathDepth(s);
 				nPath += numOfSourcePath.get(s) * getEdgeWeight(s, node);
@@ -677,7 +677,7 @@ public class DependencyDAG {
 			return;
 		}
 		
-		if (isTarget(node) && !WaistDetection.topRemovedWaistNodes.contains(node)) { // is target
+		if (isTarget(node) && !CoreDetection.topRemovedWaistNodes.contains(node)) { // is target
 			numOfTargetPath.put(node, 1.0);
 			sumOfTargetPath.put(node, 0.0);
 			avgTargetDepth.put(node, 0.0);
@@ -686,7 +686,7 @@ public class DependencyDAG {
 		
 		double nPath = 0;
 		double sPath = 0;
-		if (!WaistDetection.topRemovedWaistNodes.contains(node)) { // special condition for waist detection
+		if (!CoreDetection.topRemovedWaistNodes.contains(node)) { // special condition for waist detection
 			if (serves.containsKey(node)) { // for synthetic disconnected nodes
 				for (String s : serves.get(node)) {
 					weightedTargetPathDepth(s);
@@ -953,7 +953,7 @@ public class DependencyDAG {
 //		largestWCCNodes = new HashSet();
 		visited = new HashSet();
 		
-		WaistDetection.topRemovedWaistNodes.clear();
+		CoreDetection.topRemovedWaistNodes.clear();
 		
 		edgeWeights = new HashMap();
 	}

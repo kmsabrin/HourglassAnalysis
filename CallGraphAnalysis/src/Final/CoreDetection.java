@@ -12,11 +12,11 @@ import java.util.TreeSet;
 
 import org.apache.commons.math3.stat.correlation.Covariance;
 
-public class WaistDetection {
+public class CoreDetection {
 	static HashSet<String> topRemovedWaistNodes = new HashSet();
 	static HashMap<String, Double> averageCoreRank;
 	static HashMap<String, Double> averagePathCovered;
- 	static double pathCoverageTau = 0.94;
+ 	static double pathCoverageTau = 0.95;
 	
 	static double nodeCoverage;
 	static double hScore;
@@ -155,7 +155,7 @@ public class WaistDetection {
 //			remove from waist
 			topRemovedWaistNodes.remove(representative);
 			
-//			break;
+			break;
 		}
 	}
 	
@@ -173,6 +173,7 @@ public class WaistDetection {
 		averageCoreRank = new HashMap();
 		averagePathCovered = new HashMap();
 		coreSet = new HashMap();
+		visitedCoreByDepth.clear();
 //		System.out.println("Path Covrerge Threshold: " + pathCoverageTau);
 		traverseTreeHelper(dependencyDAG, 0, dependencyDAG.nTotalPath, 1, 1);
 		
@@ -191,15 +192,16 @@ public class WaistDetection {
 		double minST = Math.min(dependencyDAG.nSources, dependencyDAG.nTargets);
 		hScore = 1.0 - ((minCoreSize - 1.0) / minST);
 
+//		System.out.println(coreSet.size());
 		TreeSet<String> sampleCore = coreSet.keySet().iterator().next();
 		getNodeCoverage(dependencyDAG, sampleCore);
 		coreLocationAnalysis(dependencyDAG);
 		
-		System.out.println("Number of coreSet: " + optimalCoreCount);
-		System.out.println("Min core size: " + minCoreSize);
-		System.out.println("H-Score: " + hScore);
-		System.out.println("Node Coverage: " + nodeCoverage);
-		System.out.println("WeightedCoreLocation: " + weightedCoreLocation);
+//		System.out.println("Number of coreSet: " + optimalCoreCount);
+//		System.out.println("Min core size: " + minCoreSize);
+//		System.out.println("H-Score: " + hScore);
+//		System.out.println("Node Coverage: " + nodeCoverage);
+//		System.out.println("WeightedCoreLocation: " + weightedCoreLocation);
 	}
 	
 	public static void heuristicWaistDetection(DependencyDAG dependencyDAG, String filePath) throws Exception {
@@ -411,30 +413,6 @@ public class WaistDetection {
 		pathCoverageTau = tau;
 //		System.out.println("Core-size: " + minWS);
 		System.out.println("Path-coverage-threshold: " + tau);
-//		System.out.println("Min-disatnce-line distance: " +  maxDistance + " intersected at: " + crossX + "," + crossY);
-		
-		/*
-		PrintWriter pw1 = new PrintWriter(new File("analysis//coverage-threshold-" + filePath + ".txt"));
-//		PrintWriter pw2 = new PrintWriter(new File("analysis//node-coverage-threshold-" + filePath + ".txt"));
-		
-		for (pathCoverageTau = 0.50; pathCoverageTau < 1.0; pathCoverageTau += 0.01) {
-			topRemovedWaistNodes.clear();
-			dependencyDAG.numOfTargetPath.clear();
-			dependencyDAG.numOfSourcePath.clear();
-			dependencyDAG.loadPathStatistics();
-			
-			averageWaistRank = new HashMap();
-			heuristicWaistDetection(dependencyDAG, filePath);
-			int currentWaistSize = topRemovedWaistNodes.size();
-//			pw1.println(currentWaistSize + "\t" + pathCoverageTau + "\t" + ((1.0 - pathCoverageTau) * currentWaistSize));
-			
-			pw1.println(currentWaistSize + "\t" + pathCoverageTau);
-//			double nodeCoverage = getNodeCoverage(dependencyDAG);
-//			pw1.println(currentWaistSize + "\t" + pathCoverageTau + "\t" + nodeCoverage);
-		}
-		
-		pw1.close();
-		*/
 	}
 	
 	public static void randomizedWaistDetection(DependencyDAG dependencyDAG, String filePath) throws Exception {
