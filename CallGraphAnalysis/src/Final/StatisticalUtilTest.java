@@ -2,10 +2,11 @@ package Final;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 import org.apache.commons.math3.distribution.AbstractRealDistribution;
-import org.apache.commons.math3.distribution.PoissonDistribution;
+import org.apache.commons.math3.stat.StatUtils;
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 
 public class StatisticalUtilTest {
@@ -17,6 +18,19 @@ public class StatisticalUtilTest {
 				break;
 			}
 		}
+	}
+	
+	public static double[] getMeanSTD(ArrayList<Double> numbers) {
+		double n[] = new double[numbers.size()];
+		
+		for (int i = 0; i < numbers.size(); ++i) {
+			n[i] = numbers.get(i);
+		}
+		
+		double r[] = new double[2];
+		r[0] = StatUtils.mean(n);
+		r[1] = Math.sqrt(StatUtils.variance(n));
+		return r;
 	}
 	
 	public static void tryWilcoxonRankSumTest() {

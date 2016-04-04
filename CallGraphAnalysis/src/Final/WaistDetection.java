@@ -14,16 +14,18 @@ import org.apache.commons.math3.stat.correlation.Covariance;
 
 public class WaistDetection {
 	static HashSet<String> topRemovedWaistNodes = new HashSet();
-	static HashMap<String, Double> averageWaistRank;
+	static HashMap<String, Double> averageCoreRank;
 	static HashMap<String, Double> averagePathCovered;
  	static double pathCoverageTau = 0.94;
 	
 	static double nodeCoverage;
+	static double hScore;
+	static double weightedCoreLocation = 0;
+
+	static boolean thresholdSatisfied;
 	static double effectiveNodeCoverage;
-	static double hourglassness;
 	static double hourglassSymmetry;
 	static double waistSize;
-	static boolean thresholdSatisfied;
 	
 	static ArrayList<Double> ws = new ArrayList();
 	static ArrayList<Double> pc = new ArrayList();
@@ -33,7 +35,6 @@ public class WaistDetection {
 	static int randomPerturbation = 1;
 	static HashSet<String> uniqueWaistNodes = new HashSet();
 	
-	static double weightedCoreLocation = 0;
 	static boolean printInfo = false;
 	
 	static HashMap<TreeSet<String>, Double> coreSet;
@@ -44,7 +45,7 @@ public class WaistDetection {
 	static double minCoreSize;
 	static double maxCoreCoverage;
 
-	public static void traverseTieTreeHelper(DependencyDAG dependencyDAG, double cumulativePathCovered, double totalPath, int nodeRank, double nLeaves) {
+	public static void traverseTreeHelper(DependencyDAG dependencyDAG, double cumulativePathCovered, double totalPath, int nodeRank, double nLeaves) {
 //		check/mark visited state
 		if (nodeRank > 0) {
 			if (visitedCoreByDepth.containsKey(nodeRank)) {
@@ -137,8 +138,20 @@ public class WaistDetection {
 //			if (equivalentNodes.size() > 1) representative += "+";
 //			add to waist and remove from the network
 			topRemovedWaistNodes.add(representative);
+			
+//			update average waist entry rank and path contribution
+			if (averageCoreRank.containsKey(representative)) {
+				double currentRank = averageCoreRank.get(representative);
+				averageCoreRank.put(representative, (currentRank + nodeRank) * 0.5 );
+				averagePathCovered.put(representative, (averagePathCovered.get(representative) + maxPathCovered) * 0.5);
+			}
+			else {
+				averageCoreRank.put(representative, nodeRank * 1.0);
+				averagePathCovered.put(representative, maxPathCovered);
+			}
+			
 //			recurse
-			traverseTieTreeHelper(dependencyDAG, cumulativePathCovered + maxPathCovered, totalPath, nodeRank + 1, nLeaves * pathEquivalentNodeSet.size());
+			traverseTreeHelper(dependencyDAG, cumulativePathCovered + maxPathCovered, totalPath, nodeRank + 1, nLeaves * pathEquivalentNodeSet.size());
 //			remove from waist
 			topRemovedWaistNodes.remove(representative);
 			
@@ -146,7 +159,7 @@ public class WaistDetection {
 		}
 	}
 	
-	public static void traverseTieTree(DependencyDAG dependencyDAG, String filePath) {
+	public static void traverseCoreTree(DependencyDAG dependencyDAG, String filePath) {
 		topRemovedWaistNodes.clear();
 		
 		minCoreSize = 10e10;
@@ -157,21 +170,36 @@ public class WaistDetection {
 		dependencyDAG.numOfSourcePath.clear();
 		dependencyDAG.loadPathStatistics();
 		
+		averageCoreRank = new HashMap();
+		averagePathCovered = new HashMap();
 		coreSet = new HashMap();
 //		System.out.println("Path Covrerge Threshold: " + pathCoverageTau);
-		traverseTieTreeHelper(dependencyDAG, 0, dependencyDAG.nTotalPath, 1, 1);
+		traverseTreeHelper(dependencyDAG, 0, dependencyDAG.nTotalPath, 1, 1);
 		
 //		double kount = 1;
 		currentLeaf = 0;
 		int optimalCoreCount = 0;
 		for (TreeSet<String> hsS: coreSet.keySet()) {
-			System.out.println(hsS.size() + "\t" + coreSet.get(hsS));
+//			System.out.println(hsS.size() + "\t" + coreSet.get(hsS));
 			if (Math.abs(hsS.size() - minCoreSize) < 0.0001 && Math.abs(coreSet.get(hsS) - maxCoreCoverage) < 0.0001) { 
 //				System.out.println(hsS.size() + "\t" + coreSet.get(hsS));
+//				System.out.println(hsS);
 				++optimalCoreCount;
 			}
 		}
+		
+		double minST = Math.min(dependencyDAG.nSources, dependencyDAG.nTargets);
+		hScore = 1.0 - ((minCoreSize - 1.0) / minST);
+
+		TreeSet<String> sampleCore = coreSet.keySet().iterator().next();
+		getNodeCoverage(dependencyDAG, sampleCore);
+		coreLocationAnalysis(dependencyDAG);
+		
 		System.out.println("Number of coreSet: " + optimalCoreCount);
+		System.out.println("Min core size: " + minCoreSize);
+		System.out.println("H-Score: " + hScore);
+		System.out.println("Node Coverage: " + nodeCoverage);
+		System.out.println("WeightedCoreLocation: " + weightedCoreLocation);
 	}
 	
 	public static void heuristicWaistDetection(DependencyDAG dependencyDAG, String filePath) throws Exception {
@@ -282,13 +310,13 @@ public class WaistDetection {
 			topRemovedWaistNodes.add(maxPathCoveredNode);
 			
 //			update average waist entry rank and path contribution
-			if (averageWaistRank.containsKey(maxPathCoveredNode)) {
-				double currentRank = averageWaistRank.get(maxPathCoveredNode);
-				averageWaistRank.put(maxPathCoveredNode, (currentRank + nodeRank) * 0.5 );
+			if (averageCoreRank.containsKey(maxPathCoveredNode)) {
+				double currentRank = averageCoreRank.get(maxPathCoveredNode);
+				averageCoreRank.put(maxPathCoveredNode, (currentRank + nodeRank) * 0.5 );
 				averagePathCovered.put(maxPathCoveredNode, (averagePathCovered.get(maxPathCoveredNode) + maxPathCovered) * 0.5);
 			}
 			else {
-				averageWaistRank.put(maxPathCoveredNode, nodeRank * 1.0);
+				averageCoreRank.put(maxPathCoveredNode, nodeRank * 1.0);
 				averagePathCovered.put(maxPathCoveredNode, maxPathCovered);
 			}
 
@@ -342,7 +370,7 @@ public class WaistDetection {
 	}
 	
 	public static void pathCoverageThresholdDetection(DependencyDAG dependencyDAG, String filePath) throws Exception {
-		averageWaistRank = new HashMap();
+		averageCoreRank = new HashMap();
 		averagePathCovered = new HashMap();
 		pathCoverageTau = 1.0;
 		ws = new ArrayList();
@@ -381,7 +409,8 @@ public class WaistDetection {
 		
 //		System.out.println("Max D: " + maxD);
 		pathCoverageTau = tau;
-		System.out.println("Core-size: " + minWS + " Path-coverage-threshold: " + tau);
+//		System.out.println("Core-size: " + minWS);
+		System.out.println("Path-coverage-threshold: " + tau);
 //		System.out.println("Min-disatnce-line distance: " +  maxDistance + " intersected at: " + crossX + "," + crossY);
 		
 		/*
@@ -411,7 +440,7 @@ public class WaistDetection {
 	public static void randomizedWaistDetection(DependencyDAG dependencyDAG, String filePath) throws Exception {
 		HashMap<String, Integer> nodeFrequencyInWaist = new HashMap();
 		HashMap<Integer, Integer> waistSizeFrequencey = new HashMap();
-		averageWaistRank = new HashMap();
+		averageCoreRank = new HashMap();
 		topRemovedWaistNodes.clear();
 		thresholdSatisfied = false;
 		printInfo = true;
@@ -428,7 +457,7 @@ public class WaistDetection {
 		
 		int nRuns = 1;
 		minWaistSize = 100000;
-		averageWaistRank = new HashMap();
+		averageCoreRank = new HashMap();
 		for (int i = 1; i <= nRuns; ++i) {
 			topRemovedWaistNodes.clear();
 			dependencyDAG.numOfTargetPath.clear();
@@ -487,177 +516,69 @@ public class WaistDetection {
 		dependencyDAG.numOfSourcePath.clear();
 		dependencyDAG.loadPathStatistics();
 		for (String n: nodeFrequencyInWaist.keySet()) {
-			System.out.println(n + "\t" + (nodeFrequencyInWaist.get(n) * 1.0 / nRuns) + "\t" + averageWaistRank.get(n) /*+ "\t" + dependencyDAG.normalizedPathCentrality.get(n)*/);
+			System.out.println(n + "\t" + (nodeFrequencyInWaist.get(n) * 1.0 / nRuns) + "\t" + averageCoreRank.get(n) /*+ "\t" + dependencyDAG.normalizedPathCentrality.get(n)*/);
 		}
 		
 //		System.out.println("Waist Size: " + waistSize);
 		if (waistSize > 0) {
-			getNodeCoverage(dependencyDAG);
+//			getNodeCoverage(dependencyDAG);
 		}
 //		nodeCentralityWRTWaist(dependencyDAG);
 		
 		coreLocationAnalysis(dependencyDAG);
 	}
 
-	public static double getNodeCoverage(DependencyDAG dependencyDAG) {
-		HashSet<String> waistNodeCoverage = new HashSet();
-
-		for (String s : averageWaistRank.keySet()) {
+	public static void getNodeCoverage(DependencyDAG dependencyDAG, TreeSet<String> sampleCore) {
+		HashSet<String> coreNodeCoverage = new HashSet();
+		for (String s : sampleCore) {
 			dependencyDAG.visited.clear();
 			dependencyDAG.kounter = 0;
 			dependencyDAG.reachableUpwardsNodes(s); // how many nodes are using her
-//			dependencyDAG.visited.remove(s); // remove ifself
-			waistNodeCoverage.addAll(dependencyDAG.visited);
-
+			coreNodeCoverage.addAll(dependencyDAG.visited);
 			dependencyDAG.visited.clear();
 			dependencyDAG.kounter = 0;
 			dependencyDAG.reachableDownwardsNodes(s); // how many nodes are using her
-//			dependencyDAG.visited.remove(s); // remove ifself
-			waistNodeCoverage.addAll(dependencyDAG.visited);
-//			System.out.println(s + "\t" + averageWaistRank.get(s) + "\t" + dependencyDAG.location.get(s));
+			coreNodeCoverage.addAll(dependencyDAG.visited);
 		}
-
-//		System.out.println("Waist Size: " + averageWaistRank.size());
-//		System.out.print("Waist Node Coverage: " + waistNodeCoverage.size() + " of " + dependencyDAG.nodes.size() + " i.e. ");
-//		System.out.println(waistNodeCoverage.size() * 100.0 / dependencyDAG.nodes.size() + "%%");
+		nodeCoverage = coreNodeCoverage.size() * 1.0 / dependencyDAG.nodes.size();
+	}
+	
+	public static void nodeCentralityWRTWaist(DependencyDAG dependencyDAG) {
+		/*
+		double uSet = dependencyDAG.nTargets; 
+		double dSet = dependencyDAG.nSources;
 		
-		
-//		System.out.println("Intermediate Nodes Not Covered: ");
-//		HashSet<String> waistNodeNotCoverage = new HashSet();
-//		int sum = 0;
-		double notCovered = dependencyDAG.nodes.size() - waistNodeCoverage.size();
-		
-		double notCoveredSource = 0;
-		double notCoveredTarget = 0;
-		double notCoveredMiddle = 0;
-		double notCoveredSpecialSource = 0;
-		double notCoveredSpecialTarget = 0;
 		for (String s: dependencyDAG.nodes) {
-			if (!waistNodeCoverage.contains(s)) {
-				if(dependencyDAG.isSource(s)) 
-				{
-					++notCoveredSource;
+			int servesWaist = 0, dependsOnWaist = 0;
+			if (dependencyDAG.serves.containsKey(s) && dependencyDAG.depends.containsKey(s)) { // intermediate node
+				if (!averageWaistRank.containsKey(s)) { // not a waist node
+					dependencyDAG.loadRechablity(s); // find reachable nodes
 					
-					int f = 0;
-					if (dependencyDAG.serves.containsKey(s)) {
-						for (String r : dependencyDAG.serves.get(s)) {
-							if (dependencyDAG.isIntermediate(r)) {
-								f = 1;
-								break;
-							}
+					for (String r: averageWaistRank.keySet()) {
+						if (dependencyDAG.dependentsReachable.get(s).contains(r)) { // serving some waist node
+							++servesWaist;
 						}
-					}
-					if (f == 0) ++notCoveredSpecialSource; // only serves targets or none
-				}
-				else if (dependencyDAG.isTarget(s)) {
-					++notCoveredTarget;
-					
-					int f = 0;
-					for (String r: dependencyDAG.depends.get(s)) {
-						if(dependencyDAG.isIntermediate(r)) {
-							f = 1;
-							break;
-						}
-					}
-					if (f == 0) ++notCoveredSpecialTarget; // only depends on sources
-				}
-				else {
-					++notCoveredMiddle;
-				}
 				
-//					System.out.println(s);
-//					if (dependencyDAG.serves.containsKey(s)) {
-//						for (String r: dependencyDAG.serves.get(s)) {
-////							System.out.print(r + "," + dependencyDAG.normalizedPathCentrality.get(r) + " - ");
-//						}
-//					}
-//					System.out.println();
-//					
-//					if (dependencyDAG.depends.containsKey(s)) {
-//						for (String r: dependencyDAG.depends.get(s)) {
-////							System.out.print(r + "," + dependencyDAG.normalizedPathCentrality.get(r) + " - ");
-//						}
-//					}
-//					System.out.println("\n");
-//					dependencyDAG.visited.clear();
-//					dependencyDAG.kounter = 0;
-//					dependencyDAG.reachableUpwardsNodes(s); // how many nodes are using her
-//					dependencyDAG.visited.remove(s); // remove ifself
-//					waistNodeNotCoverage.addAll(dependencyDAG.visited);
-//
-////					dependencyDAG.visited.clear();
-////					dependencyDAG.kounter = 0;
-//					dependencyDAG.reachableDownwardsNodes(s); // how many nodes are using her
-////					dependencyDAG.visited.remove(s); // remove ifself
-//					waistNodeNotCoverage.addAll(dependencyDAG.visited);
-//
-//					sum += dependencyDAG.kounter;
-//					System.out.println(s + " did not cover " + dependencyDAG.kounter);
-//					System.out.println("-- " + s + "\tinDeg: " + dependencyDAG.inDegree.get(s) + "\toutDeg: " + dependencyDAG.outDegree.get(s));
-//				}
+						if (dependencyDAG.serversReachable.get(s).contains(r)) { // depending on some waist node
+							++dependsOnWaist;
+						}
+					}
+			
+					System.out.println(s + "\t" + (dependencyDAG.normalizedPathCentrality.get(s) / pathCoverageTau) + "\t" + servesWaist + "\t" + dependsOnWaist);
+				}
+			}
+			
+			if (servesWaist >= dependsOnWaist) {
+				++dSet;
+			}
+			else {
+				++uSet;
 			}
 		}
 		
-//		System.out.println((notCoveredSource / notCovered) + "\t" + (notCoveredTarget / notCovered) + "\t" + (notCoveredMiddle / notCovered));
-		nodeCoverage = waistNodeCoverage.size() * 1.0 / dependencyDAG.nodes.size();
-//		System.out.println("Node Coverage: " + nodeCoverage);
-//		effectiveNodeCoverage = waistNodeCoverage.size() * 1.0 / (dependencyDAG.nodes.size() - notCoveredSpecialSource - notCoveredSpecialTarget);
-//		System.out.println("Effective Node Coverage: " + effectiveNodeCoverage);
-//		System.out.println("Total Not Covered: " + waistNodeNotCoverage.size() + "\t but kounter: " + sum);
-
-		
-		double minST = Math.min(dependencyDAG.nSources, dependencyDAG.nTargets);
-//		System.out.println("nonSTinWaist: " + (topKNodes.size() - STNodes));
-//		System.out.println("MinST " + minST + " Waist Size " + averageWaistRank.size());
-//		if (waistSize == 0) {
-//			hourglassness = -1001;
-//		}
-//		else if ((waistSize - 1.0) >= minST) {
-//			hourglassness = 0;
-//		}
-//		else 
-		{ 
-			hourglassness = 1.0 - ((waistSize - 1.0) / minST);
-		}
-//		System.out.println("Hourglassness: " + hourglassness);
-		
-		return waistNodeCoverage.size() * 1.0 / dependencyDAG.nodes.size();
+		System.out.println("Symmetry: " + ((uSet - dSet) / (uSet + dSet)));
+		*/
 	}
-	
-//	public static void nodeCentralityWRTWaist(DependencyDAG dependencyDAG) {
-//		double uSet = dependencyDAG.nTargets; 
-//		double dSet = dependencyDAG.nSources;
-//		
-//		for (String s: dependencyDAG.nodes) {
-//			int servesWaist = 0, dependsOnWaist = 0;
-//			if (dependencyDAG.serves.containsKey(s) && dependencyDAG.depends.containsKey(s)) { // intermediate node
-//				if (!averageWaistRank.containsKey(s)) { // not a waist node
-//					dependencyDAG.loadRechablity(s); // find reachable nodes
-//					
-//					for (String r: averageWaistRank.keySet()) {
-//						if (dependencyDAG.dependentsReachable.get(s).contains(r)) { // serving some waist node
-//							++servesWaist;
-//						}
-//				
-//						if (dependencyDAG.serversReachable.get(s).contains(r)) { // depending on some waist node
-//							++dependsOnWaist;
-//						}
-//					}
-//			
-//					System.out.println(s + "\t" + (dependencyDAG.normalizedPathCentrality.get(s) / pathCoverageTau) + "\t" + servesWaist + "\t" + dependsOnWaist);
-//				}
-//			}
-//			
-//			if (servesWaist >= dependsOnWaist) {
-//				++dSet;
-//			}
-//			else {
-//				++uSet;
-//			}
-//		}
-//		
-//		System.out.println("Symmetry: " + ((uSet - dSet) / (uSet + dSet)));
-//	}
 	
 	public static void coreLocationAnalysis(DependencyDAG dependencyDAG) {
 //		double coreLocations[] = new double[averageWaistRank.size()];	
@@ -665,7 +586,7 @@ public class WaistDetection {
 //		int histogramBins[] = new int[11];
 		weightedCoreLocation = 0;
 		double corePathContribution = 0;
-		for (String s: averageWaistRank.keySet()) {
+		for (String s: averageCoreRank.keySet()) {
 //			double loc = dependencyDAG.location.get(s);
 //			coreLocations[index++] = loc;
 //			int binIndex = (int)(loc * 10);
@@ -677,14 +598,13 @@ public class WaistDetection {
 		}
 		
 		weightedCoreLocation /= corePathContribution;
-//		System.out.println("WeightedCoreLocation: " + weightedCoreLocation);
 		
 //		for (int i = 0; i < 11; ++i) {
 //			System.out.println("Bin-" + i + " Frequency " + histogramBins[i]);
 //		}
 //		System.out.println(StatUtils.percentile(coreLocations, 10) + "\t" + StatUtils.percentile(coreLocations, 50) + "\t" + StatUtils.percentile(coreLocations, 90));
 		
-		for (String s: averageWaistRank.keySet()) {
+		for (String s: averageCoreRank.keySet()) {
 			double loc = dependencyDAG.location.get(s);
 			double weight = averagePathCovered.get(s) / corePathContribution;
 //			System.out.println(loc + "\t" + weight);

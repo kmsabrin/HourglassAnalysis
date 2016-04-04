@@ -318,9 +318,9 @@ public class DependencyDAG {
 				// for metabolic and synthetic networks
 				server = tokens[0];
 				dependent = tokens[1];
-				if (largestWCCNodes.contains(server) == false || largestWCCNodes.contains(dependent) == false) {
-					continue;
-				}
+//				if (largestWCCNodes.contains(server) == false || largestWCCNodes.contains(dependent) == false) {
+//					continue;
+//				}
 			}
 
 			if (isCourtcase) {

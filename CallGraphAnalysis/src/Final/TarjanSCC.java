@@ -2,6 +2,7 @@ package Final;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Stack;
@@ -74,13 +75,11 @@ public class TarjanSCC {
 		} while (!w.equals(v));
 		count++;
 	}
-
 	
 //	Returns the number of strong components.
 	private int count() {
 		return count;
 	}
-
 	
 //	Are vertices v and w in the same strong component?
 	private boolean stronglyConnected(String v, String w) {
@@ -94,15 +93,15 @@ public class TarjanSCC {
 //		G.isMetabolic = true;
 //		G.loadCallGraph("metabolic_networks//rat-links.txt"); // "metabolic_networks//rat-links.txt"
 		
-//		PrintWriter pw = new PrintWriter(new File("jdk_class_dependency//commons-math-callgraph-consolidated.txt"));		
-//		G.isClassDependency = true;
-//		G.loadCallGraph("jdk_class_dependency//commons-math-callgraph.txt"); 
+		PrintWriter pw = new PrintWriter(new File("jdk_class_dependency//commons-math-callgraph-consolidated.txt"));		
+		G.isClassDependency = true;
+		G.loadCallGraph("jdk_class_dependency//commons-math-callgraph.txt"); 
 		
 //		openssh_callgraphs//full.graph-openssh-39
-		String graphFile = "sw_callgraphs//full-graph-Sqlite";
-		PrintWriter pw = new PrintWriter(new File(graphFile + "-consolidated"));		
-		G.isCallgraph = true;
-		G.loadCallGraph(graphFile); 
+//		String graphFile = "sw_callgraphs//full-graph-Sqlite";
+//		PrintWriter pw = new PrintWriter(new File(graphFile + "-consolidated"));		
+//		G.isCallgraph = true;
+//		G.loadCallGraph(graphFile); 
 		
 		TarjanSCC scc = new TarjanSCC(G);
 		// number of connected components
@@ -131,17 +130,22 @@ public class TarjanSCC {
 		}
 		
 		int kNonTrivialSCC = 0;
+		ArrayList<Double> numbers = new ArrayList();
 		for (String s: sccs.keySet()) {
-//			if (sccs.get(s).size() < 2) continue; // show the non-trivial SCCs only
+			if (sccs.get(s).size() < 2) continue; // show the non-trivial SCCs only
 			++kNonTrivialSCC;
-			System.out.print(s + "\t");
-			for (String r: sccs.get(s)) {
-				System.out.print(r + ", ");
-			}
-			System.out.println();
+//			System.out.print(s + "\t");
+//			for (String r: sccs.get(s)) {
+//				System.out.print(r + ", ");
+//			}
+//			System.out.println();
 //			System.out.println(sccs.get(s).size());
+			numbers.add(sccs.get(s).size() * 1.0);
 		}
 		System.out.println("Number of Non-trivial SCCs: " + kNonTrivialSCC);
+		
+		double stat[] = StatisticalUtilTest.getMeanSTD(numbers);
+		System.out.println(stat[0] + "\t" + stat[1]);
 		
 		for (String v: G.nodes) {
 			String srcSCCId = sccIdMap.get(v);

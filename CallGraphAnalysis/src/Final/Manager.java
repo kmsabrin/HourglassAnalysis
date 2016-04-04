@@ -74,10 +74,10 @@ public class Manager {
 	public static void doRealNetworkAnalysis() throws Exception {
 		String netPath = "";
 		
-		String netID = "rat";
+//		String netID = "rat";
 //		String netID = "monkey";
 		
-//		String netID = "commons-math";
+		String netID = "commons-math";
 //		String netID = "openssh-39";
 //		String netID = "apache-commons-3.4";
 		
@@ -142,7 +142,7 @@ public class Manager {
 		WaistDetection.pathCoverageThresholdDetection(dependencyDAG, netID);
 //		WaistDetection.randomizedWaistDetection(dependencyDAG, netID);
 //		WaistDetection.heuristicWaistDetection(dependencyDAG, netID);
-		WaistDetection.traverseTieTree(dependencyDAG, netID);
+		WaistDetection.traverseCoreTree(dependencyDAG, netID);
 
 //		Randomization Experiments
 //		UpstreamRandomize.randomizeDAG(dependencyDAG);
@@ -340,7 +340,7 @@ public class Manager {
 						if (WaistDetection.waistSize > 0) {
 							waistSizes[idx] = WaistDetection.waistSize;
 							nodeCoverages[idx] = WaistDetection.nodeCoverage;
-							hScores[idx] = WaistDetection.hourglassness;
+							hScores[idx] = WaistDetection.hScore;
 							weightedCoreLocation[idx] = WaistDetection.weightedCoreLocation;
 							++idx;
 						}
