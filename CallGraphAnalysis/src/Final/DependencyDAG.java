@@ -74,8 +74,7 @@ public class DependencyDAG {
 	static boolean isClassDependency = false;
 	static boolean isSimpleModel = false;
 	static boolean isComplexModel = false;
-	static boolean isWeighted = false;
-	
+	static boolean isWeighted = false;	
 	static boolean isRandomized = false;
 	
 	static int nDirectSourceTargetEdges = 0;
@@ -485,10 +484,10 @@ public class DependencyDAG {
 	public void loadDegreeMetric() {
 		if (isRandomized == false) {
 			for (String s : nodes) {
-				if (serves.containsKey(s) == false) {
+				if (isTarget(s)) {
 					targets.add(s);
 				}
-				if (depends.containsKey(s) == false) {
+				if (isSource(s)) {
 					sources.add(s);
 				}
 			}

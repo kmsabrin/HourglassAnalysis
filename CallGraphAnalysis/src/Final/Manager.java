@@ -75,13 +75,13 @@ public class Manager {
 		String netPath = "";
 		
 //		String netID = "rat";
-//		String netID = "monkey";
-		
+		String netID = "monkey";
+//		
 //		String netID = "commons-math";
 //		String netID = "openssh-39";
 //		String netID = "apache-commons-3.4";
 		
-		String netID = "court";
+//		String netID = "court";
 		
 		if (netID.equals("rat") || netID.equals("monkey")) {
 			loadLargestWCC(netID);
@@ -97,8 +97,8 @@ public class Manager {
 			DependencyDAG.isMetabolic = true;
 		}
 		else if (netID.equals("court")) {
-			CourtCaseCornellParser.caseTopic = "abortion";
-//			CourtCaseCornellParser.caseTopic = "pension";
+//			CourtCaseCornellParser.caseTopic = "abortion";
+			CourtCaseCornellParser.caseTopic = "pension";
 			CourtCaseCornellParser.loadCuratedCaseIDs();
 			netPath = "supremecourt_networks//court.txt";
 			DependencyDAG.isCourtcase = true;
@@ -236,11 +236,12 @@ public class Manager {
 	}
 	*/
 	
+	
 	public static void doToyNetworkAnalysis() throws Exception {
 		DependencyDAG.isToy = true;
 //		DependencyDAG.isWeighted = true;
-//		DependencyDAG toyDependencyDAG = new DependencyDAG("toy_networks//toy_dag_paper.txt");
-		DependencyDAG toyDependencyDAG = new DependencyDAG("synthetic_callgraphs//draw//SimpleModelDAGr-1a3d2.0.txt");
+		DependencyDAG toyDependencyDAG = new DependencyDAG("toy_networks//toy_dag_paper.txt");
+//		DependencyDAG toyDependencyDAG = new DependencyDAG("synthetic_callgraphs//draw//SimpleModelDAGr-1a3d2.0.txt");
 		String netID = "toy_dag";
 		printNetworkStat(toyDependencyDAG);
 		toyDependencyDAG.printNetworkProperties();
@@ -252,10 +253,11 @@ public class Manager {
 //		DistributionAnalysis.printSourceVsTargetCompression(dependencyDAG, netID);
 
 		CoreDetection.pathCoverageThresholdDetection(toyDependencyDAG, netID);
-		CoreDetection.randomizedWaistDetection(toyDependencyDAG, netID);
+//		CoreDetection.randomizedWaistDetection(toyDependencyDAG, netID);
 //		WaistDetection.heuristicWaistDetection(toyDependencyDAG, netID);
 //		WaistDetection.runPCWaistDetection(dependencyDAG, netID);
 //		System.out.println("\n###\n");
+		CoreDetection.traverseCoreTree(toyDependencyDAG, netID);
 		
 //		MaxFlowReduction.reduceToMaxFlowMinCutNetwork(dependencyDAG, netID);
 		
@@ -266,17 +268,20 @@ public class Manager {
 //		WaistDetection.randomizedWaistDetection(toyDependencyDAG, netID);
 	}
 	
+	
 	public static void runSyntheticStatisticalSignificanceTests() throws Exception {
 		DependencyDAG.isSynthetic = true;
 		DependencyDAG.isWeighted = false;
-		String DAGType = "SimpleModelDAG";
 		DependencyDAG.isSimpleModel = true;
+		
+		String DAGType = "SimpleModelDAG";
+		PrintWriter pw = new PrintWriter(new File("analysis//hgSeparator.txt")); 
 
-//		String alphas[] = { "-1", "-0.8", "-0.6", "-0.4", "-0.2", "0", "0.2", "0.4", "0.6", "0.8", "1" };
-		String alphas[] = {"0.25"};
+		String alphas[] = { "-1", "-0.8", "-0.6", "-0.4", "-0.2", "0", "0.2", "0.4", "0.6", "0.8", "1" };
+//		String alphas[] = {"0"};
 
-//		String dins[] = { "2", "3" };
-		String dins[] = {"2"};
+		String dins[] = { "2", "3" };
+//		String dins[] = {"2"};
 
 		for (String din : dins) {
 			for (String a : alphas) {
@@ -286,7 +291,7 @@ public class Manager {
 				String ratio = "-1";
 				String networkID = DAGType + "r" + ratio + "a" + a + "d" + din;
 				
-				int nRun = 1;
+				int nRun = 100;
 				double coreSizes[] = new double[nRun];
 				double hScores[] = new double[nRun];
 				double nodeCoverages[] = new double[nRun];
@@ -294,10 +299,10 @@ public class Manager {
 				ArrayList<Double> coreLocations = new ArrayList();
 				
 				int idx = 0;
+				double hgPositive = 0;
 				for (int i = 0; i < nRun; ++i) {
 					SimpleModelDAG.generateSimpleModel(Double.parseDouble(a), Integer.parseInt(din), nT, nI, nS, Double.parseDouble(ratio));
 
-					DependencyDAG.isRandomized = false;
 					DependencyDAG dependencyDAG = new DependencyDAG("synthetic_callgraphs//" + networkID + ".txt");
 					// printNetworkStat(dependencyDAG);
 					// dependencyDAG.printNetworkMetrics();
@@ -317,15 +322,29 @@ public class Manager {
 					weightedCoreLocation[idx] = CoreDetection.weightedCoreLocation;
 					++idx;
 					
-					System.out.println(CoreDetection.hScore);
-					UpstreamRandomize.randomizeDAG(dependencyDAG);
-//					printNetworkStat(dependencyDAG);
-//					netID += "-randomized";
-//					DistributionAnalysis.printCentralityDistribution(dependencyDAG, netID);
-					CoreDetection.traverseCoreTree(dependencyDAG, networkID);
-					System.out.println(CoreDetection.hScore);
+					double modelHScore = CoreDetection.hScore;
+//					System.out.println(modelHScore);
+					double pV = 0;
+					for (int j = 0; j < 100; ++j) {
+						DependencyDAG.isRandomized = false;
+						dependencyDAG = new DependencyDAG("synthetic_callgraphs//" + networkID + ".txt");
+						UpstreamRandomize.randomizeDAG(dependencyDAG);
+						CoreDetection.traverseCoreTree(dependencyDAG, networkID);
+						double randomizedHScore = CoreDetection.hScore;
+//						System.out.println(randomizedHScore);
+						if (modelHScore < randomizedHScore) {
+							++pV;
+						}
+					}
+//					System.out.println("Random H-Test: " + (pV / 100.0));
+					if ((pV / 100.0) >= 0.05) {
+						++hgPositive;
+					}
 				}
-
+				
+				pw.println(hgPositive / 100.0);
+				System.out.println(hgPositive / 100.0);
+				
 				double mWS = StatUtils.mean(coreSizes);
 				double mNC = StatUtils.mean(nodeCoverages);
 				double mHS = StatUtils.mean(hScores);
@@ -338,6 +357,7 @@ public class Manager {
 						+ mNC + " " + ciNC + " " + mHS + " " + ciHS + " " + mWCL + " " + ciWCL);
 			}
 			System.out.println();
+			pw.println();
 		}
 	}
 

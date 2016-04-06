@@ -16,7 +16,7 @@ public class CoreDetection {
 	static HashSet<String> topRemovedWaistNodes = new HashSet();
 	static HashMap<String, Double> averageCoreRank;
 	static HashMap<String, Double> averagePathCovered;
- 	static double pathCoverageTau = 0.95;
+ 	static double pathCoverageTau = 0.90;
 	
 	static double nodeCoverage;
 	static double hScore;
@@ -154,8 +154,12 @@ public class CoreDetection {
 			traverseTreeHelper(dependencyDAG, cumulativePathCovered + maxPathCovered, totalPath, nodeRank + 1, nLeaves * pathEquivalentNodeSet.size());
 //			remove from waist
 			topRemovedWaistNodes.remove(representative);
+
+			if (dependencyDAG.isSynthetic || dependencyDAG.isRandomized) {
+				break;
+			}
 			
-			break;
+//			break;
 		}
 	}
 	
@@ -190,10 +194,12 @@ public class CoreDetection {
 		}
 		
 		double minST = Math.min(dependencyDAG.nSources, dependencyDAG.nTargets);
+//		System.out.println(minST);
 		hScore = 1.0 - ((minCoreSize - 1.0) / minST);
 
 //		System.out.println(coreSet.size());
 		TreeSet<String> sampleCore = coreSet.keySet().iterator().next();
+//		System.out.println(sampleCore);
 		getNodeCoverage(dependencyDAG, sampleCore);
 		coreLocationAnalysis(dependencyDAG);
 		
@@ -509,14 +515,17 @@ public class CoreDetection {
 	public static void getNodeCoverage(DependencyDAG dependencyDAG, TreeSet<String> sampleCore) {
 		HashSet<String> coreNodeCoverage = new HashSet();
 		for (String s : sampleCore) {
+//			System.out.println(s);
 			dependencyDAG.visited.clear();
-			dependencyDAG.kounter = 0;
+//			dependencyDAG.kounter = 0;
 			dependencyDAG.reachableUpwardsNodes(s); // how many nodes are using her
 			coreNodeCoverage.addAll(dependencyDAG.visited);
+//			System.out.println(dependencyDAG.visited);
 			dependencyDAG.visited.clear();
-			dependencyDAG.kounter = 0;
+//			dependencyDAG.kounter = 0;
 			dependencyDAG.reachableDownwardsNodes(s); // how many nodes are using her
 			coreNodeCoverage.addAll(dependencyDAG.visited);
+//			System.out.println(dependencyDAG.visited);
 		}
 		nodeCoverage = coreNodeCoverage.size() * 1.0 / dependencyDAG.nodes.size();
 	}

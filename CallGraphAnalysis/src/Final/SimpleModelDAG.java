@@ -19,9 +19,9 @@ public class SimpleModelDAG {
 	static boolean isMultigraph = false;
 	
 //	real network matching
-	static int nT = 3; // no. of (T)arget nodes
+	static int nT = 4; // no. of (T)arget nodes
 	static int nI = 4; // no. of (I)ntermediate nodes
-	static int nS = 3; // no. of (S)ource nodes
+	static int nS = 4; // no. of (S)ource nodes
 
 	static int sT = 0; // start of Target
 	static int sI = nT; // start of Intermediate
@@ -229,6 +229,7 @@ public class SimpleModelDAG {
 			
 			int k = getInDegree();
 //			System.out.println(k);
+			k = Math.min(k, endNodeIndex - startNodeIndex + 1);
 			
 			for (int j = 0; j < k; ++j) {
 				int substrateIndex;
