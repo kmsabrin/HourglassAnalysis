@@ -19,9 +19,9 @@ public class SimpleModelDAG {
 	static boolean isMultigraph = false;
 	
 //	real network matching
-	static int nT = 4; // no. of (T)arget nodes
-	static int nI = 4; // no. of (I)ntermediate nodes
-	static int nS = 4; // no. of (S)ource nodes
+	static int nT = 3; // no. of (T)arget nodes
+	static int nI = 6; // no. of (I)ntermediate nodes
+	static int nS = 3; // no. of (S)ource nodes
 
 	static int sT = 0; // start of Target
 	static int sI = nT; // start of Intermediate
@@ -237,8 +237,8 @@ public class SimpleModelDAG {
 					substrateIndex = getNodeFromUniformDistribution(startNodeIndex, endNodeIndex);
 				} 
 				else {
-//					substrateIndex = getNodeFromZipfDistribution(startNodeIndex, endNodeIndex);
-					substrateIndex = getNodeFromZipfDistribution2(startNodeIndex, endNodeIndex);
+					substrateIndex = getNodeFromZipfDistribution(startNodeIndex, endNodeIndex);
+//					substrateIndex = getNodeFromZipfDistribution2(startNodeIndex, endNodeIndex);
 //					special case: no order among sources
 					if (substrateIndex >= sS) {
 						substrateIndex = sS + random.nextInt(nS);

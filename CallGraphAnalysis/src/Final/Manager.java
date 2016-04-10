@@ -75,13 +75,13 @@ public class Manager {
 		String netPath = "";
 		
 //		String netID = "rat";
-		String netID = "monkey";
+//		String netID = "monkey";
 //		
 //		String netID = "commons-math";
 //		String netID = "openssh-39";
 //		String netID = "apache-commons-3.4";
 		
-//		String netID = "court";
+		String netID = "court";
 		
 		if (netID.equals("rat") || netID.equals("monkey")) {
 			loadLargestWCC(netID);
@@ -142,7 +142,8 @@ public class Manager {
 		CoreDetection.pathCoverageThresholdDetection(dependencyDAG, netID);
 //		WaistDetection.randomizedWaistDetection(dependencyDAG, netID);
 //		WaistDetection.heuristicWaistDetection(dependencyDAG, netID);
-		CoreDetection.traverseCoreTree(dependencyDAG, netID);
+		CoreDetection.getCore(dependencyDAG, netID);
+		double realCore = CoreDetection.minCoreSize;
 
 //		Randomization Experiments
 //		UpstreamRandomize.randomizeDAG(dependencyDAG);
@@ -151,6 +152,11 @@ public class Manager {
 //		DistributionAnalysis.printCentralityDistribution(dependencyDAG, netID);
 //		WaistDetection.randomizedWaistDetection(dependencyDAG, netID);
 //		randomHScores[index++] = WaistDetection.hourglassness;
+		
+		dependencyDAG.resetAuxiliary();
+		dependencyDAG = new DependencyDAG(netPath);
+		FlattenNetwork.makeAndProcessFlat(dependencyDAG);
+		System.out.println("H-Score: " + (1.0 - ((realCore - 1) / FlattenNetwork.flatNetworkCoreSize)));
 	}
 	
 	/*
@@ -243,8 +249,8 @@ public class Manager {
 		DependencyDAG toyDependencyDAG = new DependencyDAG("toy_networks//toy_dag_paper.txt");
 //		DependencyDAG toyDependencyDAG = new DependencyDAG("synthetic_callgraphs//draw//SimpleModelDAGr-1a3d2.0.txt");
 		String netID = "toy_dag";
-		printNetworkStat(toyDependencyDAG);
-		toyDependencyDAG.printNetworkProperties();
+//		printNetworkStat(toyDependencyDAG);
+//		toyDependencyDAG.printNetworkProperties();
 //		DistributionAnalysis.printEdgeList(dependencyDAG, netID);
 
 //		DistributionAnalysis.getDegreeHistogram(dependencyDAG);
@@ -257,7 +263,7 @@ public class Manager {
 //		WaistDetection.heuristicWaistDetection(toyDependencyDAG, netID);
 //		WaistDetection.runPCWaistDetection(dependencyDAG, netID);
 //		System.out.println("\n###\n");
-		CoreDetection.traverseCoreTree(toyDependencyDAG, netID);
+		CoreDetection.getCore(toyDependencyDAG, netID);
 		
 //		MaxFlowReduction.reduceToMaxFlowMinCutNetwork(dependencyDAG, netID);
 		
@@ -266,6 +272,10 @@ public class Manager {
 //		toyDependencyDAG.printNetworkProperties();
 //		WaistDetection.pathCoverageThresholdDetection(toyDependencyDAG, netID);
 //		WaistDetection.randomizedWaistDetection(toyDependencyDAG, netID);
+//		CoreDetection.getCore(toyDependencyDAG, netID);
+		
+		toyDependencyDAG = new DependencyDAG("toy_networks//toy_dag_paper.txt");
+		FlattenNetwork.makeAndProcessFlat(toyDependencyDAG);
 	}
 	
 	
@@ -278,24 +288,26 @@ public class Manager {
 		PrintWriter pw = new PrintWriter(new File("analysis//hgSeparator.txt")); 
 
 		String alphas[] = { "-1", "-0.8", "-0.6", "-0.4", "-0.2", "0", "0.2", "0.4", "0.6", "0.8", "1" };
-//		String alphas[] = {"0"};
+//		String alphas[] = {"-0.9"};
 
 		String dins[] = { "2", "3" };
 //		String dins[] = {"2"};
 
 		for (String din : dins) {
 			for (String a : alphas) {
-				int nT = 200;
-				int nI = 600;
-				int nS = 200;
+				System.out.println(a);
+				int nT = 70;
+				int nI = 160;
+				int nS = 70;
 				String ratio = "-1";
 				String networkID = DAGType + "r" + ratio + "a" + a + "d" + din;
 				
-				int nRun = 100;
+				int nRun = 5;
 				double coreSizes[] = new double[nRun];
 				double hScores[] = new double[nRun];
 				double nodeCoverages[] = new double[nRun];
 				double weightedCoreLocation[] = new double[nRun];
+				double hScoreDenominaotors[] = new double[nRun];
 				ArrayList<Double> coreLocations = new ArrayList();
 				
 				int idx = 0;
@@ -305,7 +317,7 @@ public class Manager {
 
 					DependencyDAG dependencyDAG = new DependencyDAG("synthetic_callgraphs//" + networkID + ".txt");
 					// printNetworkStat(dependencyDAG);
-					// dependencyDAG.printNetworkMetrics();
+//					 dependencyDAG.printNetworkProperties();
 
 //					System.out.println("Model Generated");
 					// DistributionAnalysis.getCentralityCCDF(dependencyDAG, networkID, 1);
@@ -314,36 +326,46 @@ public class Manager {
 
 //					WaistDetection.pathCoverageThresholdDetection(dependencyDAG, networkID);
 //					WaistDetection.randomizedWaistDetection(dependencyDAG, networkID);
-					CoreDetection.traverseCoreTree(dependencyDAG, networkID);
-
+//					CoreDetection.fullTraverse = true;
+					CoreDetection.getCore(dependencyDAG, networkID);
+					CoreDetection.fullTraverse = false;
+					
 					coreSizes[idx] = CoreDetection.minCoreSize;
 					nodeCoverages[idx] = CoreDetection.nodeCoverage;
 					hScores[idx] = CoreDetection.hScore;
 					weightedCoreLocation[idx] = CoreDetection.weightedCoreLocation;
+					hScoreDenominaotors[idx] = CoreDetection.hScoreDenominator;
 					++idx;
 					
 					double modelHScore = CoreDetection.hScore;
-//					System.out.println(modelHScore);
-					double pV = 0;
-					for (int j = 0; j < 100; ++j) {
+//					System.out.print(modelHScore);
+					double hgNetwork = 0;
+					int randomRun = 10;
+					for (int j = 0; j < randomRun; ++j) {
 						DependencyDAG.isRandomized = false;
 						dependencyDAG = new DependencyDAG("synthetic_callgraphs//" + networkID + ".txt");
 						UpstreamRandomize.randomizeDAG(dependencyDAG);
-						CoreDetection.traverseCoreTree(dependencyDAG, networkID);
+//						System.out.println("Randomized!");
+						CoreDetection.getCore(dependencyDAG, networkID);
 						double randomizedHScore = CoreDetection.hScore;
-//						System.out.println(randomizedHScore);
-						if (modelHScore < randomizedHScore) {
-							++pV;
+						System.out.print(modelHScore + "\t" + coreSizes[idx - 1] + "\t" + hScoreDenominaotors[idx - 1]);
+						System.out.println("\t" + randomizedHScore + "\t" + CoreDetection.minCoreSize + "\t" + CoreDetection.hScoreDenominator);
+						if (modelHScore > randomizedHScore) {
+							++hgNetwork;
+//							System.out.println(modelHScore + "\t" + randomizedHScore);
+						}
+						else {
+//							System.out.println(modelHScore + "\t" + randomizedHScore);
 						}
 					}
-//					System.out.println("Random H-Test: " + (pV / 100.0));
-					if ((pV / 100.0) >= 0.05) {
+//					System.out.println("Random H-Test: " + (hgNetwork / randomRun));
+					if ((hgNetwork / randomRun) >= 0.95) {
 						++hgPositive;
 					}
 				}
 				
-				pw.println(hgPositive / 100.0);
-				System.out.println(hgPositive / 100.0);
+				pw.println(hgPositive / nRun);
+				System.out.println(hgPositive / nRun);
 				
 				double mWS = StatUtils.mean(coreSizes);
 				double mNC = StatUtils.mean(nodeCoverages);
@@ -353,13 +375,16 @@ public class Manager {
 				double ciNC = ConfidenceInterval.getConfidenceInterval(nodeCoverages);
 				double ciHS = ConfidenceInterval.getConfidenceInterval(hScores);
 				double ciWCL = ConfidenceInterval.getConfidenceInterval(weightedCoreLocation);
-				System.out.println(a + " " + din + " " + ratio + " " + mWS + " " + ciWS + " " 
-						+ mNC + " " + ciNC + " " + mHS + " " + ciHS + " " + mWCL + " " + ciWCL);
+//				System.out.println(a + " " + din + " " + ratio + " " + mWS + " " + ciWS + " " 
+//						+ mNC + " " + ciNC + " " + mHS + " " + ciHS + " " + mWCL + " " + ciWCL);
 			}
-			System.out.println();
+//			System.out.println();
 			pw.println();
 		}
+		
+		pw.close();
 	}
+	
 
 	static double randomHScores[] = new double[100];
 	static int index = 0;
@@ -402,8 +427,8 @@ public class Manager {
 	public static void main(String[] args) throws Exception {		
 //		Manager.doRealNetworkAnalysis();
 //		Manager.doSyntheticNetworkAnalysis();
-		Manager.runSyntheticStatisticalSignificanceTests();
-//		Manager.doToyNetworkAnalysis();
+//		Manager.runSyntheticStatisticalSignificanceTests();
+		Manager.doToyNetworkAnalysis();
 //		Manager.checkNewHGSampleNetworks();
 //		randomizationTests();
 		System.out.println("Done!");

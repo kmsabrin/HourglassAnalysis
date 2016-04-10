@@ -150,7 +150,7 @@ public class DependencyDAG {
 //			removeDisconnectedNodesForSyntheticNetworks();
 		}
 		
-		removeIsolatedNodes();
+		//removeIsolatedNodes();
 		
 		loadDegreeMetric();
 		
@@ -168,19 +168,10 @@ public class DependencyDAG {
 	}
 	
 	private void checkTargetReachability(String node) {
-		if (isSimpleModel) {
-			if (isTarget(node)) {
-				canReachTarget = true;
-				return;
-			}
+		if (isTarget(node)) {
+			canReachTarget = true;
+			return;
 		}
-		/*
-		else if (isComplexModel) {
-			if (Integer.parseInt(node) <= ComplexModelDAG.layerEndNode[0]) {
-				canReachTarget = true;
-				return;
-			}
-		}*/
 		
 		if (canReachTarget) return;
 		
@@ -192,19 +183,10 @@ public class DependencyDAG {
 	}
 	
 	private void checkSourceReachability(String node) {
-		if (isSimpleModel) {
-			if (isSource(node)) {
-				canReachSource = true;
-				return;
-			}
-		} 
-		/*else if (isComplexModel) {
-			if (Integer.parseInt(node) >= ComplexModelDAG.layerStartNode[ComplexModelDAG.nLayers - 1]) {
-				canReachSource = true;
-				return;
-			}
-		}*/
-		
+		if (isSource(node)) {
+			canReachSource = true;
+			return;
+		}
 		if (canReachSource) return;
 		
 		if (depends.containsKey(node)) {
@@ -214,7 +196,7 @@ public class DependencyDAG {
 		}
 	}
 	
-	private void checkReach(String node) {
+	public void checkReach(String node) {
 		canReachTarget = false;
 		canReachSource = false;
 		checkTargetReachability(node);
@@ -392,6 +374,7 @@ public class DependencyDAG {
 //		}
 	}
 	
+	/*
 	public void removeIsolatedNodes() {
 		HashSet<String> removable = new HashSet<String>();
 		for (String s: nodes) {
@@ -401,7 +384,8 @@ public class DependencyDAG {
 		}
 		nodes.removeAll(removable);
 	}
-
+	 */
+	
 	private void removeCyclesTraverse(String node) {
 		if (!serves.containsKey(node) || visited.contains(node)) {
 			return;
@@ -868,10 +852,10 @@ public class DependencyDAG {
 //			System.out.print(numOfSourcePath.get(s) + "\t");
 //			System.out.print(numOfTargetPath.get(s) + "\t");
 //			System.out.print(location.get(s) + "\t");
-//			System.out.print(normalizedPathCentrality.get(s) * nTotalPath + "\t");
+			System.out.print(normalizedPathCentrality.get(s) * nTotalPath + "\t");
 
-			System.out.print(inDegree.get(s) + "\t");
-			System.out.print(outDegree.get(s) + "\t");
+//			System.out.print(inDegree.get(s) + "\t");
+//			System.out.print(outDegree.get(s) + "\t");
 //			System.out.print(pagerankTargetCompression.get(s) + "\t");
 //			System.out.print(pagerankSourceCompression.get(s) + "\t");
 //			System.out.print(harmonicMeanPagerankCentrality.get(s) + "\t");
@@ -881,7 +865,7 @@ public class DependencyDAG {
 			System.out.println();
 		}
 		
-		/*
+		
 		System.out.println("Total path: " + nTotalPath);
 		
 		for (String s : nodes) {
@@ -893,15 +877,15 @@ public class DependencyDAG {
 				System.out.println();
 			}
 			
-			if (serves.containsKey(s)) {
-				System.out.print(s + " serves ");
-				for (String r : serves.get(s)) {
-					System.out.print("\t" + r);
-				}
-				System.out.println();
-			}
+//			if (serves.containsKey(s)) {
+//				System.out.print(s + " serves ");
+//				for (String r : serves.get(s)) {
+//					System.out.print("\t" + r);
+//				}
+//				System.out.println();
+//			}
 		}
-		*/
+		
 	}
 	
 	public class PathCentralityComparator<String> implements Comparator<String> {

@@ -22,6 +22,7 @@ public class CoreDetection {
 	static double hScore;
 	static double weightedCoreLocation = 0;
 
+	static boolean fullTraverse = false;
 	static boolean thresholdSatisfied;
 	static double effectiveNodeCoverage;
 	static double hourglassSymmetry;
@@ -45,6 +46,12 @@ public class CoreDetection {
 	static double minCoreSize;
 	static double maxCoreCoverage;
 
+	static HashSet<String> coreNodeCoverage;
+	static HashSet<String> coreServerCoverage;
+	static HashSet<String> coreDependentCoverage;
+	
+	static double hScoreDenominator = 1;
+	
 	public static void traverseTreeHelper(DependencyDAG dependencyDAG, double cumulativePathCovered, double totalPath, int nodeRank, double nLeaves) {
 //		check/mark visited state
 		if (nodeRank > 0) {
@@ -68,7 +75,7 @@ public class CoreDetection {
 //			print current core
 //			System.out.println("Core: " + topRemovedWaistNodes);
 			coreSet.put(new TreeSet(topRemovedWaistNodes), cumulativePathCovered);			
-//			System.out.println((++currentLeaf) /*+ "\t" + nLeaves + "\t" + topRemovedWaistNodes.size()*/);
+//			System.out.println((++currentLeaf) + "\t" + nLeaves + "\t" + topRemovedWaistNodes.size());
 			if (topRemovedWaistNodes.size() < minCoreSize) {
 				minCoreSize = topRemovedWaistNodes.size();
 				if (cumulativePathCovered > maxCoreCoverage) {
@@ -131,9 +138,9 @@ public class CoreDetection {
 //		}
 		
 		for (HashSet<String> equivalanceKey: pathEquivalentNodeSet.keySet()) {
-//			System.out.println("Rank " + nodeRank);
+//			System.out.print("Rank " + nodeRank);
 			TreeSet<String> equivalentNodes = pathEquivalentNodeSet.get(equivalanceKey);
-//			System.out.println(equivalentNodes);
+//			System.out.println(equivalentNodes + "\t" + maxPathCovered);
 			String representative = equivalentNodes.first();
 //			if (equivalentNodes.size() > 1) representative += "+";
 //			add to waist and remove from the network
@@ -155,15 +162,16 @@ public class CoreDetection {
 //			remove from waist
 			topRemovedWaistNodes.remove(representative);
 
-			if (dependencyDAG.isSynthetic || dependencyDAG.isRandomized) {
-				break;
+			if (!fullTraverse) {
+//			if (dependencyDAG.isSynthetic || dependencyDAG.isRandomized) {
+//				break;
 			}
 			
 //			break;
 		}
 	}
 	
-	public static void traverseCoreTree(DependencyDAG dependencyDAG, String filePath) {
+	public static void getCore(DependencyDAG dependencyDAG, String filePath) {
 		topRemovedWaistNodes.clear();
 		
 		minCoreSize = 10e10;
@@ -195,16 +203,21 @@ public class CoreDetection {
 		
 		double minST = Math.min(dependencyDAG.nSources, dependencyDAG.nTargets);
 //		System.out.println(minST);
+		hScoreDenominator = minST;
 		hScore = 1.0 - ((minCoreSize - 1.0) / minST);
 
 //		System.out.println(coreSet.size());
 		TreeSet<String> sampleCore = coreSet.keySet().iterator().next();
-//		System.out.println(sampleCore);
+		System.out.println(sampleCore);
 		getNodeCoverage(dependencyDAG, sampleCore);
 		coreLocationAnalysis(dependencyDAG);
 		
+		double hScore2 = 1.0 - ((minCoreSize - 1.0) / (1.0 * Math.min(coreDependentCoverage.size(), coreServerCoverage.size())));
+		hScore = hScore2;
+		hScoreDenominator = 1.0 * Math.min(coreDependentCoverage.size(), coreServerCoverage.size());
+		
 //		System.out.println("Number of coreSet: " + optimalCoreCount);
-//		System.out.println("Min core size: " + minCoreSize);
+		System.out.println("Min core size: " + minCoreSize);
 //		System.out.println("H-Score: " + hScore);
 //		System.out.println("Node Coverage: " + nodeCoverage);
 //		System.out.println("WeightedCoreLocation: " + weightedCoreLocation);
@@ -513,20 +526,41 @@ public class CoreDetection {
 	}
 
 	public static void getNodeCoverage(DependencyDAG dependencyDAG, TreeSet<String> sampleCore) {
-		HashSet<String> coreNodeCoverage = new HashSet();
+		coreNodeCoverage = new HashSet();
+		coreServerCoverage = new HashSet();
+		coreDependentCoverage = new HashSet();
 		for (String s : sampleCore) {
-//			System.out.println(s);
 			dependencyDAG.visited.clear();
-//			dependencyDAG.kounter = 0;
 			dependencyDAG.reachableUpwardsNodes(s); // how many nodes are using her
 			coreNodeCoverage.addAll(dependencyDAG.visited);
-//			System.out.println(dependencyDAG.visited);
+			coreDependentCoverage.addAll(dependencyDAG.visited);
+			
 			dependencyDAG.visited.clear();
-//			dependencyDAG.kounter = 0;
 			dependencyDAG.reachableDownwardsNodes(s); // how many nodes are using her
 			coreNodeCoverage.addAll(dependencyDAG.visited);
-//			System.out.println(dependencyDAG.visited);
+			coreServerCoverage.addAll(dependencyDAG.visited);
 		}
+		
+		/****************/
+		HashSet<String> toRemove = new HashSet();
+		for (String s: coreDependentCoverage) {
+			dependencyDAG.checkReach(s);
+			if (!dependencyDAG.canReachSource || !dependencyDAG.canReachTarget) {
+				toRemove.add(s);
+			}
+		}
+		coreDependentCoverage.removeAll(toRemove);
+		
+		toRemove.clear();
+		for (String s: coreServerCoverage) {
+			dependencyDAG.checkReach(s);
+			if (!dependencyDAG.canReachSource || !dependencyDAG.canReachTarget) {
+				toRemove.add(s);
+			}
+		}
+		coreServerCoverage.removeAll(toRemove);
+		/******************/
+		
 		nodeCoverage = coreNodeCoverage.size() * 1.0 / dependencyDAG.nodes.size();
 	}
 	
@@ -594,7 +628,12 @@ public class CoreDetection {
 		for (String s: averageCoreRank.keySet()) {
 			double loc = dependencyDAG.location.get(s);
 			double weight = averagePathCovered.get(s) / corePathContribution;
+			
 //			System.out.println(loc + "\t" + weight);
+			
+			for (double i = 0; i < weight * 100; ++i) {
+//				System.out.println(loc);
+			}
 		}
 	}
 	

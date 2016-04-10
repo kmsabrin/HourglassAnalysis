@@ -54,7 +54,7 @@ public class UpstreamRandomize {
 		dependencyDAG.isRandomized = true;
 		
 		dependencyDAG.resetAuxiliary();
-		dependencyDAG.removeIsolatedNodes();
+//		dependencyDAG.removeIsolatedNodes();
 		dependencyDAG.loadDegreeMetric();
 		dependencyDAG.loadPathStatistics();
 		dependencyDAG.loadLocationMetric();
