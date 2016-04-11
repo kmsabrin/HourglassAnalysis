@@ -332,17 +332,17 @@ public class Manager {
 //					CoreDetection.fullTraverse = true;
 					CoreDetection.getCore(dependencyDAG, networkID);
 					double realCore = CoreDetection.minCoreSize;
-
 //					CoreDetection.fullTraverse = false;
-					
-					FlattenNetwork.makeAndProcessFlat(dependencyDAG);	
-					CoreDetection.hScore = (1.0 - ((realCore - 1) / FlattenNetwork.flatNetworkCoreSize));
 					
 					coreSizes[idx] = CoreDetection.minCoreSize;
 					nodeCoverages[idx] = CoreDetection.nodeCoverage;
-					hScores[idx] = CoreDetection.hScore;
 					weightedCoreLocation[idx] = CoreDetection.weightedCoreLocation;
-					hScoreDenominaotors[idx] = CoreDetection.hScoreDenominator;
+						
+					FlattenNetwork.makeAndProcessFlat(dependencyDAG);	
+					CoreDetection.hScore = (1.0 - ((realCore - 1) / FlattenNetwork.flatNetworkCoreSize));
+					
+					hScores[idx] = CoreDetection.hScore;
+//					hScoreDenominaotors[idx] = CoreDetection.hScoreDenominator;
 					++idx;
 					
 					/*
