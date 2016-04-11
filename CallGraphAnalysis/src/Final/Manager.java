@@ -77,11 +77,11 @@ public class Manager {
 //		String netID = "rat";
 //		String netID = "monkey";
 //		
-//		String netID = "commons-math";
+		String netID = "commons-math";
 //		String netID = "openssh-39";
 //		String netID = "apache-commons-3.4";
 		
-		String netID = "court";
+//		String netID = "court";
 		
 		if (netID.equals("rat") || netID.equals("monkey")) {
 			loadLargestWCC(netID);
@@ -97,8 +97,8 @@ public class Manager {
 			DependencyDAG.isMetabolic = true;
 		}
 		else if (netID.equals("court")) {
-//			CourtCaseCornellParser.caseTopic = "abortion";
-			CourtCaseCornellParser.caseTopic = "pension";
+			CourtCaseCornellParser.caseTopic = "abortion";
+//			CourtCaseCornellParser.caseTopic = "pension";
 			CourtCaseCornellParser.loadCuratedCaseIDs();
 			netPath = "supremecourt_networks//court.txt";
 			DependencyDAG.isCourtcase = true;
@@ -137,11 +137,12 @@ public class Manager {
 //		DistributionAnalysis.printEdgeList(dependencyDAG, netID);
 //		DistributionAnalysis.printAllCentralities(dependencyDAG, netID);
 //		DistributionAnalysis.findNDirectSrcTgtBypasses(dependencyDAG, netID);
+
 		
 //		Core Detection
-		CoreDetection.pathCoverageThresholdDetection(dependencyDAG, netID);
 //		WaistDetection.randomizedWaistDetection(dependencyDAG, netID);
 //		WaistDetection.heuristicWaistDetection(dependencyDAG, netID);
+		CoreDetection.pathCoverageThresholdDetection(dependencyDAG, netID);
 		CoreDetection.getCore(dependencyDAG, netID);
 		double realCore = CoreDetection.minCoreSize;
 
@@ -152,11 +153,13 @@ public class Manager {
 //		DistributionAnalysis.printCentralityDistribution(dependencyDAG, netID);
 //		WaistDetection.randomizedWaistDetection(dependencyDAG, netID);
 //		randomHScores[index++] = WaistDetection.hourglassness;
-		
-		dependencyDAG.resetAuxiliary();
-		dependencyDAG = new DependencyDAG(netPath);
-		FlattenNetwork.makeAndProcessFlat(dependencyDAG);
-		System.out.println("H-Score: " + (1.0 - ((realCore - 1) / FlattenNetwork.flatNetworkCoreSize)));
+
+//		Flattening
+//		dependencyDAG.resetAuxiliary();
+//		printNetworkStat(dependencyDAG);
+		FlattenNetwork.makeAndProcessFlat(dependencyDAG);	
+		CoreDetection.hScore = (1.0 - ((realCore - 1) / FlattenNetwork.flatNetworkCoreSize));
+		System.out.println("H-Score: " + CoreDetection.hScore);
 	}
 	
 	/*
@@ -258,11 +261,11 @@ public class Manager {
 //		DistributionAnalysis.getCentralityCCDF(dependencyDAG, netID, 1);		
 //		DistributionAnalysis.printSourceVsTargetCompression(dependencyDAG, netID);
 
-		CoreDetection.pathCoverageThresholdDetection(toyDependencyDAG, netID);
 //		CoreDetection.randomizedWaistDetection(toyDependencyDAG, netID);
 //		WaistDetection.heuristicWaistDetection(toyDependencyDAG, netID);
 //		WaistDetection.runPCWaistDetection(dependencyDAG, netID);
 //		System.out.println("\n###\n");
+		CoreDetection.pathCoverageThresholdDetection(toyDependencyDAG, netID);
 		CoreDetection.getCore(toyDependencyDAG, netID);
 		
 //		MaxFlowReduction.reduceToMaxFlowMinCutNetwork(dependencyDAG, netID);
@@ -285,7 +288,7 @@ public class Manager {
 		DependencyDAG.isSimpleModel = true;
 		
 		String DAGType = "SimpleModelDAG";
-		PrintWriter pw = new PrintWriter(new File("analysis//hgSeparator.txt")); 
+//		PrintWriter pw = new PrintWriter(new File("analysis//hgSeparator.txt")); 
 
 		String alphas[] = { "-1", "-0.8", "-0.6", "-0.4", "-0.2", "0", "0.2", "0.4", "0.6", "0.8", "1" };
 //		String alphas[] = {"-0.9"};
@@ -302,7 +305,7 @@ public class Manager {
 				String ratio = "-1";
 				String networkID = DAGType + "r" + ratio + "a" + a + "d" + din;
 				
-				int nRun = 5;
+				int nRun = 50;
 				double coreSizes[] = new double[nRun];
 				double hScores[] = new double[nRun];
 				double nodeCoverages[] = new double[nRun];
@@ -311,7 +314,8 @@ public class Manager {
 				ArrayList<Double> coreLocations = new ArrayList();
 				
 				int idx = 0;
-				double hgPositive = 0;
+				
+//				double hgPositive = 0;
 				for (int i = 0; i < nRun; ++i) {
 					SimpleModelDAG.generateSimpleModel(Double.parseDouble(a), Integer.parseInt(din), nT, nI, nS, Double.parseDouble(ratio));
 
@@ -328,7 +332,12 @@ public class Manager {
 //					WaistDetection.randomizedWaistDetection(dependencyDAG, networkID);
 //					CoreDetection.fullTraverse = true;
 					CoreDetection.getCore(dependencyDAG, networkID);
-					CoreDetection.fullTraverse = false;
+					double realCore = CoreDetection.minCoreSize;
+
+//					CoreDetection.fullTraverse = false;
+					
+					FlattenNetwork.makeAndProcessFlat(dependencyDAG);	
+					CoreDetection.hScore = (1.0 - ((realCore - 1) / FlattenNetwork.flatNetworkCoreSize));
 					
 					coreSizes[idx] = CoreDetection.minCoreSize;
 					nodeCoverages[idx] = CoreDetection.nodeCoverage;
@@ -337,6 +346,7 @@ public class Manager {
 					hScoreDenominaotors[idx] = CoreDetection.hScoreDenominator;
 					++idx;
 					
+					/*
 					double modelHScore = CoreDetection.hScore;
 //					System.out.print(modelHScore);
 					double hgNetwork = 0;
@@ -362,10 +372,11 @@ public class Manager {
 					if ((hgNetwork / randomRun) >= 0.95) {
 						++hgPositive;
 					}
+					*/
 				}
 				
-				pw.println(hgPositive / nRun);
-				System.out.println(hgPositive / nRun);
+//				pw.println(hgPositive / nRun);
+//				System.out.println(hgPositive / nRun);	
 				
 				double mWS = StatUtils.mean(coreSizes);
 				double mNC = StatUtils.mean(nodeCoverages);
@@ -375,17 +386,16 @@ public class Manager {
 				double ciNC = ConfidenceInterval.getConfidenceInterval(nodeCoverages);
 				double ciHS = ConfidenceInterval.getConfidenceInterval(hScores);
 				double ciWCL = ConfidenceInterval.getConfidenceInterval(weightedCoreLocation);
-//				System.out.println(a + " " + din + " " + ratio + " " + mWS + " " + ciWS + " " 
-//						+ mNC + " " + ciNC + " " + mHS + " " + ciHS + " " + mWCL + " " + ciWCL);
+				System.out.println(a + " " + din + " " + ratio + " " + mWS + " " + ciWS + " " 
+						+ mNC + " " + ciNC + " " + mHS + " " + ciHS + " " + mWCL + " " + ciWCL);
 			}
-//			System.out.println();
-			pw.println();
+			System.out.println();
+//			pw.println();
 		}
 		
-		pw.close();
+//		pw.close();
 	}
 	
-
 	static double randomHScores[] = new double[100];
 	static int index = 0;
 	
@@ -427,8 +437,8 @@ public class Manager {
 	public static void main(String[] args) throws Exception {		
 //		Manager.doRealNetworkAnalysis();
 //		Manager.doSyntheticNetworkAnalysis();
-//		Manager.runSyntheticStatisticalSignificanceTests();
-		Manager.doToyNetworkAnalysis();
+		Manager.runSyntheticStatisticalSignificanceTests();
+//		Manager.doToyNetworkAnalysis();
 //		Manager.checkNewHGSampleNetworks();
 //		randomizationTests();
 		System.out.println("Done!");

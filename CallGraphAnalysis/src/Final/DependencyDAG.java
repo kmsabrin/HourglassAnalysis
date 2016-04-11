@@ -150,7 +150,7 @@ public class DependencyDAG {
 //			removeDisconnectedNodesForSyntheticNetworks();
 		}
 		
-		//removeIsolatedNodes();
+		removeIsolatedNodes();
 		
 		loadDegreeMetric();
 		
@@ -374,7 +374,7 @@ public class DependencyDAG {
 //		}
 	}
 	
-	/*
+	
 	public void removeIsolatedNodes() {
 		HashSet<String> removable = new HashSet<String>();
 		for (String s: nodes) {
@@ -384,7 +384,6 @@ public class DependencyDAG {
 		}
 		nodes.removeAll(removable);
 	}
-	 */
 	
 	private void removeCyclesTraverse(String node) {
 		if (!serves.containsKey(node) || visited.contains(node)) {
@@ -483,6 +482,7 @@ public class DependencyDAG {
 			int out = 0;
 			
 			if (isTarget(s) || isIntermediate(s)) {
+				
 				in = depends.get(s).size();
 			}
 			
@@ -728,7 +728,7 @@ public class DependencyDAG {
 				nTotalPath += nPath;
 			}
 		}
-//		System.out.println(nTotalPath);
+//		System.out.println("Total path: " + nTotalPath);
 	}
 		
 	public void loadLocationMetric() {
@@ -939,5 +939,17 @@ public class DependencyDAG {
 		CoreDetection.topRemovedWaistNodes.clear();
 		
 		edgeWeights = new HashMap();
+		
+
+//		static boolean isSynthetic = false;
+//		static boolean isCallgraph = false;
+//		static boolean isMetabolic = false;
+//		static boolean isCourtcase = false;
+//		static boolean isToy = false;
+//		static boolean isClassDependency = false;
+//		static boolean isSimpleModel = false;
+//		static boolean isComplexModel = false;
+//		static boolean isWeighted = false;	
+//		static boolean isRandomized = false;
 	}
 }

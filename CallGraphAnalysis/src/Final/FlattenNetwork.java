@@ -2,8 +2,6 @@ package Final;
 
 import java.io.File;
 import java.io.PrintWriter;
-import java.util.HashMap;
-import java.util.HashSet;
 
 public class FlattenNetwork {
 
@@ -27,10 +25,12 @@ public class FlattenNetwork {
 	}
 	
 	public static void makeAndProcessFlat(DependencyDAG dependencyDAG) throws Exception {
+//		System.out.println("Flattening");
 		writeFlatten(dependencyDAG);
+		dependencyDAG.isMetabolic = dependencyDAG.isCallgraph = dependencyDAG.isCourtcase = false;
+		dependencyDAG.isClassDependency = true;
+		
 		DependencyDAG flatDAG = new DependencyDAG("flat_networks//current_flat.txt");
-//		flatDAG.printNetworkProperties();
-		CoreDetection.pathCoverageThresholdDetection(dependencyDAG, "flatDAG");
 		CoreDetection.getCore(flatDAG, "flatDAG");
 		FlattenNetwork.flatNetworkCoreSize = CoreDetection.minCoreSize;
 	}

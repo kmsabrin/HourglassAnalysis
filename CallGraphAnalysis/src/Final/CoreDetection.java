@@ -72,6 +72,7 @@ public class CoreDetection {
 		}
 		
 		if (!(cumulativePathCovered < (totalPath * pathCoverageTau))) {
+//			System.out.println("HERE " + "\t" + cumulativePathCovered + "\t" + totalPath + "\t" + pathCoverageTau);
 //			print current core
 //			System.out.println("Core: " + topRemovedWaistNodes);
 			coreSet.put(new TreeSet(topRemovedWaistNodes), cumulativePathCovered);			
@@ -167,7 +168,7 @@ public class CoreDetection {
 //				break;
 			}
 			
-//			break;
+			break;
 		}
 	}
 	
@@ -208,7 +209,7 @@ public class CoreDetection {
 
 //		System.out.println(coreSet.size());
 		TreeSet<String> sampleCore = coreSet.keySet().iterator().next();
-		System.out.println(sampleCore);
+//		System.out.println(sampleCore);
 		getNodeCoverage(dependencyDAG, sampleCore);
 		coreLocationAnalysis(dependencyDAG);
 		
@@ -217,7 +218,7 @@ public class CoreDetection {
 		hScoreDenominator = 1.0 * Math.min(coreDependentCoverage.size(), coreServerCoverage.size());
 		
 //		System.out.println("Number of coreSet: " + optimalCoreCount);
-		System.out.println("Min core size: " + minCoreSize);
+//		System.out.println("Min core size: " + minCoreSize);
 //		System.out.println("H-Score: " + hScore);
 //		System.out.println("Node Coverage: " + nodeCoverage);
 //		System.out.println("WeightedCoreLocation: " + weightedCoreLocation);
@@ -391,11 +392,13 @@ public class CoreDetection {
 	}
 	
 	public static void pathCoverageThresholdDetection(DependencyDAG dependencyDAG, String filePath) throws Exception {
+		topRemovedWaistNodes.clear();
 		averageCoreRank = new HashMap();
 		averagePathCovered = new HashMap();
-		pathCoverageTau = 1.0;
 		ws = new ArrayList();
 		pc = new ArrayList();
+		pathCoverageTau = 1.0;
+
 		heuristicWaistDetection(dependencyDAG, filePath);
 		
 		double x1 = ws.get(0);
