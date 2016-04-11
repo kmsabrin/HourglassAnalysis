@@ -9,7 +9,6 @@ public class FlattenNetwork {
 	
 	private static void writeFlatten(DependencyDAG dependencyDAG) throws Exception {
 		PrintWriter pw = new PrintWriter(new File("flat_networks//current_flat.txt"));
-		
 		for (String s: dependencyDAG.nodes) {
 			if (dependencyDAG.isSource(s)) {
 				dependencyDAG.loadRechablity(s);
@@ -20,7 +19,6 @@ public class FlattenNetwork {
 				}
 			}
 		}
-		
 		pw.close();
 	}
 	

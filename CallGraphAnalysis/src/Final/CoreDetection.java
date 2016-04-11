@@ -187,6 +187,7 @@ public class CoreDetection {
 		averagePathCovered = new HashMap();
 		coreSet = new HashMap();
 		visitedCoreByDepth.clear();
+		
 //		System.out.println("Path Covrerge Threshold: " + pathCoverageTau);
 		traverseTreeHelper(dependencyDAG, 0, dependencyDAG.nTotalPath, 1, 1);
 		

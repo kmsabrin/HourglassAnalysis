@@ -939,17 +939,5 @@ public class DependencyDAG {
 		CoreDetection.topRemovedWaistNodes.clear();
 		
 		edgeWeights = new HashMap();
-		
-
-//		static boolean isSynthetic = false;
-//		static boolean isCallgraph = false;
-//		static boolean isMetabolic = false;
-//		static boolean isCourtcase = false;
-//		static boolean isToy = false;
-//		static boolean isClassDependency = false;
-//		static boolean isSimpleModel = false;
-//		static boolean isComplexModel = false;
-//		static boolean isWeighted = false;	
-//		static boolean isRandomized = false;
 	}
 }

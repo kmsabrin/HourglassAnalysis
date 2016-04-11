@@ -314,7 +314,6 @@ public class Manager {
 				ArrayList<Double> coreLocations = new ArrayList();
 				
 				int idx = 0;
-				
 //				double hgPositive = 0;
 				for (int i = 0; i < nRun; ++i) {
 					SimpleModelDAG.generateSimpleModel(Double.parseDouble(a), Integer.parseInt(din), nT, nI, nS, Double.parseDouble(ratio));
