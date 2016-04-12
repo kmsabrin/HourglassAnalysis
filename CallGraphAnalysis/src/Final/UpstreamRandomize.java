@@ -53,7 +53,7 @@ public class UpstreamRandomize {
 	static void regenerateDAGProperties(DependencyDAG dependencyDAG) {
 		dependencyDAG.isRandomized = true;
 		
-		dependencyDAG.resetAuxiliary();
+		dependencyDAG.init();
 //		dependencyDAG.removeIsolatedNodes();
 		dependencyDAG.loadDegreeMetric();
 		dependencyDAG.loadPathStatistics();

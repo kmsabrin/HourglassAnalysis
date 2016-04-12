@@ -10,8 +10,6 @@ import java.util.PriorityQueue;
 import java.util.Random;
 import java.util.TreeSet;
 
-import org.apache.commons.math3.stat.correlation.Covariance;
-
 public class CoreDetection {
 	static HashSet<String> topRemovedWaistNodes = new HashSet();
 	static HashMap<String, Double> averageCoreRank;
@@ -79,6 +77,9 @@ public class CoreDetection {
 //			System.out.println((++currentLeaf) + "\t" + nLeaves + "\t" + topRemovedWaistNodes.size());
 			if (topRemovedWaistNodes.size() < minCoreSize) {
 				minCoreSize = topRemovedWaistNodes.size();
+				maxCoreCoverage = cumulativePathCovered;
+			}
+			else  if (Math.abs(topRemovedWaistNodes.size() - minCoreSize) < 0.0001) {
 				if (cumulativePathCovered > maxCoreCoverage) {
 					maxCoreCoverage = cumulativePathCovered;
 				}
@@ -172,21 +173,35 @@ public class CoreDetection {
 		}
 	}
 	
-	public static void getCore(DependencyDAG dependencyDAG, String filePath) {
-		topRemovedWaistNodes.clear();
+	private static void init() {
+		topRemovedWaistNodes = new HashSet();
+		averageCoreRank = new HashMap();
+		averagePathCovered = new HashMap();
+				
+		ws = new ArrayList();
+		pc = new ArrayList();
 		
+		waistSets = new ArrayList();
+		uniqueWaistNodes = new HashSet();
+		coreSet = new HashMap();
+		
+		visitedCoreByDepth = new HashMap();
 		minCoreSize = 10e10;
 		maxCoreCoverage = -1;
+
+		coreNodeCoverage = new HashSet();
+		coreServerCoverage =  new HashSet();
+		coreDependentCoverage =  new HashSet();
+	}
+	
+	public static void getCore(DependencyDAG dependencyDAG, String filePath) {
+		init();
 		
+//		System.out.println(topRemovedWaistNodes);
 //		compute through paths for all nodes
 		dependencyDAG.numOfTargetPath.clear();
 		dependencyDAG.numOfSourcePath.clear();
 		dependencyDAG.loadPathStatistics();
-		
-		averageCoreRank = new HashMap();
-		averagePathCovered = new HashMap();
-		coreSet = new HashMap();
-		visitedCoreByDepth.clear();
 		
 //		System.out.println("Path Covrerge Threshold: " + pathCoverageTau);
 		traverseTreeHelper(dependencyDAG, 0, dependencyDAG.nTotalPath, 1, 1);
@@ -194,6 +209,7 @@ public class CoreDetection {
 //		double kount = 1;
 		currentLeaf = 0;
 		int optimalCoreCount = 0;
+//		System.out.println(minCoreSize + " --- " + maxCoreCoverage);
 		for (TreeSet<String> hsS: coreSet.keySet()) {
 //			System.out.println(hsS.size() + "\t" + coreSet.get(hsS));
 			if (Math.abs(hsS.size() - minCoreSize) < 0.0001 && Math.abs(coreSet.get(hsS) - maxCoreCoverage) < 0.0001) { 

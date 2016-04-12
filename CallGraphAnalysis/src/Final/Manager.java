@@ -76,12 +76,14 @@ public class Manager {
 		
 //		String netID = "rat";
 //		String netID = "monkey";
-//		
-		String netID = "commons-math";
+		
+//		String netID = "commons-math";
 //		String netID = "openssh-39";
 //		String netID = "apache-commons-3.4";
 		
-//		String netID = "court";
+		String netID = "court";
+		
+		DependencyDAG.resetFlags();
 		
 		if (netID.equals("rat") || netID.equals("monkey")) {
 			loadLargestWCC(netID);
@@ -97,8 +99,8 @@ public class Manager {
 			DependencyDAG.isMetabolic = true;
 		}
 		else if (netID.equals("court")) {
-			CourtCaseCornellParser.caseTopic = "abortion";
-//			CourtCaseCornellParser.caseTopic = "pension";
+//			CourtCaseCornellParser.caseTopic = "abortion";
+			CourtCaseCornellParser.caseTopic = "pension";
 			CourtCaseCornellParser.loadCuratedCaseIDs();
 			netPath = "supremecourt_networks//court.txt";
 			DependencyDAG.isCourtcase = true;
@@ -142,7 +144,7 @@ public class Manager {
 //		Core Detection
 //		WaistDetection.randomizedWaistDetection(dependencyDAG, netID);
 //		WaistDetection.heuristicWaistDetection(dependencyDAG, netID);
-		CoreDetection.pathCoverageThresholdDetection(dependencyDAG, netID);
+//		CoreDetection.pathCoverageThresholdDetection(dependencyDAG, netID);
 		CoreDetection.getCore(dependencyDAG, netID);
 		double realCore = CoreDetection.minCoreSize;
 
@@ -158,8 +160,8 @@ public class Manager {
 //		dependencyDAG.resetAuxiliary();
 //		printNetworkStat(dependencyDAG);
 		FlattenNetwork.makeAndProcessFlat(dependencyDAG);	
-		CoreDetection.hScore = (1.0 - ((realCore - 1) / FlattenNetwork.flatNetworkCoreSize));
-		System.out.println("H-Score: " + CoreDetection.hScore);
+		CoreDetection.hScore = (1.0 - (realCore / FlattenNetwork.flatNetworkCoreSize));
+//		System.out.println("H-Score: " + CoreDetection.hScore);
 	}
 	
 	/*
@@ -290,22 +292,22 @@ public class Manager {
 		String DAGType = "SimpleModelDAG";
 //		PrintWriter pw = new PrintWriter(new File("analysis//hgSeparator.txt")); 
 
-		String alphas[] = { "-1", "-0.8", "-0.6", "-0.4", "-0.2", "0", "0.2", "0.4", "0.6", "0.8", "1" };
-//		String alphas[] = {"-0.9"};
+//		String alphas[] = { "-1", "-0.8", "-0.6", "-0.4", "-0.2", "0", "0.2", "0.4", "0.6", "0.8", "1" };
+		String alphas[] = {"-1"};
 
-		String dins[] = { "2", "3" };
-//		String dins[] = {"2"};
+//		String dins[] = { "2", "3" };
+		String dins[] = {"2"};
 
 		for (String din : dins) {
 			for (String a : alphas) {
-				System.out.println(a);
-				int nT = 70;
-				int nI = 160;
-				int nS = 70;
+				System.out.println("alpha=" + a + "\t" + "din=" + din );
+				int nT = 23;
+				int nI = 54;
+				int nS = 23;
 				String ratio = "-1";
 				String networkID = DAGType + "r" + ratio + "a" + a + "d" + din;
 				
-				int nRun = 50;
+				int nRun = 1;
 				double coreSizes[] = new double[nRun];
 				double hScores[] = new double[nRun];
 				double nodeCoverages[] = new double[nRun];
@@ -316,11 +318,12 @@ public class Manager {
 				int idx = 0;
 //				double hgPositive = 0;
 				for (int i = 0; i < nRun; ++i) {
-					SimpleModelDAG.generateSimpleModel(Double.parseDouble(a), Integer.parseInt(din), nT, nI, nS, Double.parseDouble(ratio));
-
+//					SimpleModelDAG.generateSimpleModel(Double.parseDouble(a), Integer.parseInt(din), nT, nI, nS, Double.parseDouble(ratio));
+					SimpleModelDAG.initNodeIdentifiers(nT, nI, nS);
+					
 					DependencyDAG dependencyDAG = new DependencyDAG("synthetic_callgraphs//" + networkID + ".txt");
-					// printNetworkStat(dependencyDAG);
-//					 dependencyDAG.printNetworkProperties();
+//					printNetworkStat(dependencyDAG);
+//					dependencyDAG.printNetworkProperties();
 
 //					System.out.println("Model Generated");
 					// DistributionAnalysis.getCentralityCCDF(dependencyDAG, networkID, 1);
@@ -340,6 +343,7 @@ public class Manager {
 						
 					FlattenNetwork.makeAndProcessFlat(dependencyDAG);	
 					CoreDetection.hScore = (1.0 - ((realCore - 1) / FlattenNetwork.flatNetworkCoreSize));
+					System.out.println("[h-Score] " + CoreDetection.hScore);
 					
 					hScores[idx] = CoreDetection.hScore;
 //					hScoreDenominaotors[idx] = CoreDetection.hScoreDenominator;
@@ -385,10 +389,10 @@ public class Manager {
 				double ciNC = ConfidenceInterval.getConfidenceInterval(nodeCoverages);
 				double ciHS = ConfidenceInterval.getConfidenceInterval(hScores);
 				double ciWCL = ConfidenceInterval.getConfidenceInterval(weightedCoreLocation);
-				System.out.println(a + " " + din + " " + ratio + " " + mWS + " " + ciWS + " " 
-						+ mNC + " " + ciNC + " " + mHS + " " + ciHS + " " + mWCL + " " + ciWCL);
+//				System.out.println(a + " " + din + " " + ratio + " " + mWS + " " + ciWS + " " 
+//						+ mNC + " " + ciNC + " " + mHS + " " + ciHS + " " + mWCL + " " + ciWCL);
 			}
-			System.out.println();
+//			System.out.println();
 //			pw.println();
 		}
 		
@@ -418,6 +422,20 @@ public class Manager {
 		System.out.println(TestUtils.tTest(0.8544, randomHScores)/2);
 	}
 	
+	private static void measureTauEffect() throws Exception {
+//		String data[] = {"openssh-39", "commons-math", "rat", "monkey", "court-abortion", "court-pension"};
+//		PrintWriter pw = new PrintWriter(new File("analysis//hscore-vs-tau-" + data[5] + ".txt"));
+		for (int i = 40; i <= 98; i += 2) {
+			CoreDetection.pathCoverageTau = (double)i / 100.0;
+			DependencyDAG.resetFlags();
+			doRealNetworkAnalysis();
+			System.out.println(CoreDetection.hScore);
+//			System.out.println(CoreDetection.pathCoverageTau + "\t" + CoreDetection.hScore);
+//			pw.println(CoreDetection.pathCoverageTau + "\t" + CoreDetection.hScore);
+		}
+//		pw.close();
+	}
+	
 	private static void randomizationTestsBinned() throws Exception {
 		String data[] = {"openssh-39", "commons-math", "rat", "monkey", "court-abortion", "court-pension"};
 		
@@ -435,9 +453,11 @@ public class Manager {
 	
 	public static void main(String[] args) throws Exception {		
 //		Manager.doRealNetworkAnalysis();
-//		Manager.doSyntheticNetworkAnalysis();
-		Manager.runSyntheticStatisticalSignificanceTests();
+//		Manager.runSyntheticStatisticalSignificanceTests();
 //		Manager.doToyNetworkAnalysis();
+		Manager.measureTauEffect();
+		
+//		Manager.doSyntheticNetworkAnalysis();
 //		Manager.checkNewHGSampleNetworks();
 //		randomizationTests();
 		System.out.println("Done!");

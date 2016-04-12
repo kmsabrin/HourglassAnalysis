@@ -284,16 +284,20 @@ public class SimpleModelDAG {
 		pw.close();
 	}
 	
-	public static void generateSimpleModel(double alpha, int din, int nT, int nI, int nS, double ratio) throws Exception {
-		SimpleModelDAG.alpha = alpha;
-		SimpleModelDAG.din = din;
+	public static void initNodeIdentifiers(int nT, int nI, int nS) {
 		SimpleModelDAG.nT = nT;
 		SimpleModelDAG.nI = nI;
 		SimpleModelDAG.nS = nS;
 		SimpleModelDAG.sT = 0; // start of Target
 		SimpleModelDAG.sI = nT; // start of Intermediate
 		SimpleModelDAG.sS = nT + nI; // start of Source
+	}
+	
+	public static void generateSimpleModel(double alpha, int din, int nT, int nI, int nS, double ratio) throws Exception {
+		SimpleModelDAG.alpha = alpha;
+		SimpleModelDAG.din = din;
 		SimpleModelDAG.ratio = ratio;
+		initNodeIdentifiers(nT, nI, nS);
 		
 		poissonDistribution = new PoissonDistribution(din);
 		

@@ -404,10 +404,10 @@ public class DependencyDAG {
 						detectedCycles.add(new ArrayList(cycleList.subList(i, cycleList.size())));
 						
 						for (String r: detectedCycles.get(detectedCycles.size() - 1)) {
-							System.out.print(r + " ");
+//							System.out.print(r + " ");
 						}
-						System.out.println();
-						System.out.println(detectedCycles.get(detectedCycles.size() - 1).size());
+//						System.out.println();
+//						System.out.println(detectedCycles.get(detectedCycles.size() - 1).size());
 						break;
 					}
 				}
@@ -456,7 +456,7 @@ public class DependencyDAG {
 					--nEdges;
 					++nCycles;
 //					loop = true;
-					System.out.println("cycle found");
+//					System.out.println("cycle found");
 				}
 			}
 		}
@@ -482,7 +482,6 @@ public class DependencyDAG {
 			int out = 0;
 			
 			if (isTarget(s) || isIntermediate(s)) {
-				
 				in = depends.get(s).size();
 			}
 			
@@ -896,7 +895,21 @@ public class DependencyDAG {
 		}
 	}
 	
-	public void resetAuxiliary() {
+	public static void resetFlags() {
+		isSynthetic = false;
+		isCallgraph = false;
+		isMetabolic = false;
+		isCourtcase = false;
+		isToy = false;
+		isClassDependency = false;
+		isSimpleModel = false;
+		isComplexModel = false;
+		isWeighted = false;	
+		isRandomized = false;
+		nDirectSourceTargetEdges = 0;
+	}
+	
+	public void init() {
 		nTotalPath = 0;
 		nDirectSourceTargetEdges = 0;
 
