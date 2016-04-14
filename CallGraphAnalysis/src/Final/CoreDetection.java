@@ -210,6 +210,7 @@ public class CoreDetection {
 		currentLeaf = 0;
 		int optimalCoreCount = 0;
 //		System.out.println(minCoreSize + " --- " + maxCoreCoverage);
+		TreeSet<TreeSet<String>> suboptimalCores = new TreeSet();
 		for (TreeSet<String> hsS: coreSet.keySet()) {
 //			System.out.println(hsS.size() + "\t" + coreSet.get(hsS));
 			if (Math.abs(hsS.size() - minCoreSize) < 0.0001 && Math.abs(coreSet.get(hsS) - maxCoreCoverage) < 0.0001) { 
@@ -217,7 +218,12 @@ public class CoreDetection {
 //				System.out.println(hsS);
 				++optimalCoreCount;
 			}
+			else {
+//				remove??
+				suboptimalCores.add(hsS);
+			}
 		}
+		coreSet.remove(suboptimalCores);
 		
 		double minST = Math.min(dependencyDAG.nSources, dependencyDAG.nTargets);
 //		System.out.println(minST);
@@ -230,9 +236,9 @@ public class CoreDetection {
 		getNodeCoverage(dependencyDAG, sampleCore);
 		coreLocationAnalysis(dependencyDAG);
 		
-		double hScore2 = 1.0 - ((minCoreSize - 1.0) / (1.0 * Math.min(coreDependentCoverage.size(), coreServerCoverage.size())));
-		hScore = hScore2;
-		hScoreDenominator = 1.0 * Math.min(coreDependentCoverage.size(), coreServerCoverage.size());
+//		double hScore2 = 1.0 - ((minCoreSize - 1.0) / (1.0 * Math.min(coreDependentCoverage.size(), coreServerCoverage.size())));
+//		hScore = hScore2;
+//		hScoreDenominator = 1.0 * Math.min(coreDependentCoverage.size(), coreServerCoverage.size());
 		
 //		System.out.println("Number of coreSet: " + optimalCoreCount);
 //		System.out.println("Min core size: " + minCoreSize);
@@ -655,6 +661,26 @@ public class CoreDetection {
 //				System.out.println(loc);
 			}
 		}
+	}
+	
+	public static boolean verifyCore(DependencyDAG dependencyDAG, TreeSet<String> testCore) {
+		double requiredPathCover = dependencyDAG.nTotalPath * CoreDetection.pathCoverageTau;
+		double cumulativePathCover = 0;
+		init();
+		for (String s: testCore) {
+//			recompute through paths for all nodes
+			dependencyDAG.numOfTargetPath.clear();
+			dependencyDAG.numOfSourcePath.clear();
+			dependencyDAG.loadPathStatistics();
+			
+			double numPathCovered = dependencyDAG.numOfSourcePath.get(s) * dependencyDAG.numOfTargetPath.get(s);
+			cumulativePathCover += numPathCovered;
+			topRemovedWaistNodes.add(s);
+		}
+		
+		System.out.println(requiredPathCover + "\t" + cumulativePathCover);
+	
+		return !(requiredPathCover > cumulativePathCover);
 	}
 	
 }

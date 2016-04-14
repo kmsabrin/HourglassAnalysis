@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Random;
 import java.util.Scanner;
+import java.util.TreeSet;
 
 import org.apache.commons.math3.stat.StatUtils;
 import org.apache.commons.math3.stat.inference.TestUtils;
@@ -344,27 +345,24 @@ public class Manager {
 		DependencyDAG.isSynthetic = true;
 		DependencyDAG.isWeighted = false;
 		DependencyDAG.isSimpleModel = true;
-		
 		String DAGType = "SimpleModelDAG";
-//		PrintWriter pw = new PrintWriter(new File("analysis//hgSeparator.txt")); 
 
 //		String alphas[] = { "-1", "-0.8", "-0.6", "-0.4", "-0.2", "0", "0.2", "0.4", "0.6", "0.8", "1" };
-		String alphas[] = { "-1", "-0.5", "0", "0.5", "1" };
-//		String alphas[] = {"-1"};
+		String alphas[] = {"-1", "-0.8"};
 
-//		String dins[] = { "2", "3" };
-		String dins[] = {"2"};
+		String dins[] = { "2", "3" };
+//		String dins[] = {"2"};
 			
 		for (String din : dins) {
 			for (String a : alphas) {
 				System.out.println("alpha=" + a + "\t" + "din=" + din );
-				int nT = 100;
-				int nI = 300;
-				int nS = 100;
+				int nT = 75;
+				int nI = 150;
+				int nS = 75;
 				String ratio = "-1";
 				String networkID = DAGType + "r" + ratio + "a" + a + "d" + din;
 				
-				int nRun = 1;
+				int nRun = 20;
 				double coreSizes[] = new double[nRun];
 				double hScores[] = new double[nRun];
 				double nodeCoverages[] = new double[nRun];
@@ -373,33 +371,19 @@ public class Manager {
 				ArrayList<Double> coreLocations = new ArrayList();
 				
 				int idx = 0;
-//				double hgPositive = 0;
 				for (int i = 0; i < nRun; ++i) {
 					SimpleModelDAG.generateSimpleModel(Double.parseDouble(a), Integer.parseInt(din), nT, nI, nS, Double.parseDouble(ratio));
 					SimpleModelDAG.initNodeIdentifiers(nT, nI, nS);
-					
-					for (int j = 50; j <= 98; j += 2) {
-						CoreDetection.pathCoverageTau = (double)j / 100.0;
-//						DependencyDAG.resetFlags();
-
-					
+//					System.out.println("Model Generated");
 					
 //					DependencyDAG.resetFlags();
 					DependencyDAG dependencyDAG = new DependencyDAG("synthetic_callgraphs//" + networkID + ".txt");
 //					printNetworkStat(dependencyDAG);
 //					dependencyDAG.printNetworkProperties();
 
-//					System.out.println("Model Generated");
-					// DistributionAnalysis.getCentralityCCDF(dependencyDAG, networkID, 1);
-					// double medianPathLength = DistributionAnalysis.getPathLength(dependencyDAG);
-					// DistributionAnalysis.findWeaklyConnectedComponents(dependencyDAG, networkID);
-
 //					WaistDetection.pathCoverageThresholdDetection(dependencyDAG, networkID);
-//					WaistDetection.randomizedWaistDetection(dependencyDAG, networkID);
-//					CoreDetection.fullTraverse = true;
 					CoreDetection.getCore(dependencyDAG, networkID);
 					double realCore = CoreDetection.minCoreSize;
-//					CoreDetection.fullTraverse = false;
 					
 					coreSizes[idx] = CoreDetection.minCoreSize;
 					nodeCoverages[idx] = CoreDetection.nodeCoverage;
@@ -407,53 +391,20 @@ public class Manager {
 						
 					FlattenNetwork.makeAndProcessFlat(dependencyDAG);	
 					CoreDetection.hScore = (1.0 - ((realCore - 1) / FlattenNetwork.flatNetworkCoreSize));
-//					System.out.println("[h-Score] " + CoreDetection.hScore);
-					
+//					System.out.println("[h-Score] " + CoreDetection.hScore);					
 					hScores[idx] = CoreDetection.hScore;
-//					hScoreDenominaotors[idx] = CoreDetection.hScoreDenominator;
-//					++idx;
 					
-					/*
-					double modelHScore = CoreDetection.hScore;
-//					System.out.print(modelHScore);
-					double hgNetwork = 0;
-					int randomRun = 10;
-					for (int j = 0; j < randomRun; ++j) {
-						DependencyDAG.isRandomized = false;
-						dependencyDAG = new DependencyDAG("synthetic_callgraphs//" + networkID + ".txt");
-						UpstreamRandomize.randomizeDAG(dependencyDAG);
-//						System.out.println("Randomized!");
-						CoreDetection.getCore(dependencyDAG, networkID);
-						double randomizedHScore = CoreDetection.hScore;
-						System.out.print(modelHScore + "\t" + coreSizes[idx - 1] + "\t" + hScoreDenominaotors[idx - 1]);
-						System.out.println("\t" + randomizedHScore + "\t" + CoreDetection.minCoreSize + "\t" + CoreDetection.hScoreDenominator);
-						if (modelHScore > randomizedHScore) {
-							++hgNetwork;
-//							System.out.println(modelHScore + "\t" + randomizedHScore);
-						}
-						else {
-//							System.out.println(modelHScore + "\t" + randomizedHScore);
-						}
-					}
-//					System.out.println("Random H-Test: " + (hgNetwork / randomRun));
-					if ((hgNetwork / randomRun) >= 0.95) {
-						++hgPositive;
-					}
-					*/
+					++idx;
 					
-//					if (CoreDetection.hScore < 0) {
+					if (CoreDetection.hScore < 0) {
 //						System.out.println("Found");
-//						break;
-//					}
-//					System.out.println(idx);
-					
-					System.out.println(/*CoreDetection.pathCoverageTau + "\t" + */CoreDetection.hScore);					
+						dependencyDAG = new DependencyDAG("synthetic_callgraphs//" + networkID + ".txt");
+						TreeSet<String> sampleFlatCore = new TreeSet(CoreDetection.coreSet.keySet().iterator().next());
+						System.out.println(CoreDetection.verifyCore(dependencyDAG, sampleFlatCore));
+						CoreDetection.hScore = 0;
 					}
-
+//					System.out.println(idx);
 				}
-				
-//				pw.println(hgPositive / nRun);
-//				System.out.println(hgPositive / nRun);	
 				
 				double mWS = StatUtils.mean(coreSizes);
 				double mNC = StatUtils.mean(nodeCoverages);
@@ -467,10 +418,7 @@ public class Manager {
 //						+ mNC + " " + ciNC + " " + mHS + " " + ciHS + " " + mWCL + " " + ciWCL);
 			}
 //			System.out.println();
-//			pw.println();
 		}
-		
-//		pw.close();
 	}
 	
 	static double randomHScores[] = new double[100];
@@ -527,10 +475,10 @@ public class Manager {
 	
 	public static void main(String[] args) throws Exception {		
 //		Manager.doRealNetworkAnalysis();
-//		Manager.runSyntheticStatisticalSignificanceTests();
+		Manager.runSyntheticStatisticalSignificanceTests();
 //		Manager.doToyNetworkAnalysis();
 //		Manager.measureTauEffect();
-		Manager.runSyntheticStatisticalSignificanceTestsForTau();
+//		Manager.runSyntheticStatisticalSignificanceTestsForTau();
 		
 //		Manager.doSyntheticNetworkAnalysis();
 //		Manager.checkNewHGSampleNetworks();
