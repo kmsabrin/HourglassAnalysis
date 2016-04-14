@@ -273,14 +273,12 @@ public class DependencyDAG {
 					continue;
 				}
 			}
-
-			if (isClassDependency) {
+			else if (isClassDependency) {
 				// for metabolic and synthetic networks
 				server = tokens[0];
 				dependent = tokens[1];
 			}
-			
-			if (isSynthetic || isToy) {
+			else if (isSynthetic || isToy) {
 				if (isWeighted) {
 					server = tokens[0];
 					dependent = tokens[1];
@@ -294,8 +292,7 @@ public class DependencyDAG {
 					dependent = tokens[1];
 				}
 			}
-			
-			if (isMetabolic) {
+			else if (isMetabolic) {
 				// for metabolic and synthetic networks
 				server = tokens[0];
 				dependent = tokens[1];
@@ -303,8 +300,7 @@ public class DependencyDAG {
 					continue;
 				}
 			}
-
-			if (isCourtcase) {
+			else if (isCourtcase) {
 				server = tokens[1];
 				dependent = tokens[0]; // for space separated DAG: a b or a,b
 				

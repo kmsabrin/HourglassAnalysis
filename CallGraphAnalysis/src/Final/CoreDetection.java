@@ -164,10 +164,10 @@ public class CoreDetection {
 //			remove from waist
 			topRemovedWaistNodes.remove(representative);
 
-			if (!fullTraverse) {
+//			if (!fullTraverse) {
 //			if (dependencyDAG.isSynthetic || dependencyDAG.isRandomized) {
 //				break;
-			}
+//			}
 			
 			break;
 		}
