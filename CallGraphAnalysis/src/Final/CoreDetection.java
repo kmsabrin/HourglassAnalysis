@@ -203,14 +203,14 @@ public class CoreDetection {
 		dependencyDAG.numOfSourcePath.clear();
 		dependencyDAG.loadPathStatistics();
 		
-//		System.out.println("Path Covrerge Threshold: " + pathCoverageTau);
+//		System.out.println("Path Covrerage Threshold: " + pathCoverageTau);
 		traverseTreeHelper(dependencyDAG, 0, dependencyDAG.nTotalPath, 1, 1);
 		
 //		double kount = 1;
 		currentLeaf = 0;
 		int optimalCoreCount = 0;
 //		System.out.println(minCoreSize + " --- " + maxCoreCoverage);
-		TreeSet<TreeSet<String>> suboptimalCores = new TreeSet();
+		HashSet<TreeSet<String>> suboptimalCores = new HashSet();
 		for (TreeSet<String> hsS: coreSet.keySet()) {
 //			System.out.println(hsS.size() + "\t" + coreSet.get(hsS));
 			if (Math.abs(hsS.size() - minCoreSize) < 0.0001 && Math.abs(coreSet.get(hsS) - maxCoreCoverage) < 0.0001) { 
