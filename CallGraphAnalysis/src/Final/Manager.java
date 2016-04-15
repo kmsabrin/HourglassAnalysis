@@ -78,11 +78,11 @@ public class Manager {
 //		String netID = "rat";
 //		String netID = "monkey";
 		
-		String netID = "commons-math";
+//		String netID = "commons-math";
 //		String netID = "openssh-39";
 //		String netID = "apache-commons-3.4";
 		
-//		String netID = "court";
+		String netID = "court";
 		
 		DependencyDAG.resetFlags();
 		
@@ -146,6 +146,7 @@ public class Manager {
 //		WaistDetection.randomizedWaistDetection(dependencyDAG, netID);
 //		WaistDetection.heuristicWaistDetection(dependencyDAG, netID);
 //		CoreDetection.pathCoverageThresholdDetection(dependencyDAG, netID);
+		CoreDetection.fullTraverse = true;
 		CoreDetection.getCore(dependencyDAG, netID);
 		double realCore = CoreDetection.minCoreSize;
 
@@ -160,7 +161,7 @@ public class Manager {
 //		Flattening
 //		dependencyDAG.resetAuxiliary();
 //		printNetworkStat(dependencyDAG);
-		FlattenNetwork.makeAndProcessFlat(dependencyDAG);	
+//		FlattenNetwork.makeAndProcessFlat(dependencyDAG);	
 		CoreDetection.hScore = (1.0 - (realCore / FlattenNetwork.flatNetworkCoreSize));
 //		System.out.println("H-Score: " + CoreDetection.hScore);
 	}
@@ -464,9 +465,9 @@ public class Manager {
 	}
 	
 	public static void main(String[] args) throws Exception {		
-//		Manager.doRealNetworkAnalysis();
+		Manager.doRealNetworkAnalysis();
 //		Manager.doToyNetworkAnalysis();
-		Manager.measureTauEffectOnRealNetwork();
+//		Manager.measureTauEffectOnRealNetwork();
 //		Manager.runSyntheticStatisticalSignificanceTests();
 //		Manager.runSyntheticStatisticalSignificanceTestsForTau();
 		

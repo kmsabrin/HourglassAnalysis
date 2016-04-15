@@ -50,6 +50,8 @@ public class CoreDetection {
 	
 	static double hScoreDenominator = 1;
 	
+	static TreeSet<String> sampleCore;
+	
 	public static void traverseTreeHelper(DependencyDAG dependencyDAG, double cumulativePathCovered, double totalPath, int nodeRank, double nLeaves) {
 //		check/mark visited state
 		if (nodeRank > 0) {
@@ -134,7 +136,7 @@ public class CoreDetection {
 //			TreeSet<String> equivalentNodes = pathEquivalentNodeSet.get(equivalanceKey);
 //			System.out.println(equivalentNodes);
 //		}
-		
+//		
 //		if (pathEquivalentNodeSet.size() > 1) {
 //			System.out.println("Node rank: " + nodeRank + " branching for " + pathEquivalentNodeSet.size());
 //		}
@@ -164,12 +166,11 @@ public class CoreDetection {
 //			remove from waist
 			topRemovedWaistNodes.remove(representative);
 
-//			if (!fullTraverse) {
-//			if (dependencyDAG.isSynthetic || dependencyDAG.isRandomized) {
-//				break;
-//			}
+			if (fullTraverse == false || dependencyDAG.isSynthetic == true) {
+				break;
+			}
 			
-			break;
+//			break;
 		}
 	}
 	
@@ -231,7 +232,7 @@ public class CoreDetection {
 		hScore = 1.0 - ((minCoreSize - 1.0) / minST);
 
 //		System.out.println(coreSet.size());
-		TreeSet<String> sampleCore = coreSet.keySet().iterator().next();
+		sampleCore = coreSet.keySet().iterator().next();
 //		System.out.println(sampleCore);
 		getNodeCoverage(dependencyDAG, sampleCore);
 		coreLocationAnalysis(dependencyDAG);
@@ -242,7 +243,6 @@ public class CoreDetection {
 		
 //		System.out.println("Number of coreSet: " + optimalCoreCount);
 //		System.out.println("Min core size: " + minCoreSize);
-//		System.out.println("H-Score: " + hScore);
 //		System.out.println("Node Coverage: " + nodeCoverage);
 //		System.out.println("WeightedCoreLocation: " + weightedCoreLocation);
 	}
@@ -628,37 +628,23 @@ public class CoreDetection {
 	}
 	
 	public static void coreLocationAnalysis(DependencyDAG dependencyDAG) {
-//		double coreLocations[] = new double[averageWaistRank.size()];	
-//		int index = 0;
-//		int histogramBins[] = new int[11];
 		weightedCoreLocation = 0;
 		double corePathContribution = 0;
 		for (String s: averageCoreRank.keySet()) {
-//			double loc = dependencyDAG.location.get(s);
-//			coreLocations[index++] = loc;
-//			int binIndex = (int)(loc * 10);
-//			histogramBins[binIndex]++;
-//			System.out.println(averageWaistRank.get(s) + "\t" + loc);
-			
 			weightedCoreLocation += dependencyDAG.location.get(s) * averagePathCovered.get(s);
 			corePathContribution += averagePathCovered.get(s);
 		}
 		
 		weightedCoreLocation /= corePathContribution;
 		
-//		for (int i = 0; i < 11; ++i) {
-//			System.out.println("Bin-" + i + " Frequency " + histogramBins[i]);
-//		}
-//		System.out.println(StatUtils.percentile(coreLocations, 10) + "\t" + StatUtils.percentile(coreLocations, 50) + "\t" + StatUtils.percentile(coreLocations, 90));
-		
-		for (String s: averageCoreRank.keySet()) {
+		for (String s: sampleCore) {
 			double loc = dependencyDAG.location.get(s);
 			double weight = averagePathCovered.get(s) / corePathContribution;
 			
 //			System.out.println(loc + "\t" + weight);
 			
 			for (double i = 0; i < weight * 100; ++i) {
-//				System.out.println(loc);
+				System.out.println(loc);
 			}
 		}
 	}
