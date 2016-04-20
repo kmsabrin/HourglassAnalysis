@@ -247,7 +247,7 @@ public class CoreDetection {
 //		System.out.println("WeightedCoreLocation: " + weightedCoreLocation);
 	}
 	
-	public static void heuristicWaistDetection(DependencyDAG dependencyDAG, String filePath) throws Exception {
+/*	public static void heuristicWaistDetection(DependencyDAG dependencyDAG, String filePath) throws Exception {
 //		PrintWriter pw0 = new PrintWriter(new File("analysis//path-cover-2-" + filePath + ".txt"));
 		PrintWriter pw1 = new PrintWriter(new File("analysis//coverage-threshold-" + filePath + ".txt"));
 
@@ -269,12 +269,12 @@ public class CoreDetection {
 			PriorityQueue<String> pq = new PriorityQueue(randomPerturbation, dependencyDAG.new PathCentralityComparator());
 			
 			for (String s : dependencyDAG.nodes) {
-				/*
+				
 				skip if source or target
 				if (dependencyDAG.isSource(s) || dependencyDAG.isTarget(s)) {
 					continue;
 				}
-				*/
+				
 
 				pq.add(s);
 				
@@ -295,7 +295,7 @@ public class CoreDetection {
 				}
 			}
 			
-			/** Detect exact path equivalent nodes **/
+//			 Detect exact path equivalent nodes
 			if (printInfo) {
 				System.out.print("Tied nodes: ");
 				for (String s : tiedMaxPathCentralityNodes) {
@@ -314,7 +314,6 @@ public class CoreDetection {
 					}
 				}
 			}
-			/** --- --- --- **/
 			
 //			not required anymore after considering source/targets for core
 			if (DependencyDAG.isSynthetic == true) {
@@ -338,11 +337,11 @@ public class CoreDetection {
 				//tiedNodeSet.addAll(tempTiedNodeSet);
 			}
 	
-//			/*****random top-k *****/
-			/*
+//			random top-k
+			
 			maxPathNode = (String)pq.toArray()[new Random(System.nanoTime()).nextInt(randomPerturbation)];
 			maxPathThrough = dependencyDAG.numOfSourcePath.get(maxPathNode) * dependencyDAG.numOfTargetPath.get(maxPathNode);
-			*/
+			
 			
 //			record the largest through path node
 			cumulativePathsCovered += maxPathCovered;			
@@ -413,8 +412,9 @@ public class CoreDetection {
 		
 		pw1.close();
 	}
-	
-	public static void pathCoverageThresholdDetection(DependencyDAG dependencyDAG, String filePath) throws Exception {
+*/	
+
+/*	public static void pathCoverageThresholdDetection(DependencyDAG dependencyDAG, String filePath) throws Exception {
 		topRemovedWaistNodes.clear();
 		averageCoreRank = new HashMap();
 		averagePathCovered = new HashMap();
@@ -459,8 +459,9 @@ public class CoreDetection {
 //		System.out.println("Core-size: " + minWS);
 		System.out.println("Path-coverage-threshold: " + tau);
 	}
-	
-	public static void randomizedWaistDetection(DependencyDAG dependencyDAG, String filePath) throws Exception {
+*/	
+
+/*	public static void randomizedWaistDetection(DependencyDAG dependencyDAG, String filePath) throws Exception {
 		HashMap<String, Integer> nodeFrequencyInWaist = new HashMap();
 		HashMap<Integer, Integer> waistSizeFrequencey = new HashMap();
 		averageCoreRank = new HashMap();
@@ -539,7 +540,7 @@ public class CoreDetection {
 		dependencyDAG.numOfSourcePath.clear();
 		dependencyDAG.loadPathStatistics();
 		for (String n: nodeFrequencyInWaist.keySet()) {
-			System.out.println(n + "\t" + (nodeFrequencyInWaist.get(n) * 1.0 / nRuns) + "\t" + averageCoreRank.get(n) /*+ "\t" + dependencyDAG.normalizedPathCentrality.get(n)*/);
+			System.out.println(n + "\t" + (nodeFrequencyInWaist.get(n) * 1.0 / nRuns) + "\t" + averageCoreRank.get(n) + "\t" + dependencyDAG.normalizedPathCentrality.get(n));
 		}
 		
 //		System.out.println("Waist Size: " + waistSize);
@@ -550,7 +551,8 @@ public class CoreDetection {
 		
 		coreLocationAnalysis(dependencyDAG);
 	}
-
+*/
+	
 	public static void getNodeCoverage(DependencyDAG dependencyDAG, TreeSet<String> sampleCore) {
 		coreNodeCoverage = new HashSet();
 		coreServerCoverage = new HashSet();
@@ -590,8 +592,8 @@ public class CoreDetection {
 		nodeCoverage = coreNodeCoverage.size() * 1.0 / dependencyDAG.nodes.size();
 	}
 	
-	public static void nodeCentralityWRTWaist(DependencyDAG dependencyDAG) {
-		/*
+/*	public static void nodeCentralityWRTWaist(DependencyDAG dependencyDAG) {
+		
 		double uSet = dependencyDAG.nTargets; 
 		double dSet = dependencyDAG.nSources;
 		
@@ -624,8 +626,9 @@ public class CoreDetection {
 		}
 		
 		System.out.println("Symmetry: " + ((uSet - dSet) / (uSet + dSet)));
-		*/
+		
 	}
+*/	
 	
 	public static void coreLocationAnalysis(DependencyDAG dependencyDAG) {
 		weightedCoreLocation = 0;
@@ -640,11 +643,10 @@ public class CoreDetection {
 		for (String s: sampleCore) {
 			double loc = dependencyDAG.location.get(s);
 			double weight = averagePathCovered.get(s) / corePathContribution;
-			
 //			System.out.println(loc + "\t" + weight);
 			
 			for (double i = 0; i < weight * 100; ++i) {
-				System.out.println(loc);
+//				System.out.println(loc);
 			}
 		}
 	}

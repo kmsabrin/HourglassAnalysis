@@ -369,8 +369,7 @@ public class DependencyDAG {
 //			}
 //		}
 	}
-	
-	
+		
 	public void removeIsolatedNodes() {
 		HashSet<String> removable = new HashSet<String>();
 		for (String s: nodes) {
@@ -831,10 +830,10 @@ public class DependencyDAG {
 //			npc = ((int) npc * 1000.0) / 1000.0;
 			normalizedPathCentrality.put(s, npc);			
 			
-			if (isSource(s) || isTarget(s)) { 
+//			if (isSource(s) || isTarget(s)) { 
 //				manually reset source and targets to zero
 //				normalizedPathCentrality.put(s, 0.0);
-			}
+//			}
 		}			
 		
 //		System.out.println("Tubes: " + tubes);
@@ -843,12 +842,11 @@ public class DependencyDAG {
 	public void printNetworkProperties() {
 		for (String s: nodes) {
 //			if (normalizedPathCentrality.get(s) < 0.4) continue;
-			System.out.print(s + "\t");
-//			System.out.print(numOfSourcePath.get(s) + "\t");
-//			System.out.print(numOfTargetPath.get(s) + "\t");
-//			System.out.print(location.get(s) + "\t");
-			System.out.print(normalizedPathCentrality.get(s) * nTotalPath + "\t");
-
+			System.out.print("Node: " + s + "\t");
+			System.out.print("Complexity: " + numOfSourcePath.get(s) + "\t");
+			System.out.print("Generality: " + numOfTargetPath.get(s) + "\t");
+			System.out.print("Location: " + location.get(s) + "\t");
+			System.out.print("Path Centrality: " + normalizedPathCentrality.get(s) * nTotalPath + "\t");
 //			System.out.print(inDegree.get(s) + "\t");
 //			System.out.print(outDegree.get(s) + "\t");
 //			System.out.print(pagerankTargetCompression.get(s) + "\t");

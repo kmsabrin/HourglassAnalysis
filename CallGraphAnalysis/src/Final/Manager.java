@@ -20,7 +20,7 @@ public class Manager {
 		System.out.println("Toal Path: " + dependencyDAG.nTotalPath);
 	}
 	
-	private static void generateSyntheticFromReal(DependencyDAG dependencyDAG) throws Exception {
+/*	private static void generateSyntheticFromReal(DependencyDAG dependencyDAG) throws Exception {
 		SimpleModelDAG.inDegreeHistogram = DistributionAnalysis.getDegreeHistogram(dependencyDAG);
 		SimpleModelDAG.numOfNonzeroIndegreeNodes = 0;
 		for (int i: SimpleModelDAG.inDegreeHistogram.keySet()) {
@@ -48,6 +48,7 @@ public class Manager {
 			SimpleModelDAG.getSimpleModelDAG();
 		}		
 	}
+*/	
 	
 	private static void loadLargestWCC(String filePath) throws Exception {
 		DependencyDAG.largestWCCNodes = new HashSet();
@@ -61,7 +62,7 @@ public class Manager {
 		scanner.close();
 	}
 	
-	public static void checkNewHGSampleNetworks() throws Exception {
+/*	public static void checkNewHGSampleNetworks() throws Exception {
 		DependencyDAG.isCallgraph = true;
 		String swName = "Sqlite";
 		String netPath = "sw_callgraphs//full-graph-" + swName;
@@ -69,10 +70,11 @@ public class Manager {
 		
 		DependencyDAG dependencyDAG = new DependencyDAG(netPath);
 		printNetworkStat(dependencyDAG);
-		CoreDetection.randomizedWaistDetection(dependencyDAG, netID);
+//		CoreDetection.randomizedWaistDetection(dependencyDAG, netID);
 	}
+*/	
 	
-	public static void doRealNetworkAnalysis() throws Exception {
+	private static void doRealNetworkAnalysis() throws Exception {
 		String netPath = "";
 		
 //		String netID = "rat";
@@ -249,7 +251,7 @@ public class Manager {
 	}
 	*/
 	
-	public static void doToyNetworkAnalysis() throws Exception {
+	private static void doToyNetworkAnalysis() throws Exception {
 		DependencyDAG.isToy = true;
 		DependencyDAG toyDependencyDAG = new DependencyDAG("toy_networks//toy_dag_paper_2.txt");
 //		DependencyDAG toyDependencyDAG = new DependencyDAG("synthetic_callgraphs//draw//SimpleModelDAGr-1a3d2.0.txt");
@@ -267,7 +269,7 @@ public class Manager {
 		System.out.println("[h-Score] " + CoreDetection.hScore);
 	}
 
-	public static void runSyntheticStatisticalSignificanceTestsForTau() throws Exception {
+	private static void runSyntheticStatisticalSignificanceTestsForTau() throws Exception {
 		DependencyDAG.isSynthetic = true;
 		DependencyDAG.isSimpleModel = true;
 		DependencyDAG.isWeighted = false;
@@ -332,28 +334,28 @@ public class Manager {
 		}
 	}
 	
-	public static void runSyntheticStatisticalSignificanceTests() throws Exception {
+	private static void runSyntheticStatisticalSignificanceTests() throws Exception {
 		DependencyDAG.isSynthetic = true;
 		DependencyDAG.isWeighted = false;
 		DependencyDAG.isSimpleModel = true;
 		String DAGType = "SimpleModelDAG";
 
-		String alphas[] = { "-1", "-0.8", "-0.6", "-0.4", "-0.2", "0", "0.2", "0.4", "0.6", "0.8", "1" };
-//		String alphas[] = {"-1", "-0.8"};
+//		String alphas[] = { "-1", "-0.8", "-0.6", "-0.4", "-0.2", "0", "0.2", "0.4", "0.6", "0.8", "1" };
+		String alphas[] = {"-1", "0", "1"};
 
-		String dins[] = { "2", "3" };
-//		String dins[] = {"2"};
+//		String dins[] = { "2", "3" };
+		String dins[] = {"2"};
 			
 		for (String din : dins) {
 			for (String a : alphas) {
 //				System.out.println("alpha=" + a + "\t" + "din=" + din );
-				int nT = 100;
-				int nI = 300;
-				int nS = 100;
+				int nT = 4;
+				int nI = 4;
+				int nS = 4;
 				String ratio = "-1";
 				String networkID = DAGType + "r" + ratio + "a" + a + "d" + din;
 				
-				int nRun = 50;
+				int nRun = 1;
 				double coreSizes[] = new double[nRun];
 				double hScores[] = new double[nRun];
 				double nodeCoverages[] = new double[nRun];
@@ -363,7 +365,7 @@ public class Manager {
 				
 				int idx = 0;
 				for (int i = 0; i < nRun; ++i) {
-					SimpleModelDAG.generateSimpleModel(Double.parseDouble(a), Integer.parseInt(din), nT, nI, nS, Double.parseDouble(ratio));
+//					SimpleModelDAG.generateSimpleModel(Double.parseDouble(a), Integer.parseInt(din), nT, nI, nS, Double.parseDouble(ratio));
 					SimpleModelDAG.initNodeIdentifiers(nT, nI, nS);
 //					System.out.println("Model Generated");
 					
@@ -389,32 +391,32 @@ public class Manager {
 //						System.out.println(CoreDetection.verifyCore(dependencyDAG, sampleFlatCore));
 						CoreDetection.hScore = 0;
 					}
-//					System.out.println("[h-Score] " + CoreDetection.hScore);					
+					System.out.println("[h-Score] " + CoreDetection.hScore);					
 					hScores[idx] = CoreDetection.hScore;
 					
 //					System.out.println(idx);
 					++idx;					
 				}
 				
-				double mWS = StatUtils.mean(coreSizes);
-				double mNC = StatUtils.mean(nodeCoverages);
-				double mHS = StatUtils.mean(hScores);
-				double mWCL = StatUtils.mean(weightedCoreLocation);
-				double ciWS = ConfidenceInterval.getConfidenceInterval(coreSizes);
-				double ciNC = ConfidenceInterval.getConfidenceInterval(nodeCoverages);
-				double ciHS = ConfidenceInterval.getConfidenceInterval(hScores);
-				double ciWCL = ConfidenceInterval.getConfidenceInterval(weightedCoreLocation);
-				System.out.println(a + " " + din + " " + ratio + " " + mWS + " " + ciWS + " " 
-						+ mNC + " " + ciNC + " " + mHS + " " + ciHS + " " + mWCL + " " + ciWCL);
+//				double mWS = StatUtils.mean(coreSizes);
+//				double mNC = StatUtils.mean(nodeCoverages);
+//				double mHS = StatUtils.mean(hScores);
+//				double mWCL = StatUtils.mean(weightedCoreLocation);
+//				double ciWS = ConfidenceInterval.getConfidenceInterval(coreSizes);
+//				double ciNC = ConfidenceInterval.getConfidenceInterval(nodeCoverages);
+//				double ciHS = ConfidenceInterval.getConfidenceInterval(hScores);
+//				double ciWCL = ConfidenceInterval.getConfidenceInterval(weightedCoreLocation);
+//				System.out.println(a + " " + din + " " + ratio + " " + mWS + " " + ciWS + " " 
+//						+ mNC + " " + ciNC + " " + mHS + " " + ciHS + " " + mWCL + " " + ciWCL);
 			}
-			System.out.println();
+//			System.out.println();
 		}
 	}
 	
 //	static double randomHScores[] = new double[100];
 //	static int index = 0;
-	private static void randomizationTests() throws Exception {
-	/*
+/*	private static void randomizationTests() throws Exception {
+	
 		String data[] = {"openssh-39", "commons-math", "rat", "monkey", "court-abortion", "court-pension"};
 		PrintWriter pw = new PrintWriter(new File("analysis//random-hscores-" + data[5] + ".txt"));
 		for (int i = 0; i < 100; ++i) {
@@ -432,8 +434,8 @@ public class Manager {
 		System.out.println("Z Score: " + z);
 		System.out.println(TestUtils.t(0.8544, randomHScores));
 		System.out.println(TestUtils.tTest(0.8544, randomHScores)/2);
-	*/
 	}
+	*/
 	
 	private static void measureTauEffectOnRealNetwork() throws Exception {
 //		String data[] = {"openssh-39", "commons-math", "rat", "monkey", "court-abortion", "court-pension"};
@@ -449,7 +451,7 @@ public class Manager {
 //		pw.close();
 	}
 	
-	private static void randomizationTestsBinned() throws Exception {
+/*	private static void randomizationTestsBinned() throws Exception {
 		String data[] = {"openssh-39", "commons-math", "rat", "monkey", "court-abortion", "court-pension"};
 		
 		for (int i = 0; i < 6; ++i) {
@@ -463,12 +465,13 @@ public class Manager {
 			}
 		}
 	}
+*/	
 	
 	public static void main(String[] args) throws Exception {		
-		Manager.doRealNetworkAnalysis();
+//		Manager.doRealNetworkAnalysis();
 //		Manager.doToyNetworkAnalysis();
 //		Manager.measureTauEffectOnRealNetwork();
-//		Manager.runSyntheticStatisticalSignificanceTests();
+		Manager.runSyntheticStatisticalSignificanceTests();
 //		Manager.runSyntheticStatisticalSignificanceTestsForTau();
 		
 //		Manager.doSyntheticNetworkAnalysis();

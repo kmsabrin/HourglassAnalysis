@@ -237,8 +237,8 @@ public class SimpleModelDAG {
 					substrateIndex = getNodeFromUniformDistribution(startNodeIndex, endNodeIndex);
 				} 
 				else {
-					substrateIndex = getNodeFromZipfDistribution(startNodeIndex, endNodeIndex);
-//					substrateIndex = getNodeFromZipfDistribution2(startNodeIndex, endNodeIndex);
+//					substrateIndex = getNodeFromZipfDistribution(startNodeIndex, endNodeIndex);
+					substrateIndex = getNodeFromZipfDistribution2(startNodeIndex, endNodeIndex);
 //					special case: no order among sources
 					if (substrateIndex >= sS) {
 						substrateIndex = sS + random.nextInt(nS);
