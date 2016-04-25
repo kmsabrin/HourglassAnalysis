@@ -101,6 +101,7 @@ public class CoreDetection {
 		for (String s : dependencyDAG.nodes) {
 //			find the node with largest through path
 			double numPathCovered = dependencyDAG.numOfSourcePath.get(s) * dependencyDAG.numOfTargetPath.get(s);
+//			System.out.print(s + "--" + numPathCovered + "\t");
 			if (numPathCovered > maxPathCovered) {
 				maxPathCovered = numPathCovered;
 				maxPathCoveredNode = s;
@@ -115,36 +116,70 @@ public class CoreDetection {
 				tiedMaxPathCentralityNodes.add(s);
 			}
 		}
+//		System.out.println();
 					
-		HashMap<HashSet<String>, TreeSet<String>> pathEquivalentNodeSet = new HashMap();
-//		/** Detect exact path equivalent nodes **/
+//		HashMap<HashSet<String>, TreeSet<String>> pathEquivalentNodeSet = new HashMap();
+////		/** Detect exact path equivalent nodes - 1 **/
+//		for (String s : tiedMaxPathCentralityNodes) {
+//			dependencyDAG.loadRechablity(s);
+//			HashSet<String> nodesReachable = dependencyDAG.nodesReachable.get(s);
+//			if (pathEquivalentNodeSet.containsKey(nodesReachable)) {
+//				pathEquivalentNodeSet.get(nodesReachable).add(s);
+//			}
+//			else {
+//				TreeSet<String> firstElement = new TreeSet();
+//				firstElement.add(s);
+//				pathEquivalentNodeSet.put(nodesReachable, firstElement);
+//			}
+//		}
+		
+//		/** Detect exact path equivalent nodes - 2 **/
+		HashSet<String> alreadyInPES = new HashSet();
+		int kounter = 1;
+		HashMap<Integer, TreeSet<String>> pathEquivalentNodeSet2 = new HashMap();
+		HashSet<String> forIteratingTiedMaxPathCentralityNodes = new HashSet(tiedMaxPathCentralityNodes);
 		for (String s : tiedMaxPathCentralityNodes) {
-			dependencyDAG.loadRechablity(s);
-			HashSet<String> nodesReachable = dependencyDAG.nodesReachable.get(s);
-			if (pathEquivalentNodeSet.containsKey(nodesReachable)) {
-				pathEquivalentNodeSet.get(nodesReachable).add(s);
+			if (alreadyInPES.contains(s)) {
+				continue;
 			}
-			else {
-				TreeSet<String> firstElement = new TreeSet();
-				firstElement.add(s);
-				pathEquivalentNodeSet.put(nodesReachable, firstElement);
+			
+			topRemovedWaistNodes.add(s);
+			dependencyDAG.numOfTargetPath.clear();
+			dependencyDAG.numOfSourcePath.clear();
+			dependencyDAG.loadPathStatistics();
+
+			TreeSet<String> PESet = new TreeSet();
+			PESet.add(s);
+			alreadyInPES.add(s);
+			for (String r: forIteratingTiedMaxPathCentralityNodes) {
+				if (alreadyInPES.contains(r)) {
+					continue;
+				}
+				if (dependencyDAG.numOfSourcePath.get(r) == 0 || dependencyDAG.numOfTargetPath.get(r) == 0) { // has been disconnected
+					PESet.add(r);
+					alreadyInPES.add(r);
+				}
 			}
+			pathEquivalentNodeSet2.put(kounter++, PESet);
+			
+			topRemovedWaistNodes.remove(s);
 		}
 		
 //		for (HashSet<String> equivalanceKey: pathEquivalentNodeSet.keySet()) {
-//			System.out.println("Rank " + nodeRank);
-//			TreeSet<String> equivalentNodes = pathEquivalentNodeSet.get(equivalanceKey);
-//			System.out.println(equivalentNodes);
-//		}
-//		
-//		if (pathEquivalentNodeSet.size() > 1) {
-//			System.out.println("Node rank: " + nodeRank + " branching for " + pathEquivalentNodeSet.size());
-//		}
+		for (int equivalanceKey: pathEquivalentNodeSet2.keySet()) {
+			System.out.println("Rank " + nodeRank);
+			TreeSet<String> equivalentNodes = pathEquivalentNodeSet2.get(equivalanceKey);
+			System.out.println(equivalentNodes);
+		}
 		
-		for (HashSet<String> equivalanceKey: pathEquivalentNodeSet.keySet()) {
-//			System.out.print("Rank " + nodeRank);
-			TreeSet<String> equivalentNodes = pathEquivalentNodeSet.get(equivalanceKey);
-//			System.out.println(equivalentNodes + "\t" + maxPathCovered);
+		if (pathEquivalentNodeSet2.size() > 1) {
+			System.out.println("Node rank: " + nodeRank + " branching for " + pathEquivalentNodeSet2.size());
+		}
+		
+		for (int equivalanceKey: pathEquivalentNodeSet2.keySet()) {
+			System.out.print("Rank " + nodeRank);
+			TreeSet<String> equivalentNodes = pathEquivalentNodeSet2.get(equivalanceKey);
+			System.out.println(equivalentNodes + "\t" + maxPathCovered);
 			String representative = equivalentNodes.first();
 //			if (equivalentNodes.size() > 1) representative += "+";
 //			add to waist and remove from the network
@@ -162,7 +197,7 @@ public class CoreDetection {
 			}
 			
 //			recurse
-			traverseTreeHelper(dependencyDAG, cumulativePathCovered + maxPathCovered, totalPath, nodeRank + 1, nLeaves * pathEquivalentNodeSet.size());
+			traverseTreeHelper(dependencyDAG, cumulativePathCovered + maxPathCovered, totalPath, nodeRank + 1, nLeaves * pathEquivalentNodeSet2.size());
 //			remove from waist
 			topRemovedWaistNodes.remove(representative);
 
@@ -233,7 +268,7 @@ public class CoreDetection {
 
 //		System.out.println(coreSet.size());
 		sampleCore = coreSet.keySet().iterator().next();
-//		System.out.println(sampleCore);
+		System.out.println(sampleCore);
 		getNodeCoverage(dependencyDAG, sampleCore);
 		coreLocationAnalysis(dependencyDAG);
 		
@@ -241,10 +276,10 @@ public class CoreDetection {
 //		hScore = hScore2;
 //		hScoreDenominator = 1.0 * Math.min(coreDependentCoverage.size(), coreServerCoverage.size());
 		
-//		System.out.println("Number of coreSet: " + optimalCoreCount);
-//		System.out.println("Min core size: " + minCoreSize);
-//		System.out.println("Node Coverage: " + nodeCoverage);
-//		System.out.println("WeightedCoreLocation: " + weightedCoreLocation);
+		System.out.println("Number of coreSet: " + optimalCoreCount);
+		System.out.println("Min core size: " + minCoreSize);
+		System.out.println("Node Coverage: " + nodeCoverage);
+		System.out.println("WeightedCoreLocation: " + weightedCoreLocation);
 	}
 	
 /*	public static void heuristicWaistDetection(DependencyDAG dependencyDAG, String filePath) throws Exception {

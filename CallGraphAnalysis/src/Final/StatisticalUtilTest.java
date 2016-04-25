@@ -2,6 +2,8 @@ package Final;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -81,7 +83,7 @@ public class StatisticalUtilTest {
 	
 	public static void main(String[] args) throws Exception {
 //		pointLineDistance(1, 1, 5, 5, 3, 5);
-		pointLineDistance(1, 0.608621667612025, 302, 0.9659671015314805, 30, 0.9381735677821894);
+//		pointLineDistance(1, 0.608621667612025, 302, 0.9659671015314805, 30, 0.9381735677821894);
 		
 //		getCCDF(new ExponentialDistribution(0.5));
 //		getCCDF(new LogNormalDistribution());
@@ -131,6 +133,14 @@ public class StatisticalUtilTest {
 //		for (int i = 1; i < 1000; ++i) {
 //			System.out.println(normalDistribution.sample());
 //		}
+		
+		byte aBytes[] = new byte[100];
+		
+		for (int i = 0; i < 100; ++i) {
+			aBytes[i] = (byte)(i);
+		}
+		
+		Files.write(Paths.get("binfile.txt"), aBytes); //creates, overwrites
 	}
 	
 	

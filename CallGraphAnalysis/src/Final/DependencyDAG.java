@@ -267,7 +267,11 @@ public class DependencyDAG {
 //					server = tokens[1].substring(0, tokens[1].length()); // for scc-consolidation: a b
 //				}
 				
-				if (dependent.equals("do_log") || server.equals("do_log")) { 
+				if (dependent.equals("do_log") || server.equals("do_log")
+					|| dependent.equals("main") || server.equals("main")	
+					|| dependent.equals("_exit@plt") || server.equals("_exit@plt")
+//					|| dependent.equals("do_exec") || server.equals("do_exec")
+						) { 
 					// no more location metric noise! 
 					// compiler generated
 					continue;

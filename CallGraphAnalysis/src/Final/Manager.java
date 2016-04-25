@@ -81,10 +81,10 @@ public class Manager {
 //		String netID = "monkey";
 		
 //		String netID = "commons-math";
-//		String netID = "openssh-39";
+		String netID = "openssh-39";
 //		String netID = "apache-commons-3.4";
 		
-		String netID = "court";
+//		String netID = "court";
 		
 		DependencyDAG.resetFlags();
 		
@@ -102,8 +102,8 @@ public class Manager {
 			DependencyDAG.isMetabolic = true;
 		}
 		else if (netID.equals("court")) {
-//			CourtCaseCornellParser.caseTopic = "abortion";
-			CourtCaseCornellParser.caseTopic = "pension";
+			CourtCaseCornellParser.caseTopic = "abortion";
+//			CourtCaseCornellParser.caseTopic = "pension";
 			CourtCaseCornellParser.loadCuratedCaseIDs();
 			netPath = "supremecourt_networks//court.txt";
 			DependencyDAG.isCourtcase = true;
@@ -253,7 +253,8 @@ public class Manager {
 	
 	private static void doToyNetworkAnalysis() throws Exception {
 		DependencyDAG.isToy = true;
-		DependencyDAG toyDependencyDAG = new DependencyDAG("toy_networks//toy_dag_paper_2.txt");
+		String toyDAGName = "toy_dag_paper_2";
+		DependencyDAG toyDependencyDAG = new DependencyDAG("toy_networks//" + toyDAGName + ".txt");
 //		DependencyDAG toyDependencyDAG = new DependencyDAG("synthetic_callgraphs//draw//SimpleModelDAGr-1a3d2.0.txt");
 
 		String netID = "toy_dag";
@@ -263,7 +264,7 @@ public class Manager {
 		CoreDetection.getCore(toyDependencyDAG, netID);
 		double realCore = CoreDetection.minCoreSize;
 		
-		toyDependencyDAG = new DependencyDAG("toy_networks//toy_dag_paper.txt");
+		toyDependencyDAG = new DependencyDAG("toy_networks//" + toyDAGName + ".txt");
 		FlattenNetwork.makeAndProcessFlat(toyDependencyDAG);
 		CoreDetection.hScore = (1.0 - ((realCore - 1) / FlattenNetwork.flatNetworkCoreSize));
 		System.out.println("[h-Score] " + CoreDetection.hScore);
@@ -468,10 +469,10 @@ public class Manager {
 */	
 	
 	public static void main(String[] args) throws Exception {		
-//		Manager.doRealNetworkAnalysis();
+		Manager.doRealNetworkAnalysis();
 //		Manager.doToyNetworkAnalysis();
 //		Manager.measureTauEffectOnRealNetwork();
-		Manager.runSyntheticStatisticalSignificanceTests();
+//		Manager.runSyntheticStatisticalSignificanceTests();
 //		Manager.runSyntheticStatisticalSignificanceTestsForTau();
 		
 //		Manager.doSyntheticNetworkAnalysis();
