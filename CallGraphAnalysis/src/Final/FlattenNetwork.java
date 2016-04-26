@@ -29,7 +29,7 @@ public class FlattenNetwork {
 		}
 		
 		DependencyDAG flatDAG = new DependencyDAG("flat_networks//current_flat.txt");
-		flatDAG.printNetworkProperties();
+//		flatDAG.printNetworkProperties();
 		CoreDetection.fullTraverse = false;
 		CoreDetection.getCore(flatDAG, "flatDAG");
 		FlattenNetwork.flatNetworkCoreSize = CoreDetection.minCoreSize;

@@ -10,6 +10,8 @@ import java.util.PriorityQueue;
 import java.util.Random;
 import java.util.TreeSet;
 
+import org.apache.commons.math3.stat.descriptive.moment.Mean;
+
 public class CoreDetection {
 	static HashSet<String> topRemovedWaistNodes = new HashSet();
 	static HashMap<String, Double> averageCoreRank;
@@ -51,6 +53,8 @@ public class CoreDetection {
 	static double hScoreDenominator = 1;
 	
 	static TreeSet<String> sampleCore;
+	
+	static HashMap<String, Double> meanRepresentativeLocation; 
 	
 	public static void traverseTreeHelper(DependencyDAG dependencyDAG, double cumulativePathCovered, double totalPath, int nodeRank, double nLeaves) {
 //		check/mark visited state
@@ -133,6 +137,12 @@ public class CoreDetection {
 //			}
 //		}
 		
+		double meanLocation = 0;
+		for (String s: tiedMaxPathCentralityNodes) {
+			meanLocation += dependencyDAG.location.get(s);
+		}
+		meanLocation /= tiedMaxPathCentralityNodes.size();
+		
 //		/** Detect exact path equivalent nodes - 2 **/
 		HashSet<String> alreadyInPES = new HashSet();
 		int kounter = 1;
@@ -167,23 +177,24 @@ public class CoreDetection {
 		
 //		for (HashSet<String> equivalanceKey: pathEquivalentNodeSet.keySet()) {
 		for (int equivalanceKey: pathEquivalentNodeSet2.keySet()) {
-			System.out.println("Rank " + nodeRank);
+//			System.out.println("Rank " + nodeRank);
 			TreeSet<String> equivalentNodes = pathEquivalentNodeSet2.get(equivalanceKey);
-			System.out.println(equivalentNodes);
+//			System.out.println(equivalentNodes);
 		}
 		
 		if (pathEquivalentNodeSet2.size() > 1) {
-			System.out.println("Node rank: " + nodeRank + " branching for " + pathEquivalentNodeSet2.size());
+//			System.out.println("Node rank: " + nodeRank + " branching for " + pathEquivalentNodeSet2.size());
 		}
 		
 		for (int equivalanceKey: pathEquivalentNodeSet2.keySet()) {
-			System.out.print("Rank " + nodeRank);
+//			System.out.print("Rank " + nodeRank);
 			TreeSet<String> equivalentNodes = pathEquivalentNodeSet2.get(equivalanceKey);
-			System.out.println(equivalentNodes + "\t" + maxPathCovered);
+//			System.out.println(equivalentNodes + "\t" + maxPathCovered);
 			String representative = equivalentNodes.first();
 //			if (equivalentNodes.size() > 1) representative += "+";
 //			add to waist and remove from the network
 			topRemovedWaistNodes.add(representative);
+			meanRepresentativeLocation.put(representative, meanLocation);
 			
 //			update average waist entry rank and path contribution
 			if (averageCoreRank.containsKey(representative)) {
@@ -228,6 +239,8 @@ public class CoreDetection {
 		coreNodeCoverage = new HashSet();
 		coreServerCoverage =  new HashSet();
 		coreDependentCoverage =  new HashSet();
+		
+		meanRepresentativeLocation = new HashMap();
 	}
 	
 	public static void getCore(DependencyDAG dependencyDAG, String filePath) {
@@ -261,25 +274,30 @@ public class CoreDetection {
 		}
 		coreSet.remove(suboptimalCores);
 		
-		double minST = Math.min(dependencyDAG.nSources, dependencyDAG.nTargets);
+//		double minST = Math.min(dependencyDAG.nSources, dependencyDAG.nTargets);
 //		System.out.println(minST);
-		hScoreDenominator = minST;
-		hScore = 1.0 - ((minCoreSize - 1.0) / minST);
-
-//		System.out.println(coreSet.size());
-		sampleCore = coreSet.keySet().iterator().next();
-		System.out.println(sampleCore);
-		getNodeCoverage(dependencyDAG, sampleCore);
-		coreLocationAnalysis(dependencyDAG);
-		
+//		hScoreDenominator = minST;
+//		hScore = 1.0 - ((minCoreSize - 1.0) / minST);
 //		double hScore2 = 1.0 - ((minCoreSize - 1.0) / (1.0 * Math.min(coreDependentCoverage.size(), coreServerCoverage.size())));
 //		hScore = hScore2;
 //		hScoreDenominator = 1.0 * Math.min(coreDependentCoverage.size(), coreServerCoverage.size());
+
+//		System.out.println(coreSet.size());
+		sampleCore = coreSet.keySet().iterator().next();
+//		System.out.println(sampleCore);
 		
-		System.out.println("Number of coreSet: " + optimalCoreCount);
-		System.out.println("Min core size: " + minCoreSize);
-		System.out.println("Node Coverage: " + nodeCoverage);
-		System.out.println("WeightedCoreLocation: " + weightedCoreLocation);
+		/* not needed because we are not utilizing the path statistics, only reachability and location*/
+ //		topRemovedWaistNodes.clear();
+//		dependencyDAG.numOfTargetPath.clear();
+//		dependencyDAG.numOfSourcePath.clear();
+//		dependencyDAG.loadPathStatistics();
+		getNodeCoverage(dependencyDAG, sampleCore);
+		coreLocationAnalysis(dependencyDAG);
+				
+//		System.out.println("Number of coreSet: " + optimalCoreCount);
+//		System.out.println("Min core size: " + minCoreSize);
+//		System.out.println("Node Coverage: " + nodeCoverage);
+//		System.out.println("WeightedCoreLocation: " + weightedCoreLocation);
 	}
 	
 /*	public static void heuristicWaistDetection(DependencyDAG dependencyDAG, String filePath) throws Exception {
@@ -624,6 +642,9 @@ public class CoreDetection {
 		coreServerCoverage.removeAll(toRemove);
 		/******************/
 		
+		coreNodeCoverage.clear();
+		coreNodeCoverage.addAll(coreDependentCoverage);
+		coreNodeCoverage.addAll(coreServerCoverage);
 		nodeCoverage = coreNodeCoverage.size() * 1.0 / dependencyDAG.nodes.size();
 	}
 	
@@ -668,8 +689,9 @@ public class CoreDetection {
 	public static void coreLocationAnalysis(DependencyDAG dependencyDAG) {
 		weightedCoreLocation = 0;
 		double corePathContribution = 0;
-		for (String s: averageCoreRank.keySet()) {
-			weightedCoreLocation += dependencyDAG.location.get(s) * averagePathCovered.get(s);
+		for (String s: sampleCore) {
+//			weightedCoreLocation += dependencyDAG.location.get(s) * averagePathCovered.get(s);
+			weightedCoreLocation += meanRepresentativeLocation.get(s) * averagePathCovered.get(s);
 			corePathContribution += averagePathCovered.get(s);
 		}
 		

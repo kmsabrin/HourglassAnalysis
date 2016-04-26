@@ -341,22 +341,22 @@ public class Manager {
 		DependencyDAG.isSimpleModel = true;
 		String DAGType = "SimpleModelDAG";
 
-//		String alphas[] = { "-1", "-0.8", "-0.6", "-0.4", "-0.2", "0", "0.2", "0.4", "0.6", "0.8", "1" };
-		String alphas[] = {"-1", "0", "1"};
+		String alphas[] = { "-1", "-0.8", "-0.6", "-0.4", "-0.2", "0", "0.2", "0.4", "0.6", "0.8", "1" };
+//		String alphas[] = {"-1", "0", "1"};
 
-//		String dins[] = { "2", "3" };
-		String dins[] = {"2"};
+		String dins[] = { "2", "3" };
+//		String dins[] = {"2"};
 			
 		for (String din : dins) {
 			for (String a : alphas) {
 //				System.out.println("alpha=" + a + "\t" + "din=" + din );
-				int nT = 4;
-				int nI = 4;
-				int nS = 4;
+				int nT = 54;
+				int nI = 92;
+				int nS = 54;
 				String ratio = "-1";
 				String networkID = DAGType + "r" + ratio + "a" + a + "d" + din;
 				
-				int nRun = 1;
+				int nRun = 20;
 				double coreSizes[] = new double[nRun];
 				double hScores[] = new double[nRun];
 				double nodeCoverages[] = new double[nRun];
@@ -366,7 +366,7 @@ public class Manager {
 				
 				int idx = 0;
 				for (int i = 0; i < nRun; ++i) {
-//					SimpleModelDAG.generateSimpleModel(Double.parseDouble(a), Integer.parseInt(din), nT, nI, nS, Double.parseDouble(ratio));
+					SimpleModelDAG.generateSimpleModel(Double.parseDouble(a), Integer.parseInt(din), nT, nI, nS, Double.parseDouble(ratio));
 					SimpleModelDAG.initNodeIdentifiers(nT, nI, nS);
 //					System.out.println("Model Generated");
 					
@@ -392,23 +392,23 @@ public class Manager {
 //						System.out.println(CoreDetection.verifyCore(dependencyDAG, sampleFlatCore));
 						CoreDetection.hScore = 0;
 					}
-					System.out.println("[h-Score] " + CoreDetection.hScore);					
+//					System.out.println("[h-Score] " + CoreDetection.hScore);					
 					hScores[idx] = CoreDetection.hScore;
 					
 //					System.out.println(idx);
 					++idx;					
 				}
 				
-//				double mWS = StatUtils.mean(coreSizes);
-//				double mNC = StatUtils.mean(nodeCoverages);
-//				double mHS = StatUtils.mean(hScores);
-//				double mWCL = StatUtils.mean(weightedCoreLocation);
-//				double ciWS = ConfidenceInterval.getConfidenceInterval(coreSizes);
-//				double ciNC = ConfidenceInterval.getConfidenceInterval(nodeCoverages);
-//				double ciHS = ConfidenceInterval.getConfidenceInterval(hScores);
-//				double ciWCL = ConfidenceInterval.getConfidenceInterval(weightedCoreLocation);
-//				System.out.println(a + " " + din + " " + ratio + " " + mWS + " " + ciWS + " " 
-//						+ mNC + " " + ciNC + " " + mHS + " " + ciHS + " " + mWCL + " " + ciWCL);
+				double mWS = StatUtils.mean(coreSizes);
+				double mNC = StatUtils.mean(nodeCoverages);
+				double mHS = StatUtils.mean(hScores);
+				double mWCL = StatUtils.mean(weightedCoreLocation);
+				double ciWS = ConfidenceInterval.getConfidenceInterval(coreSizes);
+				double ciNC = ConfidenceInterval.getConfidenceInterval(nodeCoverages);
+				double ciHS = ConfidenceInterval.getConfidenceInterval(hScores);
+				double ciWCL = ConfidenceInterval.getConfidenceInterval(weightedCoreLocation);
+				System.out.println(a + " " + din + " " + ratio + " " + mWS + " " + ciWS + " " 
+						+ mNC + " " + ciNC + " " + mHS + " " + ciHS + " " + mWCL + " " + ciWCL);
 			}
 //			System.out.println();
 		}
@@ -469,10 +469,10 @@ public class Manager {
 */	
 	
 	public static void main(String[] args) throws Exception {		
-		Manager.doRealNetworkAnalysis();
+//		Manager.doRealNetworkAnalysis();
 //		Manager.doToyNetworkAnalysis();
 //		Manager.measureTauEffectOnRealNetwork();
-//		Manager.runSyntheticStatisticalSignificanceTests();
+		Manager.runSyntheticStatisticalSignificanceTests();
 //		Manager.runSyntheticStatisticalSignificanceTestsForTau();
 		
 //		Manager.doSyntheticNetworkAnalysis();
