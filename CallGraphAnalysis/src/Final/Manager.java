@@ -81,10 +81,10 @@ public class Manager {
 //		String netID = "monkey";
 		
 //		String netID = "commons-math";
-		String netID = "openssh-39";
+//		String netID = "openssh-39";
 //		String netID = "apache-commons-3.4";
 		
-//		String netID = "court";
+		String netID = "court";
 		
 		DependencyDAG.resetFlags();
 		
@@ -102,8 +102,8 @@ public class Manager {
 			DependencyDAG.isMetabolic = true;
 		}
 		else if (netID.equals("court")) {
-			CourtCaseCornellParser.caseTopic = "abortion";
-//			CourtCaseCornellParser.caseTopic = "pension";
+//			CourtCaseCornellParser.caseTopic = "abortion";
+			CourtCaseCornellParser.caseTopic = "pension";
 			CourtCaseCornellParser.loadCuratedCaseIDs();
 			netPath = "supremecourt_networks//court.txt";
 			DependencyDAG.isCourtcase = true;
@@ -276,12 +276,13 @@ public class Manager {
 		DependencyDAG.isWeighted = false;
 		String DAGType = "SimpleModelDAG";
 		
-		String alphas[] = { "-1", "-0.5", "0", "0.5", "1" };
-		String dins[] = {"2"};
+//		String alphas[] = { "-1", "-0.5", "0", "0.5", "1" };
+		String alphas[] = { "1" };
+		String dins[] = {"3"};
 			
 		for (String din : dins) {
 			for (String a : alphas) {
-//				System.out.println("alpha=" + a + "\t" + "din=" + din );
+				System.out.println("alpha=" + a + "\t" + "din=" + din );
 				int nT = 100;
 				int nI = 300;
 				int nS = 100;
@@ -297,7 +298,7 @@ public class Manager {
 				for (int i = 0; i < nRun; ++i) {
 					SimpleModelDAG.generateSimpleModel(Double.parseDouble(a), Integer.parseInt(din), nT, nI, nS, Double.parseDouble(ratio));
 					SimpleModelDAG.initNodeIdentifiers(nT, nI, nS);
-//					System.out.println("Model Generated");
+					System.out.println("Model Generated for run " + i );
 				
 					
 					for (int j = minTau; j <= maxTau; j += 2) {
@@ -343,16 +344,17 @@ public class Manager {
 
 		String alphas[] = { "-1", "-0.8", "-0.6", "-0.4", "-0.2", "0", "0.2", "0.4", "0.6", "0.8", "1" };
 //		String alphas[] = {"-1", "0", "1"};
+//		String alphas[] = {"1"};
 
-		String dins[] = { "2", "3" };
-//		String dins[] = {"2"};
+//		String dins[] = { "1", "2", "3", "4", "5" };
+		String dins[] = {"1"};
 			
 		for (String din : dins) {
 			for (String a : alphas) {
 //				System.out.println("alpha=" + a + "\t" + "din=" + din );
-				int nT = 54;
-				int nI = 92;
-				int nS = 54;
+				int nT = 80;
+				int nI = 40;
+				int nS = 80;
 				String ratio = "-1";
 				String networkID = DAGType + "r" + ratio + "a" + a + "d" + din;
 				
@@ -383,6 +385,7 @@ public class Manager {
 					nodeCoverages[idx] = CoreDetection.nodeCoverage;
 					weightedCoreLocation[idx] = CoreDetection.weightedCoreLocation;
 						
+//					System.out.println(CoreDetection.nodeCoverage + "\t" + CoreDetection.weightedCoreLocation);
 					FlattenNetwork.makeAndProcessFlat(dependencyDAG);	
 					CoreDetection.hScore = (1.0 - ((realCore - 1) / FlattenNetwork.flatNetworkCoreSize));
 					if (CoreDetection.hScore < 0) {
@@ -408,9 +411,9 @@ public class Manager {
 				double ciHS = ConfidenceInterval.getConfidenceInterval(hScores);
 				double ciWCL = ConfidenceInterval.getConfidenceInterval(weightedCoreLocation);
 				System.out.println(a + " " + din + " " + ratio + " " + mWS + " " + ciWS + " " 
-						+ mNC + " " + ciNC + " " + mHS + " " + ciHS + " " + mWCL + " " + ciWCL);
+				+ mNC + " " + ciNC + " " + mHS + " " + ciHS + " " + mWCL + " " + ciWCL);
 			}
-//			System.out.println();
+			System.out.println();
 		}
 	}
 	

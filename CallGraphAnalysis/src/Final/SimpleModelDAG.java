@@ -113,15 +113,8 @@ public class SimpleModelDAG {
 	
 	public static int getInDegree() {
 //		return din;
-		
-		int inD;
-//		do {
-//			inD = poissonDistribution.sample();
-//		} while (inD < 1);
-		
-		inD = poissonDistribution.sample();
-		++inD;
-		
+				
+		int inD = poissonDistribution.sample() + 1;
 		return inD;
 		
 		/*

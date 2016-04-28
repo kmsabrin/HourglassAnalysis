@@ -846,11 +846,11 @@ public class DependencyDAG {
 	public void printNetworkProperties() {
 		for (String s: nodes) {
 //			if (normalizedPathCentrality.get(s) < 0.4) continue;
-			System.out.print("Node: " + s + "\t");
-			System.out.print("Complexity: " + numOfSourcePath.get(s) + "\t");
-			System.out.print("Generality: " + numOfTargetPath.get(s) + "\t");
-			System.out.print("Location: " + location.get(s) + "\t");
-			System.out.print("Path Centrality: " + normalizedPathCentrality.get(s) * nTotalPath + "\t");
+//			System.out.print("Node: " + s + "\t");
+//			System.out.print("Complexity: " + numOfSourcePath.get(s) + "\t");
+//			System.out.print("Generality: " + numOfTargetPath.get(s) + "\t");
+//			System.out.print("Location: " + location.get(s) + "\t");
+//			System.out.print("Path Centrality: " + normalizedPathCentrality.get(s) * nTotalPath + "\t");
 //			System.out.print(inDegree.get(s) + "\t");
 //			System.out.print(outDegree.get(s) + "\t");
 //			System.out.print(pagerankTargetCompression.get(s) + "\t");
@@ -859,20 +859,21 @@ public class DependencyDAG {
 //			System.out.print(iCentrality.get(s) + "\t");
 //			System.out.print(sourcesReachable.get(s) + "\t");
 //			System.out.print(targetsReachable.get(s) + "\t");
-			System.out.println();
+			System.out.println(s + "\t" + (normalizedPathCentrality.get(s) * nTotalPath));
+//			System.out.println();
 		}
 		
 		
 		System.out.println("Total path: " + nTotalPath);
 		
 		for (String s : nodes) {
-			if (depends.containsKey(s)) {
-				System.out.print(s + " depends on ");
-				for (String r : depends.get(s)) {
-					System.out.print("\t" + r);
-				}
-				System.out.println();
-			}
+//			if (depends.containsKey(s)) {
+//				System.out.print(s + " depends on ");
+//				for (String r : depends.get(s)) {
+//					System.out.print("\t" + r);
+//				}
+//				System.out.println();
+//			}
 			
 //			if (serves.containsKey(s)) {
 //				System.out.print(s + " serves ");

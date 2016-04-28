@@ -134,13 +134,35 @@ public class StatisticalUtilTest {
 //			System.out.println(normalDistribution.sample());
 //		}
 		
-		byte aBytes[] = new byte[100];
+//		byte aBytes[] = new byte[100];
+//		
+//		for (int i = 0; i < 100; ++i) {
+//			aBytes[i] = (byte)(i);
+//		}
+//		
+//		Files.write(Paths.get("binfile.txt"), aBytes); //creates, overwrites
 		
-		for (int i = 0; i < 100; ++i) {
-			aBytes[i] = (byte)(i);
+		Scanner scanner = new Scanner(new File("ci-test.txt"));
+		
+		double a[] = new double[100];
+		double b[] = new double[100];
+		int i = 0;
+		while (scanner.hasNext()) {
+//			System.out.println(scanner.next());
+//			System.out.println(scanner.next());
+			a[i] = Double.valueOf(scanner.next());
+			b[i] = Double.valueOf(scanner.next());
+			++i;
 		}
 		
-		Files.write(Paths.get("binfile.txt"), aBytes); //creates, overwrites
+		double mA = StatUtils.mean(a);
+		double mB = StatUtils.mean(b);
+		double ciA = ConfidenceInterval.getConfidenceInterval(a);
+		double ciB = ConfidenceInterval.getConfidenceInterval(b);
+
+		System.out.println(mA + "\t" + Math.sqrt(StatUtils.variance(a)) + "\t" + ciA);
+		System.out.println(mB + "\t" + Math.sqrt(StatUtils.variance(b)) + "\t" + ciB);
+		scanner.close();
 	}
 	
 	

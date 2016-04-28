@@ -5,6 +5,7 @@ import java.io.PrintWriter;
 
 public class FlattenNetwork {
 	static double flatNetworkCoreSize = -1;
+	static boolean isProcessingFlat = false;
 	private static void writeFlatten(DependencyDAG dependencyDAG) throws Exception {
 		PrintWriter pw = new PrintWriter(new File("flat_networks//current_flat.txt"));
 		for (String s: dependencyDAG.nodes) {
@@ -31,7 +32,9 @@ public class FlattenNetwork {
 		DependencyDAG flatDAG = new DependencyDAG("flat_networks//current_flat.txt");
 //		flatDAG.printNetworkProperties();
 		CoreDetection.fullTraverse = false;
+		isProcessingFlat = true;
 		CoreDetection.getCore(flatDAG, "flatDAG");
+		isProcessingFlat = false;
 		FlattenNetwork.flatNetworkCoreSize = CoreDetection.minCoreSize;
 	}
 }
