@@ -336,7 +336,7 @@ public class Manager {
 		}
 	}
 	
-	private static void runSyntheticStatisticalSignificanceTests() throws Exception {
+	private static void runSyntheticStatisticalSignificanceTests(int nT, int nI, int nS) throws Exception {
 		DependencyDAG.isSynthetic = true;
 		DependencyDAG.isWeighted = false;
 		DependencyDAG.isSimpleModel = true;
@@ -352,13 +352,13 @@ public class Manager {
 		for (String din : dins) {
 			for (String a : alphas) {
 //				System.out.println("alpha=" + a + "\t" + "din=" + din );
-				int nT = 80;
-				int nI = 40;
-				int nS = 80;
+//				int nT = 333;
+//				int nI = 333;
+//				int nS = 333;
 				String ratio = "-1";
 				String networkID = DAGType + "r" + ratio + "a" + a + "d" + din;
 				
-				int nRun = 20;
+				int nRun = 100;
 				double coreSizes[] = new double[nRun];
 				double hScores[] = new double[nRun];
 				double nodeCoverages[] = new double[nRun];
@@ -475,9 +475,16 @@ public class Manager {
 //		Manager.doRealNetworkAnalysis();
 //		Manager.doToyNetworkAnalysis();
 //		Manager.measureTauEffectOnRealNetwork();
-		Manager.runSyntheticStatisticalSignificanceTests();
 //		Manager.runSyntheticStatisticalSignificanceTestsForTau();
-		
+
+		Manager.runSyntheticStatisticalSignificanceTests(250, 250, 500);
+		Manager.runSyntheticStatisticalSignificanceTests(500, 250, 250);
+		Manager.runSyntheticStatisticalSignificanceTests(250, 500, 250);
+		Manager.runSyntheticStatisticalSignificanceTests(400, 200, 400);
+
+		SimpleModelDAG.isPoisson = false;
+		Manager.runSyntheticStatisticalSignificanceTests(333, 333, 333);
+				
 //		Manager.doSyntheticNetworkAnalysis();
 //		Manager.checkNewHGSampleNetworks();
 //		randomizationTests();

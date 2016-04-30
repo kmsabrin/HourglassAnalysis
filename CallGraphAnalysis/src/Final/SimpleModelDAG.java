@@ -17,6 +17,7 @@ public class SimpleModelDAG {
 	static double alpha = 0.0;
 	static boolean alphaNegative = false;
 	static boolean isMultigraph = false;
+	static boolean isPoisson = true;
 	
 //	real network matching
 	static int nT = 3; // no. of (T)arget nodes
@@ -113,9 +114,13 @@ public class SimpleModelDAG {
 	
 	public static int getInDegree() {
 //		return din;
-				
-		int inD = poissonDistribution.sample() + 1;
-		return inD;
+		if (isPoisson) {
+			int inD = poissonDistribution.sample() + 1;
+			return inD;
+		}
+		else {
+			return 2;
+		}
 		
 		/*
 		int values[] = {2, 3, 4, 5};
