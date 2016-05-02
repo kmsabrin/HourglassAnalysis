@@ -1,17 +1,13 @@
 package Final;
 
-import java.io.File;
-import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.PriorityQueue;
 import java.util.Random;
+import java.util.Set;
 import java.util.TreeSet;
 
 import org.apache.commons.math3.stat.StatUtils;
-import org.apache.commons.math3.stat.descriptive.moment.Mean;
 
 public class CoreDetection {
 	static HashSet<String> topRemovedWaistNodes = new HashSet();
@@ -150,11 +146,11 @@ public class CoreDetection {
 //			}
 //		}
 		
-		double meanLocation = 0;
-		for (String s: tiedMaxPathCentralityNodes) {
-			meanLocation += dependencyDAG.location.get(s);
-		}
-		meanLocation /= tiedMaxPathCentralityNodes.size();
+//		double meanLocation = 0;
+//		for (String s: tiedMaxPathCentralityNodes) {
+//			meanLocation += dependencyDAG.location.get(s);
+//		}
+//		meanLocation /= tiedMaxPathCentralityNodes.size();
 		
 //		/** Detect exact path equivalent nodes - 2 **/
 		HashSet<String> alreadyInPES = new HashSet();
@@ -203,10 +199,10 @@ public class CoreDetection {
 		for (int equivalenceKey: pathEquivalentNodeSet2.keySet()) {
 //			System.out.print("Rank " + nodeRank);
 			
-			// randomize retrieval
-			int randomKey = new Random(System.nanoTime()).nextInt(nTiedNodes);
+//			randomize retrieval
+//			int randomKey = new Random(System.nanoTime()).nextInt(nTiedNodes);
 //			System.out.println(nTiedNodes + "\t" + randomKey + "\t" + equivalenceKey);
-//			int randomKey = equivalenceKey;
+			int randomKey = equivalenceKey;
 			
 			TreeSet<String> equivalentNodes = pathEquivalentNodeSet2.get(randomKey);
 //			System.out.println(equivalentNodes + "\t" + maxPathCovered);
@@ -296,6 +292,23 @@ public class CoreDetection {
 		}
 		coreSet.remove(suboptimalCores);
 		
+//		System.out.println(maxCoreCoverage + "\t" + minCoreSize + "\t" + optimalCoreCount);
+		
+		if (coreSet.size() > 1) {
+			// find average jaccard distance between cores
+			int sz = coreSet.size();
+			double distances[] = new double[(sz * (sz - 1)) / 2];
+			ArrayList<TreeSet<String>> traversalList = new ArrayList(coreSet.keySet());
+			int idx = 0;
+			for (int i = 0; i < traversalList.size(); ++i) {
+				for (int j = i + 1; j < traversalList.size(); ++j) {
+					distances[idx++] = jaccardDistance(traversalList.get(i), traversalList.get(j));
+				}
+			}
+			
+//			System.out.println("Mean: " + StatUtils.mean(distances) + " St D: " + Math.sqrt(StatUtils.variance(distances)));
+		}
+		
 //		double minST = Math.min(dependencyDAG.nSources, dependencyDAG.nTargets);
 //		System.out.println(minST);
 //		hScoreDenominator = minST;
@@ -309,7 +322,7 @@ public class CoreDetection {
 //		System.out.println("Sample Core: " + sampleCore);
 		
 		/* not needed because we are not utilizing the path statistics, only reachability and location*/
- //		topRemovedWaistNodes.clear();
+//		topRemovedWaistNodes.clear();
 //		dependencyDAG.numOfTargetPath.clear();
 //		dependencyDAG.numOfSourcePath.clear();
 //		dependencyDAG.loadPathStatistics();
@@ -321,7 +334,7 @@ public class CoreDetection {
 //			System.out.println("Min core size: " + minCoreSize);
 //			System.out.println("Node Coverage: " + nodeCoverage);
 //			System.out.println("WeightedCoreLocation: " + weightedCoreLocation);
-	}
+		}
 	}
 	
 /*	public static void heuristicWaistDetection(DependencyDAG dependencyDAG, String filePath) throws Exception {
@@ -630,7 +643,7 @@ public class CoreDetection {
 	}
 */
 	
-	public static void getNodeCoverage(DependencyDAG dependencyDAG, TreeSet<String> sampleCore) {
+	public static void getNodeCoverage2(DependencyDAG dependencyDAG, TreeSet<String> sampleCore) {
 		coreNodeCoverage = new HashSet();
 		coreServerCoverage = new HashSet();
 		coreDependentCoverage = new HashSet();
@@ -670,6 +683,32 @@ public class CoreDetection {
 		coreNodeCoverage.addAll(coreDependentCoverage);
 		coreNodeCoverage.addAll(coreServerCoverage);
 		nodeCoverage = coreNodeCoverage.size() * 1.0 / dependencyDAG.nodes.size();
+	}
+	
+	public static void getNodeCoverage(DependencyDAG dependencyDAG, TreeSet<String> sampleCore) {
+		coreNodeCoverage = new HashSet();
+		for (String s : sampleCore) {
+			dependencyDAG.visited.clear();
+			dependencyDAG.reachableUpwardsNodes(s); // how many nodes are using her
+			coreNodeCoverage.addAll(dependencyDAG.visited);
+			dependencyDAG.visited.clear();
+			dependencyDAG.reachableDownwardsNodes(s); // how many nodes are using her
+			coreNodeCoverage.addAll(dependencyDAG.visited);
+		}
+	
+		double numerator = 0;
+		double denominator = 0;
+		for (String s: dependencyDAG.nodes) {
+			dependencyDAG.checkReach(s);
+			if (dependencyDAG.canReachSource && dependencyDAG.canReachTarget) {
+				++denominator;
+				if (coreNodeCoverage.contains(s)) {
+					++numerator;
+				}
+			}
+		}
+		
+		nodeCoverage = numerator / denominator;
 	}
 	
 /*	public static void nodeCentralityWRTWaist(DependencyDAG dependencyDAG) {
@@ -755,4 +794,13 @@ public class CoreDetection {
 		return !(requiredPathCover > cumulativePathCover);
 	}
 	
+	private static double jaccardDistance(Set<String> a, Set<String> b) {
+		HashSet<String> union = new HashSet();
+		union.addAll(a);
+		union.addAll(b);
+		HashSet<String> intersection = new HashSet(a);
+		intersection.retainAll(b);
+//		System.out.println(a + "\t" + b + "\t" + (intersection.size() * 1.0 / union.size()));
+		return intersection.size() * 1.0 / union.size();
+	}
 }

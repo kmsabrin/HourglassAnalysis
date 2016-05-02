@@ -92,6 +92,8 @@ public class Manager {
 			loadLargestWCC(netID);
 		}
 		
+//		loadLargestWCC(netID);
+		
 		if (netID.equals("rat")) {
 			netPath = "metabolic_networks//rat-consolidated.txt";
 //			netPath = "metabolic_networks//rat-links.txt";
@@ -125,13 +127,13 @@ public class Manager {
 		
 //		generateSyntheticFromReal(dependencyDAG);
 		
-//		printNetworkStat(dependencyDAG);
+		printNetworkStat(dependencyDAG);
 //		dependencyDAG.printNetworkProperties();
 		
 		
 //		DistributionAnalysis.printEdgeList(dependencyDAG, netID);
-//		DistributionAnalysis.getAverageInOutDegree(dependencyDAG);
-//		DistributionAnalysis.getPathLength(dependencyDAG);
+		DistributionAnalysis.getAverageInOutDegree(dependencyDAG);
+		DistributionAnalysis.getPathLength(dependencyDAG);
 //		DistributionAnalysis.getDegreeHistogram(dependencyDAG);
 //		DistributionAnalysis.getDegreeHistogramSpecialized(dependencyDAG);
 //		DistributionAnalysis.findWeaklyConnectedComponents(dependencyDAG, netID);		
@@ -163,9 +165,9 @@ public class Manager {
 //		Flattening
 //		dependencyDAG.resetAuxiliary();
 //		printNetworkStat(dependencyDAG);
-//		FlattenNetwork.makeAndProcessFlat(dependencyDAG);	
+		FlattenNetwork.makeAndProcessFlat(dependencyDAG);	
 		CoreDetection.hScore = (1.0 - (realCore / FlattenNetwork.flatNetworkCoreSize));
-//		System.out.println("H-Score: " + CoreDetection.hScore);
+		System.out.println("H-Score: " + CoreDetection.hScore);
 	}
 	
 	/*
@@ -342,9 +344,9 @@ public class Manager {
 		DependencyDAG.isSimpleModel = true;
 		String DAGType = "SimpleModelDAG";
 
-		String alphas[] = { "-1", "-0.8", "-0.6", "-0.4", "-0.2", "0", "0.2", "0.4", "0.6", "0.8", "1" };
+		String alphas[] = { "-1", "-0.8", "-0.6", "-0.4", "-0.2", "0", "0.2", "0.4", "0.6", "0.8", "1", "2", "3" };
 //		String alphas[] = {"-1", "0", "1"};
-//		String alphas[] = {"1"};
+//		String alphas[] = {"5"};
 
 //		String dins[] = { "1", "2", "3", "4", "5" };
 		String dins[] = {"1"};
@@ -358,7 +360,7 @@ public class Manager {
 				String ratio = "-1";
 				String networkID = DAGType + "r" + ratio + "a" + a + "d" + din;
 				
-				int nRun = 100;
+				int nRun = 20;
 				double coreSizes[] = new double[nRun];
 				double hScores[] = new double[nRun];
 				double nodeCoverages[] = new double[nRun];
@@ -477,13 +479,12 @@ public class Manager {
 //		Manager.measureTauEffectOnRealNetwork();
 //		Manager.runSyntheticStatisticalSignificanceTestsForTau();
 
-		Manager.runSyntheticStatisticalSignificanceTests(250, 250, 500);
-		Manager.runSyntheticStatisticalSignificanceTests(500, 250, 250);
-		Manager.runSyntheticStatisticalSignificanceTests(250, 500, 250);
-		Manager.runSyntheticStatisticalSignificanceTests(400, 200, 400);
-
+//		Manager.runSyntheticStatisticalSignificanceTests(250, 250, 500);
+//		Manager.runSyntheticStatisticalSignificanceTests(500, 250, 250);
+//		Manager.runSyntheticStatisticalSignificanceTests(250, 500, 250);
+//		Manager.runSyntheticStatisticalSignificanceTests(400, 200, 400);
 		SimpleModelDAG.isPoisson = false;
-		Manager.runSyntheticStatisticalSignificanceTests(333, 333, 333);
+		Manager.runSyntheticStatisticalSignificanceTests(67, 67, 67);
 				
 //		Manager.doSyntheticNetworkAnalysis();
 //		Manager.checkNewHGSampleNetworks();

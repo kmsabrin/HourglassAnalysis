@@ -276,11 +276,19 @@ public class DependencyDAG {
 					// compiler generated
 					continue;
 				}
+				
+//				if (largestWCCNodes.contains(server) == false || largestWCCNodes.contains(dependent) == false) {
+//					continue;
+//				}
 			}
 			else if (isClassDependency) {
 				// for metabolic and synthetic networks
 				server = tokens[0];
 				dependent = tokens[1];
+				
+//				if (largestWCCNodes.contains(server) == false || largestWCCNodes.contains(dependent) == false) {
+//					continue;
+//				}
 			}
 			else if (isSynthetic || isToy) {
 				if (isWeighted) {

@@ -247,6 +247,7 @@ public class SimpleModelDAG {
 				
 				if (isMultigraph == false && edgeWeights.containsKey(str)) {
 					--j;
+//					System.out.println("Collision!");
 					continue;
 				}
 				
