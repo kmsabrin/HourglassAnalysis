@@ -299,7 +299,7 @@ public class Manager {
 				
 				for (int i = 0; i < nRun; ++i) {
 					SimpleModelDAG.generateSimpleModel(Double.parseDouble(a), Integer.parseInt(din), nT, nI, nS, Double.parseDouble(ratio));
-					SimpleModelDAG.initNodeIdentifiers(nT, nI, nS);
+					SimpleModelDAG.initNodeIdentifiers(nT, nI, nS, Integer.parseInt(din));
 					System.out.println("Model Generated for run " + i );
 				
 					
@@ -338,20 +338,24 @@ public class Manager {
 		}
 	}
 	
-	private static void runSyntheticStatisticalSignificanceTests(int nT, int nI, int nS) throws Exception {
+	private static void runSyntheticStatisticalSignificanceTests(int nT, int nI, int nS, int din) throws Exception {
 		DependencyDAG.isSynthetic = true;
 		DependencyDAG.isWeighted = false;
 		DependencyDAG.isSimpleModel = true;
 		String DAGType = "SimpleModelDAG";
 
-		String alphas[] = { "-1", "-0.8", "-0.6", "-0.4", "-0.2", "0", "0.2", "0.4", "0.6", "0.8", "1", "2", "3" };
+		String alphas[] = { "-2", "-1.8", "-1.6", "-1.4", "-1.2",
+				            "-1", "-0.8", "-0.6", "-0.4", "-0.2", 
+				            "0", 
+				            "0.2", "0.4", "0.6", "0.8", "1", 
+				            "1.2", "1.4", "1.6", "1.8", "2"};
 //		String alphas[] = {"-1", "0", "1"};
-//		String alphas[] = {"5"};
+//		String alphas[] = {"-2"};
 
 //		String dins[] = { "1", "2", "3", "4", "5" };
-		String dins[] = {"1"};
-			
-		for (String din : dins) {
+//		String dins[] = {"1"};
+//		for (String din : dins) {
+		
 			for (String a : alphas) {
 //				System.out.println("alpha=" + a + "\t" + "din=" + din );
 //				int nT = 333;
@@ -370,8 +374,8 @@ public class Manager {
 				
 				int idx = 0;
 				for (int i = 0; i < nRun; ++i) {
-					SimpleModelDAG.generateSimpleModel(Double.parseDouble(a), Integer.parseInt(din), nT, nI, nS, Double.parseDouble(ratio));
-					SimpleModelDAG.initNodeIdentifiers(nT, nI, nS);
+					SimpleModelDAG.generateSimpleModel(Double.parseDouble(a), din, nT, nI, nS, Double.parseDouble(ratio));
+					SimpleModelDAG.initNodeIdentifiers(nT, nI, nS, din);
 //					System.out.println("Model Generated");
 					
 //					DependencyDAG.resetFlags();
@@ -416,7 +420,7 @@ public class Manager {
 				+ mNC + " " + ciNC + " " + mHS + " " + ciHS + " " + mWCL + " " + ciWCL);
 			}
 			System.out.println();
-		}
+//		}
 	}
 	
 //	static double randomHScores[] = new double[100];
@@ -477,18 +481,34 @@ public class Manager {
 //		Manager.doRealNetworkAnalysis();
 //		Manager.doToyNetworkAnalysis();
 //		Manager.measureTauEffectOnRealNetwork();
-//		Manager.runSyntheticStatisticalSignificanceTestsForTau();
 
-//		Manager.runSyntheticStatisticalSignificanceTests(250, 250, 500);
-//		Manager.runSyntheticStatisticalSignificanceTests(500, 250, 250);
-//		Manager.runSyntheticStatisticalSignificanceTests(250, 500, 250);
-//		Manager.runSyntheticStatisticalSignificanceTests(400, 200, 400);
-		SimpleModelDAG.isPoisson = false;
-		Manager.runSyntheticStatisticalSignificanceTests(67, 67, 67);
+//		curve 1
+//		Manager.runSyntheticStatisticalSignificanceTests(333, 333, 333, 1);
 				
-//		Manager.doSyntheticNetworkAnalysis();
-//		Manager.checkNewHGSampleNetworks();
-//		randomizationTests();
+//		curve 2
+//		SimpleModelDAG.isPoisson = false;
+//		Manager.runSyntheticStatisticalSignificanceTests(333, 333, 333, 2);
+
+//		curve 3
+//		Manager.runSyntheticStatisticalSignificanceTests(333, 333, 333, 3);
+		
+//		curve 4
+//		Manager.runSyntheticStatisticalSignificanceTests(250, 250, 500, 1);
+		
+//		curve 5
+//		Manager.runSyntheticStatisticalSignificanceTests(500, 250, 250, 1);
+
+//		curve 6
+//		Manager.runSyntheticStatisticalSignificanceTests(250, 500, 250, 1);
+
+//		curve 7
+//		Manager.runSyntheticStatisticalSignificanceTests(400, 200, 400, 1);
+
+//		curve Toy
+		Manager.runSyntheticStatisticalSignificanceTests(66, 66, 66, 1);
+		SimpleModelDAG.isPoisson = false;
+		Manager.runSyntheticStatisticalSignificanceTests(66, 66, 66, 2);
+
 		System.out.println("Done!");
 	}
 }

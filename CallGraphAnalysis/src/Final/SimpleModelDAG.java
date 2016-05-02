@@ -119,7 +119,7 @@ public class SimpleModelDAG {
 			return inD;
 		}
 		else {
-			return 2;
+			return din;
 		}
 		
 		/*
@@ -184,6 +184,7 @@ public class SimpleModelDAG {
 	
 	public static void initiateRandomWeightedCollection(int nElements, ZipfDistribution zipfDistribution) {
 		randomWeightedCollection = new TreeMap();
+//		randomWeightedCollection.clear();
 		randomWeightedCollectionTotal = 0;
 		for (int i = 1; i <= nElements; ++i) {
 			double weight = -1; 
@@ -200,6 +201,8 @@ public class SimpleModelDAG {
 	}
 	
 	public static void generateSimpleModelDAG(PrintWriter pw) throws Exception {	
+//		randomWeightedCollection = new TreeMap();
+		double timeSum = 0;
 		for (int productIndex = sS - 1; productIndex >= 0; --productIndex) {	
 //			System.out.println(productIndex);
 			
@@ -221,10 +224,16 @@ public class SimpleModelDAG {
 				else { // zipf distribution
 //					System.out.println("Here: " + (endNodeIndex - startNodeIndex + 1) + "\t" + alpha);
 					zipfDistribution = new ZipfDistribution(endNodeIndex - startNodeIndex + 1, alpha);
+//					double startTime = System.nanoTime();
 					initiateRandomWeightedCollection(endNodeIndex - startNodeIndex + 1, zipfDistribution);
+//					double endTime = System.nanoTime();
+//					timeSum += (endTime - startTime);
+//					System.out.println("Elapsed A: " + ((endTime - startTime) / 1000000000.0) );					
+
 				}
 			}
 			
+			double startTime = System.nanoTime();
 			int k = getInDegree();
 //			System.out.println(k);
 			k = Math.min(k, endNodeIndex - startNodeIndex + 1);
@@ -245,10 +254,21 @@ public class SimpleModelDAG {
 				
 				String str = substrateIndex + " " + productIndex;
 				
-				if (isMultigraph == false && edgeWeights.containsKey(str)) {
-					--j;
+//				if (isMultigraph == false && edgeWeights.containsKey(str)) {
+//					--j;
 //					System.out.println("Collision!");
-					continue;
+//					continue;
+//				}
+				
+				while (isMultigraph == false && edgeWeights.containsKey(str)) {
+					++substrateIndex;
+					if (substrateIndex > endNodeIndex) {
+						substrateIndex = sS + random.nextInt(nS);
+//						System.out.println("Oh wow!");
+					}
+					
+					str = substrateIndex + " " + productIndex;
+//					System.out.println("Collision!");
 				}
 				
 //				System.out.println(substrateIndex + " " + productIndex);
@@ -260,19 +280,11 @@ public class SimpleModelDAG {
 				else {
 					edgeWeights.put(str, 1);
 				}
-				
-				
-//				pw.println(productIndex + " -> " + substrateIndex + ";");
-
-				/*
-				if (outDegree.containsKey(substrateIndex)) {
-					outDegree.put(substrateIndex, outDegree.get(substrateIndex) + 1);
-				} 
-				else {
-					outDegree.put(substrateIndex, 1);
-				}
-				*/
 			}
+
+//			double endTime = System.nanoTime();
+//			System.out.println("Elapsed B: " + ((endTime - startTime) / 1000000000.0) );
+
 		}
 		
 		for (String key: edgeWeights.keySet()) {
@@ -281,22 +293,25 @@ public class SimpleModelDAG {
 		}
 		
 		pw.close();
+		
+//		System.out.println("Time Sum: " + (timeSum / 1000000000.0) );
 	}
 	
-	public static void initNodeIdentifiers(int nT, int nI, int nS) {
+	public static void initNodeIdentifiers(int nT, int nI, int nS, int din) {
 		SimpleModelDAG.nT = nT;
 		SimpleModelDAG.nI = nI;
 		SimpleModelDAG.nS = nS;
 		SimpleModelDAG.sT = 0; // start of Target
 		SimpleModelDAG.sI = nT; // start of Intermediate
 		SimpleModelDAG.sS = nT + nI; // start of Source
+		SimpleModelDAG.din = din;
 	}
 	
 	public static void generateSimpleModel(double alpha, int din, int nT, int nI, int nS, double ratio) throws Exception {
 		SimpleModelDAG.alpha = alpha;
 		SimpleModelDAG.din = din;
 		SimpleModelDAG.ratio = ratio;
-		initNodeIdentifiers(nT, nI, nS);
+		initNodeIdentifiers(nT, nI, nS, din);
 		
 		poissonDistribution = new PoissonDistribution(din);
 		
