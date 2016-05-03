@@ -319,7 +319,7 @@ public class CoreDetection {
 
 //		System.out.println(coreSet.size());
 		sampleCore = coreSet.keySet().iterator().next();
-//		System.out.println("Sample Core: " + sampleCore);
+		System.out.println("Sample Core: " + sampleCore);
 		
 		/* not needed because we are not utilizing the path statistics, only reachability and location*/
 //		topRemovedWaistNodes.clear();
@@ -330,10 +330,10 @@ public class CoreDetection {
 		coreLocationAnalysis(dependencyDAG);
 				
 		if (!FlattenNetwork.isProcessingFlat) {
-//			System.out.println("Number of coreSet: " + optimalCoreCount);
-//			System.out.println("Min core size: " + minCoreSize);
-//			System.out.println("Node Coverage: " + nodeCoverage);
-//			System.out.println("WeightedCoreLocation: " + weightedCoreLocation);
+			System.out.println("Number of coreSet: " + optimalCoreCount);
+			System.out.println("Min core size: " + minCoreSize);
+			System.out.println("Node Coverage: " + nodeCoverage);
+			System.out.println("WeightedCoreLocation: " + weightedCoreLocation);
 		}
 	}
 	
@@ -764,7 +764,7 @@ public class CoreDetection {
 //		System.out.println(weightedCoreLocation);
 		
 		for (String s: sampleCore) {
-			double loc = dependencyDAG.location.get(s);
+			double loc = representativeLocation.get(s);
 			double weight = averagePathCovered.get(s) / corePathContribution;
 //			System.out.println(loc + "\t" + weight);
 			

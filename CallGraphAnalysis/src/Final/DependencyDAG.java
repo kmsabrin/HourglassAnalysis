@@ -875,13 +875,13 @@ public class DependencyDAG {
 		System.out.println("Total path: " + nTotalPath);
 		
 		for (String s : nodes) {
-//			if (depends.containsKey(s)) {
-//				System.out.print(s + " depends on ");
-//				for (String r : depends.get(s)) {
-//					System.out.print("\t" + r);
-//				}
-//				System.out.println();
-//			}
+			if (depends.containsKey(s)) {
+				System.out.print(s + " depends on ");
+				for (String r : depends.get(s)) {
+					System.out.print("\t" + r);
+				}
+				System.out.println();
+			}
 			
 //			if (serves.containsKey(s)) {
 //				System.out.print(s + " serves ");

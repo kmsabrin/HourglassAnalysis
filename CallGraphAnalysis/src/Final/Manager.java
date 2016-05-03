@@ -81,10 +81,10 @@ public class Manager {
 //		String netID = "monkey";
 		
 //		String netID = "commons-math";
-//		String netID = "openssh-39";
+		String netID = "openssh-39";
 //		String netID = "apache-commons-3.4";
 		
-		String netID = "court";
+//		String netID = "court";
 		
 		DependencyDAG.resetFlags();
 		
@@ -104,8 +104,8 @@ public class Manager {
 			DependencyDAG.isMetabolic = true;
 		}
 		else if (netID.equals("court")) {
-//			CourtCaseCornellParser.caseTopic = "abortion";
-			CourtCaseCornellParser.caseTopic = "pension";
+			CourtCaseCornellParser.caseTopic = "abortion";
+//			CourtCaseCornellParser.caseTopic = "pension";
 			CourtCaseCornellParser.loadCuratedCaseIDs();
 			netPath = "supremecourt_networks//court.txt";
 			DependencyDAG.isCourtcase = true;
@@ -255,7 +255,7 @@ public class Manager {
 	
 	private static void doToyNetworkAnalysis() throws Exception {
 		DependencyDAG.isToy = true;
-		String toyDAGName = "toy_dag_paper_2";
+		String toyDAGName = "toy_dag_paper";
 		DependencyDAG toyDependencyDAG = new DependencyDAG("toy_networks//" + toyDAGName + ".txt");
 //		DependencyDAG toyDependencyDAG = new DependencyDAG("synthetic_callgraphs//draw//SimpleModelDAGr-1a3d2.0.txt");
 
@@ -263,6 +263,7 @@ public class Manager {
 //		printNetworkStat(toyDependencyDAG);
 		toyDependencyDAG.printNetworkProperties();
 		
+		CoreDetection.fullTraverse = true;
 		CoreDetection.getCore(toyDependencyDAG, netID);
 		double realCore = CoreDetection.minCoreSize;
 		
@@ -364,7 +365,7 @@ public class Manager {
 				String ratio = "-1";
 				String networkID = DAGType + "r" + ratio + "a" + a + "d" + din;
 				
-				int nRun = 20;
+				int nRun = 100;
 				double coreSizes[] = new double[nRun];
 				double hScores[] = new double[nRun];
 				double nodeCoverages[] = new double[nRun];
@@ -479,7 +480,7 @@ public class Manager {
 	
 	public static void main(String[] args) throws Exception {		
 //		Manager.doRealNetworkAnalysis();
-//		Manager.doToyNetworkAnalysis();
+		Manager.doToyNetworkAnalysis();
 //		Manager.measureTauEffectOnRealNetwork();
 
 //		curve 1
@@ -505,9 +506,9 @@ public class Manager {
 //		Manager.runSyntheticStatisticalSignificanceTests(400, 200, 400, 1);
 
 //		curve Toy
-		Manager.runSyntheticStatisticalSignificanceTests(66, 66, 66, 1);
-		SimpleModelDAG.isPoisson = false;
-		Manager.runSyntheticStatisticalSignificanceTests(66, 66, 66, 2);
+//		Manager.runSyntheticStatisticalSignificanceTests(66, 66, 66, 1);
+//		SimpleModelDAG.isPoisson = false;
+//		Manager.runSyntheticStatisticalSignificanceTests(66, 66, 66, 2);
 
 		System.out.println("Done!");
 	}
