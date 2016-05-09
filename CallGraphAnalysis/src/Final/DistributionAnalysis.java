@@ -364,6 +364,6 @@ public class DistributionAnalysis {
 		}
 		
 		dependencyDAG.nDirectSourceTargetEdges = knt;
-//		System.out.println("Direct source to target edges: " + knt);
+		System.out.println("Direct source to target edges: " + knt);
 	}
 }

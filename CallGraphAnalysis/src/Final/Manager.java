@@ -104,8 +104,8 @@ public class Manager {
 			DependencyDAG.isMetabolic = true;
 		}
 		else if (netID.equals("court")) {
-			CourtCaseCornellParser.caseTopic = "abortion";
-//			CourtCaseCornellParser.caseTopic = "pension";
+//			CourtCaseCornellParser.caseTopic = "abortion";
+			CourtCaseCornellParser.caseTopic = "pension";
 			CourtCaseCornellParser.loadCuratedCaseIDs();
 			netPath = "supremecourt_networks//court.txt";
 			DependencyDAG.isCourtcase = true;
@@ -143,7 +143,7 @@ public class Manager {
 //		DistributionAnalysis.printCentralityDistribution(dependencyDAG, netID);
 //		DistributionAnalysis.printEdgeList(dependencyDAG, netID);
 //		DistributionAnalysis.printAllCentralities(dependencyDAG, netID);
-//		DistributionAnalysis.findNDirectSrcTgtBypasses(dependencyDAG, netID);
+		DistributionAnalysis.findNDirectSrcTgtBypasses(dependencyDAG, netID);
 
 		
 //		Core Detection
@@ -165,7 +165,7 @@ public class Manager {
 //		Flattening
 //		dependencyDAG.resetAuxiliary();
 //		printNetworkStat(dependencyDAG);
-		FlattenNetwork.makeAndProcessFlat(dependencyDAG);	
+//		FlattenNetwork.makeAndProcessFlat(dependencyDAG);	
 		CoreDetection.hScore = (1.0 - (realCore / FlattenNetwork.flatNetworkCoreSize));
 		System.out.println("H-Score: " + CoreDetection.hScore);
 	}
@@ -345,13 +345,13 @@ public class Manager {
 		DependencyDAG.isSimpleModel = true;
 		String DAGType = "SimpleModelDAG";
 
-		String alphas[] = { "-2", "-1.8", "-1.6", "-1.4", "-1.2",
-				            "-1", "-0.8", "-0.6", "-0.4", "-0.2", 
-				            "0", 
-				            "0.2", "0.4", "0.6", "0.8", "1", 
-				            "1.2", "1.4", "1.6", "1.8", "2"};
+//		String alphas[] = { "-2", "-1.8", "-1.6", "-1.4", "-1.2",
+//				            "-1", "-0.8", "-0.6", "-0.4", "-0.2", 
+//				            "0", 
+//				            "0.2", "0.4", "0.6", "0.8", "1", 
+//				            "1.2", "1.4", "1.6", "1.8", "2"};
 //		String alphas[] = {"-1", "0", "1"};
-//		String alphas[] = {"-2"};
+		String alphas[] = {"2"};
 
 //		String dins[] = { "1", "2", "3", "4", "5" };
 //		String dins[] = {"1"};
@@ -479,8 +479,8 @@ public class Manager {
 */	
 	
 	public static void main(String[] args) throws Exception {		
-//		Manager.doRealNetworkAnalysis();
-		Manager.doToyNetworkAnalysis();
+		Manager.doRealNetworkAnalysis();
+//		Manager.doToyNetworkAnalysis();
 //		Manager.measureTauEffectOnRealNetwork();
 
 //		curve 1

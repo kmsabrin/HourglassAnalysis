@@ -326,14 +326,15 @@ public class CoreDetection {
 //		dependencyDAG.numOfTargetPath.clear();
 //		dependencyDAG.numOfSourcePath.clear();
 //		dependencyDAG.loadPathStatistics();
+//		getNodeCoverage2(dependencyDAG, sampleCore);
 		getNodeCoverage(dependencyDAG, sampleCore);
 		coreLocationAnalysis(dependencyDAG);
 				
 		if (!FlattenNetwork.isProcessingFlat) {
-			System.out.println("Number of coreSet: " + optimalCoreCount);
-			System.out.println("Min core size: " + minCoreSize);
-			System.out.println("Node Coverage: " + nodeCoverage);
-			System.out.println("WeightedCoreLocation: " + weightedCoreLocation);
+//			System.out.println("Number of coreSet: " + optimalCoreCount);
+//			System.out.println("Min core size: " + minCoreSize);
+//			System.out.println("Node Coverage: " + nodeCoverage);
+//			System.out.println("WeightedCoreLocation: " + weightedCoreLocation);
 		}
 	}
 	
@@ -679,15 +680,18 @@ public class CoreDetection {
 		coreServerCoverage.removeAll(toRemove);
 		/******************/
 		
-		coreNodeCoverage.clear();
-		coreNodeCoverage.addAll(coreDependentCoverage);
-		coreNodeCoverage.addAll(coreServerCoverage);
+//		coreNodeCoverage.clear();
+//		coreNodeCoverage.addAll(coreDependentCoverage);
+//		coreNodeCoverage.addAll(coreServerCoverage);
 		nodeCoverage = coreNodeCoverage.size() * 1.0 / dependencyDAG.nodes.size();
+		
+		System.out.println(nodeCoverage + "\t" + coreNodeCoverage.size() + "\t" +  dependencyDAG.nodes.size());
 	}
 	
 	public static void getNodeCoverage(DependencyDAG dependencyDAG, TreeSet<String> sampleCore) {
 		coreNodeCoverage = new HashSet();
 		for (String s : sampleCore) {
+			System.out.println(dependencyDAG.isIntermediate(s));
 			dependencyDAG.visited.clear();
 			dependencyDAG.reachableUpwardsNodes(s); // how many nodes are using her
 			coreNodeCoverage.addAll(dependencyDAG.visited);
@@ -698,17 +702,26 @@ public class CoreDetection {
 	
 		double numerator = 0;
 		double denominator = 0;
+		double coveredS = 0;
+		double coveredT = 0;
+		double coveredI = 0;
 		for (String s: dependencyDAG.nodes) {
 			dependencyDAG.checkReach(s);
 			if (dependencyDAG.canReachSource && dependencyDAG.canReachTarget) {
 				++denominator;
 				if (coreNodeCoverage.contains(s)) {
 					++numerator;
+					if (dependencyDAG.isIntermediate(s)) ++coveredI;
+					if (dependencyDAG.isSource(s)) ++coveredS;
+					if (dependencyDAG.isTarget(s)) ++coveredT;
 				}
 			}
 		}
 		
 		nodeCoverage = numerator / denominator;
+		
+		System.out.println(nodeCoverage + "\t" + numerator + "\t" + denominator);
+		System.out.println(coveredT + "\t" + coveredI + "\t" + coveredS);
 	}
 	
 /*	public static void nodeCentralityWRTWaist(DependencyDAG dependencyDAG) {
