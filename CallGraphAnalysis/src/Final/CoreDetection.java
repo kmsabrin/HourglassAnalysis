@@ -132,7 +132,7 @@ public class CoreDetection {
 //		System.out.println();
 					
 //		HashMap<HashSet<String>, TreeSet<String>> pathEquivalentNodeSet = new HashMap();
-////		/** Detect exact path equivalent nodes - 1 **/
+//		/** Detect exact path equivalent nodes - 1 **/
 //		for (String s : tiedMaxPathCentralityNodes) {
 //			dependencyDAG.loadRechablity(s);
 //			HashSet<String> nodesReachable = dependencyDAG.nodesReachable.get(s);
@@ -685,13 +685,13 @@ public class CoreDetection {
 //		coreNodeCoverage.addAll(coreServerCoverage);
 		nodeCoverage = coreNodeCoverage.size() * 1.0 / dependencyDAG.nodes.size();
 		
-		System.out.println(nodeCoverage + "\t" + coreNodeCoverage.size() + "\t" +  dependencyDAG.nodes.size());
+//		System.out.println(nodeCoverage + "\t" + coreNodeCoverage.size() + "\t" +  dependencyDAG.nodes.size());
 	}
 	
 	public static void getNodeCoverage(DependencyDAG dependencyDAG, TreeSet<String> sampleCore) {
 		coreNodeCoverage = new HashSet();
 		for (String s : sampleCore) {
-			System.out.println(dependencyDAG.isIntermediate(s));
+//			System.out.println(dependencyDAG.isIntermediate(s));
 			dependencyDAG.visited.clear();
 			dependencyDAG.reachableUpwardsNodes(s); // how many nodes are using her
 			coreNodeCoverage.addAll(dependencyDAG.visited);
@@ -720,8 +720,8 @@ public class CoreDetection {
 		
 		nodeCoverage = numerator / denominator;
 		
-		System.out.println(nodeCoverage + "\t" + numerator + "\t" + denominator);
-		System.out.println(coveredT + "\t" + coveredI + "\t" + coveredS);
+//		System.out.println(nodeCoverage + "\t" + numerator + "\t" + denominator);
+//		System.out.println(coveredT + "\t" + coveredI + "\t" + coveredS);
 	}
 	
 /*	public static void nodeCentralityWRTWaist(DependencyDAG dependencyDAG) {

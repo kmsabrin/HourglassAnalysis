@@ -255,7 +255,7 @@ public class Manager {
 	
 	private static void doToyNetworkAnalysis() throws Exception {
 		DependencyDAG.isToy = true;
-		String toyDAGName = "toy_dag_paper";
+		String toyDAGName = "toy_dag_3";
 		DependencyDAG toyDependencyDAG = new DependencyDAG("toy_networks//" + toyDAGName + ".txt");
 //		DependencyDAG toyDependencyDAG = new DependencyDAG("synthetic_callgraphs//draw//SimpleModelDAGr-1a3d2.0.txt");
 
@@ -479,8 +479,8 @@ public class Manager {
 */	
 	
 	public static void main(String[] args) throws Exception {		
-		Manager.doRealNetworkAnalysis();
-//		Manager.doToyNetworkAnalysis();
+//		Manager.doRealNetworkAnalysis();
+		Manager.doToyNetworkAnalysis();
 //		Manager.measureTauEffectOnRealNetwork();
 
 //		curve 1
