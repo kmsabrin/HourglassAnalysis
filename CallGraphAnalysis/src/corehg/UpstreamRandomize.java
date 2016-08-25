@@ -46,7 +46,6 @@ public class UpstreamRandomize {
 //				}
 //			}
 //		}
-		
 		regenerateDAGProperties(dependencyDAG);
 	}
 	

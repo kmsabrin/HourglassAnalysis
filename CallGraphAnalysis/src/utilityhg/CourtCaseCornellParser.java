@@ -108,9 +108,7 @@ public class CourtCaseCornellParser {
 						else {
 							++kntSuffix;
 						}
-					}
-					
-					
+					}	
 				}
 				
 //				if (line.startsWith("25347") && c.startsWith("roe")) {

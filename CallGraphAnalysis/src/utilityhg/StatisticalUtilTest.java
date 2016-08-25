@@ -77,7 +77,6 @@ public class StatisticalUtilTest {
 			System.out.println(-1 / s1); 
 	}
 	
-	
 	public static void main(String[] args) throws Exception {
 //		pointLineDistance(1, 1, 5, 5, 3, 5);
 //		pointLineDistance(1, 0.608621667612025, 302, 0.9659671015314805, 30, 0.9381735677821894);

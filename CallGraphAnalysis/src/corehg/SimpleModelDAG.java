@@ -65,7 +65,6 @@ public class SimpleModelDAG {
 	
 	public static TreeMap<Integer, Integer> inDegreeHistogram;
 	public static int numOfNonzeroIndegreeNodes;
-	
 	public static int din = 2;
 	
 	public static NavigableMap<Double, Integer> randomWeightedCollection;

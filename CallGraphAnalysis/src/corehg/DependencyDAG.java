@@ -38,7 +38,6 @@ public class DependencyDAG {
 	public HashMap<String, Double> harmonicMeanPathCentrality;
 	public HashMap<String, Double> normalizedPathCentrality;
 	public HashMap<String, Integer> centralityRank;
-	
 	public HashMap<String, Double> iCentrality;
 	
 	public Map<String, Integer> outDegree;

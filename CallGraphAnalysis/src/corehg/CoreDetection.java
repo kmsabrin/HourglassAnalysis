@@ -383,7 +383,6 @@ public class CoreDetection {
 		}
 		
 //		System.out.println(requiredPathCover + "\t" + cumulativePathCover);
-	
 		return !(requiredPathCover > cumulativePathCover);
 	}
 	

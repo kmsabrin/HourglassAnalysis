@@ -51,7 +51,6 @@ public class ManagerSWPaper {
 //		DependencyDAG.printNetworkStat(dependencyDAG);
 //		dependencyDAG.printNetworkProperties();
 		
-		
 //		DistributionAnalysis.printEdgeList(dependencyDAG, netID);
 //		DistributionAnalysis.getAverageInOutDegree(dependencyDAG);
 //		DistributionAnalysis.getPathLength(dependencyDAG);

@@ -11,7 +11,6 @@ public class ConfidenceInterval {
 		for (double val : data) {
 			stats.addValue(val);
 		}
-
 		// Calculate 95% confidence interval
 		double ci = calcMeanCI(stats, 0.95);
 		// System.out.println(String.format("Mean: %f", stats.getMean()));

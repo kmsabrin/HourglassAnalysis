@@ -23,10 +23,11 @@ public class ExtractMetabolicNetwork {
 		Document doc = dBuilder.parse(inputFile);
 		doc.getDocumentElement().normalize();
 		// System.out.println("Root element :" + doc.getDocumentElement().getNodeName());
-
+		
 		NodeList reactionList = doc.getElementsByTagName("reaction");
 		// System.out.println("Number of reactions: " + reactionList.getLength());
 		TreeSet<String> compoundsInReactions = new TreeSet();
+		
 		for (int reactionIndex = 0; reactionIndex < reactionList.getLength(); reactionIndex++) {
 			Element reaction = (Element) reactionList.item(reactionIndex);
 			// System.out.println("Reaction id: " + reaction.getAttribute("id"));

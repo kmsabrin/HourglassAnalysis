@@ -20,6 +20,7 @@ import corehg.FlattenNetwork;
 import corehg.SimpleModelDAG;
 
 public class ManagerHGPaper {	
+	
 /*	private static void generateSyntheticFromReal(DependencyDAG dependencyDAG) throws Exception {
 		SimpleModelDAG.inDegreeHistogram = DistributionAnalysis.getDegreeHistogram(dependencyDAG);
 		SimpleModelDAG.numOfNonzeroIndegreeNodes = 0;

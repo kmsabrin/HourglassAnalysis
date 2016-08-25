@@ -90,7 +90,6 @@ public class TarjanSCC {
 	
 	public static void main(String[] args) throws Exception {
 		DependencyDAG G = new DependencyDAG(); 
-		
 //		PrintWriter pw = new PrintWriter(new File("metabolic_networks//rat-consolidated.txt"));		
 //		G.isMetabolic = true;
 //		G.loadCallGraph("metabolic_networks//rat-links.txt"); // "metabolic_networks//rat-links.txt"

@@ -19,7 +19,6 @@ public class DistributionAnalysis {
 	
 	private static void WCCHelper(String s, DependencyDAG dependencyDAG) {
 //		if (visited.contains(s)) return;
-		
 		++wccSize;
 		visited.add(s);
 		
