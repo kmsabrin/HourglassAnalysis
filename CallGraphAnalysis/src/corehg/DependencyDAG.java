@@ -897,6 +897,7 @@ public class DependencyDAG {
 	}
 	
 	public class PathCentralityComparator<String> implements Comparator<String> {
+		@Override
 		public int compare(String s1, String s2) {
 			double nPathThroughs1 = numOfSourcePath.get(s1) * numOfTargetPath.get(s1);
 			double nPathThroughs2 = numOfSourcePath.get(s2) * numOfTargetPath.get(s2);

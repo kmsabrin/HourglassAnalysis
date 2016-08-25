@@ -1,16 +1,10 @@
 package hgpaper;
 
 import java.io.File;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Random;
 import java.util.Scanner;
-import java.util.TreeSet;
-
 import org.apache.commons.math3.stat.StatUtils;
-import org.apache.commons.math3.stat.inference.TestUtils;
-
 import utilityhg.ConfidenceInterval;
 import utilityhg.CourtCaseCornellParser;
 import utilityhg.DistributionAnalysis;
@@ -312,7 +306,7 @@ public class ManagerHGPaper {
 				
 					
 					for (int j = minTau; j <= maxTau; j += 2) {
-						CoreDetection.pathCoverageTau = (double)j / 100.0;
+						CoreDetection.pathCoverageTau = j / 100.0;
 //						DependencyDAG.resetFlags();
 
 						DependencyDAG dependencyDAG = new DependencyDAG("synthetic_callgraphs//" + networkID + ".txt");
@@ -459,7 +453,7 @@ public class ManagerHGPaper {
 //		String data[] = {"openssh-39", "commons-math", "rat", "monkey", "court-abortion", "court-pension"};
 //		PrintWriter pw = new PrintWriter(new File("analysis//hscore-vs-tau-" + data[5] + ".txt"));
 		for (int i = 50; i <= 98; i += 2) {
-			CoreDetection.pathCoverageTau = (double)i / 100.0;
+			CoreDetection.pathCoverageTau = i / 100.0;
 			DependencyDAG.resetFlags();
 			doRealNetworkAnalysis();
 //			System.out.println(CoreDetection.hScore);

@@ -16,7 +16,8 @@ public class ConfidenceInterval {
 		// System.out.println(String.format("Mean: %f", stats.getMean()));
 		double lower = stats.getMean() - ci;
 		double upper = stats.getMean() + ci;
-		// System.out.println(String.format("Confidence Interval 95%%: %f, %f", lower, upper));
+		// System.out.println(String.format("Confidence Interval 95%%: %f, %f",
+		// lower, upper));
 		return ci;
 	}
 

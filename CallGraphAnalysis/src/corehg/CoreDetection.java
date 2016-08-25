@@ -186,7 +186,7 @@ public class CoreDetection {
 			topRemovedWaistNodes.remove(representative);
 
 //			conditional break for full recursive traversal.
-			if (fullTraverse == false || dependencyDAG.isSynthetic == true) {
+			if (fullTraverse == false || DependencyDAG.isSynthetic == true) {
 				break;
 			}
 //			break;

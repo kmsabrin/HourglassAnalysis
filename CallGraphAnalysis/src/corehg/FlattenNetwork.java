@@ -25,9 +25,9 @@ public class FlattenNetwork {
 //		System.out.println("Flattening");
 		writeFlatten(dependencyDAG);
 		
-		if (dependencyDAG.isSynthetic == false) { // for real networks only
-			dependencyDAG.isClassDependency = true;
-			dependencyDAG.isMetabolic = dependencyDAG.isCallgraph = dependencyDAG.isCourtcase = false;
+		if (DependencyDAG.isSynthetic == false) { // for real networks only
+			DependencyDAG.isClassDependency = true;
+			DependencyDAG.isMetabolic = DependencyDAG.isCallgraph = DependencyDAG.isCourtcase = false;
 		}
 		
 		DependencyDAG flatDAG = new DependencyDAG("flat_networks//current_flat.txt");

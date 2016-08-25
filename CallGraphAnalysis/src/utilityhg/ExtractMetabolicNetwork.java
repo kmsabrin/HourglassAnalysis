@@ -14,40 +14,46 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 public class ExtractMetabolicNetwork {
-	public static void parseMetabolicNetworkXML(String filePath) throws Exception {
-		PrintWriter pw = new PrintWriter(new File("metabolic_networks//monkey-links.txt"));
+	public static void parseMetabolicNetworkXML(String filePath)
+			throws Exception {
+		PrintWriter pw = new PrintWriter(new File(
+				"metabolic_networks//monkey-links.txt"));
 
 		File inputFile = new File(filePath);
 		DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
 		Document doc = dBuilder.parse(inputFile);
 		doc.getDocumentElement().normalize();
-		// System.out.println("Root element :" + doc.getDocumentElement().getNodeName());
-		
+		// System.out.println("Root element :" +
+		// doc.getDocumentElement().getNodeName());
+
 		NodeList reactionList = doc.getElementsByTagName("reaction");
-		// System.out.println("Number of reactions: " + reactionList.getLength());
+		// System.out.println("Number of reactions: " +
+		// reactionList.getLength());
 		TreeSet<String> compoundsInReactions = new TreeSet();
-		
+
 		for (int reactionIndex = 0; reactionIndex < reactionList.getLength(); reactionIndex++) {
 			Element reaction = (Element) reactionList.item(reactionIndex);
-			// System.out.println("Reaction id: " + reaction.getAttribute("id"));
+			// System.out.println("Reaction id: " +
+			// reaction.getAttribute("id"));
 			ArrayList<String> substrate = new ArrayList();
 			ArrayList<String> product = new ArrayList();
 			NodeList compoundList = reaction.getChildNodes();
-			for (int compoundIndex = 0; compoundIndex < compoundList.getLength(); ++compoundIndex) {
+			for (int compoundIndex = 0; compoundIndex < compoundList
+					.getLength(); ++compoundIndex) {
 				Node node = compoundList.item(compoundIndex);
 				if (node.getNodeType() == Node.ELEMENT_NODE) {
 					Element compound = (Element) node;
 					if (compound.getNodeName().equals("substrate")) {
 						substrate.add(compound.getAttribute("name"));
-					} 
-					else {
+					} else {
 						product.add(compound.getAttribute("name"));
 					}
-					// System.out.println(compound.getNodeName() + "\t" + compound.getAttribute("id") + "\t" + compound.getAttribute("name"));
+					// System.out.println(compound.getNodeName() + "\t" +
+					// compound.getAttribute("id") + "\t" +
+					// compound.getAttribute("name"));
 					compoundsInReactions.add(compound.getAttribute("name"));
-				} 
-				else {
+				} else {
 					// System.out.println(node.getTextContent());
 				}
 			}
@@ -58,23 +64,25 @@ public class ExtractMetabolicNetwork {
 				}
 			}
 
-//			if (reaction.getAttribute("type").equals("reversible")) {
-//				for (String s : substrate) {
-//					for (String p : product) {
-////						System.out.println(p + " " + s);
-//					}
-//				}
-//			}
+			// if (reaction.getAttribute("type").equals("reversible")) {
+			// for (String s : substrate) {
+			// for (String p : product) {
+			// // System.out.println(p + " " + s);
+			// }
+			// }
+			// }
 		}
-		
-//		for (String s: compoundsInReactions) {
-////			System.out.println(s);
-//		}
-		
+
+		// for (String s: compoundsInReactions) {
+		// // System.out.println(s);
+		// }
+
 		pw.close();
 	}
 
 	public static void main(String[] args) throws Exception {
-		parseMetabolicNetworkXML("metabolic_networks//mcc-kgml.xml"); // eco, rno, mcc
+		parseMetabolicNetworkXML("metabolic_networks//mcc-kgml.xml"); // eco,
+																		// rno,
+																		// mcc
 	}
 }

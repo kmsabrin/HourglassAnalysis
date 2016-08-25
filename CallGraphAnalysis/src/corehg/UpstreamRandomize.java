@@ -50,7 +50,7 @@ public class UpstreamRandomize {
 	}
 	
 	static void regenerateDAGProperties(DependencyDAG dependencyDAG) {
-		dependencyDAG.isRandomized = true;
+		DependencyDAG.isRandomized = true;
 		
 		dependencyDAG.init();
 //		dependencyDAG.removeIsolatedNodes();
