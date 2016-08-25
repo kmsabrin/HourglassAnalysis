@@ -11,23 +11,15 @@ import java.util.TreeSet;
 import org.apache.commons.math3.stat.StatUtils;
 import org.apache.commons.math3.stat.inference.TestUtils;
 
-import utility.ConfidenceInterval;
-import utility.CourtCaseCornellParser;
-import utility.DistributionAnalysis;
+import utilityhg.ConfidenceInterval;
+import utilityhg.CourtCaseCornellParser;
+import utilityhg.DistributionAnalysis;
 import corehg.CoreDetection;
 import corehg.DependencyDAG;
 import corehg.FlattenNetwork;
 import corehg.SimpleModelDAG;
 
 public class ManagerHGPaper {	
-	private static void printNetworkStat(DependencyDAG dependencyDAG) {
-		System.out.println(" S: " + dependencyDAG.nSources);
-		System.out.println(" T: " + dependencyDAG.nTargets);
-		System.out.println(" E: " + dependencyDAG.nEdges);
-		System.out.println(" N: " + dependencyDAG.nodes.size());
-		System.out.println("Toal Path: " + dependencyDAG.nTotalPath);
-	}
-	
 /*	private static void generateSyntheticFromReal(DependencyDAG dependencyDAG) throws Exception {
 		SimpleModelDAG.inDegreeHistogram = DistributionAnalysis.getDegreeHistogram(dependencyDAG);
 		SimpleModelDAG.numOfNonzeroIndegreeNodes = 0;
@@ -141,7 +133,7 @@ public class ManagerHGPaper {
 		
 //		generateSyntheticFromReal(dependencyDAG);
 		
-		printNetworkStat(dependencyDAG);
+		DependencyDAG.printNetworkStat(dependencyDAG);
 //		dependencyDAG.printNetworkProperties();
 		
 		

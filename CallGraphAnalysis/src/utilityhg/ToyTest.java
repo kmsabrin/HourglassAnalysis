@@ -1,4 +1,4 @@
-package utility;
+package utilityhg;
 
 import corehg.CoreDetection;
 import corehg.DependencyDAG;
@@ -14,7 +14,7 @@ public class ToyTest {
 		// DependencyDAG("synthetic_callgraphs//draw//SimpleModelDAGr-1a3d2.0.txt");
 
 		String netID = "toy_dag";
-		// printNetworkStat(toyDependencyDAG);
+		DependencyDAG.printNetworkStat(toyDependencyDAG);
 		toyDependencyDAG.printNetworkProperties();
 
 		CoreDetection.fullTraverse = true;

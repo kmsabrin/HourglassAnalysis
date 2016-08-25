@@ -9,7 +9,7 @@ import java.util.TreeMap;
 import org.apache.commons.math3.stat.StatUtils;
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 
-import utility.DistributionAnalysis;
+import utilityhg.DistributionAnalysis;
 import corehg.DependencyDAG;
 
 public class GradientFilterAnalysis {

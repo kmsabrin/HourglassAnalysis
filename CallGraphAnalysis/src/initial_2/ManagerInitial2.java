@@ -8,9 +8,9 @@ import java.util.Scanner;
 
 import org.apache.commons.math3.stat.StatUtils;
 
-import utility.ConfidenceInterval;
-import utility.CourtCaseCornellParser;
-import utility.DistributionAnalysis;
+import utilityhg.ConfidenceInterval;
+import utilityhg.CourtCaseCornellParser;
+import utilityhg.DistributionAnalysis;
 import corehg.DependencyDAG;
 import corehg.SimpleModelDAG;
 import corehg.UpstreamRandomize;

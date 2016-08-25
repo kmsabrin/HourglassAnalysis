@@ -9,7 +9,7 @@ import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Random;
 
-import utility.DistributionAnalysis;
+import utilityhg.DistributionAnalysis;
 import corehg.DependencyDAG;
 
 public class WaistDetection {

@@ -10,7 +10,7 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeSet;
 
-import utility.CourtCaseCornellParser;
+import utilityhg.CourtCaseCornellParser;
 
 public class DependencyDAG {
 	public int nEdges;
@@ -962,5 +962,13 @@ public class DependencyDAG {
 		CoreDetection.topRemovedWaistNodes.clear();
 		
 		edgeWeights = new HashMap();
+	}
+	
+	public static void printNetworkStat(DependencyDAG dependencyDAG) {
+		System.out.println(" S: " + dependencyDAG.nSources);
+		System.out.println(" T: " + dependencyDAG.nTargets);
+		System.out.println(" E: " + dependencyDAG.nEdges);
+		System.out.println(" N: " + dependencyDAG.nodes.size());
+		System.out.println("Toal Path: " + dependencyDAG.nTotalPath);
 	}
 }
