@@ -269,12 +269,15 @@ public class DependencyDAG {
 //				}
 				
 				if (dependent.equals("do_log") || server.equals("do_log")
-					//|| dependent.equals("main") || server.equals("main")	
-				//	|| dependent.equals("_exit@plt") || server.equals("_exit@plt")
-//					|| dependent.equals("do_exec") || server.equals("do_exec")
+					|| dependent.equals("main") || server.equals("main")	
+					|| dependent.equals("do_exec") || server.equals("do_exec")
 						) { 
 					// no more location metric noise! 
 					// compiler generated
+					continue;
+				}
+				
+				if (dependent.endsWith("@plt") || server.endsWith("@plt")) {
 					continue;
 				}
 				

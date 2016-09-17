@@ -3,13 +3,15 @@ package utilityhg;
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Scanner;
+import java.util.Set;
 
 import org.apache.commons.math3.distribution.AbstractRealDistribution;
 import org.apache.commons.math3.stat.StatUtils;
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 
-public class StatisticalUtilTest {
+public class Util {
 	public static void getCCDF(AbstractRealDistribution distribution) {
 		for (double i = 0.0;; i += 0.02) {
 			double ccdf = 1.0 - distribution.cumulativeProbability(i);
@@ -21,6 +23,16 @@ public class StatisticalUtilTest {
 		}
 	}
 
+	public static double getJaccardDistance(Set<String> a, Set<String> b) {
+		HashSet<String> union = new HashSet();
+		union.addAll(a);
+		union.addAll(b);
+		HashSet<String> intersection = new HashSet(a);
+		intersection.retainAll(b);
+//		System.out.println(a + "\t" + b + "\t" + (intersection.size() * 1.0 / union.size()));
+		return intersection.size() * 1.0 / union.size();
+	}
+	
 	public static double[] getMeanSTD(ArrayList<Double> numbers) {
 		double n[] = new double[numbers.size()];
 

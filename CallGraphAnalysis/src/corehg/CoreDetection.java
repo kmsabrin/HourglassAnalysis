@@ -12,7 +12,7 @@ public class CoreDetection {
 	public static HashSet<String> topRemovedWaistNodes = new HashSet();
 	public static HashMap<String, Double> averageCoreRank;
 	public static HashMap<String, Double> averagePathCovered;
-	public static double pathCoverageTau = 0.8;
+	public static double pathCoverageTau = 0.9;
 	
 	public static double nodeCoverage;
 	public static double hScore;

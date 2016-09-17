@@ -146,7 +146,7 @@ public class TarjanSCC {
 		}
 		System.out.println("Number of Non-trivial SCCs: " + kNonTrivialSCC);
 
-		double stat[] = StatisticalUtilTest.getMeanSTD(numbers);
+		double stat[] = Util.getMeanSTD(numbers);
 		System.out.println(stat[0] + "\t" + stat[1]);
 
 		for (String v : G.nodes) {
