@@ -31,6 +31,7 @@ public class CoreDetection {
 	public static HashSet<String> coreDependentCoverage;
 	
 	public static TreeSet<String> sampleCore;	
+	public static HashMap<String, Double> coreWeights;
 	public static HashMap<String, Double> representativeLocation; 
 	
 	private static double getMedianPESLocation(TreeSet<String> PENodes, DependencyDAG dependencyDAG) {
@@ -78,6 +79,8 @@ public class CoreDetection {
 			}
 			return;
 		}
+		
+		
 		
 //		recompute through paths for all nodes
 		dependencyDAG.numOfTargetPath.clear();
@@ -166,6 +169,9 @@ public class CoreDetection {
 //			add to waist and remove from the network
 			topRemovedWaistNodes.add(representative);
 			representativeLocation.put(representative, getMedianPESLocation(equivalentNodes, dependencyDAG));
+			if (!FlattenNetwork.isProcessingFlat & false) {
+				System.out.println(representative + "\t" + ((cumulativePathCovered + maxPathCovered) / totalPath));
+			}
 			
 //			analysis
 //			update average waist entry rank and path contribution
@@ -250,7 +256,7 @@ public class CoreDetection {
 		}
 		
 //		Use the first core as a sample
-		sampleCore = coreSet.keySet().iterator().next(); 
+		sampleCore = coreSet.keySet().iterator().next();
 		getNodeCoverage(dependencyDAG, sampleCore);
 //		getNodeCoverage2(dependencyDAG, sampleCore);
 		coreLocationAnalysis(dependencyDAG);
@@ -343,6 +349,7 @@ public class CoreDetection {
 	}
 	
 	private static void coreLocationAnalysis(DependencyDAG dependencyDAG) {
+		coreWeights = new HashMap();
 		weightedCoreLocation = 0;
 		double corePathContribution = 0;
 		for (String s: sampleCore) {
@@ -360,6 +367,7 @@ public class CoreDetection {
 			double loc = representativeLocation.get(s);
 			double weight = averagePathCovered.get(s) / corePathContribution;
 //			System.out.println(loc + "\t" + weight);
+			coreWeights.put(s, weight);
 			
 			for (double i = 0; i < weight * 100; ++i) {
 //				System.out.println(loc);

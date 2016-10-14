@@ -301,7 +301,7 @@ public class ManagerHGPaper {
 				
 				for (int i = 0; i < nRun; ++i) {
 					SimpleModelDAG.generateSimpleModel(Double.parseDouble(a), Integer.parseInt(din), nT, nI, nS, Double.parseDouble(ratio));
-					SimpleModelDAG.initNodeIdentifiers(nT, nI, nS, Integer.parseInt(din));
+					SimpleModelDAG.initModelProperties(nT, nI, nS, Integer.parseInt(din));
 					System.out.println("Model Generated for run " + i );
 				
 					
@@ -377,7 +377,7 @@ public class ManagerHGPaper {
 				int idx = 0;
 				for (int i = 0; i < nRun; ++i) {
 					SimpleModelDAG.generateSimpleModel(Double.parseDouble(a), din, nT, nI, nS, Double.parseDouble(ratio));
-					SimpleModelDAG.initNodeIdentifiers(nT, nI, nS, din);
+					SimpleModelDAG.initModelProperties(nT, nI, nS, din);
 //					System.out.println("Model Generated");
 					
 //					DependencyDAG.resetFlags();

@@ -3,6 +3,7 @@ package corehg;
 import java.io.File;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.NavigableMap;
 import java.util.Random;
@@ -69,6 +70,9 @@ public class SimpleModelDAG {
 	
 	public static NavigableMap<Double, Integer> randomWeightedCollection;
 	public static double randomWeightedCollectionTotal = 0;
+	
+	public static HashMap<Integer, String> nodeStringMap; // Lexis
+	public static HashMap<Integer, String> nodeGrammarMap; // Lexis
 	
 	/*
 	RandomWeightedCollection randomWeightedCollection;
@@ -202,6 +206,8 @@ public class SimpleModelDAG {
 	public static void generateSimpleModelDAG(PrintWriter pw) throws Exception {	
 //		randomWeightedCollection = new TreeMap();
 		double timeSum = 0;
+		int productGrammarIndex = 1; // Lexis
+		ArrayList<String> targetString = new ArrayList(); // Lexis
 		for (int productIndex = sS - 1; productIndex >= 0; --productIndex) {	
 //			System.out.println(productIndex);
 			
@@ -235,8 +241,20 @@ public class SimpleModelDAG {
 			double startTime = System.nanoTime();
 			int k = getInDegree();
 //			System.out.println(k);
-			k = Math.min(k, endNodeIndex - startNodeIndex + 1);
 			
+//			k = Math.min(k, endNodeIndex - startNodeIndex + 1); // Lexis-off
+			k = Math.max(k, 2); // Lexis
+			
+			String productString = ""; // Lexis
+			String productGrammar = "N";
+			if (productIndex < sI) {
+				productGrammar += 0; 
+			}
+			else {
+				productGrammar += productGrammarIndex; // Lexis
+			}
+			ArrayList<String> substrateStringList = new ArrayList(); // Lexis
+			ArrayList<String> substrateGrammarList = new ArrayList(); // Lexis
 			for (int j = 0; j < k; ++j) {
 				int substrateIndex;
 				if (Math.abs(alpha) < 0.000001) {
@@ -249,6 +267,16 @@ public class SimpleModelDAG {
 					if (substrateIndex >= sS) {
 						substrateIndex = sS + random.nextInt(nS);
 					}
+				}
+				
+//				System.out.println(productIndex + "\t" + substrateIndex);
+				productString += nodeStringMap.get(substrateIndex); // Lexis
+				substrateStringList.add(nodeStringMap.get(substrateIndex)); // Lexis
+				if (substrateIndex < sS) {
+					substrateGrammarList.add(nodeGrammarMap.get(substrateIndex));
+				}
+				else {
+					substrateGrammarList.add(nodeStringMap.get(substrateIndex));
 				}
 				
 				String str = substrateIndex + " " + productIndex;
@@ -283,20 +311,45 @@ public class SimpleModelDAG {
 
 //			double endTime = System.nanoTime();
 //			System.out.println("Elapsed B: " + ((endTime - startTime) / 1000000000.0) );
-
+			
+			/*** Lexis ***/
+			for (String s4: substrateGrammarList) { 
+				System.out.println(s4 + "\t" + productGrammar);
+			} 
+			
+//			System.out.println("---");
+//			for (String s4: substrateStringList) { 
+//				System.out.println(s4 + "\t" + productString); 
+//			} 
+//			System.out.println("###");
+			
+			nodeStringMap.put(productIndex, productString); 
+			
+			nodeGrammarMap.put(productIndex, productGrammar); 
+			++productGrammarIndex;
+			
+			if (productIndex < sI) {
+				targetString.add(productString);
+			}
+			/*** Lexis ***/
 		}
 		
 		for (String key: edgeWeights.keySet()) {
 			int w = edgeWeights.get(key);
 			pw.println(key + " " + w);
 		}
-		
 		pw.close();
 		
 //		System.out.println("Time Sum: " + (timeSum / 1000000000.0) );
+		
+		/* Lexis */
+		for (String s: targetString) {
+			System.out.println(s);
+		}
+		/* Lexis */
 	}
 	
-	public static void initNodeIdentifiers(int nT, int nI, int nS, int din) {
+	public static void initModelProperties(int nT, int nI, int nS, int din) {
 		SimpleModelDAG.nT = nT;
 		SimpleModelDAG.nI = nI;
 		SimpleModelDAG.nS = nS;
@@ -304,13 +357,25 @@ public class SimpleModelDAG {
 		SimpleModelDAG.sI = nT; // start of Intermediate
 		SimpleModelDAG.sS = nT + nI; // start of Source
 		SimpleModelDAG.din = din;
+		
+		/***** Lexis *****/
+		nodeGrammarMap = new HashMap();
+		nodeStringMap = new HashMap();
+		char c = '!';
+		for (int i = sS; i < sS + nS; ++i) {
+			String s = "" + c;
+			nodeStringMap.put(i, s);
+			++c;
+//			System.out.println(i + "\t" + c);
+		}
+		/***** Lexis *****/
 	}
 	
 	public static void generateSimpleModel(double alpha, int din, int nT, int nI, int nS, double ratio) throws Exception {
 		SimpleModelDAG.alpha = alpha;
 		SimpleModelDAG.din = din;
 		SimpleModelDAG.ratio = ratio;
-		initNodeIdentifiers(nT, nI, nS, din);
+		initModelProperties(nT, nI, nS, din);
 		
 		poissonDistribution = new PoissonDistribution(din);
 		
@@ -326,25 +391,25 @@ public class SimpleModelDAG {
 		getSimpleModelDAG();
 	}
 
-	public static void main(String[] args) throws Exception {
-//		double alphaValues[] = {-1.0, -0.5, 0, 0.5, 1.0};
-		double alphaValues[] = {0.0};
-		
-		poissonDistribution = new PoissonDistribution(din);
-		
-		for (double d : alphaValues) {
-			if (d < 0) {
-				alphaNegative = true;
-			} else {
-				alphaNegative = false;
-			}
-			alpha = Math.abs(d);
-			random = new Random(System.nanoTime());
-
-			getSimpleModelDAG();
-
-			// break;
-		}
-		System.out.println("Done!");
-	}
+//	public static void main(String[] args) throws Exception {
+////		double alphaValues[] = {-1.0, -0.5, 0, 0.5, 1.0};
+//		double alphaValues[] = {0.0};
+//		
+//		poissonDistribution = new PoissonDistribution(din);
+//		
+//		for (double d : alphaValues) {
+//			if (d < 0) {
+//				alphaNegative = true;
+//			} else {
+//				alphaNegative = false;
+//			}
+//			alpha = Math.abs(d);
+//			random = new Random(System.nanoTime());
+//
+//			getSimpleModelDAG();
+//
+//			// break;
+//		}
+//		System.out.println("Done!");
+//	}
 }

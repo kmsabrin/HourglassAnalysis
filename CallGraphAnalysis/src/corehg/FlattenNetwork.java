@@ -30,6 +30,7 @@ public class FlattenNetwork {
 			DependencyDAG.isMetabolic = DependencyDAG.isCallgraph = DependencyDAG.isCourtcase = false;
 		}
 		
+		DependencyDAG.isWeighted = false;
 		DependencyDAG flatDAG = new DependencyDAG("flat_networks//current_flat.txt");
 //		flatDAG.printNetworkProperties();
 		CoreDetection.fullTraverse = false;

@@ -77,6 +77,7 @@ public class DependencyDAG {
 	public static boolean isComplexModel = false;
 	public static boolean isWeighted = false;	
 	public static boolean isRandomized = false;
+	public static boolean isLexis = false;
 	
 	public static int nDirectSourceTargetEdges = 0;
 	
@@ -246,6 +247,7 @@ public class DependencyDAG {
 		Scanner scanner = new Scanner(new File(fileName));
 
 		int violation = 0;
+		int lexisTargetKount = 0;
 		while (scanner.hasNext()) {
 			String line = scanner.nextLine();
 			String tokens[] = line.split("\\s+");
@@ -277,9 +279,9 @@ public class DependencyDAG {
 					continue;
 				}
 				
-				if (dependent.endsWith("@plt") || server.endsWith("@plt")) {
-					continue;
-				}
+//				if (dependent.endsWith("@plt") || server.endsWith("@plt")) {
+//					continue;
+//				}
 				
 //				if (largestWCCNodes.contains(server) == false || largestWCCNodes.contains(dependent) == false) {
 //					continue;
@@ -338,6 +340,44 @@ public class DependencyDAG {
 					++violation;
 					continue;
 				}
+			}
+			else if (isLexis) {
+				// temporary fix
+				dependent = tokens[0];
+				if (dependent.equals("N0")) {
+					dependent += "_" + lexisTargetKount++;
+				}
+				nodes.add(dependent);
+				
+				for (int i = 2; i < tokens.length; ++i) {
+					server = tokens[i]; 
+					nodes.add(server);
+
+					if (serves.containsKey(server)) {
+						serves.get(server).add(dependent);
+					} else {
+						HashSet<String> hs = new HashSet();
+						hs.add(dependent);
+						serves.put(server, hs);
+					}
+					
+					if (depends.containsKey(dependent)) {
+						depends.get(dependent).add(server);
+					} else {
+						HashSet<String> hs = new HashSet();
+						hs.add(server);
+						depends.put(dependent, hs);
+					}
+					
+					String weightKey = server + "#" + dependent;
+					if (edgeWeights.containsKey(weightKey)) {
+						edgeWeights.put(weightKey, edgeWeights.get(weightKey) + 1);
+					}
+					else {
+						edgeWeights.put(weightKey, 1);
+					}
+				}
+				continue;
 			}
 
 			nodes.add(dependent);
@@ -919,6 +959,7 @@ public class DependencyDAG {
 		isComplexModel = false;
 		isWeighted = false;	
 		isRandomized = false;
+		isLexis = false;
 		nDirectSourceTargetEdges = 0;
 	}
 	
