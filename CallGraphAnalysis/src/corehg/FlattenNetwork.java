@@ -24,10 +24,9 @@ public class FlattenNetwork {
 	public static void makeAndProcessFlat(DependencyDAG dependencyDAG) throws Exception {
 //		System.out.println("Flattening");
 		writeFlatten(dependencyDAG);
-		
 		if (DependencyDAG.isSynthetic == false) { // for real networks only
 			DependencyDAG.isClassDependency = true;
-			DependencyDAG.isMetabolic = DependencyDAG.isCallgraph = DependencyDAG.isCourtcase = false;
+			DependencyDAG.isMetabolic = DependencyDAG.isCallgraph = DependencyDAG.isCourtcase = DependencyDAG.isToy = DependencyDAG.isNeuro = false;
 		}
 		
 		DependencyDAG.isWeighted = false;

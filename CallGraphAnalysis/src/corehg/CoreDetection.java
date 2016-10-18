@@ -87,13 +87,20 @@ public class CoreDetection {
 		dependencyDAG.numOfSourcePath.clear();
 		dependencyDAG.loadPathStatistics();
 
-		double maxPathCovered = 0;
+		double maxPathCovered = -1;
 		String maxPathCoveredNode = "";
 		int numOfTies = 0;
 		HashSet<String> tiedMaxPathCentralityNodes = new HashSet();
 		for (String s : dependencyDAG.nodes) {
 //			find the node with largest through path
-			double numPathCovered = dependencyDAG.numOfSourcePath.get(s) * dependencyDAG.numOfTargetPath.get(s);
+			
+//			double numPathCovered = 0;
+//			if (dependencyDAG.numOfSourcePath.containsKey(s) && dependencyDAG.numOfTargetPath.containsKey(s)) {
+//				numPathCovered = dependencyDAG.numOfSourcePath.get(s) * dependencyDAG.numOfTargetPath.get(s);
+//			}
+			
+			double numPathCovered = dependencyDAG.nodePathThrough.get(s);
+			
 			if (numPathCovered > maxPathCovered) {
 				maxPathCovered = numPathCovered;
 				maxPathCoveredNode = s;
@@ -108,7 +115,9 @@ public class CoreDetection {
 				tiedMaxPathCentralityNodes.add(s);
 			}
 		}
-				
+			
+//		System.out.println("WTF  " + tiedMaxPathCentralityNodes);
+//		System.out.println(maxPathCovered + "\t" + totalPath);
 //		/** Detect exact path equivalent nodes - 2 **/
 		HashSet<String> alreadyInPES = new HashSet();
 		int nTiedNodes = 0;
@@ -120,6 +129,7 @@ public class CoreDetection {
 			}
 			
 			topRemovedWaistNodes.add(s);
+//			System.out.println("Blocking: " + s);
 			dependencyDAG.numOfTargetPath.clear();
 			dependencyDAG.numOfSourcePath.clear();
 			dependencyDAG.loadPathStatistics();
@@ -131,7 +141,8 @@ public class CoreDetection {
 				if (alreadyInPES.contains(r)) {
 					continue;
 				}
-				if (dependencyDAG.numOfSourcePath.get(r) == 0 || dependencyDAG.numOfTargetPath.get(r) == 0) { // has been disconnected
+//				if (dependencyDAG.numOfSourcePath.get(r) == 0 || dependencyDAG.numOfTargetPath.get(r) == 0) { // has been disconnected
+				if (dependencyDAG.nodePathThrough.get(r) < 1.0) {// has been disconnected
 					PESet.add(r);
 					alreadyInPES.add(r);
 				}
@@ -162,14 +173,14 @@ public class CoreDetection {
 			TreeSet<String> equivalentNodes = pathEquivalentNodeSet2.get(randomKey);
 //			System.out.println(equivalentNodes + "\t" + maxPathCovered);
 			String representative = equivalentNodes.first();
-			/*System.out.println("Chosen: " + representative 
-					+ " centrality: " + dependencyDAG.normalizedPathCentrality.get(representative)
-					+ " location: " + dependencyDAG.location.get(representative));*/
+//			System.out.println("Chosen: " + representative 
+//					+ " centrality: " + dependencyDAG.nodePathThrough.get(representative)
+//					+ " location: " + dependencyDAG.location.get(representative));
 //			if (equivalentNodes.size() > 1) representative += "+";
 //			add to waist and remove from the network
 			topRemovedWaistNodes.add(representative);
 			representativeLocation.put(representative, getMedianPESLocation(equivalentNodes, dependencyDAG));
-			if (!FlattenNetwork.isProcessingFlat & false) {
+			if (!FlattenNetwork.isProcessingFlat & true) {
 				System.out.println(representative + "\t" + ((cumulativePathCovered + maxPathCovered) / totalPath));
 			}
 			
@@ -261,7 +272,7 @@ public class CoreDetection {
 //		getNodeCoverage2(dependencyDAG, sampleCore);
 		coreLocationAnalysis(dependencyDAG);
 				
-		if (!FlattenNetwork.isProcessingFlat & false) {
+		if (!FlattenNetwork.isProcessingFlat & true) {
 			System.out.println("Sample Core: " + sampleCore);
 			System.out.println("Number of coreSet: " + optimalCoreCount);
 			System.out.println("Min core size: " + minCoreSize);
@@ -327,9 +338,9 @@ public class CoreDetection {
 	
 		double numerator = 0;
 		double denominator = 0;
-		double coveredSource = 0;
-		double coveredTarget = 0;
-		double coveredIntermediate = 0;
+//		double coveredSource = 0;
+//		double coveredTarget = 0;
+//		double coveredIntermediate = 0;
 		for (String s: dependencyDAG.nodes) {
 			dependencyDAG.checkReach(s);
 			// check if a node is in a source/target path
@@ -337,9 +348,9 @@ public class CoreDetection {
 				++denominator;
 				if (coreNodeCoverage.contains(s)) {
 					++numerator;
-					if (dependencyDAG.isIntermediate(s)) ++coveredIntermediate;
-					if (dependencyDAG.isSource(s)) ++coveredSource;
-					if (dependencyDAG.isTarget(s)) ++coveredTarget;
+//					if (dependencyDAG.isIntermediate(s)) ++coveredIntermediate;
+//					if (dependencyDAG.isSource(s)) ++coveredSource;
+//					if (dependencyDAG.isTarget(s)) ++coveredTarget;
 				}
 			}
 		}

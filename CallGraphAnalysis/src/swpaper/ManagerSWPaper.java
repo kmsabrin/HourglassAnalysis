@@ -14,6 +14,7 @@ import org.apache.commons.math3.stat.StatUtils;
 
 import corehg.CoreDetection;
 import corehg.DependencyDAG;
+import corehg.FlattenNetwork;
 
 public class ManagerSWPaper {	
 	private static void loadLargestWCC(String filePath) throws Exception {
@@ -76,9 +77,9 @@ public class ManagerSWPaper {
 		double realCore = CoreDetection.minCoreSize;
 
 //		Flattening
-		//FlattenNetwork.makeAndProcessFlat(dependencyDAG);	
-		//CoreDetection.hScore = (1.0 - (realCore / FlattenNetwork.flatNetworkCoreSize));
-//		System.out.println("H-Score: " + CoreDetection.hScore);
+		FlattenNetwork.makeAndProcessFlat(dependencyDAG);	
+		CoreDetection.hScore = (1.0 - (realCore / FlattenNetwork.flatNetworkCoreSize));
+		System.out.println("H-Score: " + CoreDetection.hScore);
 	}
 	
 	private static void getNodeInsertDeleteInfo(Set<String> previous, Set<String> current, int transition) {
@@ -423,10 +424,10 @@ public class ManagerSWPaper {
 	}
 	
 	public static void main(String[] args) throws Exception {		
-//		ManagerSWPaper.doRealNetworkAnalysis("openssh_callgraphs", "full.graph-openssh-39");
+		ManagerSWPaper.doRealNetworkAnalysis("openssh_callgraphs", "full.graph-openssh-39");
 //		ManagerSWPaper.analyzeNetworks();
 //		ManagerSWPaper.analyzePatch();
-		ManagerSWPaper.analyzeNetworks2();
+//		ManagerSWPaper.analyzeNetworks2();
 		System.out.println("Done!");
 	}
 }
