@@ -88,11 +88,10 @@ public class ManagerNeuro {
 //		neuroDependencyDAG.printNetworkProperties();
 
 		CoreDetection.pathCoverageTau = 0.9999;
-		CoreDetection.fullTraverse = true;
+		CoreDetection.fullTraverse = false;
 		CoreDetection.getCore(neuroDependencyDAG, netID);
 		double realCore = CoreDetection.minCoreSize;
 
-//		DependencyDAG.isNeuro = false;
 		neuroDependencyDAG = new DependencyDAG("neuro_networks//" + neuroDAGName + ".txt");
 		FlattenNetwork.makeAndProcessFlat(neuroDependencyDAG);
 		CoreDetection.hScore = (1.0 - ((realCore - 1) / FlattenNetwork.flatNetworkCoreSize));

@@ -71,15 +71,17 @@ public class ManagerSWPaper {
 //		DistributionAnalysis.printAllCentralities(dependencyDAG, netID);
 //		DistributionAnalysis.findNDirectSrcTgtBypasses(dependencyDAG, netID);
 		
+		LineOfCodeGenerator.parseFile(netPath + "//" + netID.substring(netID.indexOf('o')) + ".c", dependencyDAG.nodes);
+		
 //		Core Detection
 //		CoreDetection.fullTraverse = true;
 		CoreDetection.getCore(dependencyDAG, netID);
 		double realCore = CoreDetection.minCoreSize;
 
 //		Flattening
-		FlattenNetwork.makeAndProcessFlat(dependencyDAG);	
-		CoreDetection.hScore = (1.0 - (realCore / FlattenNetwork.flatNetworkCoreSize));
-		System.out.println("H-Score: " + CoreDetection.hScore);
+//		FlattenNetwork.makeAndProcessFlat(dependencyDAG);	
+//		CoreDetection.hScore = (1.0 - (realCore / FlattenNetwork.flatNetworkCoreSize));
+//		System.out.println("H-Score: " + CoreDetection.hScore);
 	}
 	
 	private static void getNodeInsertDeleteInfo(Set<String> previous, Set<String> current, int transition) {
@@ -350,6 +352,42 @@ public class ManagerSWPaper {
 		System.out.println(stage + "\t" + (numerator/denominator));
 	}
 	
+	public static void analyzeNetworks3() throws Exception {
+		int nVersions = 39;
+		for (int i = 1; i <= nVersions; ++i) {
+			DependencyDAG.resetFlags();
+			DependencyDAG.isCallgraph = true;
+			DependencyDAG dependencyDAG = new DependencyDAG(
+					"openssh_callgraphs" + "//" + "full.graph-openssh-" + i);
+
+			CoreDetection.pathCoverageTau = 0.91;
+			doRealNetworkAnalysis("openssh_callgraphs", "full.graph-openssh-"
+					+ i);
+
+			double meanCoreNumLine = 0;
+			double meanCoreNumLineK = 0;
+			double meanNonCoreNumLine = 0;
+			double meanNonCoreNumLineK = 0;
+			for (String s : dependencyDAG.nodes) {
+				if (CoreDetection.sampleCore.contains(s)) {
+					if (LineOfCodeGenerator.functionNumLines.containsKey(s)) {
+						meanCoreNumLine += LineOfCodeGenerator.functionNumLines
+								.get(s);
+						++meanCoreNumLineK;
+					}
+				} else {
+					if (LineOfCodeGenerator.functionNumLines.containsKey(s)) {
+						meanNonCoreNumLine += LineOfCodeGenerator.functionNumLines
+								.get(s);
+						++meanNonCoreNumLineK;
+					}
+				}
+			}
+			System.out.println((meanCoreNumLine / meanCoreNumLineK) + "\t"
+					+ (meanNonCoreNumLine / meanNonCoreNumLineK));
+		}
+	}
+	
 	public static void analyzeNetworks2() throws Exception {
 		int nVersions = 39;
 		HashMap<String, Double[]> nodeRankByVersion = new HashMap();
@@ -361,7 +399,6 @@ public class ManagerSWPaper {
 			
 			CoreDetection.pathCoverageTau = 0.91;
 			doRealNetworkAnalysis("openssh_callgraphs", "full.graph-openssh-" + i);
-			
 			for (String s: CoreDetection.averageCoreRank.keySet()) {
 //				System.out.println(s + "\t" + CoreDetection.averageCoreRank.get(s));
 				if (nodeRankByVersion.containsKey(s)) {
@@ -402,6 +439,7 @@ public class ManagerSWPaper {
 			}	
 		}
 		
+		double others[] =  new double[nVersions + 1];
 		for (String s: nodeRankByVersion.keySet()) {
 			Double arr[] = nodeRankByVersion.get(s);
 			int i = 1;
@@ -410,24 +448,40 @@ public class ManagerSWPaper {
 					break;
 				}
 			}
-			if (i > nVersions) continue;
-			
-			System.out.print(s);
-			for (i = 1; i < nVersions + 1; ++i) {
-				System.out.print("\t");
-				if (arr[i] == 0) System.out.print(" ");
-				else if (arr[i] < 0) System.out.print(" ");
-				else System.out.print(arr[i]);
+			if (i > nVersions) {
+				for (int j = 1; j < nVersions + 1; ++j) {
+					if (arr[j] > 0) {
+						others[j] += arr[j];
+					}
+				}
+				continue;
 			}
-			System.out.println();
+			
+//			System.out.print(s);
+//			for (i = 1; i < nVersions + 1; ++i) {
+//				System.out.print("\t");
+//				if (arr[i] == 0) System.out.print(" ");
+//				else if (arr[i] < 0) System.out.print(" ");
+//				else System.out.print(arr[i]);
+//			}
+//			System.out.println();
 		}
+		
+//		System.out.println("Others");
+//		for (int i = 1; i < nVersions + 1; ++i) {
+//			System.out.print("\t");
+//			if (others[i] == 0) System.out.print(" ");
+//			else if (others[i] < 0) System.out.print(" ");
+//			else System.out.print(others[i]);
+//		}
+//		System.out.println();
 	}
 	
 	public static void main(String[] args) throws Exception {		
-		ManagerSWPaper.doRealNetworkAnalysis("openssh_callgraphs", "full.graph-openssh-39");
+//		ManagerSWPaper.doRealNetworkAnalysis("openssh_callgraphs", "full.graph-openssh-1");
 //		ManagerSWPaper.analyzeNetworks();
 //		ManagerSWPaper.analyzePatch();
-//		ManagerSWPaper.analyzeNetworks2();
+//		ManagerSWPaper.analyzeNetworks3();
 		System.out.println("Done!");
 	}
 }

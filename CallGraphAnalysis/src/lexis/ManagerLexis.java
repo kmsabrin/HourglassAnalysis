@@ -28,13 +28,15 @@ public class ManagerLexis {
 				
 
 //		DependencyDAG.isCallgraph = true;
-//		DependencyDAG.isLexis = true;
+		DependencyDAG.isLexis = true;
+		
 		DependencyDAG.isWeighted = true;
-		DependencyDAG.isSynthetic = true;
-		DependencyDAG.isSimpleModel = true;
+		
+//		DependencyDAG.isSynthetic = true;
+//		DependencyDAG.isSimpleModel = true;
 		
 		DependencyDAG dependencyDAG = new DependencyDAG(netPath + "//" + netID);
-		DependencyDAG.printNetworkStat(dependencyDAG);
+//		DependencyDAG.printNetworkStat(dependencyDAG);
 //		dependencyDAG.printNetworkProperties();
 		
 //		DistributionAnalysis.printEdgeList(dependencyDAG, netID);
@@ -66,15 +68,15 @@ public class ManagerLexis {
 		String DAGType = "SimpleModelDAG";
 		SimpleModelDAG.isMultigraph = true;
 		int din = 2;
-		double alpha = 1.5;
-		int nT = 15;
-		int nI = 20;
-		int nS = 15;
+		double alpha = 0.01;
+		int nT = 20;
+		int nI = 30;
+		int nS = 20;
 		String ratio = "-1";
 		SimpleModelDAG.generateSimpleModel(alpha, din, nT, nI, nS, -1);
 		SimpleModelDAG.initModelProperties(nT, nI, nS, din);
 		String networkID = DAGType + "r" + ratio + "a" + alpha + "d" + din;
-		System.out.println("synthetic_callgraphs//" + networkID + ".txt");
+//		System.out.println("synthetic_callgraphs//" + networkID + ".txt");
 		doRealNetworkAnalysis("synthetic_callgraphs", networkID + ".txt");
 	}
 	
@@ -83,8 +85,11 @@ public class ManagerLexis {
 //		ManagerLexis.doRealNetworkAnalysis("lexis_graphs//Text", "Cogall.txt");
 //		ManagerLexis.doRealNetworkAnalysis("lexis_graphs//iGEM", "iGEM_All.txt");
 		
-		ManagerLexis.analyzeModelLexisDAG();
+		ManagerLexis.doRealNetworkAnalysis("lexis_graphs/hgDAG-payam/Lexis-DAGs", "L-a101.txt");
+		ManagerLexis.doRealNetworkAnalysis("lexis_graphs/hgDAG-payam/Kaeser-DAGs", "K-a101.txt");
 		
-		System.out.println("Done!");
+//		ManagerLexis.analyzeModelLexisDAG();
+		
+//		System.out.println("Done!");
 	}
 }

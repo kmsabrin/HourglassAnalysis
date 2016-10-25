@@ -849,6 +849,9 @@ public class DependencyDAG {
 	}
 	
 	public void loadRegularPathStatistics() {
+		numOfTargetPath.clear();
+		numOfSourcePath.clear();
+
 		visited = new HashSet();
 		for (String s: nodes) {
 			sourcePathDepth(s);

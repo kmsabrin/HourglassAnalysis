@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.TreeSet;
 
 import org.apache.commons.math3.stat.StatUtils;
@@ -180,7 +181,7 @@ public class CoreDetection {
 //			add to waist and remove from the network
 			topRemovedWaistNodes.add(representative);
 			representativeLocation.put(representative, getMedianPESLocation(equivalentNodes, dependencyDAG));
-			if (!FlattenNetwork.isProcessingFlat & true) {
+			if (!FlattenNetwork.isProcessingFlat & false) {
 				System.out.println(representative + "\t" + ((cumulativePathCovered + maxPathCovered) / totalPath));
 			}
 			
@@ -231,6 +232,11 @@ public class CoreDetection {
 	public static void getCore(DependencyDAG dependencyDAG, String filePath) {
 		init();
 		
+//		if (true) {
+//			getCore2(dependencyDAG);
+//			return;
+//		}
+		
 //		Compute through paths for all nodes
 		dependencyDAG.numOfTargetPath.clear();
 		dependencyDAG.numOfSourcePath.clear();
@@ -272,12 +278,54 @@ public class CoreDetection {
 //		getNodeCoverage2(dependencyDAG, sampleCore);
 		coreLocationAnalysis(dependencyDAG);
 				
-		if (!FlattenNetwork.isProcessingFlat & true) {
+		if (!FlattenNetwork.isProcessingFlat & false) {
 			System.out.println("Sample Core: " + sampleCore);
 			System.out.println("Number of coreSet: " + optimalCoreCount);
 			System.out.println("Min core size: " + minCoreSize);
 			System.out.println("Node Coverage: " + nodeCoverage);
 			System.out.println("WeightedCoreLocation: " + weightedCoreLocation);
+		}
+	}
+	
+	public static void getCore2(DependencyDAG dependencyDAG) {
+		TreeMap<Double, ArrayList<String>> pathCentralitySortedNodes = new TreeMap();
+		
+		for (String s: dependencyDAG.nodes) {
+			double pathCentrality = -1 *  dependencyDAG.nodePathThrough.get(s);
+			if (pathCentralitySortedNodes.containsKey(pathCentrality)) {
+				pathCentralitySortedNodes.get(pathCentrality).add(s);
+			}
+			else {
+				ArrayList<String> stringList = new ArrayList();
+				stringList.add(s);
+				pathCentralitySortedNodes.put(pathCentrality, stringList);
+			}
+		}
+		
+		ArrayList<String> cores = new ArrayList();
+		double startingTotalPath = dependencyDAG.nTotalPath;
+		for (double d: pathCentralitySortedNodes.keySet()) {
+			cores.addAll(pathCentralitySortedNodes.get(d));
+			topRemovedWaistNodes.addAll(pathCentralitySortedNodes.get(d));
+//			System.out.println("Adding " + pathCentralitySortedNodes.get(d));
+			dependencyDAG.loadPathStatistics();
+			double pathCover = startingTotalPath - dependencyDAG.nTotalPath;
+//			System.out.println("numRemainingPath " + dependencyDAG.nTotalPath + " Cumulative cover " + pathCover);
+			if (!(pathCover < Math.floor(startingTotalPath * pathCoverageTau))) {
+				break;
+			}
+		}
+		
+		sampleCore = new TreeSet(cores);
+		CoreDetection.minCoreSize = sampleCore.size();
+		getNodeCoverage(dependencyDAG, sampleCore);
+//		coreLocationAnalysis(dependencyDAG); // does not apply
+				
+		if (!FlattenNetwork.isProcessingFlat && false) {
+			System.out.println("Sample Core: " + sampleCore);
+			System.out.println("Min core size: " + minCoreSize);
+			System.out.println("Node Coverage: " + nodeCoverage);
+//			System.out.println("WeightedCoreLocation: " + weightedCoreLocation); // does not apply
 		}
 	}
 	

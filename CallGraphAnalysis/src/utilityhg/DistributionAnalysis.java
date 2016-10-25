@@ -225,10 +225,10 @@ public class DistributionAnalysis {
 		System.out.println("------------------------");
 
 		for (int i : outDegreeHistogram.keySet()) {
-			if (i < 1)
-				continue;
-			// System.out.println(i + "\t" + (outDegreeHistogram.get(i) /
-			// outSum));
+//			if (i < 1)
+//				continue;
+//			 System.out.println(i + "\t" + (outDegreeHistogram.get(i) / outSum));
+			System.out.println(i + "\t" + (outDegreeHistogram.get(i)));
 		}
 
 		// System.out.println(StatUtils.percentile(inDegrees, 50) + "\t" +
