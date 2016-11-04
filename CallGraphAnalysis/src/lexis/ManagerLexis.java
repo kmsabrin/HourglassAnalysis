@@ -36,7 +36,7 @@ public class ManagerLexis {
 //		DependencyDAG.isSimpleModel = true;
 		
 		DependencyDAG dependencyDAG = new DependencyDAG(netPath + "//" + netID);
-//		DependencyDAG.printNetworkStat(dependencyDAG);
+		DependencyDAG.printNetworkStat(dependencyDAG);
 //		dependencyDAG.printNetworkProperties();
 		
 //		DistributionAnalysis.printEdgeList(dependencyDAG, netID);

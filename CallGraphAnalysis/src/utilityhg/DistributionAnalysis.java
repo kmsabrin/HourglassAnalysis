@@ -2,7 +2,9 @@ package utilityhg;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -261,8 +263,8 @@ public class DistributionAnalysis {
 		double nearTargetDegSum = 0;
 		for (String s : dependencyDAG.nodes) {
 			int iDeg = dependencyDAG.inDegree.get(s);
-			if (dependencyDAG.location.get(s) > 0
-					&& dependencyDAG.location.get(s) < 0.4) {
+			if (dependencyDAG.lengthPathLocation.get(s) > 0
+					&& dependencyDAG.lengthPathLocation.get(s) < 0.4) {
 				if (iDeg > maxDeg)
 					maxDeg = iDeg;
 				nearSourceDegSum += iDeg;
@@ -274,7 +276,7 @@ public class DistributionAnalysis {
 					inDegreeHistogramNearSource.put(iDeg, 1);
 			}
 
-			if (dependencyDAG.location.get(s) > 0.9) {
+			if (dependencyDAG.lengthPathLocation.get(s) > 0.9) {
 				if (iDeg > maxDeg)
 					maxDeg = iDeg;
 				nearTargetDegSum += iDeg;
@@ -385,7 +387,7 @@ public class DistributionAnalysis {
 			// dependencyDAG.location.get(node) + " " +
 			// dependencyDAG.normalizedPathCentrality.get(node));
 			pw.println(indeg_c + "\t" + outdeg_c + "\t" + closeness_c + "\t"
-					+ betwenness_c + "\t" + dependencyDAG.location.get(node)
+					+ betwenness_c + "\t" + dependencyDAG.lengthPathLocation.get(node)
 					+ "\t" + dependencyDAG.normalizedPathCentrality.get(node));
 		}
 
@@ -409,5 +411,91 @@ public class DistributionAnalysis {
 
 		DependencyDAG.nDirectSourceTargetEdges = knt;
 		System.out.println("Direct source to target edges: " + knt);
+	}
+	
+	public static void getLocationHistogram(DependencyDAG dependencyDAG) {
+		HashMap<Double, Double> hist = new HashMap();
+		for (String s: dependencyDAG.nodes) {
+			double loc = dependencyDAG.numPathLocation.get(s);
+			if (hist.containsKey(loc)) {
+				hist.put(loc, hist.get(loc) + 1.0);
+			}
+			else {
+				hist.put(loc, 1.0);
+			}
+		}
+		
+		for (double d: hist.keySet()) {
+			System.out.println(d + "\t" + (hist.get(d) / dependencyDAG.nodes.size()));
+		}
+	}
+	
+	public static void getLocationColorWeightedHistogram(DependencyDAG dependencyDAG) {
+		double binWidth = 0.1;
+		int numBin = (int)(1.0 / binWidth) + 2;
+		double binKount[] = new double[numBin];
+		
+		ArrayList< ArrayList<Double> > colorValues = new ArrayList();
+		for (int i = 0; i < numBin; ++i) {
+			colorValues.add(new ArrayList<Double>());
+		}
+		
+		for (String s: dependencyDAG.nodes) {
+			double loc = dependencyDAG.numPathLocation.get(s);
+			int binLocation = -1;
+			if (dependencyDAG.isSource(s)) {
+				binLocation = 0;
+			}
+			else if (dependencyDAG.isTarget(s)) {
+				binLocation = numBin - 1;
+			}
+			else {
+				binLocation = 1 + (int)(loc / binWidth);
+			}
+			binKount[binLocation]++;
+			
+			colorValues.get(binLocation).add(dependencyDAG.normalizedPathCentrality.get(s));
+		}
+		
+//		for (int i = 0; i < numBin; ++i) {
+//			System.out.println((i + 1) + "\t" + binKount[i]);
+//		}
+
+		int matrixMaxHeight = 106 + 1; // to be computed in first run
+		double colorMatrix[][] = new double[matrixMaxHeight][numBin];
+		
+		int midIndex = matrixMaxHeight / 2;
+		for (int i = 0; i < numBin; ++i) {
+			ArrayList<Double> aList = colorValues.get(i);
+			if (aList.size() < 1) continue;
+			Collections.sort(aList, Collections.reverseOrder());
+			
+			int k = 0;
+			colorMatrix[midIndex + k][i] = aList.get(0);
+			++k;
+			for (int j = 1; j < aList.size(); ++j) {
+				colorMatrix[midIndex + k][i] = aList.get(j);
+				if (j + 1 < aList.size()) {
+					colorMatrix[midIndex - k][i] = aList.get(j + 1);
+					++k;
+					++j;
+				}
+				else {
+					break;
+				}
+			}
+		}
+		
+		for (int i = 0; i < matrixMaxHeight; ++i) {
+			for (int j = 0; j < numBin; ++j) {
+				if (colorMatrix[i][j] != 0) {
+					System.out.print(colorMatrix[i][j] + "\t");
+				}
+				else {
+					System.out.print(" " + "\t");
+				}
+			}
+			System.out.println();
+		}
 	}
 }

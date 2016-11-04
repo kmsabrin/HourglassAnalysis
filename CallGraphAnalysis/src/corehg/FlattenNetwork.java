@@ -26,7 +26,7 @@ public class FlattenNetwork {
 		writeFlatten(dependencyDAG);
 		if (DependencyDAG.isSynthetic == false) { // for real networks only
 			DependencyDAG.isClassDependency = true;
-			DependencyDAG.isMetabolic = DependencyDAG.isCallgraph = DependencyDAG.isCourtcase = DependencyDAG.isToy = DependencyDAG.isNeuro = false;
+			DependencyDAG.isMetabolic = DependencyDAG.isCallgraph = DependencyDAG.isCourtcase = DependencyDAG.isToy = DependencyDAG.isCyclic = false;
 		}
 		
 		DependencyDAG.isWeighted = false;

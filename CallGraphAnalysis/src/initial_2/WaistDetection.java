@@ -428,7 +428,7 @@ public class WaistDetection {
 			dependencyDAG.reachableDownwardsNodes(s); // how many nodes are using her
 //			dependencyDAG.visited.remove(s); // remove ifself
 			waistNodeCoverage.addAll(dependencyDAG.visited);
-			System.out.println(s + "\t" + averageWaistRank.get(s) + "\t" + dependencyDAG.location.get(s));
+			System.out.println(s + "\t" + averageWaistRank.get(s) + "\t" + dependencyDAG.lengthPathLocation.get(s));
 		}
 
 //		System.out.println("Waist Size: " + averageWaistRank.size());

@@ -5,6 +5,7 @@ import java.io.PrintWriter;
 import java.util.HashSet;
 import java.util.Scanner;
 
+import utilityhg.DistributionAnalysis;
 import corehg.CoreDetection;
 import corehg.DependencyDAG;
 import corehg.FlattenNetwork;
@@ -79,27 +80,28 @@ public class ManagerNeuro {
 	}
 	
 	private static void doNeuroNetworkAnalysis() throws Exception {
-		DependencyDAG.isNeuro = true;
+		DependencyDAG.isCyclic = true;
 		String neuroDAGName = "celegans_network_clean";
 		DependencyDAG neuroDependencyDAG = new DependencyDAG("neuro_networks//" + neuroDAGName + ".txt");
 		
 		String netID = "neuro_network";
 		DependencyDAG.printNetworkStat(neuroDependencyDAG);
+//		DistributionAnalysis.getLocationColorWeightedHistogram(neuroDependencyDAG);
 //		neuroDependencyDAG.printNetworkProperties();
 
 		CoreDetection.pathCoverageTau = 0.9999;
 		CoreDetection.fullTraverse = false;
 		CoreDetection.getCore(neuroDependencyDAG, netID);
 		double realCore = CoreDetection.minCoreSize;
-
-		neuroDependencyDAG = new DependencyDAG("neuro_networks//" + neuroDAGName + ".txt");
-		FlattenNetwork.makeAndProcessFlat(neuroDependencyDAG);
-		CoreDetection.hScore = (1.0 - ((realCore - 1) / FlattenNetwork.flatNetworkCoreSize));
-		System.out.println("[h-Score] " + CoreDetection.hScore);
+//
+//		neuroDependencyDAG = new DependencyDAG("neuro_networks//" + neuroDAGName + ".txt");
+//		FlattenNetwork.makeAndProcessFlat(neuroDependencyDAG);
+//		CoreDetection.hScore = (1.0 - ((realCore - 1) / FlattenNetwork.flatNetworkCoreSize));
+//		System.out.println("[h-Score] " + CoreDetection.hScore);
 	}
 	
 	public static void main(String[] args) throws Exception {
-		getCleanNeuroNetwork();
+//		getCleanNeuroNetwork();
 		doNeuroNetworkAnalysis();
 	}
 }
