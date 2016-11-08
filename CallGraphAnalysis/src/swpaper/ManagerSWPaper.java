@@ -17,6 +17,9 @@ import corehg.DependencyDAG;
 import corehg.FlattenNetwork;
 
 public class ManagerSWPaper {	
+	static String callgraphName = "sqlite";
+	static int nVersions = 19;
+
 	private static void loadLargestWCC(String filePath) throws Exception {
 		DependencyDAG.largestWCCNodes = new HashSet();
 		Scanner scanner = new Scanner(new File("analysis//largestWCC-" + filePath + ".txt"));
@@ -52,7 +55,9 @@ public class ManagerSWPaper {
 		*/
 
 		DependencyDAG.isCallgraph = true;
+		DependencyDAG.isCyclic = true;
 //		DependencyDAG.isClassDependency = true;
+
 		DependencyDAG dependencyDAG = new DependencyDAG(netPath + "//" + netID);
 //		DependencyDAG.printNetworkStat(dependencyDAG);
 //		dependencyDAG.printNetworkProperties();
@@ -71,17 +76,22 @@ public class ManagerSWPaper {
 //		DistributionAnalysis.printAllCentralities(dependencyDAG, netID);
 //		DistributionAnalysis.findNDirectSrcTgtBypasses(dependencyDAG, netID);
 		
-		LineOfCodeGenerator.parseFile(netPath + "//" + netID.substring(netID.indexOf('o')) + ".c", dependencyDAG.nodes);
+//		LineOfCodeGenerator.parseFile(netPath + "//" + netID.substring(netID.indexOf('o')) + ".c", dependencyDAG.nodes);
+		
+//		System.out.print(dependencyDAG.nodes.size() + "\t" + dependencyDAG.nEdges + "\t");
 		
 //		Core Detection
 //		CoreDetection.fullTraverse = true;
+		CoreDetection.pathCoverageTau = 0.95;
 		CoreDetection.getCore(dependencyDAG, netID);
 		double realCore = CoreDetection.minCoreSize;
+//		System.out.print(CoreDetection.minCoreSize);
 
 //		Flattening
 //		FlattenNetwork.makeAndProcessFlat(dependencyDAG);	
 //		CoreDetection.hScore = (1.0 - (realCore / FlattenNetwork.flatNetworkCoreSize));
 //		System.out.println("H-Score: " + CoreDetection.hScore);
+//		System.out.println("\t" + CoreDetection.hScore);
 	}
 	
 	private static void getNodeInsertDeleteInfo(Set<String> previous, Set<String> current, int transition) {
@@ -165,10 +175,12 @@ public class ManagerSWPaper {
 		HashMap<String, Double> previouseNormalizedPathCentrality = null;
 		ArrayList<Double> coreDeviation = new ArrayList();
 		ArrayList<Double> nonCoreDeviation = new ArrayList();
-		for (int i = 1; i <= 39; ++i) {
+		for (int i = 1; i <= nVersions; ++i) {
+			if (callgraphName.equals("sqlite") && (i == 2 || i == 3)) continue;
 			DependencyDAG.resetFlags();
-			DependencyDAG.isCallgraph = true;
-			DependencyDAG dependencyDAG = new DependencyDAG("openssh_callgraphs" + "//" + "full.graph-openssh-" + i);
+			DependencyDAG.isCallgraph = DependencyDAG.isCyclic = true;
+			DependencyDAG dependencyDAG = new DependencyDAG(callgraphName + "_callgraphs" + "//" 
+															+ "full.graph-" + callgraphName + "-" + i);
 			
 //			for (String s: dependencyDAG.nodes) {
 //				if (appearanceFrequency.containsKey(s)) {
@@ -186,21 +198,21 @@ public class ManagerSWPaper {
 //			CoreDetection.pathCoverageTau = 0.9999;
 //			doRealNetworkAnalysis("openssh_callgraphs", "full.graph-openssh-" + i);
 			
-			CoreDetection.pathCoverageTau = 0.95;
-			doRealNetworkAnalysis("openssh_callgraphs", "full.graph-openssh-" + i);
+			CoreDetection.pathCoverageTau = 0.90;
+			doRealNetworkAnalysis(callgraphName + "_callgraphs", "full.graph-" + callgraphName + "-" + i);
 			
 			if (i > 1) {
 				
 //				getNodeInsertDeleteInfo(previousNodes, dependencyDAG.nodes, i);
-//				getNodeInsertDeleteInfo2(previousNodes, dependencyDAG.nodes, previousCore, CoreDetection.sampleCore, i);
+				getNodeInsertDeleteInfo2(previousNodes, dependencyDAG.nodes, previousCore, CoreDetection.sampleCore, i);
 				
 //				getPathCentralityDeviations(previouseNormalizedPathCentrality, dependencyDAG.normalizedPathCentrality, 
 //						previousGrayCore, CoreDetection.sampleCore, nonCoreDeviation, false);
 //				getStats(nonCoreDeviation);
 				
-				getPathCentralityDeviations(previouseNormalizedPathCentrality, dependencyDAG.normalizedPathCentrality, 
-						previousCore, CoreDetection.sampleCore, coreDeviation, true);
-				getStats(coreDeviation);
+//				getPathCentralityDeviations(previouseNormalizedPathCentrality, dependencyDAG.normalizedPathCentrality, 
+//						previousCore, CoreDetection.sampleCore, coreDeviation, true);
+//				getStats(coreDeviation);
 			}
 		
 //			previousGrayCore = new TreeSet(CoreDetection.sampleCore);
@@ -353,16 +365,14 @@ public class ManagerSWPaper {
 	}
 	
 	public static void analyzeNetworks3() throws Exception {
-		int nVersions = 39;
 		for (int i = 1; i <= nVersions; ++i) {
 			DependencyDAG.resetFlags();
 			DependencyDAG.isCallgraph = true;
 			DependencyDAG dependencyDAG = new DependencyDAG(
-					"openssh_callgraphs" + "//" + "full.graph-openssh-" + i);
+					callgraphName + "_callgraphs" + "//" + "full.graph-" + callgraphName + "-" + i);
 
-			CoreDetection.pathCoverageTau = 0.91;
-			doRealNetworkAnalysis("openssh_callgraphs", "full.graph-openssh-"
-					+ i);
+			CoreDetection.pathCoverageTau = 0.90;
+			doRealNetworkAnalysis(callgraphName + "_callgraphs", "full.graph-" + callgraphName + "-" + i);
 
 			double meanCoreNumLine = 0;
 			double meanCoreNumLineK = 0;
@@ -389,44 +399,42 @@ public class ManagerSWPaper {
 	}
 	
 	public static void analyzeNetworks2() throws Exception {
-		int nVersions = 39;
-		HashMap<String, Double[]> nodeRankByVersion = new HashMap();
-		HashMap<String, Double> previousCoreWeights = null;
+		HashMap<String, Double[]> nodeWeightByVersion = new HashMap();
+//		HashMap<String, Double> previousCoreWeights = null;
 		for (int i = 1; i <= nVersions; ++i) {
-			DependencyDAG.resetFlags();
-			DependencyDAG.isCallgraph = true;
-			DependencyDAG dependencyDAG = new DependencyDAG("openssh_callgraphs" + "//" + "full.graph-openssh-" + i);
+			if (callgraphName.equals("sqlite") && (i == 2 || i == 3)) continue;
+//			DependencyDAG.resetFlags();
+//			DependencyDAG.isCallgraph = true;
+//			DependencyDAG dependencyDAG = new DependencyDAG(sw + "_callgraphs" + "//" + "full.graph-" + sw + "-" + i);
+//			CoreDetection.pathCoverageTau = 0.90;
 			
-			CoreDetection.pathCoverageTau = 0.91;
-			doRealNetworkAnalysis("openssh_callgraphs", "full.graph-openssh-" + i);
-			for (String s: CoreDetection.averageCoreRank.keySet()) {
-//				System.out.println(s + "\t" + CoreDetection.averageCoreRank.get(s));
-				if (nodeRankByVersion.containsKey(s)) {
-//					nodeRankByVersion.get(s)[i] = CoreDetection.averageCoreRank.get(s);
-					nodeRankByVersion.get(s)[i] = CoreDetection.coreWeights.get(s);
+			doRealNetworkAnalysis(callgraphName + "_callgraphs", "full.graph-" + callgraphName + "-" + i);
+			for (String s: CoreDetection.sampleCore) {
+				if (nodeWeightByVersion.containsKey(s)) {
+					nodeWeightByVersion.get(s)[i] = CoreDetection.coreWeights.get(s);
 				}
 				else {
 					Double arr[] = new Double[nVersions + 1];
-//					arr[i] = CoreDetection.averageCoreRank.get(s);
 					arr[i] = CoreDetection.coreWeights.get(s);
-					nodeRankByVersion.put(s, arr);
+					nodeWeightByVersion.put(s, arr);
 				}
 			}
 			
-			if (i > 1) {
+//			if (i > 1) {
 //				getWeightedJaccard(previousCoreWeights, CoreDetection.coreWeights, i);
-			}
-			
-			previousCoreWeights = new HashMap(CoreDetection.coreWeights);
+//			}		
+//			previousCoreWeights = new HashMap(CoreDetection.coreWeights);
 		}
 		
 		for (int i = 1; i <= nVersions; ++i) {
+			if (callgraphName.equals("sqlite") && (i == 2 || i == 3)) continue;
+
 			DependencyDAG.resetFlags();
-			DependencyDAG.isCallgraph = true;
-			DependencyDAG dependencyDAG = new DependencyDAG("openssh_callgraphs" + "//" + "full.graph-openssh-" + i);
+			DependencyDAG.isCallgraph = DependencyDAG.isCyclic = true;			
+			DependencyDAG dependencyDAG = new DependencyDAG(callgraphName + "_callgraphs" + "//" + "full.graph-" + callgraphName + "-" + i);
 			
-			for (String s: nodeRankByVersion.keySet()) {
-				Double arr[] = nodeRankByVersion.get(s);
+			for (String s: nodeWeightByVersion.keySet()) {
+				Double arr[] = nodeWeightByVersion.get(s);
 				
 				if (arr[i] == null) {
 					if (dependencyDAG.nodes.contains(s)) {
@@ -440,16 +448,19 @@ public class ManagerSWPaper {
 		}
 		
 		double others[] =  new double[nVersions + 1];
-		for (String s: nodeRankByVersion.keySet()) {
-			Double arr[] = nodeRankByVersion.get(s);
+		for (String s: nodeWeightByVersion.keySet()) {
+			Double arr[] = nodeWeightByVersion.get(s);
 			int i = 1;
 			for (; i < nVersions + 1; ++i) {
+				if (callgraphName.equals("sqlite") && (i == 2 || i == 3)) continue;
 				if (arr[i] > 0.03) {
 					break;
 				}
 			}
+			
 			if (i > nVersions) {
 				for (int j = 1; j < nVersions + 1; ++j) {
+					if (callgraphName.equals("sqlite") && (j == 2 || j == 3)) continue;
 					if (arr[j] > 0) {
 						others[j] += arr[j];
 					}
@@ -457,31 +468,34 @@ public class ManagerSWPaper {
 				continue;
 			}
 			
-//			System.out.print(s);
-//			for (i = 1; i < nVersions + 1; ++i) {
-//				System.out.print("\t");
-//				if (arr[i] == 0) System.out.print(" ");
-//				else if (arr[i] < 0) System.out.print(" ");
-//				else System.out.print(arr[i]);
-//			}
-//			System.out.println();
+			System.out.print(s);
+			for (i = 1; i < nVersions + 1; ++i) {
+				if (callgraphName.equals("sqlite") && (i == 2 || i == 3)) continue;
+				System.out.print("\t");
+				if (arr[i] == 0) System.out.print(" ");
+				else if (arr[i] < 0) System.out.print(" ");
+				else System.out.print(arr[i]);
+			}
+			System.out.println();
 		}
 		
-//		System.out.println("Others");
-//		for (int i = 1; i < nVersions + 1; ++i) {
-//			System.out.print("\t");
-//			if (others[i] == 0) System.out.print(" ");
-//			else if (others[i] < 0) System.out.print(" ");
-//			else System.out.print(others[i]);
-//		}
-//		System.out.println();
+		System.out.print("Others");
+		for (int i = 1; i < nVersions + 1; ++i) {
+			if (callgraphName.equals("sqlite") && (i == 2 || i == 3)) continue;
+			System.out.print("\t");
+			if (others[i] == 0) System.out.print(" ");
+			else if (others[i] < 0) System.out.print(" ");
+			else System.out.print(others[i]);
+		}
+		System.out.println();
 	}
 	
 	public static void main(String[] args) throws Exception {		
 //		ManagerSWPaper.doRealNetworkAnalysis("openssh_callgraphs", "full.graph-openssh-1");
 //		ManagerSWPaper.analyzeNetworks();
 //		ManagerSWPaper.analyzePatch();
+		ManagerSWPaper.analyzeNetworks2();
 //		ManagerSWPaper.analyzeNetworks3();
-		System.out.println("Done!");
+//		System.out.println("Done!");
 	}
 }

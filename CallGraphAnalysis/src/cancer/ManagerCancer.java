@@ -53,24 +53,23 @@ public class ManagerCancer {
 	}
 	
 	private static void doCancerNetworkAnalysis() throws Exception {
-		DependencyDAG.isToy = true;
-		DependencyDAG.isCyclic = true;
-//		String toyDAGName = "out-toy";
-		String toyDAGName = "toy_cyclic_2";
-		DependencyDAG toyDependencyDAG = new DependencyDAG("toy_networks//" + toyDAGName + ".txt");
+		DependencyDAG.isCallgraph = true;
+//		DependencyDAG.isCyclic = true;
+		String cancerDAGName = "cancer";
+		DependencyDAG cancerDependencyDAG = new DependencyDAG("cancer_networks//" + cancerDAGName + ".dot");
 		
-		printCancerNetwork(toyDependencyDAG);
+//		printCancerNetwork(toyDependencyDAG);
 		
-//		String netID = "cancer_dag";
-//		DependencyDAG.printNetworkStat(toyDependencyDAG);
-//		toyDependencyDAG.printNetworkProperties();
+		String netID = "cancer_dag";
+		DependencyDAG.printNetworkStat(cancerDependencyDAG);
+		cancerDependencyDAG.printNetworkProperties();
+
+		CoreDetection.fullTraverse = false;
+		CoreDetection.getCore(cancerDependencyDAG, netID);
+		double realCore = CoreDetection.minCoreSize;
 //
-//		CoreDetection.fullTraverse = false;
-//		CoreDetection.getCore(toyDependencyDAG, netID);
-//		double realCore = CoreDetection.minCoreSize;
-//
-//		toyDependencyDAG = new DependencyDAG("toy_networks//" + toyDAGName + ".txt");
-//		FlattenNetwork.makeAndProcessFlat(toyDependencyDAG);
+//		cancerDependencyDAG = new DependencyDAG("toy_networks//" + cancerDAGName + ".txt");
+//		FlattenNetwork.makeAndProcessFlat(cancerDependencyDAG);
 //		CoreDetection.hScore = (1.0 - ((realCore - 1) / FlattenNetwork.flatNetworkCoreSize));
 //		System.out.println("[h-Score] " + CoreDetection.hScore);
 	}

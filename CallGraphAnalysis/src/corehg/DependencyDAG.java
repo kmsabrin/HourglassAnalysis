@@ -161,7 +161,7 @@ public class DependencyDAG {
 		loadCallGraph(dependencyGraphID);
 		
 		if (isCallgraph || isClassDependency /*|| isToy || isMetabolic || isCourtcase*/) {
-			removeCycles(); // or should I only ignore cycles?
+//			removeCycles(); // or should I only ignore cycles?
 		}
 		
 		if (isSynthetic) {
@@ -171,7 +171,7 @@ public class DependencyDAG {
 		removeIsolatedNodes();
 		
 		loadDegreeMetric();
-		
+				
 		loadPathStatistics();
 		
 		loadLocationMetric(); // must load degree metric before
@@ -281,7 +281,7 @@ public class DependencyDAG {
 		while (scanner.hasNext()) {
 			String line = scanner.nextLine();
 			String tokens[] = line.split("\\s+");
-			if (tokens.length < 2) {
+			if (tokens.length < 2 || tokens.length > 3) {
 				continue;
 			}
 
@@ -308,6 +308,16 @@ public class DependencyDAG {
 					// compiler generated
 					continue;
 				}
+				
+				if (dependent.equals("sqliteRunParser") || server.equals("sqliteRunParser")
+					|| dependent.equals("sqliteVdbeExec") || server.equals("sqliteVdbeExec") 
+					|| dependent.equals("sqliteRunParser") || server.equals("sqlite3Init")
+					|| dependent.equals("sqlite3_prepare") || server.equals("sqlite3_prepare")
+					|| dependent.equals("sqlite_exec") || server.equals("sqlite_exec")
+					|| dependent.equals("sqliteParser") || server.equals("sqliteParser")) {
+					continue;
+				}
+					
 				
 //				if (dependent.endsWith("@plt") || server.endsWith("@plt")) {
 //					continue;
@@ -652,6 +662,7 @@ public class DependencyDAG {
 	}
 		
 	private void sourcePathsTraverse(String node) {
+//		System.out.println(node);
 		if (numOfSourcePath.containsKey(node)) { // node already traversed
 			return;
 		}
@@ -858,8 +869,7 @@ public class DependencyDAG {
 	}
 	
 	public void loadCyclicPathStatistics() {
-//		System.out.println("Computing Path Stats: " + CoreDetection.topRemovedWaistNodes);
-//		CoreDetection.topRemovedWaistNodes.add("261");
+//		System.out.println("HERE !!!");
 		nTotalPath = 0;
 		nodePathThrough = new HashMap();
 		for (String s: nodes) {
@@ -867,11 +877,13 @@ public class DependencyDAG {
 			numOfTargetPath.clear();
 			numOfSourcePath.clear();
 			loadGoodEdge(s, "fromSource");
+//			System.out.println("Starting towards target traversal from " + s);
 			targetPathsTraverse(s);
 		
 			for (String r: nodes) {
 				if (!isTarget(r)) continue;
 //				if (!numOfTargetPath.containsKey(r)) continue;
+//				System.out.println("Starting towards source traversal from " + r);
 				sourcePathsTraverse(r);
 			}
 			
@@ -992,9 +1004,12 @@ public class DependencyDAG {
 	public void loadLocationMetric() {
 		for (String s : nodes) {
 //			System.out.println(s + "\t" + avgSourceDepth.get(s) + "\t" + avgTargetDepth.get(s));
-			double m = avgSourceDepth.get(s) / (avgTargetDepth.get(s) + avgSourceDepth.get(s));
-			m = ((int) (m * 1000.0)) / 1000.0; // round up to 2 decimal point
+			if (!isCyclic) // old style
+			{
+				double m = avgSourceDepth.get(s) / (avgTargetDepth.get(s) + avgSourceDepth.get(s));
+				m = ((int) (m * 1000.0)) / 1000.0; // round up to 2 decimal point
 			lengthPathLocation.put(s, m);
+			}
 			
 			double n = 0;
 			if (isCyclic) {
@@ -1131,9 +1146,9 @@ public class DependencyDAG {
 //			System.out.print(iCentrality.get(s) + "\t");
 //			System.out.print(sourcesReachable.get(s) + "\t");
 //			System.out.print(targetsReachable.get(s) + "\t");
-//			System.out.println(s + "\t" + (normalizedPathCentrality.get(s) * nTotalPath));
+			System.out.println(s + "\t" + normalizedPathCentrality.get(s));
 //			System.out.println();
-			System.out.println(s + "\t" + numPathLocation.get(s) + "\t" + lengthPathLocation.get(s));
+//			System.out.println(s + "\t" + numPathLocation.get(s) + "\t" + lengthPathLocation.get(s));
 //			System.out.println(s + "\t" + numPathLocation.get(s) + "\t" + normalizedPathCentrality.get(s));
 //			System.out.println(numPathLocation.get(s) + "\t" + Math.random() + "\t" + Math.log10(nodePathThrough.get(s)));
 		}
