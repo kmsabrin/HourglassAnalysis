@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 import utilityhg.CourtCaseCornellParser;
+import utilityhg.Edge;
 
 public class DependencyDAG {
 	public int nEdges;
@@ -94,6 +95,8 @@ public class DependencyDAG {
 	public HashMap<String, Double> cyclicNumTargetPath;
 	
 	public HashMap<String, Double> numPathLocation;
+
+	public ArrayList<Edge> edgePathCentrality;
 	
 	public DependencyDAG() { 
 		nodes = new TreeSet();
@@ -150,6 +153,8 @@ public class DependencyDAG {
 		cyclicNumTargetPath = new HashMap();
 		
 		numPathLocation = new HashMap();
+		
+		edgePathCentrality = new ArrayList();
 	}
 	
 	public DependencyDAG(String dependencyGraphID) throws Exception {
@@ -160,7 +165,7 @@ public class DependencyDAG {
 		// load & initialize the attributes of the dependency graph
 		loadCallGraph(dependencyGraphID);
 		
-		if (isCallgraph || isClassDependency /*|| isToy || isMetabolic || isCourtcase*/) {
+		if (isCallgraph || isClassDependency || isToy || isMetabolic || isCourtcase) {
 //			removeCycles(); // or should I only ignore cycles?
 		}
 		
@@ -235,7 +240,7 @@ public class DependencyDAG {
 		visited.clear();
 	}
 	
-	private void removeNode(String node) {
+	public void removeNode(String node) {
 //		System.out.println("Removing: " + node);
 		
 		nodes.remove(node);
@@ -253,6 +258,11 @@ public class DependencyDAG {
 			}
 			depends.remove(node);
 		}
+	}
+	
+	public void removeEdge(String source, String target) {
+		serves.get(source).remove(target);
+		depends.get(target).remove(source);
 	}
 	
 	private void removeDisconnectedNodesForSyntheticNetworks() {
@@ -281,18 +291,36 @@ public class DependencyDAG {
 		while (scanner.hasNext()) {
 			String line = scanner.nextLine();
 			String tokens[] = line.split("\\s+");
-			if (tokens.length < 2 || tokens.length > 3) {
+			if (tokens.length < 2 /*|| tokens.length > 3*/) {
 				continue;
 			}
 
+			int directionIndex = -1;
+			int idx = 0;
+			for (String s: tokens) {
+				if (s.equals("->")) {
+					directionIndex = idx;
+				}
+				++idx;
+			}
+				
 			String server = "", dependent = "";
 
 			if (isCallgraph) {
-				if (tokens[1].equals("->")) {
-					dependent = tokens[0].substring(0, tokens[0].length());
-					server = tokens[2].substring(0, tokens[2].length() - 1); // for cobjdump: a-> b;
-					// String server = tokens[2].substring(0, tokens[2].length()); // for cdepn: a -> b
+				if (directionIndex > 0) {
+					dependent = tokens[directionIndex - 1].substring(0, tokens[directionIndex - 1].length());
+					server = tokens[directionIndex + 1].substring(0, tokens[directionIndex + 1].length()); // for dot: a -> b;
+					if (server.charAt(server.length() - 1) == ';') {
+						server = server.substring(0, server.length() - 1);
+					}
 				}
+				
+				// for call graphs
+//				if (tokens[1].equals("->")) {
+//					dependent = tokens[0].substring(0, tokens[0].length());
+//					server = tokens[2].substring(0, tokens[2].length() - 1); // for cobjdump: a-> b;
+//					// String server = tokens[2].substring(0, tokens[2].length()); // for cdepn: a -> b
+//				}
 				
 //				else {
 //					// for scc-consolidated graph
@@ -318,7 +346,6 @@ public class DependencyDAG {
 					continue;
 				}
 					
-				
 //				if (dependent.endsWith("@plt") || server.endsWith("@plt")) {
 //					continue;
 //				}
@@ -336,6 +363,14 @@ public class DependencyDAG {
 //					continue;
 //				}
 			}
+			else if (isMetabolic) {
+				// for metabolic and synthetic networks
+				server = tokens[0];
+				dependent = tokens[1];
+				if (largestWCCNodes.contains(server) == false || largestWCCNodes.contains(dependent) == false) {
+//					continue;
+				}
+			}
 			else if (isSynthetic || isToy || isCyclic) {
 				if (isWeighted) {
 					server = tokens[0];
@@ -351,14 +386,6 @@ public class DependencyDAG {
 //					if (server.equals("miR429")) {
 //						continue;
 //					}
-				}
-			}
-			else if (isMetabolic) {
-				// for metabolic and synthetic networks
-				server = tokens[0];
-				dependent = tokens[1];
-				if (largestWCCNodes.contains(server) == false || largestWCCNodes.contains(dependent) == false) {
-					continue;
 				}
 			}
 			else if (isCourtcase) {
@@ -869,6 +896,8 @@ public class DependencyDAG {
 	}
 	
 	public void loadCyclicPathStatistics() {
+		HashMap<String, Double> edgeCentralityMap = new HashMap(); // for edge centrality
+		
 //		System.out.println("HERE !!!");
 		nTotalPath = 0;
 		nodePathThrough = new HashMap();
@@ -906,13 +935,6 @@ public class DependencyDAG {
 					cyclicNumSourcePath.put(r, numSourcePath);
 				}
 				
-//				if (cyclicNumTargetPath.containsKey(r)) {
-//					cyclicNumTargetPath.put(r, Math.max(numTargetPath, cyclicNumTargetPath.get(r)));
-//				}
-//				else {
-//					cyclicNumTargetPath.put(r, numTargetPath);
-//				}
-				
 				double numPath = numSourcePath * numTargetPath;
 				if (nodePathThrough.containsKey(r)) {
 					numPath += nodePathThrough.get(r);
@@ -920,10 +942,43 @@ public class DependencyDAG {
 				nodePathThrough.put(r, numPath);
 			}
 			
-			nTotalPath += numOfTargetPath.get(s);
+			nTotalPath += numOfTargetPath.get(s);		
+			
+			/* edge centrality - begin */
+			for (String r : nodes) {
+				if (isTarget(r)) continue;
+				for (String t : serves.get(r)) {
+					double numSourcePath = 0;
+					if (numOfSourcePath.containsKey(r)) {
+						numSourcePath = numOfSourcePath.get(r);
+					}
+					double numTargetPath = 0;
+					if (numOfTargetPath.containsKey(t)) {
+						numTargetPath = numOfTargetPath.get(t);
+					}
+					double numEdgePath = numSourcePath * numTargetPath;
+					String edge = r + "#" + t;
+					if (edgeCentralityMap.containsKey(edge)) {
+						edgeCentralityMap.put(edge, edgeCentralityMap.get(edge) + numEdgePath);
+					}
+					else {
+						edgeCentralityMap.put(edge, numEdgePath);
+					}
+				}
+			}
+			/* edge centrality - end */
 		}
 		
+		/* edge centrality - begin */
+		for (String e : edgeCentralityMap.keySet()) {
+			String r = e.substring(0, e.indexOf('#'));
+			String t = e.substring(e.indexOf('#') + 1);
+			Edge edge = new Edge(r, t, edgeCentralityMap.get(e));
+			edgePathCentrality.add(edge);
+		}	
+		/* edge centrality - end */
 		
+		/* number of target paths - begin */
 		for (String s: nodes) {
 			if (!isTarget(s)) continue;
 			numOfTargetPath.clear();
@@ -947,6 +1002,7 @@ public class DependencyDAG {
 				}
 			}
 		}
+		/* number of target paths - end */
 		
 //		System.out.println("Total path: " + nTotalPath);		
 //		for (String r: nodes) {
@@ -998,6 +1054,17 @@ public class DependencyDAG {
 				nTotalPath += nPath;
 			}
 		}
+		
+		for (String s : nodes) {
+			if (isTarget(s)) continue;
+			for (String r : serves.get(s)) {
+				double numEdgePath = numOfSourcePath.get(s) * numOfTargetPath.get(r);
+				Edge e = new Edge(s, r, numEdgePath);
+				edgePathCentrality.add(e);
+//				System.out.println(s + "\t" + r + "\t" + numEdgePath);
+			}
+		}	
+		
 //		System.out.println("Total path: " + nTotalPath);
 	}
 		
@@ -1146,10 +1213,10 @@ public class DependencyDAG {
 //			System.out.print(iCentrality.get(s) + "\t");
 //			System.out.print(sourcesReachable.get(s) + "\t");
 //			System.out.print(targetsReachable.get(s) + "\t");
-			System.out.println(s + "\t" + normalizedPathCentrality.get(s));
+//			System.out.println(s + "\t" + normalizedPathCentrality.get(s));
 //			System.out.println();
 //			System.out.println(s + "\t" + numPathLocation.get(s) + "\t" + lengthPathLocation.get(s));
-//			System.out.println(s + "\t" + numPathLocation.get(s) + "\t" + normalizedPathCentrality.get(s));
+			System.out.println(s + "\t" + numPathLocation.get(s) + "\t" + normalizedPathCentrality.get(s));
 //			System.out.println(numPathLocation.get(s) + "\t" + Math.random() + "\t" + Math.log10(nodePathThrough.get(s)));
 		}
 		

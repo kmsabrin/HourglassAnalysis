@@ -12,6 +12,7 @@ import java.util.TreeSet;
 
 import org.apache.commons.math3.stat.StatUtils;
 
+import utilityhg.DistributionAnalysis;
 import corehg.CoreDetection;
 import corehg.DependencyDAG;
 import corehg.FlattenNetwork;
@@ -57,11 +58,12 @@ public class ManagerSWPaper {
 		DependencyDAG.isCallgraph = true;
 		DependencyDAG.isCyclic = true;
 //		DependencyDAG.isClassDependency = true;
-
+		System.out.println(netPath + "//" + netID);
 		DependencyDAG dependencyDAG = new DependencyDAG(netPath + "//" + netID);
 //		DependencyDAG.printNetworkStat(dependencyDAG);
 //		dependencyDAG.printNetworkProperties();
 		
+//		DistributionAnalysis.getLocationColorWeightedHistogram(dependencyDAG);
 //		DistributionAnalysis.printEdgeList(dependencyDAG, netID);
 //		DistributionAnalysis.getAverageInOutDegree(dependencyDAG);
 //		DistributionAnalysis.getPathLength(dependencyDAG);
@@ -79,6 +81,9 @@ public class ManagerSWPaper {
 //		LineOfCodeGenerator.parseFile(netPath + "//" + netID.substring(netID.indexOf('o')) + ".c", dependencyDAG.nodes);
 		
 //		System.out.print(dependencyDAG.nodes.size() + "\t" + dependencyDAG.nEdges + "\t");
+		
+//		Central Edge Subgraph
+//		CoreDetection.getCentralEdgeSubgraph(dependencyDAG);
 		
 //		Core Detection
 //		CoreDetection.fullTraverse = true;
@@ -490,12 +495,22 @@ public class ManagerSWPaper {
 		System.out.println();
 	}
 	
+	private static void analyzeNetworks4() throws Exception {	
+		for (int i = 1; i <= 13; ++i) {
+			doRealNetworkAnalysis("jetuml_dependency", "JetUML-0." + i + ".jar.dot");
+		}
+	}
+	
 	public static void main(String[] args) throws Exception {		
-//		ManagerSWPaper.doRealNetworkAnalysis("openssh_callgraphs", "full.graph-openssh-1");
+//		ManagerSWPaper.doRealNetworkAnalysis("jetuml_dependency", "JetUML-0.13.jar.dot");
+//		ManagerSWPaper.doRealNetworkAnalysis("openssh_callgraphs", "full.graph-openssh-39");
+		
 //		ManagerSWPaper.analyzeNetworks();
 //		ManagerSWPaper.analyzePatch();
-		ManagerSWPaper.analyzeNetworks2();
+//		ManagerSWPaper.analyzeNetworks2();
 //		ManagerSWPaper.analyzeNetworks3();
+		
+		ManagerSWPaper.analyzeNetworks4();
 //		System.out.println("Done!");
 	}
 }

@@ -55,6 +55,8 @@ public class ManagerNeuro {
 	private static void writeFile(String edgeFileName, HashSet<Integer> source, HashSet<Integer> target) throws Exception {
 		Scanner scan = new Scanner(new File(edgeFileName));
 		PrintWriter pw = new PrintWriter(new File("neuro_networks//celegans_network_clean.txt"));
+		int nRemovedInedges = 0;
+		int nRemovedOutedges = 0;
 		
 		while (scan.hasNext()) {
 			int src = scan.nextInt();
@@ -62,15 +64,20 @@ public class ManagerNeuro {
 			double weight = scan.nextDouble();
 			
 			if (target.contains(src)) {
+				++nRemovedInedges;
 				continue;
 			}
 			
 			if (source.contains(dst)) {
+				++nRemovedOutedges;
 				continue;
 			}
 			
 			pw.println(src + "\t" + dst);
 		}
+		
+		System.out.println("Removed in-edges " + nRemovedInedges);
+		System.out.println("Removed out-edges " + nRemovedOutedges);
 		
 		scan.close();
 		pw.close();
@@ -181,13 +188,15 @@ public class ManagerNeuro {
 		
 		String netID = "neuro_network";
 //		DependencyDAG.printNetworkStat(neuroDependencyDAG);
-		getLocationColorWeightedHistogram(neuroDependencyDAG);
+//		getLocationColorWeightedHistogram(neuroDependencyDAG);
 //		neuroDependencyDAG.printNetworkProperties();
 
-		CoreDetection.pathCoverageTau = 0.9999;
-		CoreDetection.fullTraverse = false;
-		CoreDetection.getCore(neuroDependencyDAG, netID);
-		double realCore = CoreDetection.minCoreSize;
+		CoreDetection.getCentralEdgeSubgraph(neuroDependencyDAG);
+		
+//		CoreDetection.pathCoverageTau = 0.9999;
+//		CoreDetection.fullTraverse = false;
+//		CoreDetection.getCore(neuroDependencyDAG, netID);
+//		double realCore = CoreDetection.minCoreSize;
 //
 //		neuroDependencyDAG = new DependencyDAG("neuro_networks//" + neuroDAGName + ".txt");
 //		FlattenNetwork.makeAndProcessFlat(neuroDependencyDAG);
@@ -196,7 +205,7 @@ public class ManagerNeuro {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		getCleanNeuroNetwork();
+//		getCleanNeuroNetwork();
 		doNeuroNetworkAnalysis();
 	}
 }

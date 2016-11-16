@@ -79,9 +79,9 @@ public class ManagerHGPaper {
 //		String netID = "openssh-39";
 //		String netID = "apache-commons-3.4";
 		
-//		String netID = "court";
+		String netID = "court";
 		
-		String netID = "jetuml";
+//		String netID = "jetuml";
 		
 		DependencyDAG.resetFlags();
 		
@@ -92,17 +92,20 @@ public class ManagerHGPaper {
 //		loadLargestWCC(netID);
 		
 		if (netID.equals("rat")) {
-			netPath = "metabolic_networks//rat-consolidated.txt";
-//			netPath = "metabolic_networks//rat-links.txt";
+//			netPath = "metabolic_networks//rat-consolidated.txt";
+			netPath = "metabolic_networks//rat-links.txt";
 			DependencyDAG.isMetabolic = true;
+			DependencyDAG.isCyclic = true;
 		}
 		else if (netID.equals("monkey")) {
-			netPath = "metabolic_networks//monkey-consolidated.txt";
+//			netPath = "metabolic_networks//monkey-consolidated.txt";
+			netPath = "metabolic_networks//monkey-links.txt";
 			DependencyDAG.isMetabolic = true;
+			DependencyDAG.isCyclic = true;
 		}
 		else if (netID.equals("court")) {
-//			CourtCaseCornellParser.caseTopic = "abortion";
-			CourtCaseCornellParser.caseTopic = "pension";
+			CourtCaseCornellParser.caseTopic = "abortion";
+//			CourtCaseCornellParser.caseTopic = "pension";
 			CourtCaseCornellParser.loadCuratedCaseIDs();
 			netPath = "supremecourt_networks//court.txt";
 			DependencyDAG.isCourtcase = true;
@@ -129,12 +132,12 @@ public class ManagerHGPaper {
 //		generateSyntheticFromReal(dependencyDAG);
 		
 		DependencyDAG.printNetworkStat(dependencyDAG);
-//		dependencyDAG.printNetworkProperties();
+		dependencyDAG.printNetworkProperties();
 		
 		
 //		DistributionAnalysis.printEdgeList(dependencyDAG, netID);
-		DistributionAnalysis.getAverageInOutDegree(dependencyDAG);
-		DistributionAnalysis.getPathLength(dependencyDAG);
+//		DistributionAnalysis.getAverageInOutDegree(dependencyDAG);
+//		DistributionAnalysis.getPathLength(dependencyDAG);
 //		DistributionAnalysis.getDegreeHistogram(dependencyDAG);
 //		DistributionAnalysis.getDegreeHistogramSpecialized(dependencyDAG);
 //		DistributionAnalysis.findWeaklyConnectedComponents(dependencyDAG, netID);		
@@ -144,7 +147,7 @@ public class ManagerHGPaper {
 //		DistributionAnalysis.printCentralityDistribution(dependencyDAG, netID);
 //		DistributionAnalysis.printEdgeList(dependencyDAG, netID);
 //		DistributionAnalysis.printAllCentralities(dependencyDAG, netID);
-		DistributionAnalysis.findNDirectSrcTgtBypasses(dependencyDAG, netID);
+//		DistributionAnalysis.findNDirectSrcTgtBypasses(dependencyDAG, netID);
 
 		
 //		Core Detection
@@ -166,9 +169,9 @@ public class ManagerHGPaper {
 //		Flattening
 //		dependencyDAG.init();
 //		printNetworkStat(dependencyDAG);
-		FlattenNetwork.makeAndProcessFlat(dependencyDAG);	
-		CoreDetection.hScore = (1.0 - (realCore / FlattenNetwork.flatNetworkCoreSize));
-		System.out.println("H-Score: " + CoreDetection.hScore);
+//		FlattenNetwork.makeAndProcessFlat(dependencyDAG);	
+//		CoreDetection.hScore = (1.0 - (realCore / FlattenNetwork.flatNetworkCoreSize));
+//		System.out.println("H-Score: " + CoreDetection.hScore);
 	}
 	
 	/*

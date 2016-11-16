@@ -13,6 +13,9 @@ import java.util.TreeMap;
 
 import org.apache.commons.math3.stat.StatUtils;
 
+import com.google.common.collect.Ordering;
+import com.google.common.collect.TreeMultimap;
+
 import corehg.DependencyDAG;
 
 public class DistributionAnalysis {
@@ -427,6 +430,90 @@ public class DistributionAnalysis {
 		
 		for (double d: hist.keySet()) {
 			System.out.println(d + "\t" + (hist.get(d) / dependencyDAG.nodes.size()));
+		}
+	}
+	
+	public static void getLocationColorWeightedHistogram(DependencyDAG dependencyDAG) {
+		double binWidth = 0.1;
+		int numBin = (int)(1.0 / binWidth) + 2;
+		int binKount[] = new int[numBin];
+		
+		ArrayList< ArrayList<String> > colorValues = new ArrayList();
+		for (int i = 0; i < numBin; ++i) {
+			colorValues.add(new ArrayList<String>());
+		}
+		
+		for (String s: dependencyDAG.nodes) {
+			double loc = dependencyDAG.numPathLocation.get(s);
+			int binLocation = -1;
+			if (dependencyDAG.isSource(s)) {
+				binLocation = 0;
+			}
+			else if (dependencyDAG.isTarget(s)) {
+				binLocation = numBin - 1;
+			}
+			else {
+				binLocation = 1 + (int)(loc / binWidth);
+			}
+			binKount[binLocation]++;
+			
+			colorValues.get(binLocation).add(s);
+		}
+		
+		int matrixMaxHeight = 0;
+		for (int i = 0; i < numBin; ++i) {
+//			System.out.println((i + 1) + "\t" + binKount[i]);
+			if (binKount[i] > matrixMaxHeight) {
+				matrixMaxHeight = binKount[i];
+			}
+		}
+		matrixMaxHeight++;
+		
+		double colorMatrixValue[][] = new double[matrixMaxHeight][numBin];
+		String colorMatrixName[][] = new String[matrixMaxHeight][numBin];
+		
+		int midIndex = matrixMaxHeight / 2;
+		for (int i = 0; i < numBin; ++i) {
+//			ArrayList<Double> aList = colorValues.get(i);
+			TreeMultimap<Double, String> sortedStrings = TreeMultimap.create(Ordering.natural().reverse(), Ordering.natural());
+			for (String s: colorValues.get(i)) {
+				sortedStrings.put(dependencyDAG.normalizedPathCentrality.get(s), s);
+			}
+			if (sortedStrings.size() < 1) continue;
+			
+			ArrayList<Double> aListValue = new ArrayList(sortedStrings.keys());
+			ArrayList<String> aListName = new ArrayList(sortedStrings.values());
+			int k = 0;
+			colorMatrixValue[midIndex + k][i] = aListValue.get(0);
+			colorMatrixName[midIndex + k][i] = aListName.get(0);
+			++k;
+			for (int j = 1; j < aListValue.size(); ++j) {
+				colorMatrixValue[midIndex + k][i] = aListValue.get(j);
+				colorMatrixName[midIndex + k][i] = aListName.get(j);
+				if (j + 1 < aListValue.size()) {
+					colorMatrixValue[midIndex - k][i] = aListValue.get(j + 1);
+					colorMatrixName[midIndex - k][i] = aListName.get(j + 1);
+					++k;
+					++j;
+				}
+				else {
+					break;
+				}
+			}
+		}
+		
+		for (int i = 0; i < matrixMaxHeight; ++i) {
+			for (int j = 0; j < numBin; ++j) {
+				if (colorMatrixValue[i][j] != 0) {
+//					double truncated = ((int)colorMatrixValue[i][j] * 1000) / 1000.0;
+//					System.out.print(idNeuronMap.get(colorMatrixName[i][j]) + " (" + truncated + ")\t");
+					System.out.print(colorMatrixValue[i][j] + "\t");
+				}
+				else {
+					System.out.print(" " + "\t");
+				}
+			}
+			System.out.println();
 		}
 	}
 }
