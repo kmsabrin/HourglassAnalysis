@@ -143,25 +143,20 @@ public class DistributionAnalysis {
 	}
 
 	public static double getPathLength(DependencyDAG dependencyDAG) {
-		double avgPLength = 0;
 		int knt = 0;
-		double pathLengths[] = new double[(int) dependencyDAG.nTargets];
+		double pathLengths[] = new double[(int) dependencyDAG.nSources];
 		for (String s : dependencyDAG.nodes) {
-			if (!dependencyDAG.serves.containsKey(s)) {
-				avgPLength += dependencyDAG.avgSourceDepth.get(s);
-				pathLengths[knt++] = dependencyDAG.avgSourceDepth.get(s);
-				// System.out.println(s + " " +
-				// dependencyDAG.avgSourceDepth.get(s));
+			if (dependencyDAG.isSource(s) && !Double.isNaN(dependencyDAG.avgTargetDepth.get(s))) {
+				pathLengths[knt++] = dependencyDAG.avgTargetDepth.get(s);
+//				System.out.println(s + " " + dependencyDAG.avgTargetDepth.get(s));
+//				System.out.println(knt + "\t" + pathLengths[knt - 1]);
 			}
 		}
 
-		// System.out.println("Average Path Length: " + avgPLength / knt);
-		// System.out.println("Median Path Length: " +
-		// StatUtils.percentile(pathLengths, 50));
-		// System.out.println("Max Path Length: " + StatUtils.max(pathLengths));
 		System.out.println("Mean Path Length: " + StatUtils.mean(pathLengths));
-		System.out.println("STD Path Length: "
-				+ Math.sqrt(StatUtils.variance(pathLengths)));
+		System.out.println("STD Path Length: " + Math.sqrt(StatUtils.variance(pathLengths)));
+		System.out.println("Median Path Length: " + StatUtils.percentile(pathLengths, 50));
+		System.out.println("Max Path Length: " + StatUtils.max(pathLengths));
 
 		return StatUtils.percentile(pathLengths, 50);
 	}

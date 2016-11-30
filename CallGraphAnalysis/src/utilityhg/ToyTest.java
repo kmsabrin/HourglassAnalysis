@@ -2,6 +2,7 @@ package utilityhg;
 
 import corehg.CoreDetection;
 import corehg.DependencyDAG;
+import corehg.ModelRealConnector;
 
 public class ToyTest {	
 	private static void doToyNetworkAnalysis() throws Exception {
@@ -11,15 +12,18 @@ public class ToyTest {
 		String toyDAGName = "toy_dag_paper";
 		DependencyDAG toyDependencyDAG = new DependencyDAG("toy_networks//" + toyDAGName + ".txt");
 		
-		String netID = "toy_dag";
-//		DependencyDAG.printNetworkStat(toyDependencyDAG);
+		ModelRealConnector modelRealConnector = new ModelRealConnector(toyDependencyDAG);
+		modelRealConnector.generateModelNetwork(toyDependencyDAG, 1);
+		
+//		String netID = "toy_dag";
+//		DependencyDAG.printNetworkStat();
 //		toyDependencyDAG.printNetworkProperties();
 
 //		CoreDetection.fullTraverse = false;
 //		CoreDetection.getCore(toyDependencyDAG, netID);
 //		double realCore = CoreDetection.minCoreSize;
 		
-		CoreDetection.getCentralEdgeSubgraph(toyDependencyDAG);
+//		CoreDetection.getCentralEdgeSubgraph(toyDependencyDAG);
 
 //		toyDependencyDAG = new DependencyDAG("toy_networks//" + toyDAGName + ".txt");
 //		FlattenNetwork.makeAndProcessFlat(toyDependencyDAG);

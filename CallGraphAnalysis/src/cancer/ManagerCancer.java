@@ -55,13 +55,13 @@ public class ManagerCancer {
 	private static void doCancerNetworkAnalysis() throws Exception {
 		DependencyDAG.isCallgraph = true;
 //		DependencyDAG.isCyclic = true;
-		String cancerDAGName = "cancer";
+		String cancerDAGName = "cancer_2.5";
 		DependencyDAG cancerDependencyDAG = new DependencyDAG("cancer_networks//" + cancerDAGName + ".dot");
 		
 //		printCancerNetwork(toyDependencyDAG);
 		
 		String netID = "cancer_dag";
-		DependencyDAG.printNetworkStat(cancerDependencyDAG);
+		cancerDependencyDAG.printNetworkStat();
 		cancerDependencyDAG.printNetworkProperties();
 
 		CoreDetection.fullTraverse = false;

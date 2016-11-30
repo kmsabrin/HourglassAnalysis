@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Scanner;
 
+import utilityhg.DistributionAnalysis;
+
 import com.google.common.collect.Ordering;
 import com.google.common.collect.TreeMultimap;
 
@@ -187,11 +189,12 @@ public class ManagerNeuro {
 		DependencyDAG neuroDependencyDAG = new DependencyDAG("neuro_networks//" + neuroDAGName + ".txt");
 		
 		String netID = "neuro_network";
-//		DependencyDAG.printNetworkStat(neuroDependencyDAG);
+		neuroDependencyDAG.printNetworkStat();
 //		getLocationColorWeightedHistogram(neuroDependencyDAG);
 //		neuroDependencyDAG.printNetworkProperties();
 
-		CoreDetection.getCentralEdgeSubgraph(neuroDependencyDAG);
+		DistributionAnalysis.getPathLength(neuroDependencyDAG);
+//		CoreDetection.getCentralEdgeSubgraph(neuroDependencyDAG);
 		
 //		CoreDetection.pathCoverageTau = 0.9999;
 //		CoreDetection.fullTraverse = false;

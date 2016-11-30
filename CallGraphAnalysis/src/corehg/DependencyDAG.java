@@ -166,7 +166,7 @@ public class DependencyDAG {
 		loadCallGraph(dependencyGraphID);
 		
 		if (isCallgraph || isClassDependency || isToy || isMetabolic || isCourtcase) {
-//			removeCycles(); // or should I only ignore cycles?
+			removeCycles(); // or should I only ignore cycles?
 		}
 		
 		if (isSynthetic) {
@@ -978,7 +978,7 @@ public class DependencyDAG {
 		}	
 		/* edge centrality - end */
 		
-		/* number of target paths - begin */
+		/* number of paths from targets - begin */
 		for (String s: nodes) {
 			if (!isTarget(s)) continue;
 			numOfTargetPath.clear();
@@ -1005,9 +1005,12 @@ public class DependencyDAG {
 		/* number of target paths - end */
 		
 //		System.out.println("Total path: " + nTotalPath);		
-//		for (String r: nodes) {
+		for (String r: nodes) {
 //			System.out.println(r + "\t" + nodePathThrough.get(r) + "\t" + cyclicNumSourcePath.get(r) + "\t" + cyclicNumTargetPath.get(r));
-//		}
+			if (isSource(r)) {
+//				System.out.println(r + "\t" + avgTargetDepth.get(r));
+			}
+		}
 //		System.out.println("--------");
 	}
 	
@@ -1075,7 +1078,7 @@ public class DependencyDAG {
 			{
 				double m = avgSourceDepth.get(s) / (avgTargetDepth.get(s) + avgSourceDepth.get(s));
 				m = ((int) (m * 1000.0)) / 1000.0; // round up to 2 decimal point
-			lengthPathLocation.put(s, m);
+				lengthPathLocation.put(s, m);
 			}
 			
 			double n = 0;
@@ -1086,7 +1089,7 @@ public class DependencyDAG {
 				n = (numOfSourcePath.get(s) - 1) / ((numOfSourcePath.get(s) - 1) + (numOfTargetPath.get(s) - 1));
 			}
 			n = ((int) (n * 100.0)) / 100.0; // round up to 2 decimal point
-			numPathLocation.put(s, n);
+			numPathLocation.put(s, n);			
 		}		
 	}
 		
@@ -1313,11 +1316,11 @@ public class DependencyDAG {
 		edgeWeights = new HashMap();
 	}
 	
-	public static void printNetworkStat(DependencyDAG dependencyDAG) {
-		System.out.println(" S: " + dependencyDAG.nSources);
-		System.out.println(" T: " + dependencyDAG.nTargets);
-		System.out.println(" E: " + dependencyDAG.nEdges);
-		System.out.println(" N: " + dependencyDAG.nodes.size());
-//		System.out.println(" Toal Path: " + dependencyDAG.nTotalPath);
+	public void printNetworkStat() {
+		System.out.println(" S: " + nSources);
+		System.out.println(" T: " + nTargets);
+		System.out.println(" E: " + nEdges);
+		System.out.println(" N: " + nodes.size());
+//		System.out.println(" Toal Path: " + nTotalPath);		
 	}
 }
