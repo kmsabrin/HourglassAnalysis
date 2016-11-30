@@ -9,15 +9,15 @@ public class ToyTest {
 		DependencyDAG.isToy = true;
 		DependencyDAG.isCyclic = true;
 //		String toyDAGName = "out-toy";
-		String toyDAGName = "toy_dag_paper";
+		String toyDAGName = "toy_cyclic_2";
 		DependencyDAG toyDependencyDAG = new DependencyDAG("toy_networks//" + toyDAGName + ".txt");
 		
-		ModelRealConnector modelRealConnector = new ModelRealConnector(toyDependencyDAG);
-		modelRealConnector.generateModelNetwork(toyDependencyDAG, 1);
+//		ModelRealConnector modelRealConnector = new ModelRealConnector(toyDependencyDAG);
+//		modelRealConnector.generateModelNetwork(toyDependencyDAG, 1);
 		
 //		String netID = "toy_dag";
-//		DependencyDAG.printNetworkStat();
-//		toyDependencyDAG.printNetworkProperties();
+//		toyDependencyDAG.printNetworkStat();
+		toyDependencyDAG.printNetworkProperties();
 
 //		CoreDetection.fullTraverse = false;
 //		CoreDetection.getCore(toyDependencyDAG, netID);

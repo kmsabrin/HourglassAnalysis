@@ -191,14 +191,14 @@ public class ManagerNeuro {
 		String netID = "neuro_network";
 		neuroDependencyDAG.printNetworkStat();
 //		getLocationColorWeightedHistogram(neuroDependencyDAG);
-//		neuroDependencyDAG.printNetworkProperties();
+		neuroDependencyDAG.printNetworkProperties();
 
-		DistributionAnalysis.getPathLength(neuroDependencyDAG);
+//		DistributionAnalysis.getPathLength(neuroDependencyDAG);
 //		CoreDetection.getCentralEdgeSubgraph(neuroDependencyDAG);
 		
-//		CoreDetection.pathCoverageTau = 0.9999;
-//		CoreDetection.fullTraverse = false;
-//		CoreDetection.getCore(neuroDependencyDAG, netID);
+		CoreDetection.pathCoverageTau = 0.9999;
+		CoreDetection.fullTraverse = false;
+		CoreDetection.getCore(neuroDependencyDAG, netID);
 //		double realCore = CoreDetection.minCoreSize;
 //
 //		neuroDependencyDAG = new DependencyDAG("neuro_networks//" + neuroDAGName + ".txt");
@@ -208,7 +208,7 @@ public class ManagerNeuro {
 	}
 	
 	public static void main(String[] args) throws Exception {
-//		getCleanNeuroNetwork();
+		getCleanNeuroNetwork();
 		doNeuroNetworkAnalysis();
 	}
 }

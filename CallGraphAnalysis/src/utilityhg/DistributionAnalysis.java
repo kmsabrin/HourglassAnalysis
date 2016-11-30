@@ -141,8 +141,8 @@ public class DistributionAnalysis {
 		pw.close();
 		return ccdfMap;
 	}
-
-	public static double getPathLength(DependencyDAG dependencyDAG) {
+	
+	public static double getPathLength(DependencyDAG dependencyDAG) {	
 		int knt = 0;
 		double pathLengths[] = new double[(int) dependencyDAG.nSources];
 		for (String s : dependencyDAG.nodes) {

@@ -40,6 +40,7 @@ public class DependencyDAG {
 	public HashMap<String, Double> normalizedPathCentrality;
 	public HashMap<String, Integer> centralityRank;
 	public HashMap<String, Double> iCentrality;
+	public HashMap<String, Double> lengthWeightedPathCentrality;
 	
 	public Map<String, Integer> outDegree;
 	public Map<String, Integer> inDegree;
@@ -93,6 +94,8 @@ public class DependencyDAG {
 	public HashSet<String> visitedBlack;
 	public HashMap<String, Double> cyclicNumSourcePath;
 	public HashMap<String, Double> cyclicNumTargetPath;
+	public HashMap<String, Double> cyclicAvgSourceDepth;
+	public HashMap<String, Double> cyclicAvgTargetDepth;
 	
 	public HashMap<String, Double> numPathLocation;
 
@@ -119,6 +122,7 @@ public class DependencyDAG {
 		harmonicMeanPathCentrality = new HashMap();
 		normalizedPathCentrality = new HashMap();
 		centralityRank = new HashMap();
+		lengthWeightedPathCentrality = new HashMap();
 		
 		iCentrality = new HashMap();
 		
@@ -151,6 +155,8 @@ public class DependencyDAG {
 		goodEdgeToTarget = new HashSet();
 		cyclicNumSourcePath = new HashMap();
 		cyclicNumTargetPath = new HashMap();
+		cyclicAvgSourceDepth = new HashMap();
+		cyclicAvgTargetDepth = new HashMap();
 		
 		numPathLocation = new HashMap();
 		
@@ -895,24 +901,30 @@ public class DependencyDAG {
 //		System.out.println(goodEdgeToSource);
 	}
 	
+	private void initPathTraversalDS() {
+		numOfTargetPath.clear();
+		numOfSourcePath.clear();
+		sumOfSourcePath.clear();
+		sumOfTargetPath.clear();
+		avgTargetDepth.clear();
+		avgSourceDepth.clear();
+	}
+	
 	public void loadCyclicPathStatistics() {
 		HashMap<String, Double> edgeCentralityMap = new HashMap(); // for edge centrality
-		
-//		System.out.println("HERE !!!");
 		nTotalPath = 0;
-		nodePathThrough = new HashMap();
-		for (String s: nodes) {
+		nodePathThrough.clear();
+		
+		for (String s: nodes) { // for every source DAG
 			if (!isSource(s)) continue;
-			numOfTargetPath.clear();
-			numOfSourcePath.clear();
+			initPathTraversalDS();
+			
 			loadGoodEdge(s, "fromSource");
 //			System.out.println("Starting towards target traversal from " + s);
 			targetPathsTraverse(s);
 		
-			for (String r: nodes) {
+			for (String r: nodes) { // from targets to source for this DAG, needed for total paths in this DAG
 				if (!isTarget(r)) continue;
-//				if (!numOfTargetPath.containsKey(r)) continue;
-//				System.out.println("Starting towards source traversal from " + r);
 				sourcePathsTraverse(r);
 			}
 			
@@ -925,9 +937,13 @@ public class DependencyDAG {
 				if (numOfTargetPath.containsKey(r)) {
 					numTargetPath = numOfTargetPath.get(r);
 				}
-
 //				System.out.println(r + "\t" + tPath + "\t" + sPath);
-
+				double numPath = numSourcePath * numTargetPath;
+				if (nodePathThrough.containsKey(r)) {
+					numPath += nodePathThrough.get(r);
+				}
+				nodePathThrough.put(r, numPath);
+				
 				if (cyclicNumSourcePath.containsKey(r)) {
 					cyclicNumSourcePath.put(r, numSourcePath + cyclicNumSourcePath.get(r));
 				}
@@ -935,11 +951,15 @@ public class DependencyDAG {
 					cyclicNumSourcePath.put(r, numSourcePath);
 				}
 				
-				double numPath = numSourcePath * numTargetPath;
-				if (nodePathThrough.containsKey(r)) {
-					numPath += nodePathThrough.get(r);
+				if (avgSourceDepth.containsKey(r) && !Double.isNaN(avgSourceDepth.get(r))) {
+					if (cyclicAvgSourceDepth.containsKey(r)) {
+						cyclicAvgSourceDepth.put(r, (cyclicAvgSourceDepth.get(r) + avgSourceDepth.get(r)) * 0.5);
+					}
+					else {
+						cyclicAvgSourceDepth.put(r, avgSourceDepth.get(r));
+					}
+//					System.out.println(r + "\t" + avgSourceDepth.get(r));
 				}
-				nodePathThrough.put(r, numPath);
 			}
 			
 			nTotalPath += numOfTargetPath.get(s);		
@@ -981,13 +1001,14 @@ public class DependencyDAG {
 		/* number of paths from targets - begin */
 		for (String s: nodes) {
 			if (!isTarget(s)) continue;
-			numOfTargetPath.clear();
-//			numOfSourcePath.clear();
+			initPathTraversalDS();
 			loadGoodEdge(s, "fromTarget");
+			
 			for (String r: nodes) {
 				if (!isSource(r)) continue;
 				targetPathsTraverse(r);
 			}
+			
 			for (String r: nodes) {
 				double numTargetPath = 0;
 				if (numOfTargetPath.containsKey(r)) {
@@ -999,6 +1020,15 @@ public class DependencyDAG {
 				}
 				else {
 					cyclicNumTargetPath.put(r, numTargetPath);
+				}
+				
+				if (avgTargetDepth.containsKey(r)  && !Double.isNaN(avgTargetDepth.get(r))) {
+					if (cyclicAvgTargetDepth.containsKey(r)) {
+						cyclicAvgTargetDepth.put(r, (cyclicAvgTargetDepth.get(r) + avgTargetDepth.get(r)) * 0.5);
+					}
+					else {
+						cyclicAvgTargetDepth.put(r, avgTargetDepth.get(r));
+					}
 				}
 			}
 		}
@@ -1080,6 +1110,7 @@ public class DependencyDAG {
 				m = ((int) (m * 1000.0)) / 1000.0; // round up to 2 decimal point
 				lengthPathLocation.put(s, m);
 			}
+			
 			
 			double n = 0;
 			if (isCyclic) {
@@ -1195,6 +1226,10 @@ public class DependencyDAG {
 //				manually reset source and targets to zero
 //				normalizedPathCentrality.put(s, 0.0);
 //			}
+			
+			if (isCyclic) {
+				lengthWeightedPathCentrality.put(s, nodePathThrough.get(s) / (cyclicAvgSourceDepth.get(s) + cyclicAvgTargetDepth.get(s)));
+			}
 		}			
 		
 //		System.out.println("Tubes: " + tubes);
@@ -1219,8 +1254,13 @@ public class DependencyDAG {
 //			System.out.println(s + "\t" + normalizedPathCentrality.get(s));
 //			System.out.println();
 //			System.out.println(s + "\t" + numPathLocation.get(s) + "\t" + lengthPathLocation.get(s));
-			System.out.println(s + "\t" + numPathLocation.get(s) + "\t" + normalizedPathCentrality.get(s));
+//			System.out.println(s + "\t" + numPathLocation.get(s) + "\t" + normalizedPathCentrality.get(s));
 //			System.out.println(numPathLocation.get(s) + "\t" + Math.random() + "\t" + Math.log10(nodePathThrough.get(s)));
+			if (isCyclic) {
+//				System.out.println(s + "\t" + cyclicAvgSourceDepth.get(s) + "\t" + cyclicAvgTargetDepth.get(s));
+//				System.out.println(s + "\t" + lengthWeightedPathCentrality.get(s) + "\t" + nodePathThrough.get(s));
+				System.out.println(s + "\t" + nodePathThrough.get(s));
+			}
 		}
 		
 		
