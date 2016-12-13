@@ -10,6 +10,7 @@ import org.apache.commons.math3.stat.StatUtils;
 import utilityhg.ConfidenceInterval;
 import utilityhg.CourtCaseCornellParser;
 import utilityhg.DistributionAnalysis;
+import utilityhg.Visualization;
 import corehg.CoreDetection;
 import corehg.DependencyDAG;
 import corehg.FlattenNetwork;
@@ -82,8 +83,7 @@ public class ManagerHGPaper {
 //		String netID = "openssh-39";
 //		String netID = "apache-commons-3.4";
 		
-		String netID = "court";
-		
+		String netID = "court";		
 //		String netID = "jetuml";
 		
 		DependencyDAG.resetFlags();
@@ -95,16 +95,16 @@ public class ManagerHGPaper {
 //		loadLargestWCC(netID);
 		
 		if (netID.equals("rat")) {
-//			netPath = "metabolic_networks//rat-consolidated.txt";
-			netPath = "metabolic_networks//rat-links.txt";
+			netPath = "metabolic_networks//rat-consolidated.txt";
+//			netPath = "metabolic_networks//rat-links.txt";
 			DependencyDAG.isMetabolic = true;
-			DependencyDAG.isCyclic = true;
+//			DependencyDAG.isCyclic = true;
 		}
 		else if (netID.equals("monkey")) {
-//			netPath = "metabolic_networks//monkey-consolidated.txt";
-			netPath = "metabolic_networks//monkey-links.txt";
+			netPath = "metabolic_networks//monkey-consolidated.txt";
+//			netPath = "metabolic_networks//monkey-links.txt";
 			DependencyDAG.isMetabolic = true;
-			DependencyDAG.isCyclic = true;
+//			DependencyDAG.isCyclic = true;
 		}
 		else if (netID.equals("court")) {
 //			CourtCaseCornellParser.caseTopic = "abortion";
@@ -134,11 +134,14 @@ public class ManagerHGPaper {
 		
 //		generateSyntheticFromReal(dependencyDAG);
 		
-		dependencyDAG.printNetworkStat();
-//		dependencyDAG.printNetworkProperties();
+//		dependencyDAG.printNetworkStat();
+		dependencyDAG.printNetworkProperties();
+		DistributionAnalysis.getLocationColorWeightedHistogram(dependencyDAG);
 		
-		ModelRealConnector modelRealConnector = new ModelRealConnector(dependencyDAG);
-		modelRealConnector.generateModelNetwork(dependencyDAG, 0.6);
+//		Visualization.printDOTNetwork(dependencyDAG);
+		
+//		ModelRealConnector modelRealConnector = new ModelRealConnector(dependencyDAG);
+//		modelRealConnector.generateModelNetwork(dependencyDAG, 0.6);
 		
 //		DistributionAnalysis.printEdgeList(dependencyDAG, netID);
 //		DistributionAnalysis.getAverageInOutDegree(dependencyDAG);
@@ -160,8 +163,8 @@ public class ManagerHGPaper {
 //		WaistDetection.heuristicWaistDetection(dependencyDAG, netID);
 //		CoreDetection.pathCoverageThresholdDetection(dependencyDAG, netID);
 		
-//		CoreDetection.fullTraverse = false;
-//		CoreDetection.getCore(dependencyDAG, netID);
+		CoreDetection.fullTraverse = false;
+		CoreDetection.getCore(dependencyDAG, netID);
 //		double realCore = CoreDetection.minCoreSize;
 
 //		Randomization Experiments

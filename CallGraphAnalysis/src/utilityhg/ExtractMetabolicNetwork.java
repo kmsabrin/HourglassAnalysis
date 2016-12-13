@@ -81,8 +81,6 @@ public class ExtractMetabolicNetwork {
 	}
 
 	public static void main(String[] args) throws Exception {
-		parseMetabolicNetworkXML("metabolic_networks//mcc-kgml.xml"); // eco,
-																		// rno,
-																		// mcc
+		parseMetabolicNetworkXML("metabolic_networks//mcc-kgml.xml"); // eco, // rno, // mcc
 	}
 }

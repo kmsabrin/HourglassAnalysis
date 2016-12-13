@@ -8,6 +8,8 @@ import java.util.Scanner;
 import java.util.Set;
 
 import org.apache.commons.math3.distribution.AbstractRealDistribution;
+import org.apache.commons.math3.distribution.PoissonDistribution;
+import org.apache.commons.math3.distribution.ZipfDistribution;
 import org.apache.commons.math3.stat.StatUtils;
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 
@@ -126,17 +128,16 @@ public class Util {
 
 		extractJavaClassDependency();
 		//
-		// int n = 10;
-		// PoissonDistribution poissonDistribution = new PoissonDistribution(7);
-		// // ZipfDistribution zipfDistribution = new ZipfDistribution(n, 5.0);
-		// for (int i = 0; i <= n; ++i) {
-		// // System.out.println(i + "\t" + zipfDistribution.probability(n - i +
-		// 1));
-		// // System.out.println(zipfDistribution.sample());
-		// // System.out.println(i + "\t" + zipfDistribution.probability(n - i +
-		// 1));
-		// System.out.println(i + "\t" + poissonDistribution.probability(i));
-		// }
+		
+		int n = 3;
+		PoissonDistribution poissonDistribution = new PoissonDistribution(7);
+		ZipfDistribution zipfDistribution = new ZipfDistribution(n, 1.0);
+		for (int i = 1; i <= n; ++i) {
+			 System.out.println(i + "\t" + zipfDistribution.probability(n - i + 1));
+//			 System.out.println(zipfDistribution.sample());
+//			 System.out.println(i + "\t" + zipfDistribution.probability(i));
+//			 System.out.println(i + "\t" + poissonDistribution.probability(i));
+		}
 		//
 		// System.out.println("----------");
 		//

@@ -23,6 +23,7 @@ public class CoreDetection {
 	public static double weightedCoreLocation = 0;
 
 	public static boolean fullTraverse = false;
+	public static boolean inCore = false;
 	
 	public static HashMap<TreeSet<String>, Double> coreSet;
 	
@@ -188,6 +189,7 @@ public class CoreDetection {
 			representativeLocation.put(representative, getMedianPESLocation(equivalentNodes, dependencyDAG));
 			if (!FlattenNetwork.isProcessingFlat & true) {
 				System.out.println("[Core] " + representative + "\t" + ((cumulativePathCovered + maxPathCovered) / totalPath));
+//				System.out.println(((cumulativePathCovered + maxPathCovered) / totalPath));
 			}
 			
 //			analysis
@@ -243,6 +245,7 @@ public class CoreDetection {
 //		}
 		
 //		Compute through paths for all nodes
+		inCore = true;
 		dependencyDAG.numOfTargetPath.clear();
 		dependencyDAG.numOfSourcePath.clear();
 		dependencyDAG.loadPathStatistics();
@@ -291,6 +294,8 @@ public class CoreDetection {
 			System.out.println("Node Coverage: " + nodeCoverage);
 			System.out.println("WeightedCoreLocation: " + weightedCoreLocation);
 		}
+		
+		inCore = false;
 	}
 	
 	private static void getCoreNeighborhood(DependencyDAG dependencyDAG, TreeSet<String> sampleCore) {

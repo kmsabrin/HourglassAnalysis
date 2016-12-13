@@ -13,6 +13,7 @@ import java.util.TreeSet;
 import org.apache.commons.math3.stat.StatUtils;
 
 import utilityhg.DistributionAnalysis;
+import utilityhg.Visualization;
 import corehg.CoreDetection;
 import corehg.DependencyDAG;
 import corehg.FlattenNetwork;
@@ -58,10 +59,11 @@ public class ManagerSWPaper {
 		DependencyDAG.isCallgraph = true;
 		DependencyDAG.isCyclic = true;
 //		DependencyDAG.isClassDependency = true;
-		System.out.println(netPath + "//" + netID);
+//		System.out.println(netPath + "//" + netID);
+		
 		DependencyDAG dependencyDAG = new DependencyDAG(netPath + "//" + netID);
-//		DependencyDAG.printNetworkStat(dependencyDAG);
-//		dependencyDAG.printNetworkProperties();
+//		dependencyDAG.printNetworkStat();
+		dependencyDAG.printNetworkProperties();
 		
 //		DistributionAnalysis.getLocationColorWeightedHistogram(dependencyDAG);
 //		DistributionAnalysis.printEdgeList(dependencyDAG, netID);
@@ -77,22 +79,25 @@ public class ManagerSWPaper {
 //		DistributionAnalysis.printEdgeList(dependencyDAG, netID);
 //		DistributionAnalysis.printAllCentralities(dependencyDAG, netID);
 //		DistributionAnalysis.findNDirectSrcTgtBypasses(dependencyDAG, netID);
+		DistributionAnalysis.getLocationColorWeightedHistogram(dependencyDAG);
 		
 //		LineOfCodeGenerator.parseFile(netPath + "//" + netID.substring(netID.indexOf('o')) + ".c", dependencyDAG.nodes);
 		
 //		System.out.print(dependencyDAG.nodes.size() + "\t" + dependencyDAG.nEdges + "\t");
 		
-//		Central Edge Subgraph
+		/* Central Edge Subgraph */
 //		CoreDetection.getCentralEdgeSubgraph(dependencyDAG);
+//		Visualization.printDOTNetwork(dependencyDAG);
 		
-//		Core Detection
-//		CoreDetection.fullTraverse = true;
-		CoreDetection.pathCoverageTau = 0.95;
+		/* Core Detection */
+		CoreDetection.fullTraverse = false;
+		CoreDetection.pathCoverageTau = 0.97;
 		CoreDetection.getCore(dependencyDAG, netID);
 		double realCore = CoreDetection.minCoreSize;
 //		System.out.print(CoreDetection.minCoreSize);
+//		System.out.println();
 
-//		Flattening
+		/* Flattening */
 //		FlattenNetwork.makeAndProcessFlat(dependencyDAG);	
 //		CoreDetection.hScore = (1.0 - (realCore / FlattenNetwork.flatNetworkCoreSize));
 //		System.out.println("H-Score: " + CoreDetection.hScore);
@@ -502,7 +507,7 @@ public class ManagerSWPaper {
 	}
 	
 	public static void main(String[] args) throws Exception {		
-//		ManagerSWPaper.doRealNetworkAnalysis("jetuml_dependency", "JetUML-0.13.jar.dot");
+		ManagerSWPaper.doRealNetworkAnalysis("jetuml_dependency", "JetUML-0.13.jar.dot");
 //		ManagerSWPaper.doRealNetworkAnalysis("openssh_callgraphs", "full.graph-openssh-39");
 		
 //		ManagerSWPaper.analyzeNetworks();
@@ -510,7 +515,7 @@ public class ManagerSWPaper {
 //		ManagerSWPaper.analyzeNetworks2();
 //		ManagerSWPaper.analyzeNetworks3();
 		
-		ManagerSWPaper.analyzeNetworks4();
+//		ManagerSWPaper.analyzeNetworks4();
 //		System.out.println("Done!");
 	}
 }

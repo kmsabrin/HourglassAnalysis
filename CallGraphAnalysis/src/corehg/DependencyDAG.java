@@ -1,6 +1,7 @@
 package corehg;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -171,8 +172,8 @@ public class DependencyDAG {
 		// load & initialize the attributes of the dependency graph
 		loadCallGraph(dependencyGraphID);
 		
-		if (isCallgraph || isClassDependency || isToy || isMetabolic || isCourtcase) {
-			removeCycles(); // or should I only ignore cycles?
+		if (isCallgraph /*|| isClassDependency || isToy || isMetabolic || isCourtcase*/) {
+//			removeCycles(); // or should I only ignore cycles?
 		}
 		
 		if (isSynthetic) {
@@ -191,8 +192,8 @@ public class DependencyDAG {
 		loadServerReachabilityAll();
 		
 		loadPathCentralityMetric();
-//		loadPagerankCentralityMetric();		
 		
+//		loadPagerankCentralityMetric();		
 //		DistributionAnalysis.rankNodeByCentrality(this, this.normalizedPathCentrality);
 	}
 	
@@ -294,6 +295,7 @@ public class DependencyDAG {
 
 		int violation = 0;
 		int lexisTargetKount = 0;
+		
 		while (scanner.hasNext()) {
 			String line = scanner.nextLine();
 			String tokens[] = line.split("\\s+");
@@ -373,9 +375,9 @@ public class DependencyDAG {
 				// for metabolic and synthetic networks
 				server = tokens[0];
 				dependent = tokens[1];
-				if (largestWCCNodes.contains(server) == false || largestWCCNodes.contains(dependent) == false) {
+//				if (largestWCCNodes.contains(server) == false || largestWCCNodes.contains(dependent) == false) {
 //					continue;
-				}
+//				}
 			}
 			else if (isSynthetic || isToy || isCyclic) {
 				if (isWeighted) {
@@ -840,8 +842,11 @@ public class DependencyDAG {
 		}
 		
 		visitedGray.add(node);
-		if (serves.containsKey(node)) { // for synthetic disconnected nodes
-			for (String s : serves.get(node)) {
+		if (serves.containsKey(node)) { 
+			ArrayList<String> shuffledNodes = new ArrayList(serves.get(node));
+			// do a random shuffling of nodes
+//			Collections.shuffle(shuffledNodes);
+			for (String s : shuffledNodes) {
 				if (!visitedGray.contains(s) || visitedBlack.contains(s)) {
 //					System.out.println("Adding: " + node + "\t" + s);
 					goodEdgeToTarget.add(node + "#" + s);
@@ -853,7 +858,6 @@ public class DependencyDAG {
 				}
 			}
 		}
-		
 		visitedBlack.add(node);
 		visitedGray.remove(node);
 	}
@@ -864,8 +868,11 @@ public class DependencyDAG {
 		}
 		
 		visitedGray.add(node);
-		if (depends.containsKey(node)) { // for synthetic disconnected nodes
-			for (String s : depends.get(node)) {
+		if (depends.containsKey(node)) { 
+			ArrayList<String> shuffledNodes = new ArrayList(depends.get(node));
+			// do a random shuffling of nodes
+//			Collections.shuffle(shuffledNodes);
+			for (String s : shuffledNodes) {
 				if (!visitedGray.contains(s) || visitedBlack.contains(s)) {
 //					System.out.println("Adding: " + node + "\t" + s);
 					goodEdgeToTarget.add(s + "#" + node);
@@ -876,8 +883,7 @@ public class DependencyDAG {
 					traverseFromTarget(s);
 				}
 			}
-		}
-		
+		}		
 		visitedBlack.add(node);
 		visitedGray.remove(node);
 	}
@@ -951,6 +957,7 @@ public class DependencyDAG {
 					cyclicNumSourcePath.put(r, numSourcePath);
 				}
 				
+				// for weighted path centrality
 				if (avgSourceDepth.containsKey(r) && !Double.isNaN(avgSourceDepth.get(r))) {
 					if (cyclicAvgSourceDepth.containsKey(r)) {
 						cyclicAvgSourceDepth.put(r, (cyclicAvgSourceDepth.get(r) + avgSourceDepth.get(r)) * 0.5);
@@ -958,44 +965,43 @@ public class DependencyDAG {
 					else {
 						cyclicAvgSourceDepth.put(r, avgSourceDepth.get(r));
 					}
-//					System.out.println(r + "\t" + avgSourceDepth.get(r));
 				}
 			}
 			
 			nTotalPath += numOfTargetPath.get(s);		
 			
 			/* edge centrality - begin */
-			for (String r : nodes) {
-				if (isTarget(r)) continue;
-				for (String t : serves.get(r)) {
-					double numSourcePath = 0;
-					if (numOfSourcePath.containsKey(r)) {
-						numSourcePath = numOfSourcePath.get(r);
-					}
-					double numTargetPath = 0;
-					if (numOfTargetPath.containsKey(t)) {
-						numTargetPath = numOfTargetPath.get(t);
-					}
-					double numEdgePath = numSourcePath * numTargetPath;
-					String edge = r + "#" + t;
-					if (edgeCentralityMap.containsKey(edge)) {
-						edgeCentralityMap.put(edge, edgeCentralityMap.get(edge) + numEdgePath);
-					}
-					else {
-						edgeCentralityMap.put(edge, numEdgePath);
-					}
-				}
-			}
+//			for (String r : nodes) {
+//				if (isTarget(r)) continue;
+//				for (String t : serves.get(r)) {
+//					double numSourcePath = 0;
+//					if (numOfSourcePath.containsKey(r)) {
+//						numSourcePath = numOfSourcePath.get(r);
+//					}
+//					double numTargetPath = 0;
+//					if (numOfTargetPath.containsKey(t)) {
+//						numTargetPath = numOfTargetPath.get(t);
+//					}
+//					double numEdgePath = numSourcePath * numTargetPath;
+//					String edge = r + "#" + t;
+//					if (edgeCentralityMap.containsKey(edge)) {
+//						edgeCentralityMap.put(edge, edgeCentralityMap.get(edge) + numEdgePath);
+//					}
+//					else {
+//						edgeCentralityMap.put(edge, numEdgePath);
+//					}
+//				}
+//			}
 			/* edge centrality - end */
 		}
 		
 		/* edge centrality - begin */
-		for (String e : edgeCentralityMap.keySet()) {
-			String r = e.substring(0, e.indexOf('#'));
-			String t = e.substring(e.indexOf('#') + 1);
-			Edge edge = new Edge(r, t, edgeCentralityMap.get(e));
-			edgePathCentrality.add(edge);
-		}	
+//		for (String e : edgeCentralityMap.keySet()) {
+//			String r = e.substring(0, e.indexOf('#'));
+//			String t = e.substring(e.indexOf('#') + 1);
+//			Edge edge = new Edge(r, t, edgeCentralityMap.get(e));
+//			edgePathCentrality.add(edge);
+//		}	
 		/* edge centrality - end */
 		
 		/* number of paths from targets - begin */
@@ -1035,12 +1041,13 @@ public class DependencyDAG {
 		/* number of target paths - end */
 		
 //		System.out.println("Total path: " + nTotalPath);		
-		for (String r: nodes) {
+//		for (String r: nodes) {
 //			System.out.println(r + "\t" + nodePathThrough.get(r) + "\t" + cyclicNumSourcePath.get(r) + "\t" + cyclicNumTargetPath.get(r));
-			if (isSource(r)) {
+//			System.out.println(r + "\t" + nodePathThrough.get(r) + "\t" + cyclicAvgSourceDepth.get(r) + "\t" + cyclicAvgTargetDepth.get(r));
+//			if (isSource(r)) {
 //				System.out.println(r + "\t" + avgTargetDepth.get(r));
-			}
-		}
+//			}
+//		}
 //		System.out.println("--------");
 	}
 	
@@ -1228,7 +1235,7 @@ public class DependencyDAG {
 //			}
 			
 			if (isCyclic) {
-				lengthWeightedPathCentrality.put(s, nodePathThrough.get(s) / (cyclicAvgSourceDepth.get(s) + cyclicAvgTargetDepth.get(s)));
+//				lengthWeightedPathCentrality.put(s, nodePathThrough.get(s) / (cyclicAvgSourceDepth.get(s) + cyclicAvgTargetDepth.get(s)));
 			}
 		}			
 		
@@ -1251,7 +1258,7 @@ public class DependencyDAG {
 //			System.out.print(iCentrality.get(s) + "\t");
 //			System.out.print(sourcesReachable.get(s) + "\t");
 //			System.out.print(targetsReachable.get(s) + "\t");
-//			System.out.println(s + "\t" + normalizedPathCentrality.get(s));
+			System.out.println(s + "\t" + normalizedPathCentrality.get(s));
 //			System.out.println();
 //			System.out.println(s + "\t" + numPathLocation.get(s) + "\t" + lengthPathLocation.get(s));
 //			System.out.println(s + "\t" + numPathLocation.get(s) + "\t" + normalizedPathCentrality.get(s));
@@ -1259,12 +1266,13 @@ public class DependencyDAG {
 			if (isCyclic) {
 //				System.out.println(s + "\t" + cyclicAvgSourceDepth.get(s) + "\t" + cyclicAvgTargetDepth.get(s));
 //				System.out.println(s + "\t" + lengthWeightedPathCentrality.get(s) + "\t" + nodePathThrough.get(s));
-				System.out.println(s + "\t" + nodePathThrough.get(s));
+//				System.out.println(s + "\t" + nodePathThrough.get(s));				
 			}
 		}
 		
 		
-//		System.out.println("Total path: " + nTotalPath);
+		
+		System.out.println("Total path: " + nTotalPath);
 		
 		for (String s : nodes) {
 //			if (depends.containsKey(s)) {
@@ -1284,6 +1292,15 @@ public class DependencyDAG {
 //			}
 		}
 		
+		
+		String[] jetumlCore = new String[]{"ca.mcgill.cs.stg.jetuml.TestUMLEditor", "ca.mcgill.cs.stg.jetuml.graph.Node",
+				"ca.mcgill.cs.stg.jetuml.graph.CallNode", "ca.mcgill.cs.stg.jetuml.graph.Graph", 
+				"ca.mcgill.cs.stg.jetuml.framework.EditorFrame", "ca.mcgill.cs.stg.jetuml.diagrams.ClassDiagramGraph"};
+			
+		for (String r: jetumlCore) {
+			System.out.println(r + "\t" + normalizedPathCentrality.get(r) + "\t" + numPathLocation.get(r));
+		}
+		System.out.println();
 	}
 	
 	public class PathCentralityComparator<String> implements Comparator<String> {
