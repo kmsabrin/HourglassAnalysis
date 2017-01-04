@@ -79,7 +79,7 @@ public class ManagerSWPaper {
 //		DistributionAnalysis.printEdgeList(dependencyDAG, netID);
 //		DistributionAnalysis.printAllCentralities(dependencyDAG, netID);
 //		DistributionAnalysis.findNDirectSrcTgtBypasses(dependencyDAG, netID);
-		DistributionAnalysis.getLocationColorWeightedHistogram(dependencyDAG);
+//		DistributionAnalysis.getLocationColorWeightedHistogram(dependencyDAG);
 		
 //		LineOfCodeGenerator.parseFile(netPath + "//" + netID.substring(netID.indexOf('o')) + ".c", dependencyDAG.nodes);
 		

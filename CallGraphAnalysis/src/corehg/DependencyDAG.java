@@ -173,7 +173,7 @@ public class DependencyDAG {
 		loadCallGraph(dependencyGraphID);
 		
 		if (isCallgraph /*|| isClassDependency || isToy || isMetabolic || isCourtcase*/) {
-//			removeCycles(); // or should I only ignore cycles?
+			removeCycles(); // or should I only ignore cycles?
 		}
 		
 		if (isSynthetic) {
@@ -1258,10 +1258,11 @@ public class DependencyDAG {
 //			System.out.print(iCentrality.get(s) + "\t");
 //			System.out.print(sourcesReachable.get(s) + "\t");
 //			System.out.print(targetsReachable.get(s) + "\t");
-			System.out.println(s + "\t" + normalizedPathCentrality.get(s));
+//			System.out.println(s + "\t" + normalizedPathCentrality.get(s));
 //			System.out.println();
 //			System.out.println(s + "\t" + numPathLocation.get(s) + "\t" + lengthPathLocation.get(s));
 //			System.out.println(s + "\t" + numPathLocation.get(s) + "\t" + normalizedPathCentrality.get(s));
+//			System.out.println(s + "\t" + numPathLocation.get(s));
 //			System.out.println(numPathLocation.get(s) + "\t" + Math.random() + "\t" + Math.log10(nodePathThrough.get(s)));
 			if (isCyclic) {
 //				System.out.println(s + "\t" + cyclicAvgSourceDepth.get(s) + "\t" + cyclicAvgTargetDepth.get(s));
@@ -1269,8 +1270,6 @@ public class DependencyDAG {
 //				System.out.println(s + "\t" + nodePathThrough.get(s));				
 			}
 		}
-		
-		
 		
 		System.out.println("Total path: " + nTotalPath);
 		
@@ -1293,14 +1292,14 @@ public class DependencyDAG {
 		}
 		
 		
-		String[] jetumlCore = new String[]{"ca.mcgill.cs.stg.jetuml.TestUMLEditor", "ca.mcgill.cs.stg.jetuml.graph.Node",
-				"ca.mcgill.cs.stg.jetuml.graph.CallNode", "ca.mcgill.cs.stg.jetuml.graph.Graph", 
-				"ca.mcgill.cs.stg.jetuml.framework.EditorFrame", "ca.mcgill.cs.stg.jetuml.diagrams.ClassDiagramGraph"};
-			
-		for (String r: jetumlCore) {
-			System.out.println(r + "\t" + normalizedPathCentrality.get(r) + "\t" + numPathLocation.get(r));
-		}
-		System.out.println();
+//		String[] jetumlCore = new String[]{"ca.mcgill.cs.stg.jetuml.TestUMLEditor", "ca.mcgill.cs.stg.jetuml.graph.Node",
+//				"ca.mcgill.cs.stg.jetuml.graph.CallNode", "ca.mcgill.cs.stg.jetuml.graph.Graph", 
+//				"ca.mcgill.cs.stg.jetuml.framework.EditorFrame", "ca.mcgill.cs.stg.jetuml.diagrams.ClassDiagramGraph"};
+//			
+//		for (String r: jetumlCore) {
+//			System.out.println(r + "\t" + normalizedPathCentrality.get(r) + "\t" + numPathLocation.get(r));
+//		}
+//		System.out.println();
 	}
 	
 	public class PathCentralityComparator<String> implements Comparator<String> {

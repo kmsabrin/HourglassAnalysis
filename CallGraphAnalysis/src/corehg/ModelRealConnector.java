@@ -92,7 +92,7 @@ public class ModelRealConnector {
 	}
 	
 	public void generateModelNetwork(DependencyDAG dependencyDAG, double alpha) throws Exception {
-		PrintWriter pw = new PrintWriter(new File("toy_networks//real-model-test.txt"));
+		PrintWriter pw = new PrintWriter(new File("real_model_networks//real-model-test.txt"));
 		Random random = new Random(System.nanoTime());
 		HashSet<String> uniqueEdge = new HashSet();
 		

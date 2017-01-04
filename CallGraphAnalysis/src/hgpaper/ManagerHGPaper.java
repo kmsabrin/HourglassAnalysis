@@ -73,6 +73,44 @@ public class ManagerHGPaper {
 	}
 */	
 	
+	private static void getOptimalAlphaForModel(DependencyDAG dependencyDAG, double realHScore) throws Exception {
+		int nRun = 20;
+		double minMedianHScoreDiff = 10e10;
+		double optimalAlpha = -10e10;
+		double hScoreDiffArray[] = new double[nRun];
+		
+		for (double a = 0.35; a <= 0.95; a += 0.05) {
+			for (int i = 0; i < nRun; ++i) {
+				ModelRealConnector modelRealConnector = new ModelRealConnector(dependencyDAG);
+				modelRealConnector.generateModelNetwork(dependencyDAG, a);
+		
+				DependencyDAG.isToy = true;
+				String toyDAGName = "real-model-test";
+				String netID = "toy_dag";
+				DependencyDAG modelDependencyDAG = new DependencyDAG("real_model_networks//" + toyDAGName + ".txt");
+//				toyDependencyDAG.printNetworkStat();
+//				toyDependencyDAG.printNetworkProperties();
+
+				CoreDetection.fullTraverse = false;
+				CoreDetection.getCore(modelDependencyDAG, netID);
+				double realCore = CoreDetection.minCoreSize;
+		
+				FlattenNetwork.makeAndProcessFlat(modelDependencyDAG);
+				CoreDetection.hScore = (1.0 - ((realCore - 1) / FlattenNetwork.flatNetworkCoreSize));
+			
+				hScoreDiffArray[i] = Math.abs(realHScore - CoreDetection.hScore);
+			}
+		
+			double medianDiff = StatUtils.percentile(hScoreDiffArray, 50);
+			if (medianDiff < minMedianHScoreDiff) {
+				minMedianHScoreDiff = medianDiff;
+				optimalAlpha = a;
+			}
+		}
+		
+		System.out.println("Optimal Alpha: " + optimalAlpha);
+	}
+	
 	private static void doRealNetworkAnalysis() throws Exception {
 		String netPath = "";
 		
@@ -135,13 +173,11 @@ public class ManagerHGPaper {
 //		generateSyntheticFromReal(dependencyDAG);
 		
 //		dependencyDAG.printNetworkStat();
-		dependencyDAG.printNetworkProperties();
-		DistributionAnalysis.getLocationColorWeightedHistogram(dependencyDAG);
+//		dependencyDAG.printNetworkProperties();
+//		DistributionAnalysis.getLocationColorWeightedHistogram(dependencyDAG);
 		
 //		Visualization.printDOTNetwork(dependencyDAG);
 		
-//		ModelRealConnector modelRealConnector = new ModelRealConnector(dependencyDAG);
-//		modelRealConnector.generateModelNetwork(dependencyDAG, 0.6);
 		
 //		DistributionAnalysis.printEdgeList(dependencyDAG, netID);
 //		DistributionAnalysis.getAverageInOutDegree(dependencyDAG);
@@ -157,7 +193,6 @@ public class ManagerHGPaper {
 //		DistributionAnalysis.printAllCentralities(dependencyDAG, netID);
 //		DistributionAnalysis.findNDirectSrcTgtBypasses(dependencyDAG, netID);
 
-		
 //		Core Detection
 //		WaistDetection.randomizedWaistDetection(dependencyDAG, netID);
 //		WaistDetection.heuristicWaistDetection(dependencyDAG, netID);
@@ -165,7 +200,7 @@ public class ManagerHGPaper {
 		
 		CoreDetection.fullTraverse = false;
 		CoreDetection.getCore(dependencyDAG, netID);
-//		double realCore = CoreDetection.minCoreSize;
+		double realCore = CoreDetection.minCoreSize;
 
 //		Randomization Experiments
 //		UpstreamRandomize.randomizeDAG(dependencyDAG);
@@ -176,11 +211,16 @@ public class ManagerHGPaper {
 //		randomHScores[index++] = WaistDetection.hourglassness;
 
 //		Flattening
-//		dependencyDAG.init();
+//		dependencyDAG.init(); // why even here
 //		printNetworkStat(dependencyDAG);
-//		FlattenNetwork.makeAndProcessFlat(dependencyDAG);	
-//		CoreDetection.hScore = (1.0 - (realCore / FlattenNetwork.flatNetworkCoreSize));
+		FlattenNetwork.makeAndProcessFlat(dependencyDAG);	
+		CoreDetection.hScore = (1.0 - (realCore / FlattenNetwork.flatNetworkCoreSize));
 //		System.out.println("H-Score: " + CoreDetection.hScore);
+		
+//		Get Real to Model Networks
+		getOptimalAlphaForModel(dependencyDAG, CoreDetection.hScore);
+//		ModelRealConnector modelRealConnector = new ModelRealConnector(dependencyDAG);
+//		modelRealConnector.generateModelNetwork(dependencyDAG, 0.6);
 	}
 	
 	/*
