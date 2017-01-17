@@ -13,6 +13,8 @@ import org.apache.commons.math3.stat.StatUtils;
 import utilityhg.Edge;
 
 public class CoreDetection {
+	public static boolean viewCore = false;
+	public static boolean viewStat = false;
 	public static HashSet<String> topRemovedWaistNodes = new HashSet();
 	public static HashMap<String, Double> averageCoreRank;
 	public static HashMap<String, Double> averagePathCovered;
@@ -187,7 +189,7 @@ public class CoreDetection {
 //			add to waist and remove from the network
 			topRemovedWaistNodes.add(representative);
 			representativeLocation.put(representative, getMedianPESLocation(equivalentNodes, dependencyDAG));
-			if (!FlattenNetwork.isProcessingFlat & false) {
+			if (!FlatNetwork.isProcessingFlat & viewCore) {
 				System.out.println("[Core] " + representative + "\t" + ((cumulativePathCovered + maxPathCovered) / totalPath));
 //				System.out.println(((cumulativePathCovered + maxPathCovered) / totalPath));
 			}
@@ -287,7 +289,7 @@ public class CoreDetection {
 		coreLocationAnalysis(dependencyDAG);
 //		getCoreNeighborhood(dependencyDAG, sampleCore);
 				
-		if (!FlattenNetwork.isProcessingFlat & false) {
+		if (!FlatNetwork.isProcessingFlat & viewStat) {
 			System.out.println("Sample Core: " + sampleCore);
 			System.out.println("Number of coreSet: " + optimalCoreCount);
 			System.out.println("Min core size: " + minCoreSize);
@@ -379,7 +381,7 @@ public class CoreDetection {
 		getNodeCoverage(dependencyDAG, sampleCore);
 		coreLocationAnalysis2(dependencyDAG);
 				
-		if (!FlattenNetwork.isProcessingFlat && true) {
+		if (!FlatNetwork.isProcessingFlat && true) {
 			System.out.println("Sample Core: " + sampleCore);
 			System.out.println("Min core size: " + minCoreSize);
 			System.out.println("Node Coverage: " + nodeCoverage);

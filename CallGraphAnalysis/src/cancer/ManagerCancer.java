@@ -5,7 +5,7 @@ import java.util.HashSet;
 
 import corehg.CoreDetection;
 import corehg.DependencyDAG;
-import corehg.FlattenNetwork;
+import corehg.FlatNetwork;
 
 public class ManagerCancer {
 	private static void printCancerNetwork(DependencyDAG cancerDAG) {

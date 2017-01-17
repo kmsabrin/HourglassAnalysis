@@ -7,9 +7,9 @@ import corehg.ModelRealConnector;
 public class ToyTest {	
 	private static void doToyNetworkAnalysis() throws Exception {
 		DependencyDAG.isToy = true;
-//		DependencyDAG.isCyclic = true;
-		String toyDAGName = "toy_dag_paper";
-//		String toyDAGName = "toy_cyclic_2";
+		DependencyDAG.isCyclic = true;
+//		String toyDAGName = "toy_dag_paper";
+		String toyDAGName = "toy_cyclic_2";
 		DependencyDAG toyDependencyDAG = new DependencyDAG("toy_networks//" + toyDAGName + ".txt");
 		
 //		ModelRealConnector modelRealConnector = new ModelRealConnector(toyDependencyDAG);

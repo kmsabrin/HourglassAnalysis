@@ -3,7 +3,7 @@ package corehg;
 import java.io.File;
 import java.io.PrintWriter;
 
-public class FlattenNetwork {
+public class FlatNetwork {
 	public static double flatNetworkCoreSize = -1;
 	public static boolean isProcessingFlat = false;
 	private static void writeFlatten(DependencyDAG dependencyDAG) throws Exception {
@@ -36,6 +36,6 @@ public class FlattenNetwork {
 		isProcessingFlat = true;
 		CoreDetection.getCore(flatDAG, "flatDAG");
 		isProcessingFlat = false;
-		FlattenNetwork.flatNetworkCoreSize = CoreDetection.minCoreSize;
+		FlatNetwork.flatNetworkCoreSize = CoreDetection.minCoreSize;
 	}
 }

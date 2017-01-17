@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Scanner;
 
+import utilityhg.DistributionAnalysis;
 import utilityhg.Visualization;
 
 import com.google.common.collect.Ordering;
@@ -14,7 +15,7 @@ import com.google.common.collect.TreeMultimap;
 
 import corehg.CoreDetection;
 import corehg.DependencyDAG;
-import corehg.FlattenNetwork;
+import corehg.FlatNetwork;
 
 public class ManagerNeuro {
 	public static HashMap<String, String> idNeuronMap = new HashMap();
@@ -260,8 +261,8 @@ public class ManagerNeuro {
 			double coreSize = CoreDetection.minCoreSize;
 	
 			neuroDependencyDAG = new DependencyDAG("neuro_networks//" + neuroDAGName + ".txt");
-			FlattenNetwork.makeAndProcessFlat(neuroDependencyDAG);
-			CoreDetection.hScore = (1.0 - ((coreSize - 1) / FlattenNetwork.flatNetworkCoreSize));
+			FlatNetwork.makeAndProcessFlat(neuroDependencyDAG);
+			CoreDetection.hScore = (1.0 - ((coreSize - 1) / FlatNetwork.flatNetworkCoreSize));
 			System.out.println(coreSize + "\t" + CoreDetection.hScore);
 		}
 	}
@@ -278,11 +279,12 @@ public class ManagerNeuro {
 
 //		DistributionAnalysis.getPathLength(neuroDependencyDAG);
 //		CoreDetection.getCentralEdgeSubgraph(neuroDependencyDAG);
+		DistributionAnalysis.getCentralityCCDF(neuroDependencyDAG, netID, 1);
 		
 //		Visualization.printDOTNetwork(neuroDependencyDAG);
-		CoreDetection.pathCoverageTau = 1.0;
+//		CoreDetection.pathCoverageTau = 1.0;
 //		CoreDetection.fullTraverse = false;
-		CoreDetection.getCore(neuroDependencyDAG, netID);
+//		CoreDetection.getCore(neuroDependencyDAG, netID);
 //		double realCore = CoreDetection.minCoreSize;
 //
 //		neuroDependencyDAG = new DependencyDAG("neuro_networks//" + neuroDAGName + ".txt");

@@ -13,7 +13,7 @@ import utilityhg.DistributionAnalysis;
 import utilityhg.Visualization;
 import corehg.CoreDetection;
 import corehg.DependencyDAG;
-import corehg.FlattenNetwork;
+import corehg.FlatNetwork;
 import corehg.ModelRealConnector;
 import corehg.SimpleModelDAG;
 
@@ -74,12 +74,13 @@ public class ManagerHGPaper {
 */	
 	
 	private static void getOptimalAlphaForModel(DependencyDAG dependencyDAG, double realHScore) throws Exception {
-		int nRun = 20;
+		int nRun = 10;
 		double minMedianHScoreDiff = 10e10;
 		double optimalAlpha = -10e10;
 		double hScoreDiffArray[] = new double[nRun];
+		System.out.println(realHScore);
 		
-		for (double a = 0.35; a <= 0.95; a += 0.05) {
+		for (double a = 0.4; a <= 0.9; a += 0.05) {
 			for (int i = 0; i < nRun; ++i) {
 				ModelRealConnector modelRealConnector = new ModelRealConnector(dependencyDAG);
 				modelRealConnector.generateModelNetwork(dependencyDAG, a);
@@ -95,10 +96,11 @@ public class ManagerHGPaper {
 				CoreDetection.getCore(modelDependencyDAG, netID);
 				double realCore = CoreDetection.minCoreSize;
 		
-				FlattenNetwork.makeAndProcessFlat(modelDependencyDAG);
-				CoreDetection.hScore = (1.0 - ((realCore - 1) / FlattenNetwork.flatNetworkCoreSize));
+				FlatNetwork.makeAndProcessFlat(modelDependencyDAG);
+				CoreDetection.hScore = (1.0 - ((realCore - 1) / FlatNetwork.flatNetworkCoreSize));
 			
 				hScoreDiffArray[i] = Math.abs(realHScore - CoreDetection.hScore);
+//				System.out.println(CoreDetection.hScore);
 			}
 		
 			double medianDiff = StatUtils.percentile(hScoreDiffArray, 50);
@@ -106,9 +108,11 @@ public class ManagerHGPaper {
 				minMedianHScoreDiff = medianDiff;
 				optimalAlpha = a;
 			}
+			
+			System.out.println(a);
 		}
 		
-		System.out.println("Optimal Alpha: " + optimalAlpha);
+		System.out.println("Optimal Alpha: " + optimalAlpha + " closest HScoreDiff: " + minMedianHScoreDiff);
 	}
 	
 	private static void doRealNetworkAnalysis() throws Exception {
@@ -118,10 +122,10 @@ public class ManagerHGPaper {
 //		String netID = "monkey";
 		
 //		String netID = "commons-math";
-//		String netID = "openssh-39";
+		String netID = "openssh-39";
 //		String netID = "apache-commons-3.4";
 		
-		String netID = "court";		
+//		String netID = "court";		
 //		String netID = "jetuml";
 		
 		DependencyDAG.resetFlags();
@@ -129,8 +133,6 @@ public class ManagerHGPaper {
 		if (netID.equals("rat") || netID.equals("monkey")) {
 			loadLargestWCC(netID);
 		}
-		
-//		loadLargestWCC(netID);
 		
 		if (netID.equals("rat")) {
 			netPath = "metabolic_networks//rat-consolidated.txt";
@@ -213,8 +215,8 @@ public class ManagerHGPaper {
 //		Flattening
 //		dependencyDAG.init(); // why even here
 //		printNetworkStat(dependencyDAG);
-		FlattenNetwork.makeAndProcessFlat(dependencyDAG);	
-		CoreDetection.hScore = (1.0 - (realCore / FlattenNetwork.flatNetworkCoreSize));
+		FlatNetwork.makeAndProcessFlat(dependencyDAG);	
+		CoreDetection.hScore = (1.0 - (realCore / FlatNetwork.flatNetworkCoreSize));
 //		System.out.println("H-Score: " + CoreDetection.hScore);
 		
 //		Get Real to Model Networks
@@ -368,8 +370,8 @@ public class ManagerHGPaper {
 						CoreDetection.getCore(dependencyDAG, networkID);
 						double realCore = CoreDetection.minCoreSize;
 											
-						FlattenNetwork.makeAndProcessFlat(dependencyDAG);	
-						CoreDetection.hScore = (1.0 - ((realCore - 1) / FlattenNetwork.flatNetworkCoreSize));
+						FlatNetwork.makeAndProcessFlat(dependencyDAG);	
+						CoreDetection.hScore = (1.0 - ((realCore - 1) / FlatNetwork.flatNetworkCoreSize));
 						if (CoreDetection.hScore < 0) {
 //							System.out.println("Found");
 //							dependencyDAG = new DependencyDAG("synthetic_callgraphs//" + networkID + ".txt");
@@ -446,8 +448,8 @@ public class ManagerHGPaper {
 					weightedCoreLocation[idx] = CoreDetection.weightedCoreLocation;
 						
 //					System.out.println(CoreDetection.nodeCoverage + "\t" + CoreDetection.weightedCoreLocation);
-					FlattenNetwork.makeAndProcessFlat(dependencyDAG);	
-					CoreDetection.hScore = (1.0 - ((realCore - 1) / FlattenNetwork.flatNetworkCoreSize));
+					FlatNetwork.makeAndProcessFlat(dependencyDAG);	
+					CoreDetection.hScore = (1.0 - ((realCore - 1) / FlatNetwork.flatNetworkCoreSize));
 					if (CoreDetection.hScore < 0) {
 //						System.out.println("Found");
 //						dependencyDAG = new DependencyDAG("synthetic_callgraphs//" + networkID + ".txt");

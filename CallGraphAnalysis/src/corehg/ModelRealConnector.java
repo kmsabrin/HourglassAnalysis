@@ -150,8 +150,8 @@ public class ModelRealConnector {
 //		CoreDetection.getCentralEdgeSubgraph(toyDependencyDAG);
 
 //		toyDependencyDAG = new DependencyDAG("toy_networks//" + toyDAGName + ".txt");
-		FlattenNetwork.makeAndProcessFlat(toyDependencyDAG);
-		CoreDetection.hScore = (1.0 - ((realCore - 1) / FlattenNetwork.flatNetworkCoreSize));
+		FlatNetwork.makeAndProcessFlat(toyDependencyDAG);
+		CoreDetection.hScore = (1.0 - ((realCore - 1) / FlatNetwork.flatNetworkCoreSize));
 		System.out.println("[h-Score] " + CoreDetection.hScore);
 	}
 }

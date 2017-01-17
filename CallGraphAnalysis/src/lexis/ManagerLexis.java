@@ -7,7 +7,7 @@ import java.util.Scanner;
 import utilityhg.DistributionAnalysis;
 import corehg.CoreDetection;
 import corehg.DependencyDAG;
-import corehg.FlattenNetwork;
+import corehg.FlatNetwork;
 import corehg.SimpleModelDAG;
 
 public class ManagerLexis {
@@ -59,8 +59,8 @@ public class ManagerLexis {
 		double realCore = CoreDetection.minCoreSize;
 
 //		Flattening
-		FlattenNetwork.makeAndProcessFlat(dependencyDAG);	
-		CoreDetection.hScore = (1.0 - (realCore / FlattenNetwork.flatNetworkCoreSize));
+		FlatNetwork.makeAndProcessFlat(dependencyDAG);	
+		CoreDetection.hScore = (1.0 - (realCore / FlatNetwork.flatNetworkCoreSize));
 		System.out.println("H-Score: " + CoreDetection.hScore);
 	}
 	

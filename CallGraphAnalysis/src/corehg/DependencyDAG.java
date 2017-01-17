@@ -361,6 +361,12 @@ public class DependencyDAG {
 //				if (largestWCCNodes.contains(server) == false || largestWCCNodes.contains(dependent) == false) {
 //					continue;
 //				}
+				
+
+				// for JetUML 
+				if (dependent.contains("Test") || server.contains("Test")) {
+					continue;
+				}
 			}
 			else if (isClassDependency) {
 				// for metabolic and synthetic networks
@@ -375,9 +381,9 @@ public class DependencyDAG {
 				// for metabolic and synthetic networks
 				server = tokens[0];
 				dependent = tokens[1];
-//				if (largestWCCNodes.contains(server) == false || largestWCCNodes.contains(dependent) == false) {
-//					continue;
-//				}
+				if (largestWCCNodes.contains(server) == false || largestWCCNodes.contains(dependent) == false) {
+					continue;
+				}
 			}
 			else if (isSynthetic || isToy || isCyclic) {
 				if (isWeighted) {
@@ -845,7 +851,7 @@ public class DependencyDAG {
 		if (serves.containsKey(node)) { 
 			ArrayList<String> shuffledNodes = new ArrayList(serves.get(node));
 			// do a random shuffling of nodes
-//			Collections.shuffle(shuffledNodes);
+			Collections.shuffle(shuffledNodes);
 			for (String s : shuffledNodes) {
 				if (!visitedGray.contains(s) || visitedBlack.contains(s)) {
 //					System.out.println("Adding: " + node + "\t" + s);
@@ -871,7 +877,7 @@ public class DependencyDAG {
 		if (depends.containsKey(node)) { 
 			ArrayList<String> shuffledNodes = new ArrayList(depends.get(node));
 			// do a random shuffling of nodes
-//			Collections.shuffle(shuffledNodes);
+			Collections.shuffle(shuffledNodes);
 			for (String s : shuffledNodes) {
 				if (!visitedGray.contains(s) || visitedBlack.contains(s)) {
 //					System.out.println("Adding: " + node + "\t" + s);
@@ -1095,15 +1101,16 @@ public class DependencyDAG {
 			}
 		}
 		
-		for (String s : nodes) {
-			if (isTarget(s)) continue;
-			for (String r : serves.get(s)) {
-				double numEdgePath = numOfSourcePath.get(s) * numOfTargetPath.get(r);
-				Edge e = new Edge(s, r, numEdgePath);
-				edgePathCentrality.add(e);
+		/* edge path computation */
+//		for (String s : nodes) {
+//			if (isTarget(s)) continue;
+//			for (String r : serves.get(s)) {
+//				double numEdgePath = numOfSourcePath.get(s) * numOfTargetPath.get(r);
+//				Edge e = new Edge(s, r, numEdgePath);
+//				edgePathCentrality.add(e);
 //				System.out.println(s + "\t" + r + "\t" + numEdgePath);
-			}
-		}	
+//			}
+//		}	
 		
 //		System.out.println("Total path: " + nTotalPath);
 	}
@@ -1248,7 +1255,7 @@ public class DependencyDAG {
 //			System.out.print("Node: " + s + "\t");
 //			System.out.print("Complexity: " + numOfSourcePath.get(s) + "\t");
 //			System.out.print("Generality: " + numOfTargetPath.get(s) + "\t");
-//			System.out.print("Location: " + location.get(s) + "\t");
+//			System.out.print("Location: " + numPathLocation.get(s) + "\t");
 //			System.out.print("Path Centrality: " + normalizedPathCentrality.get(s) * nTotalPath + "\t");
 //			System.out.print(inDegree.get(s) + "\t");
 //			System.out.print(outDegree.get(s) + "\t");
@@ -1260,7 +1267,7 @@ public class DependencyDAG {
 //			System.out.print(targetsReachable.get(s) + "\t");
 //			System.out.println(s + "\t" + normalizedPathCentrality.get(s));
 //			System.out.println();
-//			System.out.println(s + "\t" + numPathLocation.get(s) + "\t" + lengthPathLocation.get(s));
+			System.out.println(s + "\t" + numPathLocation.get(s) + "\t" + lengthPathLocation.get(s));
 //			System.out.println(s + "\t" + numPathLocation.get(s) + "\t" + normalizedPathCentrality.get(s));
 //			System.out.println(s + "\t" + numPathLocation.get(s));
 //			System.out.println(numPathLocation.get(s) + "\t" + Math.random() + "\t" + Math.log10(nodePathThrough.get(s)));

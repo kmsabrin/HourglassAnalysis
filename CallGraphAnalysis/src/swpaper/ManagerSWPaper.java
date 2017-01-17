@@ -16,7 +16,7 @@ import utilityhg.DistributionAnalysis;
 import utilityhg.Visualization;
 import corehg.CoreDetection;
 import corehg.DependencyDAG;
-import corehg.FlattenNetwork;
+import corehg.FlatNetwork;
 
 public class ManagerSWPaper {	
 	static String callgraphName = "sqlite";
@@ -57,7 +57,7 @@ public class ManagerSWPaper {
 		*/
 
 		DependencyDAG.isCallgraph = true;
-		DependencyDAG.isCyclic = true;
+//		DependencyDAG.isCyclic = true;
 //		DependencyDAG.isClassDependency = true;
 //		System.out.println(netPath + "//" + netID);
 		
@@ -507,7 +507,7 @@ public class ManagerSWPaper {
 	}
 	
 	public static void main(String[] args) throws Exception {		
-		ManagerSWPaper.doRealNetworkAnalysis("jetuml_dependency", "JetUML-0.13.jar.dot");
+//		ManagerSWPaper.doRealNetworkAnalysis("jetuml_dependency", "JetUML-0.13.jar.dot");
 //		ManagerSWPaper.doRealNetworkAnalysis("openssh_callgraphs", "full.graph-openssh-39");
 		
 //		ManagerSWPaper.analyzeNetworks();
@@ -515,7 +515,7 @@ public class ManagerSWPaper {
 //		ManagerSWPaper.analyzeNetworks2();
 //		ManagerSWPaper.analyzeNetworks3();
 		
-//		ManagerSWPaper.analyzeNetworks4();
+		ManagerSWPaper.analyzeNetworks4();
 //		System.out.println("Done!");
 	}
 }
