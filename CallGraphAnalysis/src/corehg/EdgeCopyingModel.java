@@ -9,14 +9,12 @@ import java.util.Random;
 
 import org.apache.commons.math3.stat.StatUtils;
 
-import utilityhg.DistributionAnalysis;
-
 public class EdgeCopyingModel {
-	static int nSources = 200;
-	static int nTargets = 200;
-	static int nIntermediates = 600;
+	static int nSources = 20000;
+	static int nTargets = 20000;
+	static int nIntermediates = 60000;
 	static int nNodes = nSources + nIntermediates + nTargets;
-	static double beta = 1;
+	static double beta = 0.5;
 	static int inDeg = 3;
 
 	public static void generateModel() throws Exception {
@@ -78,14 +76,13 @@ public class EdgeCopyingModel {
 		}
 	}
 	
-	public static void testRun() throws Exception {
-		generateModel();
+	public static void runTest() throws Exception {
+//		generateModel();
 		SimpleModelDAG.initModelProperties(nTargets, nIntermediates, nSources, inDeg);
 		DependencyDAG.isSynthetic= true;
 		String copyDAGName = "copy-dag";
 		DependencyDAG copyDependencyDAG = new DependencyDAG("copy_models//" + copyDAGName + ".txt");
 		
-		String netID = "copy-dag";
 //		copyDependencyDAG.printNetworkStat();
 //		getLocationColorWeightedHistogram(neuroDependencyDAG);
 //		neuroDependencyDAG.printNetworkProperties();
@@ -96,8 +93,9 @@ public class EdgeCopyingModel {
 		
 //		Visualization.printDOTNetwork(neuroDependencyDAG);
 //		CoreDetection.pathCoverageTau = 1.0;
+		System.out.println("Detecting core");
 		CoreDetection.fullTraverse = false;
-		CoreDetection.getCore(copyDependencyDAG, netID);
+		CoreDetection.getCore(copyDependencyDAG, copyDAGName);
 		double realCore = CoreDetection.minCoreSize;
 
 //		copyDependencyDAG = new DependencyDAG("copy_models//" + copyDAGName + ".txt");
@@ -105,10 +103,10 @@ public class EdgeCopyingModel {
 //		System.out.println(FlatNetwork.flatNetworkCoreSize);
 		CoreDetection.hScore = (1.0 - ((realCore - 1) / FlatNetwork.flatNetworkCoreSize));
 		System.out.println(CoreDetection.hScore);
-
 	}
 	
 	public static void main(String[] args) throws Exception {
-		statTest();
+//		statTest();
+		runTest();
 	}
 }

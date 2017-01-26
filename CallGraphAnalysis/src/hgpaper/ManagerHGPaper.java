@@ -18,6 +18,8 @@ import corehg.ModelRealConnector;
 import corehg.SimpleModelDAG;
 
 public class ManagerHGPaper {	
+	public static String nID = "";
+	public static String kTopic = "";
 	
 /*	private static void generateSyntheticFromReal(DependencyDAG dependencyDAG) throws Exception {
 		SimpleModelDAG.inDegreeHistogram = DistributionAnalysis.getDegreeHistogram(dependencyDAG);
@@ -78,9 +80,10 @@ public class ManagerHGPaper {
 		double minMedianHScoreDiff = 10e10;
 		double optimalAlpha = -10e10;
 		double hScoreDiffArray[] = new double[nRun];
-		System.out.println(realHScore);
+		double hScoreArray[] = new double[nRun];
+		System.out.println(nID + "\t" + kTopic + "\t" + realHScore);
 		
-		for (double a = 0.4; a <= 0.9; a += 0.05) {
+		for (double a = 0.35; a <= 1.2; a += 0.05) {
 			for (int i = 0; i < nRun; ++i) {
 				ModelRealConnector modelRealConnector = new ModelRealConnector(dependencyDAG);
 				modelRealConnector.generateModelNetwork(dependencyDAG, a);
@@ -100,6 +103,7 @@ public class ManagerHGPaper {
 				CoreDetection.hScore = (1.0 - ((realCore - 1) / FlatNetwork.flatNetworkCoreSize));
 			
 				hScoreDiffArray[i] = Math.abs(realHScore - CoreDetection.hScore);
+				hScoreArray[i] = CoreDetection.hScore;
 //				System.out.println(CoreDetection.hScore);
 			}
 		
@@ -109,7 +113,8 @@ public class ManagerHGPaper {
 				optimalAlpha = a;
 			}
 			
-			System.out.println(a);
+			System.out.println(a + "\t" + StatUtils.min(hScoreArray) + "\t" + StatUtils.percentile(hScoreArray, 50) + "\t" 
+							   + StatUtils.max(hScoreArray));
 		}
 		
 		System.out.println("Optimal Alpha: " + optimalAlpha + " closest HScoreDiff: " + minMedianHScoreDiff);
@@ -122,11 +127,13 @@ public class ManagerHGPaper {
 //		String netID = "monkey";
 		
 //		String netID = "commons-math";
-		String netID = "openssh-39";
+//		String netID = "openssh-39";
 //		String netID = "apache-commons-3.4";
 		
 //		String netID = "court";		
 //		String netID = "jetuml";
+		
+		String netID = nID;
 		
 		DependencyDAG.resetFlags();
 		
@@ -148,7 +155,8 @@ public class ManagerHGPaper {
 		}
 		else if (netID.equals("court")) {
 //			CourtCaseCornellParser.caseTopic = "abortion";
-			CourtCaseCornellParser.caseTopic = "pension";
+//			CourtCaseCornellParser.caseTopic = "pension";
+			CourtCaseCornellParser.caseTopic = kTopic;
 			CourtCaseCornellParser.loadCuratedCaseIDs();
 			netPath = "supremecourt_networks//court.txt";
 			DependencyDAG.isCourtcase = true;
@@ -533,15 +541,28 @@ public class ManagerHGPaper {
 	}
 */	
 	
-	private static void doRealModelComparison() {
-		
+	private static void runThroughAllRealNets() throws Exception {
+		String data[] = {"rat", "monkey", "court", "court", "openssh-39", "commons-math"};
+		for (int i = 0; i < 6; ++i) {
+			nID = data[i];
+			if (i == 2) {
+				kTopic = "abortion";
+			}
+			else if (i == 3) {
+				kTopic = "pension";
+			}
+			else {
+				kTopic = "";
+			}
+			doRealNetworkAnalysis();
+		}
 	}
 	
 	public static void main(String[] args) throws Exception {		
-		ManagerHGPaper.doRealNetworkAnalysis();
+//		ManagerHGPaper.doRealNetworkAnalysis();
 //		Manager.doToyNetworkAnalysis();
 //		Manager.measureTauEffectOnRealNetwork();
-
+		ManagerHGPaper.runThroughAllRealNets();
 		
 //		curve 1
 //		Manager.runSyntheticStatisticalSignificanceTests(333, 333, 333, 1);
