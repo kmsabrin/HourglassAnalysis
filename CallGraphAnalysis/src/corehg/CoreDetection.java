@@ -13,7 +13,7 @@ import org.apache.commons.math3.stat.StatUtils;
 import utilityhg.Edge;
 
 public class CoreDetection {
-	public static boolean viewCore = false;
+	public static boolean viewCore = true;
 	public static boolean viewStat = false;
 	public static HashSet<String> topRemovedWaistNodes = new HashSet();
 	public static HashMap<String, Double> averageCoreRank;
@@ -190,7 +190,7 @@ public class CoreDetection {
 			topRemovedWaistNodes.add(representative);
 			representativeLocation.put(representative, getMedianPESLocation(equivalentNodes, dependencyDAG));
 			if (!FlatNetwork.isProcessingFlat & viewCore) {
-				System.out.println("[Core] " + representative + "\t" + ((cumulativePathCovered + maxPathCovered) / totalPath));
+				System.out.println("[Core] " + representative + "\t" + ((cumulativePathCovered + maxPathCovered) / totalPath) + "\t" + dependencyDAG.lengthPathLocation.get(representative));
 //				System.out.println(((cumulativePathCovered + maxPathCovered) / totalPath));
 			}
 			

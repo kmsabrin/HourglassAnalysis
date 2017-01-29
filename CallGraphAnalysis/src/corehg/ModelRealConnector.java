@@ -11,8 +11,9 @@ import java.util.TreeMap;
 import utilityhg.ZipfDistributionWrapper;
 
 public class ModelRealConnector {
-	private TreeMap<Integer, HashSet<String>> levelNodeMap;
+	private TreeMap<Integer, ArrayList<String>> levelNodeMap;
 	private HashMap<String, Integer> nodeLevelMap;
+	private HashMap<String, Integer> nodeIdMap;
 	private int targetLevel;
 	
 	public ModelRealConnector(DependencyDAG dependencyDAG) {
@@ -45,7 +46,7 @@ public class ModelRealConnector {
 		++maxLevel;
 		nodeLevelMap.put(s, maxLevel);
 		if (!levelNodeMap.containsKey(maxLevel)) {
-			levelNodeMap.put(maxLevel, new HashSet());
+			levelNodeMap.put(maxLevel, new ArrayList());
 		}
 		levelNodeMap.get(maxLevel).add(s);
 	}
@@ -53,7 +54,7 @@ public class ModelRealConnector {
 	private void getTopoMap(DependencyDAG dependencyDAG) {
 		levelNodeMap = new TreeMap();
 		nodeLevelMap = new HashMap();
-		levelNodeMap.put(0, new HashSet());
+		levelNodeMap.put(0, new ArrayList());
 		targetLevel = -1;
 		
 		for (String s: dependencyDAG.nodes) {
@@ -63,7 +64,7 @@ public class ModelRealConnector {
 		}
 		
 		++targetLevel;
-		levelNodeMap.put(targetLevel, new HashSet());
+		levelNodeMap.put(targetLevel, new ArrayList());
 		for (String s: dependencyDAG.nodes) {
 			if (dependencyDAG.isTarget(s)) {
 				nodeLevelMap.put(s, targetLevel);
@@ -96,10 +97,17 @@ public class ModelRealConnector {
 		Random random = new Random(System.nanoTime());
 		HashSet<String> uniqueEdge = new HashSet();
 		
+		int nodeId = dependencyDAG.nodes.size() - 1;
+		nodeIdMap = new HashMap();
+		
 		int itemCount = 0;
 		for (int i: levelNodeMap.keySet()) {
 			if (i == 0) {
 				itemCount += levelNodeMap.get(i).size();
+				
+				for (String n: levelNodeMap.get(i)) {
+					nodeIdMap.put(n, nodeId--);
+				}
 				continue; // sources
 			}
 
@@ -110,6 +118,7 @@ public class ModelRealConnector {
 			ZipfDistributionWrapper zipfDistributionWrapper = new ZipfDistributionWrapper(itemCount, alpha);
 
 			for (String product: levelNodeMap.get(i)) {
+				nodeIdMap.put(product, nodeId--);
 				int inDegree = dependencyDAG.inDegree.get(product);
 				for (int d = 0; d < inDegree; ++d) {
 //					int substrateLevel = zipfDistributionWrapper.getNodeFromZipfDistribution2(startLevel, endLevel);
@@ -117,7 +126,7 @@ public class ModelRealConnector {
 					int substrateIndex = zipfDistributionWrapper.getNodeFromZipfDistribution2(0);
 					int substrateLevel = getLevel(substrateIndex, i);
 					
-					ArrayList<String> candidateList = new ArrayList(levelNodeMap.get(substrateLevel));
+					ArrayList<String> candidateList = levelNodeMap.get(substrateLevel);
 					String substrate = candidateList.get(random.nextInt(candidateList.size()));
 					String edge = substrate + "#" + product;
 					if (uniqueEdge.contains(edge)) {
@@ -126,7 +135,7 @@ public class ModelRealConnector {
 					}
 					uniqueEdge.add(edge);
 //					System.out.println(substrate + "\t" + product);
-					pw.println(substrate + "\t" + product);
+					pw.println(nodeIdMap.get(substrate) + "\t" + nodeIdMap.get(product));
 				}
 			}
 			itemCount += levelNodeMap.get(i).size();

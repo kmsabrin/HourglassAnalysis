@@ -177,7 +177,7 @@ public class DependencyDAG {
 		}
 		
 		if (isSynthetic) {
-//			removeDisconnectedNodesForSyntheticNetworks();
+			removeDisconnectedNodesForSyntheticNetworks();
 		}
 		
 		removeIsolatedNodes();
@@ -189,7 +189,7 @@ public class DependencyDAG {
 		loadLocationMetric(); // must load degree metric before
 		
 //		loadReachablityAll();		
-		loadServerReachabilityAll();
+//		loadServerReachabilityAll();
 		
 		loadPathCentralityMetric();
 		
@@ -1267,7 +1267,7 @@ public class DependencyDAG {
 //			System.out.print(targetsReachable.get(s) + "\t");
 //			System.out.println(s + "\t" + normalizedPathCentrality.get(s));
 //			System.out.println();
-			System.out.println(s + "\t" + numPathLocation.get(s) + "\t" + lengthPathLocation.get(s));
+//			System.out.println(s + "\t" + numPathLocation.get(s) + "\t" + lengthPathLocation.get(s));
 //			System.out.println(s + "\t" + numPathLocation.get(s) + "\t" + normalizedPathCentrality.get(s));
 //			System.out.println(s + "\t" + numPathLocation.get(s));
 //			System.out.println(numPathLocation.get(s) + "\t" + Math.random() + "\t" + Math.log10(nodePathThrough.get(s)));
@@ -1276,6 +1276,8 @@ public class DependencyDAG {
 //				System.out.println(s + "\t" + lengthWeightedPathCentrality.get(s) + "\t" + nodePathThrough.get(s));
 //				System.out.println(s + "\t" + nodePathThrough.get(s));				
 			}
+			
+			System.out.println(s + "\t" + numPathLocation.get(s) + "\t" + nodePathThrough.get(s) + "\t" + outDegree.get(s));
 		}
 		
 		System.out.println("Total path: " + nTotalPath);

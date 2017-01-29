@@ -71,8 +71,8 @@ public class SimpleModelDAG {
 	public static NavigableMap<Double, Integer> randomWeightedCollection;
 	public static double randomWeightedCollectionTotal = 0;
 	
-	public static HashMap<Integer, String> nodeStringMap; // Lexis
-	public static HashMap<Integer, String> nodeGrammarMap; // Lexis
+//	public static HashMap<Integer, String> nodeStringMap; // Lexis
+//	public static HashMap<Integer, String> nodeGrammarMap; // Lexis
 	
 	/*
 	RandomWeightedCollection randomWeightedCollection;
@@ -110,7 +110,7 @@ public class SimpleModelDAG {
 		DecimalFormat df = new DecimalFormat();
 		df.setMaximumFractionDigits(2);
 		
-		PrintWriter pw = new PrintWriter(new File("synthetic_callgraphs//SimpleModelDAG" + "r" + df.format(ratio) + "a" + negate + df.format(alpha) + "d" + din + ".txt"));
+		PrintWriter pw = new PrintWriter(new File("synthetic_callgraphs//SimpleModelDAG" + "r" + (int)ratio + "a" + negate + df.format(alpha) + "d" + din + ".txt"));
 		edgeWeights = new HashMap();
 		generateSimpleModelDAG(pw);
 	}
@@ -208,11 +208,11 @@ public class SimpleModelDAG {
 //		double timeSum = 0;
 		
 		/** Lexis **/
-		int productGrammarIndex = 1; 
-		ArrayList<String> targetString = new ArrayList(); 
-		HashMap<String, String> repeatEdge = new HashMap(); 
-		HashMap<String, Integer> outEdgeKounter = new HashMap(); 
-		HashMap<String, String> lexisIdHGIndex = new HashMap(); 
+//		int productGrammarIndex = 1; 
+//		ArrayList<String> targetString = new ArrayList(); 
+//		HashMap<String, String> repeatEdge = new HashMap(); 
+//		HashMap<String, Integer> outEdgeKounter = new HashMap(); 
+//		HashMap<String, String> lexisIdHGIndex = new HashMap(); 
 		/** Lexis **/
 		
 		for (int productIndex = sS - 1; productIndex >= 0; --productIndex) {	
@@ -244,24 +244,24 @@ public class SimpleModelDAG {
 				}
 			}
 			
-			double startTime = System.nanoTime();
+//			double startTime = System.nanoTime();
 			int k = getInDegree();
 //			System.out.println(k);
 			
-//			k = Math.min(k, endNodeIndex - startNodeIndex + 1); // Lexis-off
+			k = Math.min(k, endNodeIndex - startNodeIndex + 1); // Lexis-off
 			
 			/** Lexis **/
-			k = Math.max(k, 2);
-			String productString = "";
-			String productGrammar = "N";
-			if (productIndex < sI) {
-				productGrammar += 0; 
-			}
-			else {
-				productGrammar += productGrammarIndex;
-			}
-			ArrayList<String> substrateStringList = new ArrayList();
-			ArrayList<String> substrateGrammarList = new ArrayList();
+//			k = Math.max(k, 2);
+//			String productString = "";
+//			String productGrammar = "N";
+//			if (productIndex < sI) {
+//				productGrammar += 0; 
+//			}
+//			else {
+//				productGrammar += productGrammarIndex;
+//			}
+//			ArrayList<String> substrateStringList = new ArrayList();
+//			ArrayList<String> substrateGrammarList = new ArrayList();
 			/** Lexis **/
 			
 			for (int j = 0; j < k; ++j) {
@@ -308,14 +308,14 @@ public class SimpleModelDAG {
 				}
 
 				/** Lexis **/
-				productString += nodeStringMap.get(substrateIndex);
-				substrateStringList.add(nodeStringMap.get(substrateIndex));
-				if (substrateIndex < sS) {
-					substrateGrammarList.add(nodeGrammarMap.get(substrateIndex));
-				}
-				else {
-					substrateGrammarList.add(nodeStringMap.get(substrateIndex));
-				}
+//				productString += nodeStringMap.get(substrateIndex);
+//				substrateStringList.add(nodeStringMap.get(substrateIndex));
+//				if (substrateIndex < sS) {
+//					substrateGrammarList.add(nodeGrammarMap.get(substrateIndex));
+//				}
+//				else {
+//					substrateGrammarList.add(nodeStringMap.get(substrateIndex));
+//				}
 				/** Lexis **/
 			}
 
@@ -323,23 +323,23 @@ public class SimpleModelDAG {
 //			System.out.println("Elapsed B: " + ((endTime - startTime) / 1000000000.0) );
 			
 			/*** Lexis ***/
-			if (productIndex < sI) {
-				System.out.println();
-			}
-			for (String s4: substrateGrammarList) { 
-				System.out.println(s4 + "\t" + productGrammar);
-				
-				if (!repeatEdge.containsKey(s4)) {
-					repeatEdge.put(s4, productGrammar);
-				}
-				
-				if (outEdgeKounter.containsKey(s4)) {
-					outEdgeKounter.put(s4, outEdgeKounter.get(s4) + 1);
-				}
-				else {
-					outEdgeKounter.put(s4, 1);
-				}
-			} 
+//			if (productIndex < sI) {
+//				System.out.println();
+//			}
+//			for (String s4: substrateGrammarList) { 
+//				System.out.println(s4 + "\t" + productGrammar);
+//				
+//				if (!repeatEdge.containsKey(s4)) {
+//					repeatEdge.put(s4, productGrammar);
+//				}
+//				
+//				if (outEdgeKounter.containsKey(s4)) {
+//					outEdgeKounter.put(s4, outEdgeKounter.get(s4) + 1);
+//				}
+//				else {
+//					outEdgeKounter.put(s4, 1);
+//				}
+//			} 
 			
 //			System.out.println("---");
 //			for (String s4: substrateStringList) { 
@@ -347,22 +347,22 @@ public class SimpleModelDAG {
 //			} 
 //			System.out.println("###");
 			
-			nodeStringMap.put(productIndex, productString); 
-			nodeGrammarMap.put(productIndex, productGrammar); 
-			++productGrammarIndex;
-			if (productIndex < sI) {
-				targetString.add(productString);
-			}
+//			nodeStringMap.put(productIndex, productString); 
+//			nodeGrammarMap.put(productIndex, productGrammar); 
+//			++productGrammarIndex;
+//			if (productIndex < sI) {
+//				targetString.add(productString);
+//			}
 			
 			/*** Lexis ***/
 		}
 		
 		/** Lexis **/ 
-		for (String s: outEdgeKounter.keySet()) {
-			if (outEdgeKounter.get(s) < 2) {
-//				System.out.println(s + "\t" + repeatEdge.get(s));
-			}
-		}
+//		for (String s: outEdgeKounter.keySet()) {
+//			if (outEdgeKounter.get(s) < 2) {
+////				System.out.println(s + "\t" + repeatEdge.get(s));
+//			}
+//		}
 		/** Lexis **/
 		
 		for (String key: edgeWeights.keySet()) {
@@ -374,16 +374,16 @@ public class SimpleModelDAG {
 //		System.out.println("Time Sum: " + (timeSum / 1000000000.0) );
 		
 		/* Lexis */
-		for (String s: outEdgeKounter.keySet()) {
-			if (outEdgeKounter.get(s) < 2) {
-				System.out.println(s + "\t" + repeatEdge.get(s));
-			}
-		}
-		
-		System.out.println();
-		for (String s: targetString) {
-			System.out.println(s);
-		}
+//		for (String s: outEdgeKounter.keySet()) {
+//			if (outEdgeKounter.get(s) < 2) {
+//				System.out.println(s + "\t" + repeatEdge.get(s));
+//			}
+//		}
+//		
+//		System.out.println();
+//		for (String s: targetString) {
+//			System.out.println(s);
+//		}
 		/* Lexis */
 	}
 	
@@ -397,15 +397,15 @@ public class SimpleModelDAG {
 		SimpleModelDAG.din = din;
 		
 		/***** Lexis *****/
-		nodeGrammarMap = new HashMap();
-		nodeStringMap = new HashMap();
-		char c = '!';
-		for (int i = sS; i < sS + nS; ++i) {
-			String s = "" + c;
-			nodeStringMap.put(i, s);
-			++c;
+//		nodeGrammarMap = new HashMap();
+//		nodeStringMap = new HashMap();
+//		char c = '!';
+//		for (int i = sS; i < sS + nS; ++i) {
+//			String s = "" + c;
+//			nodeStringMap.put(i, s);
+//			++c;
 //			System.out.println(i + "\t" + c);
-		}
+//		}
 		/***** Lexis *****/
 	}
 	

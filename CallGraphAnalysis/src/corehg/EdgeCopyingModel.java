@@ -10,11 +10,11 @@ import java.util.Random;
 import org.apache.commons.math3.stat.StatUtils;
 
 public class EdgeCopyingModel {
-	static int nSources = 20000;
-	static int nTargets = 20000;
-	static int nIntermediates = 60000;
+	static int nSources = 200;
+	static int nTargets = 200;
+	static int nIntermediates = 600;
 	static int nNodes = nSources + nIntermediates + nTargets;
-	static double beta = 0.5;
+	static double beta = 0.6;
 	static int inDeg = 3;
 
 	public static void generateModel() throws Exception {
@@ -77,7 +77,7 @@ public class EdgeCopyingModel {
 	}
 	
 	public static void runTest() throws Exception {
-//		generateModel();
+		generateModel();
 		SimpleModelDAG.initModelProperties(nTargets, nIntermediates, nSources, inDeg);
 		DependencyDAG.isSynthetic= true;
 		String copyDAGName = "copy-dag";
@@ -85,7 +85,7 @@ public class EdgeCopyingModel {
 		
 //		copyDependencyDAG.printNetworkStat();
 //		getLocationColorWeightedHistogram(neuroDependencyDAG);
-//		neuroDependencyDAG.printNetworkProperties();
+		copyDependencyDAG.printNetworkProperties();
 
 //		DistributionAnalysis.getPathLength(neuroDependencyDAG);
 //		CoreDetection.getCentralEdgeSubgraph(neuroDependencyDAG);
