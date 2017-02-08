@@ -243,7 +243,7 @@ public class ManagerInitial2 {
 					printNetworkStat(dependencyDAG);
 //					dependencyDAG.printNetworkMetrics();
 
-					DistributionAnalysis.getCentralityCCDF(dependencyDAG, networkID, 1);
+					DistributionAnalysis.getDistributionCCDF(dependencyDAG, networkID, 1);
 //					double medianPathLength = DistributionAnalysis.getPathLength(dependencyDAG);
 //					DistributionAnalysis.findWeaklyConnectedComponents(dependencyDAG, networkID);
 

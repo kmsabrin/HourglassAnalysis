@@ -4,8 +4,10 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.Set;
+import java.util.TreeMap;
 
 import org.apache.commons.math3.distribution.AbstractRealDistribution;
 import org.apache.commons.math3.distribution.PoissonDistribution;
@@ -13,7 +15,10 @@ import org.apache.commons.math3.distribution.ZipfDistribution;
 import org.apache.commons.math3.stat.StatUtils;
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 
+import corehg.DependencyDAG;
+
 public class Util {
+	/*
 	public static void getCCDF(AbstractRealDistribution distribution) {
 		for (double i = 0.0;; i += 0.02) {
 			double ccdf = 1.0 - distribution.cumulativeProbability(i);
@@ -23,6 +28,41 @@ public class Util {
 				break;
 			}
 		}
+	}
+	*/
+	
+	public static TreeMap<Double, Double> getCCDF(double[] values) throws Exception {
+		PrintWriter pw = new PrintWriter(new File("analysis//outdegree-ccdf-b95_ss_nl.txt"));
+		Map<Double, Double> histogram = new TreeMap<Double, Double>();
+		Map<Double, Double> CDF = new TreeMap<Double, Double>();
+
+		for (double v: values) {
+			if (histogram.containsKey(v)) {
+				histogram.put(v, histogram.get(v) + 1.0);
+			} else {
+				histogram.put(v, 1.0);
+			}
+		}
+
+		// CDF: Cumulative Distribution Function
+		double cumulativeSum = 0;
+		for (double d : histogram.keySet()) {
+			double v = histogram.get(d);
+			// System.out.println(d + "\t" + v);
+			cumulativeSum += v;
+			CDF.put(d, cumulativeSum / values.length);
+		}
+
+		// CCDF: Complementary CDF
+		TreeMap<Double, Double> ccdfMap = new TreeMap();
+		for (double d : CDF.keySet()) {
+			double ccdfP = 1.0 - CDF.get(d);
+			pw.println(d + "\t" + ccdfP);
+			ccdfMap.put(d, ccdfP);
+		}
+
+		pw.close();
+		return ccdfMap;
 	}
 
 	public static double getJaccardDistance(Set<String> a, Set<String> b) {
@@ -126,18 +166,19 @@ public class Util {
 		// System.out.println(random.nextDouble());
 		// }
 
-		extractJavaClassDependency();
+//		extractJavaClassDependency();
 		//
 		
-		int n = 3;
-		PoissonDistribution poissonDistribution = new PoissonDistribution(7);
-		ZipfDistribution zipfDistribution = new ZipfDistribution(n, 1.0);
-		for (int i = 1; i <= n; ++i) {
-			 System.out.println(i + "\t" + zipfDistribution.probability(n - i + 1));
+//		int n = 3;
+//		PoissonDistribution poissonDistribution = new PoissonDistribution(7);
+//		ZipfDistribution zipfDistribution = new ZipfDistribution(n, 1.0);
+//		for (int i = 1; i <= n; ++i) {
+//			 System.out.println(i + "\t" + zipfDistribution.probability(n - i + 1));
 //			 System.out.println(zipfDistribution.sample());
 //			 System.out.println(i + "\t" + zipfDistribution.probability(i));
 //			 System.out.println(i + "\t" + poissonDistribution.probability(i));
-		}
+//		}
+		
 		//
 		// System.out.println("----------");
 		//
@@ -191,7 +232,15 @@ public class Util {
 		// "\t" + ciA);
 		// System.out.println(mB + "\t" + Math.sqrt(StatUtils.variance(b)) +
 		// "\t" + ciB);
-		// scanner.close();
+		
+		double[] v = new double[9989];
+		int i = 0;
+		Scanner scanner = new Scanner(new File("analysis//test.txt"));
+		while (scanner.hasNext()) {
+			v[i++] = scanner.nextInt();
+		}
+		scanner.close();
+		getCCDF(v);
 	}
 
 }

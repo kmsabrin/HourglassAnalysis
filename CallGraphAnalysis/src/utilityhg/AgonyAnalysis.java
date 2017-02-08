@@ -6,12 +6,19 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 public class AgonyAnalysis {
+//	static String directory = "metabolic_networks";
+//	static String network_file = "rat-links.txt";
+//	static String network_id = "rat";
+	
+	static String directory = "neuro_networks";
+	static String network_file = "celegans_network_clean.txt";
+	static String network_id = "celegans";
 	
 	public static void printAgonyNetwork() throws Exception {
 		HashMap<String, Integer> labelIdMap = new HashMap();
 		
-		Scanner scanner = new Scanner(new File("metabolic_networks//rat-links.txt"));
-		PrintWriter pw = new PrintWriter(new File("metabolic_networks//rat.edges"));
+		Scanner scanner = new Scanner(new File(directory + "//" + network_file));
+		PrintWriter pw = new PrintWriter(new File(directory + "//" + network_id + ".edges"));
 		int id = 0;
 		while (scanner.hasNext()) {
 			String server = scanner.next();
@@ -22,15 +29,15 @@ public class AgonyAnalysis {
 			if (!labelIdMap.containsKey(dependent)) {
 				labelIdMap.put(dependent, id++);
 			}
-			System.out.println(labelIdMap.get(server) + "\t" + labelIdMap.get(dependent));
+//			System.out.println(labelIdMap.get(server) + "\t" + labelIdMap.get(dependent));
 			pw.println(labelIdMap.get(server) + "\t" + labelIdMap.get(dependent));
 		}
 		scanner.close();
 		pw.close();
 
-		pw = new PrintWriter(new File("metabolic_networks//rat.nodes"));
+		pw = new PrintWriter(new File(directory + "//" + network_id + ".nodes"));
 		for (String s: labelIdMap.keySet()) {
-			System.out.println(labelIdMap.get(s) + "\t" + s);
+//			System.out.println(labelIdMap.get(s) + "\t" + s);
 			pw.println(labelIdMap.get(s) + "\t" + s);
 		}
 		pw.close();
@@ -40,7 +47,7 @@ public class AgonyAnalysis {
 		HashMap<Integer, String> idLabelMap = new HashMap();
 		HashMap<Integer, Integer> idRankMap = new HashMap();
 
-		Scanner scanner = new Scanner(new File("metabolic_networks//rat.nodes"));
+		Scanner scanner = new Scanner(new File(directory + "//" + network_id + ".nodes"));
 		while (scanner.hasNext()) {
 			int id = scanner.nextInt();
 			String label = scanner.next();
@@ -48,7 +55,7 @@ public class AgonyAnalysis {
 		}
 		scanner.close();
 		
-		scanner = new Scanner(new File("metabolic_networks//rat.ranks"));
+		scanner = new Scanner(new File(directory + "//" + network_id + ".ranks"));
 		while (scanner.hasNext()) {
 			int id = scanner.nextInt();
 			int rank = scanner.nextInt();
@@ -57,8 +64,8 @@ public class AgonyAnalysis {
 		}
 		scanner.close();
 		
-		scanner = new Scanner(new File("metabolic_networks//rat.edges"));
-		PrintWriter pw = new PrintWriter(new File("metabolic_networks//rat.agony.network"));
+		scanner = new Scanner(new File(directory + "//" + network_id + ".edges"));
+		PrintWriter pw = new PrintWriter(new File(directory + "//" + network_id + ".agony.network"));
 		while (scanner.hasNext()) {
 			int substrate = scanner.nextInt();
 			int product = scanner.nextInt();
@@ -76,7 +83,7 @@ public class AgonyAnalysis {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		printAgonyNetwork();
+//		printAgonyNetwork();
 		getAgonyCompliantNetwork();
 	}
 }

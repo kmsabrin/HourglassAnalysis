@@ -279,7 +279,7 @@ public class ManagerNeuro {
 
 //		DistributionAnalysis.getPathLength(neuroDependencyDAG);
 //		CoreDetection.getCentralEdgeSubgraph(neuroDependencyDAG);
-		DistributionAnalysis.getCentralityCCDF(neuroDependencyDAG, netID, 1);
+		DistributionAnalysis.getDistributionCCDF(neuroDependencyDAG, netID, 1);
 		
 //		Visualization.printDOTNetwork(neuroDependencyDAG);
 //		CoreDetection.pathCoverageTau = 1.0;

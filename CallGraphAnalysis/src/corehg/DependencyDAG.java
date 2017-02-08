@@ -102,6 +102,8 @@ public class DependencyDAG {
 
 	public ArrayList<Edge> edgePathCentrality;
 	
+	public static int disconnectedKount; 
+	
 	public DependencyDAG() { 
 		nodes = new TreeSet();
 		serves = new HashMap();
@@ -177,10 +179,11 @@ public class DependencyDAG {
 		}
 		
 		if (isSynthetic) {
-			removeDisconnectedNodesForSyntheticNetworks();
+//			removeDisconnectedNodesForSyntheticNetworks();
 		}
 		
-		removeIsolatedNodes();
+		countDisconnectedNodes();
+//		removeIsolatedNodes();
 		
 		loadDegreeMetric();
 				
@@ -289,6 +292,23 @@ public class DependencyDAG {
 			}
 		}
 	}
+	
+	private int countDisconnectedNodes() {
+		disconnectedKount = 0;
+		for (String s: nodes) {
+			checkReach(s);
+			if (isSource(s) && !canReachTarget) {
+				++disconnectedKount;
+			}
+			else if (isTarget(s) && !canReachSource) {
+				++disconnectedKount;
+			}
+			else if (!canReachTarget || !canReachSource) {
+				++disconnectedKount;
+			}
+		}
+		return disconnectedKount;
+	}
 
 	public void loadCallGraph(String fileName) throws Exception {
 		Scanner scanner = new Scanner(new File(fileName));
@@ -322,6 +342,9 @@ public class DependencyDAG {
 						server = server.substring(0, server.length() - 1);
 					}
 				}
+				else {
+					continue;
+				}
 				
 				// for call graphs
 //				if (tokens[1].equals("->")) {
@@ -345,14 +368,14 @@ public class DependencyDAG {
 					continue;
 				}
 				
-				if (dependent.equals("sqliteRunParser") || server.equals("sqliteRunParser")
-					|| dependent.equals("sqliteVdbeExec") || server.equals("sqliteVdbeExec") 
-					|| dependent.equals("sqliteRunParser") || server.equals("sqlite3Init")
-					|| dependent.equals("sqlite3_prepare") || server.equals("sqlite3_prepare")
-					|| dependent.equals("sqlite_exec") || server.equals("sqlite_exec")
-					|| dependent.equals("sqliteParser") || server.equals("sqliteParser")) {
-					continue;
-				}
+//				if (dependent.equals("sqliteRunParser") || server.equals("sqliteRunParser")
+//					|| dependent.equals("sqliteVdbeExec") || server.equals("sqliteVdbeExec") 
+//					|| dependent.equals("sqliteRunParser") || server.equals("sqlite3Init")
+//					|| dependent.equals("sqlite3_prepare") || server.equals("sqlite3_prepare")
+//					|| dependent.equals("sqlite_exec") || server.equals("sqlite_exec")
+//					|| dependent.equals("sqliteParser") || server.equals("sqliteParser")) {
+//					continue;
+//				}
 					
 //				if (dependent.endsWith("@plt") || server.endsWith("@plt")) {
 //					continue;
@@ -397,9 +420,17 @@ public class DependencyDAG {
 				else {
 					server = tokens[0];
 					dependent = tokens[1];
+					
 //					if (server.equals("miR429")) {
 //						continue;
 //					}
+					
+					if (dependent.equals("do_log") || server.equals("do_log")
+							|| dependent.equals("main") || server.equals("main")	
+							|| dependent.equals("do_exec") || server.equals("do_exec")
+							) {
+							continue;
+					}
 				}
 			}
 			else if (isCourtcase) {
@@ -464,6 +495,7 @@ public class DependencyDAG {
 				continue;
 			}
 
+//			System.out.println(dependent + " - " + dependent.length() + "\t" + server + " - " + server.length());
 			nodes.add(dependent);
 			nodes.add(server);
 
@@ -618,6 +650,7 @@ public class DependencyDAG {
 			int out = 0;
 			
 			if (isTarget(s) || isIntermediate(s)) {
+//				System.out.println(s);
 				in = depends.get(s).size();
 			}
 			
@@ -1277,7 +1310,9 @@ public class DependencyDAG {
 //				System.out.println(s + "\t" + nodePathThrough.get(s));				
 			}
 			
-			System.out.println(s + "\t" + numPathLocation.get(s) + "\t" + nodePathThrough.get(s) + "\t" + outDegree.get(s));
+//			System.out.println(s + "\t" + numPathLocation.get(s) + "\t" + normalizedPathCentrality.get(s));
+			System.out.println(s + "\t" + lengthPathLocation.get(s) + "\t" + nodePathThrough.get(s) + "\t" + outDegree.get(s));
+			
 		}
 		
 		System.out.println("Total path: " + nTotalPath);

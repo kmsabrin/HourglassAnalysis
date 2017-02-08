@@ -77,26 +77,29 @@ public class DistributionAnalysis {
 	}
 
 	public static void printCentralityDistribution(DependencyDAG dependencyDAG,
-			String filePath) throws Exception {
-		PrintWriter pw = new PrintWriter(new File(
-				"analysis//centrality-distribution-" + filePath + ".txt"));
+			String filePath, int key) throws Exception {
+		String[] dist = { "", "centrality", "outdegree" };
+		PrintWriter pw = new PrintWriter(new File("analysis//"+ dist[key] + "-distribution-" + filePath + ".txt"));
 
 		for (String s : dependencyDAG.nodes) {
-			if (dependencyDAG.serves.containsKey(s) && dependencyDAG.depends.containsKey(s)) { // only intermediate nodes
-				pw.println(dependencyDAG.normalizedPathCentrality.get(s) * dependencyDAG.nTotalPath);
+			if (key == 1) {
+//				if (dependencyDAG.serves.containsKey(s) && dependencyDAG.depends.containsKey(s)) { // only intermediate nodes
+					pw.println(dependencyDAG.nodePathThrough.get(s));
+//				}
+			}
+			else if (key == 2) {
+				pw.println(dependencyDAG.outDegree.get(s));
 			}
 		}
 
 		pw.close();
 	}
 
-	public static TreeMap<Double, Double> getCentralityCCDF(
+	public static TreeMap<Double, Double> getDistributionCCDF(
 			DependencyDAG dependencyDAG, String filePath, int key)
 			throws Exception {
-		String[] centrality = { "p-", "i-", "hpr-", "gpr-" };
-
-		PrintWriter pw = new PrintWriter(new File("analysis//centrality-ccdf-"
-				+ centrality[key - 1] + filePath + ".txt"));
+		String[] dist = { "", "centrality", "outdegree" };
+		PrintWriter pw = new PrintWriter(new File("analysis//"+ dist[key] + "-ccdf-" + filePath + ".txt"));
 
 		Map<Double, Double> histogram = new TreeMap<Double, Double>();
 		Map<Double, Double> CDF = new TreeMap<Double, Double>();
@@ -104,15 +107,10 @@ public class DistributionAnalysis {
 		for (String s : dependencyDAG.nodes) {
 			double v = 0;
 			if (key == 1)
-				v = dependencyDAG.normalizedPathCentrality.get(s); // *
-																	// dependencyDAG.nTotalPath;
-			if (key == 2)
-				v = dependencyDAG.iCentrality.get(s);
-			if (key == 3)
-				v = dependencyDAG.harmonicMeanPagerankCentrality.get(s);
-			if (key == 4)
-				v = dependencyDAG.geometricMeanPagerankCentrality.get(s);
-
+				v = dependencyDAG.normalizedPathCentrality.get(s); // dependencyDAG.nTotalPath;
+			else if (key == 2)
+				v = dependencyDAG.outDegree.get(s);
+			
 			if (histogram.containsKey(v)) {
 				histogram.put(v, histogram.get(v) + 1.0);
 			} else {
@@ -153,9 +151,9 @@ public class DistributionAnalysis {
 		}
 
 		System.out.println("Mean Path Length: " + StatUtils.mean(pathLengths));
-		System.out.println("STD Path Length: " + Math.sqrt(StatUtils.variance(pathLengths)));
-		System.out.println("Median Path Length: " + StatUtils.percentile(pathLengths, 50));
-		System.out.println("Max Path Length: " + StatUtils.max(pathLengths));
+//		System.out.println("STD Path Length: " + Math.sqrt(StatUtils.variance(pathLengths)));
+//		System.out.println("Median Path Length: " + StatUtils.percentile(pathLengths, 50));
+//		System.out.println("Max Path Length: " + StatUtils.max(pathLengths));
 
 		return StatUtils.percentile(pathLengths, 50);
 	}

@@ -13,7 +13,7 @@ import org.apache.commons.math3.stat.StatUtils;
 import utilityhg.Edge;
 
 public class CoreDetection {
-	public static boolean viewCore = true;
+	public static boolean viewCore = false;
 	public static boolean viewStat = false;
 	public static HashSet<String> topRemovedWaistNodes = new HashSet();
 	public static HashMap<String, Double> averageCoreRank;
