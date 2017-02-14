@@ -15,8 +15,10 @@ public class ModelRealConnector {
 	private HashMap<String, Integer> nodeLevelMap;
 	private HashMap<String, Integer> nodeIdMap;
 	private int targetLevel;
+	private Random random;
 	
 	public ModelRealConnector(DependencyDAG dependencyDAG) {
+		random = new Random(System.nanoTime());
 		getTopoMap(dependencyDAG);
 	}
 	
@@ -92,10 +94,110 @@ public class ModelRealConnector {
 		return -1;
 	}
 	
+	private int getLevel2(int itemIndex, int level, HashMap<Integer, ArrayList<String>> topoSubtree) {
+		int itemCount = 0;
+		for (int i = level - 1;  i >= 0; --i) {
+			if (!topoSubtree.containsKey(i)) {
+				continue;
+			}
+			itemCount += topoSubtree.get(i).size();
+			if (itemIndex < itemCount) {
+				return i;
+			}
+		}
+		return -1;
+	}
+	
+	private String getDegreePreferredSubstrate(ArrayList<String> candidateList, HashMap<String, Integer> nodeOutdeg) {
+		double sum = 0;
+		for (String s: candidateList) {
+			sum += nodeOutdeg.get(s) + 1;
+		}
+		
+		double rnd = random.nextDouble();
+		double runningSum = 0;
+		for (String s : candidateList) {
+			runningSum += nodeOutdeg.get(s) * 1.0 / sum;
+			if (rnd <= runningSum) {
+				return s;
+			}
+		}
+		
+		return candidateList.get(random.nextInt(candidateList.size()));
+	}
+
+	public void generateModelNetwork2(DependencyDAG dependencyDAG, double alpha) throws Exception {
+		PrintWriter pw = new PrintWriter(new File("real_model_networks//real-model-test.txt"));
+		HashMap<String, Integer> nodeOutdeg = new HashMap();
+		int nodeId = dependencyDAG.nodes.size() - 1;
+		nodeIdMap = new HashMap();
+		
+		for (int i: levelNodeMap.keySet()) {
+			if (i == 0) {				
+				for (String n: levelNodeMap.get(i)) {
+					nodeIdMap.put(n, nodeId--);
+					nodeOutdeg.put(n, 0);
+				}
+				continue; // sources
+			}
+			
+			for (String product: levelNodeMap.get(i)) {
+				dependencyDAG.visited.clear();
+				dependencyDAG.reachableDownwardsNodes(product);
+				dependencyDAG.visited.remove(product);
+				
+				HashSet<String> uniqueEdge = new HashSet();
+				ZipfDistributionWrapper zipfDistributionWrapper = new ZipfDistributionWrapper(dependencyDAG.visited.size(), alpha);
+
+				HashMap<Integer, ArrayList<String>> topoSubtree = new HashMap();
+				for (String s: dependencyDAG.visited) {
+					int level = nodeLevelMap.get(s);
+					if (topoSubtree.containsKey(level)) {
+						topoSubtree.get(level).add(s);
+					}
+					else {
+						ArrayList<String> aList = new ArrayList();
+						aList.add(s);
+						topoSubtree.put(level, aList);
+					}
+				}
+				
+				nodeIdMap.put(product, nodeId--);
+				nodeOutdeg.put(product, 0);
+				int inDegree = dependencyDAG.inDegree.get(product);
+				for (int d = 0; d < inDegree; ++d) {
+//					int substrateIndex = zipfDistributionWrapper.getNodeFromZipfDistribution2(0);
+//					int substrateLevel = getLevel2(substrateIndex, i, topoSubtree);					
+					String edge = "";
+					String substrate = "";
+					do {
+						int substrateIndex = zipfDistributionWrapper.getNodeFromZipfDistribution2(0);
+						int substrateLevel = getLevel2(substrateIndex, i, topoSubtree);
+						ArrayList<String> candidateList = topoSubtree.get(substrateLevel);
+						// random selection
+						substrate = candidateList.get(random.nextInt(candidateList.size()));
+						// outdeg preferential selection
+//						substrate = getDegreePreferredSubstrate(candidateList, nodeOutdeg);
+						edge = substrate + "#" + product;
+//						substrateLevel = Math.max(0, substrateLevel - 1);
+//						System.out.println(edge);
+					} while(uniqueEdge.contains(edge));
+					uniqueEdge.add(edge);
+					
+//					System.out.println(substrate + "\t" + product);
+					int v = nodeOutdeg.get(substrate);
+					nodeOutdeg.put(substrate, v + 1);
+					pw.println(nodeIdMap.get(substrate) + "\t" + nodeIdMap.get(product));
+				}
+			}
+		}
+		pw.close();
+	}
+	
 	public void generateModelNetwork(DependencyDAG dependencyDAG, double alpha) throws Exception {
 		PrintWriter pw = new PrintWriter(new File("real_model_networks//real-model-test.txt"));
-		Random random = new Random(System.nanoTime());
 		HashSet<String> uniqueEdge = new HashSet();
+		HashMap<String, Integer> nodeOutdeg = new HashMap();
 		
 		int nodeId = dependencyDAG.nodes.size() - 1;
 		nodeIdMap = new HashMap();
@@ -107,6 +209,7 @@ public class ModelRealConnector {
 				
 				for (String n: levelNodeMap.get(i)) {
 					nodeIdMap.put(n, nodeId--);
+					nodeOutdeg.put(n, 0);
 				}
 				continue; // sources
 			}
@@ -119,22 +222,31 @@ public class ModelRealConnector {
 
 			for (String product: levelNodeMap.get(i)) {
 				nodeIdMap.put(product, nodeId--);
+				nodeOutdeg.put(product, 0);
 				int inDegree = dependencyDAG.inDegree.get(product);
 				for (int d = 0; d < inDegree; ++d) {
 //					int substrateLevel = zipfDistributionWrapper.getNodeFromZipfDistribution2(startLevel, endLevel);
 					
-					int substrateIndex = zipfDistributionWrapper.getNodeFromZipfDistribution2(0);
-					int substrateLevel = getLevel(substrateIndex, i);
+//					int substrateIndex = zipfDistributionWrapper.getNodeFromZipfDistribution2(0);
+//					int substrateLevel = getLevel(substrateIndex, i);
 					
-					ArrayList<String> candidateList = levelNodeMap.get(substrateLevel);
-					String substrate = candidateList.get(random.nextInt(candidateList.size()));
-					String edge = substrate + "#" + product;
-					if (uniqueEdge.contains(edge)) {
-						--d;
-						continue;
-					}
+					String edge = "";
+					String substrate = "";
+					do {
+						int substrateIndex = zipfDistributionWrapper.getNodeFromZipfDistribution2(0);
+						int substrateLevel = getLevel(substrateIndex, i);
+						ArrayList<String> candidateList = levelNodeMap.get(substrateLevel);
+						// outdeg preferential selection
+						substrate = getDegreePreferredSubstrate(candidateList, nodeOutdeg);
+						edge = substrate + "#" + product;
+//						substrateLevel = Math.max(0, substrateLevel - 1);
+						System.out.println(edge);
+					} while(uniqueEdge.contains(edge));
 					uniqueEdge.add(edge);
+					
 //					System.out.println(substrate + "\t" + product);
+					int v = nodeOutdeg.get(substrate);
+					nodeOutdeg.put(substrate, v + 1);
 					pw.println(nodeIdMap.get(substrate) + "\t" + nodeIdMap.get(product));
 				}
 			}
@@ -145,22 +257,25 @@ public class ModelRealConnector {
 	
 	public static void main(String[] args) throws Exception {
 		DependencyDAG.isToy = true;
-		String toyDAGName = "real-model-test";
+		String toyDAGName = "toy_dag_paper";
+//		String toyDAGName = "real-model-test";
 		DependencyDAG toyDependencyDAG = new DependencyDAG("toy_networks//" + toyDAGName + ".txt");
 		
-		String netID = "toy_dag";
-		toyDependencyDAG.printNetworkStat();
+		ModelRealConnector modelRealConnector = new ModelRealConnector(toyDependencyDAG);
+		modelRealConnector.generateModelNetwork2(toyDependencyDAG, 1);
+//		String netID = "toy_dag";
+//		toyDependencyDAG.printNetworkStat();
 //		toyDependencyDAG.printNetworkProperties();
 
-		CoreDetection.fullTraverse = false;
-		CoreDetection.getCore(toyDependencyDAG, netID);
-		double realCore = CoreDetection.minCoreSize;
+//		CoreDetection.fullTraverse = false;
+//		CoreDetection.getCore(toyDependencyDAG, netID);
+//		double realCore = CoreDetection.minCoreSize;
 		
 //		CoreDetection.getCentralEdgeSubgraph(toyDependencyDAG);
 
 //		toyDependencyDAG = new DependencyDAG("toy_networks//" + toyDAGName + ".txt");
-		FlatNetwork.makeAndProcessFlat(toyDependencyDAG);
-		CoreDetection.hScore = (1.0 - ((realCore - 1) / FlatNetwork.flatNetworkCoreSize));
-		System.out.println("[h-Score] " + CoreDetection.hScore);
+//		FlatNetwork.makeAndProcessFlat(toyDependencyDAG);
+//		CoreDetection.hScore = (1.0 - ((realCore - 1) / FlatNetwork.flatNetworkCoreSize));
+//		System.out.println("[h-Score] " + CoreDetection.hScore);
 	}
 }

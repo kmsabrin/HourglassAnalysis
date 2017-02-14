@@ -49,6 +49,7 @@ public class ZipfDistributionWrapper {
 	public int getNodeFromZipfDistribution2(int startNodeIndex) {
 		double value = random.nextDouble() * randomWeightedCollectionTotal;
         int elementIndex = randomWeightedCollection.ceilingEntry(value).getValue();
+//        System.out.println(value + "\t" + elementIndex);
         return startNodeIndex + elementIndex - 1;
 	}
 	

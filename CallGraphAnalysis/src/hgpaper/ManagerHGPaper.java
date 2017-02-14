@@ -76,11 +76,11 @@ public class ManagerHGPaper {
 	}
 */	
 	
-	private static void compareRealNetworkWithOptimalAlphaNetwork(DependencyDAG dependencyDAG, String nid, double realHScore, double optimalAlphaScore) throws Exception {
+	private static void compareRealNetworkWithOptimalAlphaNetwork(DependencyDAG dependencyDAG, String nid, double optimalAlphaScore) throws Exception {
 		DependencyDAG.resetFlags();
 		DependencyDAG.isToy = true;
 		ModelRealConnector modelRealConnector = new ModelRealConnector(dependencyDAG);
-		modelRealConnector.generateModelNetwork(dependencyDAG, optimalAlphaScore);
+		modelRealConnector.generateModelNetwork2(dependencyDAG, optimalAlphaScore);
 
 		DependencyDAG.resetFlags();
 		SimpleModelDAG.initModelProperties((int)dependencyDAG.nTargets, (int)(dependencyDAG.nodes.size() - dependencyDAG.nTargets - dependencyDAG.nSources), (int)dependencyDAG.nSources, -1);
@@ -151,11 +151,12 @@ public class ManagerHGPaper {
 //		String netID = "rat";
 //		String netID = "monkey";
 		
-//		String netID = "commons-math";
+		String netID = "commons-math";
 //		String netID = "openssh-39";
+		
 //		String netID = "apache-commons-3.4";
 		
-		String netID = "court";		
+//		String netID = "court";		
 //		String netID = "jetuml";
 //		String netID = "celegans";
 		
@@ -185,8 +186,8 @@ public class ManagerHGPaper {
 //			DependencyDAG.isCyclic = true;
 		}
 		else if (netID.equals("court")) {
-			CourtCaseCornellParser.caseTopic = "abortion";
-//			CourtCaseCornellParser.caseTopic = "pension";
+//			CourtCaseCornellParser.caseTopic = "abortion";
+			CourtCaseCornellParser.caseTopic = "pension";
 //			CourtCaseCornellParser.caseTopic = kTopic;
 			CourtCaseCornellParser.loadCuratedCaseIDs();
 			netPath = "supremecourt_networks//court.txt";
@@ -232,7 +233,6 @@ public class ManagerHGPaper {
 		
 //		Visualization.printDOTNetwork(dependencyDAG);
 		
-		
 //		DistributionAnalysis.printEdgeList(dependencyDAG, netID);
 //		DistributionAnalysis.getAverageInOutDegree(dependencyDAG);
 //		DistributionAnalysis.getPathLength(dependencyDAG);
@@ -262,7 +262,7 @@ public class ManagerHGPaper {
 		
 //		Get Real to Model Networks
 //		getOptimalAlphaForModel(dependencyDAG, CoreDetection.hScore);
-		compareRealNetworkWithOptimalAlphaNetwork(dependencyDAG, netID, 0.93, 0.65);
+		compareRealNetworkWithOptimalAlphaNetwork(dependencyDAG, netID, 0.5);
 //		ModelRealConnector modelRealConnector = new ModelRealConnector(dependencyDAG);
 //		modelRealConnector.generateModelNetwork(dependencyDAG, 0.5);
 	}
