@@ -10,16 +10,18 @@ import java.util.Random;
 import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.apache.commons.math3.stat.StatUtils;
 
+import utilityhg.ConfidenceInterval;
+
 public class EdgeCopyingModel {
-	static int nSources = 1000;
-	static int nTargets = 1000;
-	static int nIntermediates = 8000;
+	static int nSources = 400;
+	static int nTargets = 400;
+	static int nIntermediates = 400;
 //	static int nSources = 3;
 //	static int nTargets = 3;
 //	static int nIntermediates = 4;
 	static int nNodes = nSources + nIntermediates + nTargets;
 	static double beta = 0.01;
-	static int poissonMean = 1;
+	static double poissonMean = 1.5;
 	static PoissonDistribution poissonDistribution;
 
 	public static void generateModel() throws Exception {
@@ -66,8 +68,8 @@ public class EdgeCopyingModel {
 	}
 	
 	public static void statTest() throws Exception {
-		int nRun = 10;
-		for (double b = 0.2; b <= 1.0; b += 0.1) {
+		int nRun = 20;
+		for (double b = 0; b <= 1.01; b += 0.1) {
 			double hScores[] = new double[nRun];
 			beta = b;
 			for (int r = 0; r < nRun; ++r) {
@@ -83,7 +85,9 @@ public class EdgeCopyingModel {
 				CoreDetection.hScore = (1.0 - ((realCore - 1) / FlatNetwork.flatNetworkCoreSize));
 				hScores[r] = CoreDetection.hScore;
 			}
-			System.out.println(b + "\t" + StatUtils.percentile(hScores, 50));
+//			System.out.println(b + "\t" + StatUtils.percentile(hScores, 50));
+			System.out.println(b + "\t" + StatUtils.mean(hScores) + "\t" + ConfidenceInterval.getConfidenceInterval(hScores));
+//			System.out.println(b + "\t" + StatUtils.mean(hScores) + "\t" + Math.sqrt(StatUtils.variance(hScores)));
 		}
 	}
 	
@@ -117,7 +121,7 @@ public class EdgeCopyingModel {
 	}
 	
 	public static void main(String[] args) throws Exception {
-//		statTest();
-		runTest();
+		statTest();
+//		runTest();
 	}
 }

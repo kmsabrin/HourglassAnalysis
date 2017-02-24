@@ -140,22 +140,34 @@ public class DistributionAnalysis {
 	}
 	
 	public static double getPathLength(DependencyDAG dependencyDAG) {	
-		int knt = 0;
-		double pathLengths[] = new double[(int) dependencyDAG.nSources];
+//		int knt = 0;
+//		double pathLengths[] = new double[(int) dependencyDAG.nSources];
+//		double pathLengths[] = new double[(int) dependencyDAG.nTargets];
+		double sumOfPathLengths = 0;
 		for (String s : dependencyDAG.nodes) {
-			if (dependencyDAG.isSource(s) && !Double.isNaN(dependencyDAG.avgTargetDepth.get(s))) {
-				pathLengths[knt++] = dependencyDAG.avgTargetDepth.get(s);
+//			if (dependencyDAG.isSource(s) && !Double.isNaN(dependencyDAG.avgTargetDepth.get(s))) {
+//				pathLengths[knt++] = dependencyDAG.avgTargetDepth.get(s);
 //				System.out.println(s + " " + dependencyDAG.avgTargetDepth.get(s));
 //				System.out.println(knt + "\t" + pathLengths[knt - 1]);
+//			}
+			
+			if (dependencyDAG.isTarget(s) && !Double.isNaN(dependencyDAG.avgTargetDepth.get(s))) {
+//				pathLengths[knt++] = dependencyDAG.avgSourceDepth.get(s);
+//				System.out.println(s + " " + dependencyDAG.avgSourceDepth.get(s));
+//				System.out.println(knt + "\t" + pathLengths[knt - 1]);
+				sumOfPathLengths += dependencyDAG.avgSourceDepth.get(s) * dependencyDAG.numOfSourcePath.get(s);
 			}
 		}
 
-		System.out.println("Mean Path Length: " + StatUtils.mean(pathLengths));
+//		System.out.println("Mean Path Length: " + sumOfPathLengths / dependencyDAG.nTotalPath);
+//		System.out.println("Mean Path Length: " + StatUtils.mean(pathLengths));
 //		System.out.println("STD Path Length: " + Math.sqrt(StatUtils.variance(pathLengths)));
 //		System.out.println("Median Path Length: " + StatUtils.percentile(pathLengths, 50));
 //		System.out.println("Max Path Length: " + StatUtils.max(pathLengths));
 
-		return StatUtils.percentile(pathLengths, 50);
+//		return StatUtils.percentile(pathLengths, 50);
+//		return StatUtils.mean(pathLengths);
+		return sumOfPathLengths / dependencyDAG.nTotalPath;
 	}
 
 	public static TreeMap<Integer, Integer> getDegreeHistogram(
