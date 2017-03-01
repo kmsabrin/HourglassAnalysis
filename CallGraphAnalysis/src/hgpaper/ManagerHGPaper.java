@@ -159,8 +159,8 @@ public class ManagerHGPaper {
 //		String netID = "rat";
 //		String netID = "monkey";
 		
-		String netID = "commons-math";
-//		String netID = "openssh-39";
+//		String netID = "commons-math";
+		String netID = "openssh-39";
 		
 //		String netID = "apache-commons-3.4";
 		
@@ -266,15 +266,15 @@ public class ManagerHGPaper {
 //		Flattening
 		FlatNetwork.makeAndProcessFlat(dependencyDAG);	
 		CoreDetection.hScore = (1.0 - (realCore / FlatNetwork.flatNetworkCoreSize));
-//		System.out.println("H-Score: " + CoreDetection.hScore);
+		System.out.println("H-Score: " + CoreDetection.hScore);
 		
 //		Get Real to Model Networks
 //		getOptimalAlphaForModel(dependencyDAG, CoreDetection.hScore);
 		//######
-		if (netID.equals("court")) {
-			netID = CourtCaseCornellParser.caseTopic;
-		}
-		compareRealNetworkWithOptimalAlphaNetwork(dependencyDAG, netID, 0.8);
+//		if (netID.equals("court")) {
+//			netID = CourtCaseCornellParser.caseTopic;
+//		}
+//		compareRealNetworkWithOptimalAlphaNetwork(dependencyDAG, netID, 0.8);
 		// rat, monkey, abortion, pension, openssh, javamath => 1.8, 1.7, 1.1, 1.4, 0.7, 0.5
 		
 //		ModelRealConnector modelRealConnector = new ModelRealConnector(dependencyDAG);
@@ -389,11 +389,11 @@ public class ManagerHGPaper {
 		DependencyDAG.isSimpleModel = true;
 		DependencyDAG.isWeighted = false;
 		String DAGType = "SimpleModelDAG";
-//		String alphas[] = { "1", "0", "-1" };
-		String alphas[] = {"0"};
+		String alphas[] = { "1", "0", "-1" };
+//		String alphas[] = {"-1"};
 		String din = "1";
-//		int numNodes[] = {1000, 5000, 10000, 20000, 30000, 50000};
-		int numNodes[] = {50000};
+		int numNodes[] = {1000, 5000, 10000, 20000, 30000, 50000};
+//		int numNodes[] = {20000};
 		
 		for (int n: numNodes) {
 			for (String a: alphas) {
@@ -403,25 +403,27 @@ public class ManagerHGPaper {
 				String ratio = String.valueOf(n);
 				String networkID = "";
 				
-				if (!a.equals("0")) {
+//				if (!a.equals("0")) 
+//				{
 					networkID = DAGType + "n" + n + "a" + a;
 					AlmostZipfModel.generateNetwork(Integer.parseInt(a), Integer.parseInt(din), nT, nI, nS, n);
-				}
-				else {
-					networkID = DAGType + "r" + ratio + "a" + a + "d" + din;
-					SimpleModelDAG.generateSimpleModel(Double.parseDouble(a), Integer.parseInt(din), nT, nI, nS, Double.parseDouble(ratio));
-				}
+//				}
+//				else {
+//					networkID = DAGType + "r" + ratio + "a" + a + "d" + din;
+//					SimpleModelDAG.generateSimpleModel(Double.parseDouble(a), Integer.parseInt(din), nT, nI, nS, Double.parseDouble(ratio));
+//				}
 				
 				SimpleModelDAG.initModelProperties(nT, nI, nS, Integer.parseInt(din));
 
 				long startTime = System.nanoTime();
 				DependencyDAG dependencyDAG = new DependencyDAG("synthetic_callgraphs//" + networkID + ".txt");
+				CoreDetection.fullTraverse = false;
 				CoreDetection.getCore(dependencyDAG, networkID);
 //				double realCore = CoreDetection.minCoreSize;				
 //				FlatNetwork.makeAndProcessFlat(dependencyDAG);	
 //				CoreDetection.hScore = (1.0 - ((realCore - 1) / FlatNetwork.flatNetworkCoreSize));
 				long endTime = System.nanoTime();
-				System.out.println(networkID + "\t" + TimeUnit.NANOSECONDS.toSeconds(endTime - startTime) + "\t" + CoreDetection.hScore);
+				System.out.println(networkID + "\t" + TimeUnit.NANOSECONDS.toMinutes(endTime - startTime) + "\t" + CoreDetection.minCoreSize);
 			}
 		}
 	}

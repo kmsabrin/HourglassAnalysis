@@ -142,24 +142,31 @@ public class CoreDetection {
 			dependencyDAG.numOfTargetPath.clear();
 			dependencyDAG.numOfSourcePath.clear();
 			dependencyDAG.loadPathStatistics();
-
+						
 			TreeSet<String> PESet = new TreeSet();
 			PESet.add(s);
 			alreadyInPES.add(s);
+
 			for (String r: forIteratingTiedMaxPathCentralityNodes) {
 				if (alreadyInPES.contains(r)) {
 					continue;
 				}
 //				if (dependencyDAG.numOfSourcePath.get(r) == 0 || dependencyDAG.numOfTargetPath.get(r) == 0) { // has been disconnected
-				if (dependencyDAG.nodePathThrough.get(r) < 1.0) {// has been disconnected
+				
+				dependencyDAG.checkReach(r);
+				if (!dependencyDAG.canReachSource && !dependencyDAG.canReachTarget) {
+//				if (dependencyDAG.nodePathThrough.get(r) < 1.0) {// has been disconnected
 					PESet.add(r);
 					alreadyInPES.add(r);
 				}
 			}
+			topRemovedWaistNodes.remove(s);
 //			System.out.println("Adding " + PESet + " at " + nTiedNodes);
 			pathEquivalentNodeSet2.put(nTiedNodes++, new TreeSet(PESet));
-			topRemovedWaistNodes.remove(s);
+			
 		}
+		
+//		pathEquivalentNodeSet2.put(nTiedNodes++, new TreeSet(tiedMaxPathCentralityNodes));
 		
 //		System.out.println("Rank " + nodeRank); 
 //		for (HashSet<String> equivalanceKey: pathEquivalentNodeSet.keySet()) {

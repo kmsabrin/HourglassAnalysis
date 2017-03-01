@@ -17,7 +17,7 @@ public class AlmostZipfModel {
 	
 	private static void getSyntheticNetwork() throws Exception {
 		Random rand = new Random(System.nanoTime());
-		int end = nTargets + nIntermediates;
+		int end = nTargets + nIntermediates + nSources;
 		PrintWriter pw = new PrintWriter(new File("synthetic_callgraphs//SimpleModelDAG" + "n" + nNodes + "a" + alpha + ".txt"));	
 		
 		for (int i = (nTargets + nIntermediates - 1); i >= 0; --i) {
@@ -28,33 +28,45 @@ public class AlmostZipfModel {
 			}
 			for (int j = 0; j < inDeg; ++j) {
 				if (alpha > 0) {
-					for (int k = start; k <= end; ++k) {
+					int k = start;
+					for (; k <= end; ++k) {
 						if (rand.nextDouble() < bias) {
 							int substrate = k;
-							if (substrate == end) {
-								substrate = end + rand.nextInt(nSources);
+							if (substrate >= (nTargets + nIntermediates)) {
+								substrate = nTargets + nIntermediates + rand.nextInt(nSources);
 							}
 							pw.println(substrate + "\t" + i);
 							break;
 						}
 					}
+					
+					if (k > end) {
+						int substrate = nTargets + nIntermediates + rand.nextInt(nSources);
+						pw.println(substrate + "\t" + i);
+					}
 				}
 				else if (alpha < 0){
-					for (int k = end; k >= start; --k) {
+					int k = end;
+					for (; k >= start; --k) {
 						if (rand.nextDouble() < bias) {
 							int substrate = k;
-							if (substrate == end) {
-								substrate = end + rand.nextInt(nSources);
+							if (substrate >= (nTargets + nIntermediates)) {
+								substrate = nTargets + nIntermediates + rand.nextInt(nSources);
 							}
 							pw.println(substrate + "\t" + i);
 							break;
 						}
+					}
+					
+					if (k < start) {
+						int substrate = nTargets + nIntermediates + rand.nextInt(nSources);
+						pw.println(substrate + "\t" + i);
 					}
 				}
 				else {
 					int substrate = start + rand.nextInt(end - start + 1);
-					if (substrate == end) {
-						substrate = end + rand.nextInt(nSources);
+					if (substrate >= (nTargets + nIntermediates)) {
+						substrate = nTargets + nIntermediates + rand.nextInt(nSources);
 					}
 					pw.println(substrate + "\t" + i);
 				}

@@ -215,6 +215,7 @@ public class DependencyDAG {
 		
 		if (serves.containsKey(node)) {
 			for (String s : serves.get(node)) {
+				if (CoreDetection.topRemovedWaistNodes.contains(s)) continue;
 				checkTargetReachability(s);
 			}
 		}
@@ -235,6 +236,7 @@ public class DependencyDAG {
 		
 		if (depends.containsKey(node)) {
 			for (String s : depends.get(node)) {
+				if (CoreDetection.topRemovedWaistNodes.contains(s)) continue;
 				checkSourceReachability(s);
 			}
 		}
