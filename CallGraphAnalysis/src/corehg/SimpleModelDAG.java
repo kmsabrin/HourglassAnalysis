@@ -71,6 +71,7 @@ public class SimpleModelDAG {
 	public static NavigableMap<Double, Integer> randomWeightedCollection;
 	public static double randomWeightedCollectionTotal = 0;
 	
+	private static int maxZipfSize;
 //	public static HashMap<Integer, String> nodeStringMap; // Lexis
 //	public static HashMap<Integer, String> nodeGrammarMap; // Lexis
 	
@@ -116,7 +117,9 @@ public class SimpleModelDAG {
 	}
 	
 	public static int getInDegree() {
-//		return din;
+//		return din + 1;
+		
+		
 		if (isPoisson) {
 			int inD = poissonDistribution.sample() + 1;
 			return inD;
@@ -124,6 +127,7 @@ public class SimpleModelDAG {
 		else {
 			return din;
 		}
+		
 		
 		/*
 		int values[] = {2, 3, 4, 5};
@@ -179,10 +183,22 @@ public class SimpleModelDAG {
 		return endNodeIndex;
 	}
 	
-	public static int getNodeFromZipfDistribution2(int startNodeIndex, int endNodeIndex) {
+	private static int getNodeFromZipfDistribution2(int startNodeIndex) {
 		double value = random.nextDouble() * randomWeightedCollectionTotal;
         int elementIndex = randomWeightedCollection.ceilingEntry(value).getValue();
         return startNodeIndex + elementIndex - 1;
+	}
+	
+	private static int getNodeFromZipfDistribution2() {
+		double value = random.nextDouble() * randomWeightedCollectionTotal;
+        int elementIndex = randomWeightedCollection.ceilingEntry(value).getValue();
+        return elementIndex;
+	}
+	
+	private static int getProportionalIndex(int startNodeIndex, int endNodeIndex, int elementIndex) {
+		int currentSize = endNodeIndex - startNodeIndex + 1;
+		int newElementIndex = (int)(Math.ceil(elementIndex * currentSize * 1.0 / maxZipfSize));
+		return startNodeIndex + newElementIndex - 1;
 	}
 	
 	public static void initiateRandomWeightedCollection(int nElements, ZipfDistribution zipfDistribution) {
@@ -204,6 +220,7 @@ public class SimpleModelDAG {
 	}
 	
 	public static void generateSimpleModelDAG(PrintWriter pw) throws Exception {	
+
 //		randomWeightedCollection = new TreeMap();
 //		double timeSum = 0;
 		
@@ -214,6 +231,11 @@ public class SimpleModelDAG {
 //		HashMap<String, Integer> outEdgeKounter = new HashMap(); 
 //		HashMap<String, String> lexisIdHGIndex = new HashMap(); 
 		/** Lexis **/
+
+		if (Math.abs(alpha) != 0) {
+			zipfDistribution = new ZipfDistribution(maxZipfSize, alpha);
+			initiateRandomWeightedCollection(maxZipfSize, zipfDistribution);
+		}
 		
 		for (int productIndex = sS - 1; productIndex >= 0; --productIndex) {	
 //			System.out.println(productIndex);
@@ -234,21 +256,16 @@ public class SimpleModelDAG {
 					}
 				} 
 				else { // zipf distribution
-//					System.out.println("Here: " + (endNodeIndex - startNodeIndex + 1) + "\t" + alpha);
+					/*
 					zipfDistribution = new ZipfDistribution(endNodeIndex - startNodeIndex + 1, alpha);
-//					double startTime = System.nanoTime();
 					initiateRandomWeightedCollection(endNodeIndex - startNodeIndex + 1, zipfDistribution);
-//					double endTime = System.nanoTime();
-//					timeSum += (endTime - startTime);
-//					System.out.println("Elapsed A: " + ((endTime - startTime) / 1000000000.0) );					
+					*/
 				}
 			}
 			
-//			double startTime = System.nanoTime();
 			int k = getInDegree();
-//			System.out.println(k);
 			
-			k = Math.min(k, endNodeIndex - startNodeIndex + 1); // Lexis-off
+//			k = Math.min(k, endNodeIndex - startNodeIndex + 1); // Lexis-off
 			
 			/** Lexis **/
 //			k = Math.max(k, 2);
@@ -271,33 +288,28 @@ public class SimpleModelDAG {
 				} 
 				else {
 //					substrateIndex = getNodeFromZipfDistribution(startNodeIndex, endNodeIndex);
-					substrateIndex = getNodeFromZipfDistribution2(startNodeIndex, endNodeIndex);
+//					substrateIndex = getNodeFromZipfDistribution2(startNodeIndex);
+					
+					int elementIndex = getNodeFromZipfDistribution2();
+					substrateIndex = getProportionalIndex(startNodeIndex, endNodeIndex, elementIndex);
+					
 //					special case: no order among sources
 					if (substrateIndex >= sS) {
 						substrateIndex = sS + random.nextInt(nS);
 					}
 				}
 				
-//				System.out.println(substrateIndex + "\t" + productIndex);				
-				String str = substrateIndex + " " + productIndex;
-				
-//				if (isMultigraph == false && edgeWeights.containsKey(str)) {
-//					--j;
-//					System.out.println("Collision!");
-//					continue;
-//				}
+				String str = substrateIndex + " " + productIndex;		
+//				System.out.println(j + "\t" + str);
+//				edgeWeights.put(str, 1);
 				
 				while (isMultigraph == false && edgeWeights.containsKey(str)) {
 					++substrateIndex;
 					if (substrateIndex > endNodeIndex) {
 						substrateIndex = sS + random.nextInt(nS);
-//						System.out.println("Oh wow!");
 					}
-					
 					str = substrateIndex + " " + productIndex;
-//					System.out.println("Collision!");
 				}
-//				System.out.println(substrateIndex + " " + productIndex);
 				
 				if (edgeWeights.containsKey(str)) {
 					int v = edgeWeights.get(str);
@@ -306,7 +318,8 @@ public class SimpleModelDAG {
 				else {
 					edgeWeights.put(str, 1);
 				}
-
+				
+				
 				/** Lexis **/
 //				productString += nodeStringMap.get(substrateIndex);
 //				substrateStringList.add(nodeStringMap.get(substrateIndex));
@@ -395,6 +408,7 @@ public class SimpleModelDAG {
 		SimpleModelDAG.sI = nT; // start of Intermediate
 		SimpleModelDAG.sS = nT + nI; // start of Source
 		SimpleModelDAG.din = din;
+		SimpleModelDAG.maxZipfSize = nT + nI + nS;
 		
 		/***** Lexis *****/
 //		nodeGrammarMap = new HashMap();

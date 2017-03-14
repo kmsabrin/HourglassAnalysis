@@ -5,7 +5,7 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Scanner;
 
-public class AgonyAnalysis {
+public class SocialRankAnalysis {
 //	static String directory = "metabolic_networks";
 //	static String network_file = "rat-links.txt";
 //	static String network_id = "rat";

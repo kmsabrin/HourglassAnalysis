@@ -77,9 +77,12 @@ public class ManagerHGPaper {
 */	
 	
 	private static void compareRealNetworkWithOptimalAlphaNetwork(DependencyDAG dependencyDAG, String nid, double optimalAlphaScore) throws Exception {		
-		int nRun = 30;
+		int nRun = 5;
 		double pathLengths[] = new double[nRun];
 		double disconnectedFractions[] = new double[nRun];
+		double nodeCoverage[] = new double [nRun];
+		double avgCoreLocation[] = new double [nRun];
+		double coreSize[] = new double [nRun];
 		
 		for (int i = 0; i < nRun; ++i) {
 			DependencyDAG.resetFlags();
@@ -93,18 +96,28 @@ public class ManagerHGPaper {
 			String toyDAGName = "real-model-test";
 			
 			DependencyDAG modelDependencyDAG = new DependencyDAG("real_model_networks//" + toyDAGName + ".txt");
+			modelDependencyDAG.printNetworkStat();			
 			
 			String netID = nid + "-model";		
-			pathLengths[i] = DistributionAnalysis.getPathLength(modelDependencyDAG);
-			disconnectedFractions[i] = (1.0 * modelDependencyDAG.disconnectedKount/modelDependencyDAG.nodes.size());
-					
-			netID = nid + "-model-" + i;
-			DistributionAnalysis.getDistributionCCDF(modelDependencyDAG, netID, 1); // 1=centrality, 2=outdegree
-			DistributionAnalysis.getDistributionCCDF(modelDependencyDAG, netID, 2);
+//			pathLengths[i] = DistributionAnalysis.getPathLength(modelDependencyDAG);
+//			disconnectedFractions[i] = (1.0 * modelDependencyDAG.disconnectedKount/modelDependencyDAG.nodes.size());
+			CoreDetection.fullTraverse = false;
+			CoreDetection.getCore(modelDependencyDAG, netID);
+			nodeCoverage[i] = CoreDetection.nodeCoverage;
+			avgCoreLocation[i] = CoreDetection.weightedCoreLocation;
+			coreSize[i] = CoreDetection.minCoreSize;
+			
+//			netID = nid + "-model-" + i;
+//			DistributionAnalysis.getDistributionCCDF(modelDependencyDAG, netID, 1); // 1=centrality, 2=outdegree
+//			DistributionAnalysis.getDistributionCCDF(modelDependencyDAG, netID, 2);
 		}
 		
-		System.out.println("PathLength: " + StatUtils.mean(pathLengths) + "\t" + Math.sqrt(StatUtils.variance(pathLengths)));
-		System.out.println("DisconnectedFraction: " + StatUtils.mean(disconnectedFractions) + "\t" + Math.sqrt(StatUtils.variance(disconnectedFractions)));
+//		System.out.println("PathLength: " + StatUtils.mean(pathLengths) + "\t" + Math.sqrt(StatUtils.variance(pathLengths)));
+//		System.out.println("DisconnectedFraction: " + StatUtils.mean(disconnectedFractions) + "\t" + Math.sqrt(StatUtils.variance(disconnectedFractions)));
+		
+		System.out.println("nodeCoverage: " + StatUtils.mean(nodeCoverage) + "\t" + Math.sqrt(StatUtils.variance(nodeCoverage)));
+		System.out.println("avgCoreLocation: " + StatUtils.mean(avgCoreLocation) + "\t" + Math.sqrt(StatUtils.variance(avgCoreLocation)));
+		System.out.println("coreSize: " + StatUtils.mean(coreSize) + "\t" + Math.sqrt(StatUtils.variance(coreSize)));
 	}
 	
 	private static void getOptimalAlphaForModel(DependencyDAG dependencyDAG, double realHScore) throws Exception {
@@ -115,7 +128,7 @@ public class ManagerHGPaper {
 		
 		System.out.println(nID + "\t" + kTopic + "\t" + realHScore);
 		
-		for (double a = 0.8; a <= 0.91; a += 0.1) {
+		for (double a = 0.5; a <= 1.1; a += 0.1) {
 			for (int i = 0; i < nRun; ++i) {
 				DependencyDAG.resetFlags();
 				DependencyDAG.isToy = true;
@@ -160,7 +173,7 @@ public class ManagerHGPaper {
 //		String netID = "monkey";
 		
 //		String netID = "commons-math";
-		String netID = "openssh-39";
+//		String netID = "openssh-39";
 		
 //		String netID = "apache-commons-3.4";
 		
@@ -170,7 +183,7 @@ public class ManagerHGPaper {
 		
 //		String netID = "toy";
 		
-//		String netID = nID;
+		String netID = nID;
 		
 		DependencyDAG.resetFlags();
 		
@@ -194,8 +207,8 @@ public class ManagerHGPaper {
 //			DependencyDAG.isCyclic = true;
 		}
 		else if (netID.equals("court")) {
-			CourtCaseCornellParser.caseTopic = "abortion";
-//			CourtCaseCornellParser.caseTopic = "pension";
+//			CourtCaseCornellParser.caseTopic = "abortion";
+			CourtCaseCornellParser.caseTopic = "pension";
 //			CourtCaseCornellParser.caseTopic = kTopic;
 			CourtCaseCornellParser.loadCuratedCaseIDs();
 			netPath = "supremecourt_networks//court.txt";
@@ -231,7 +244,7 @@ public class ManagerHGPaper {
 
 		DependencyDAG dependencyDAG = new DependencyDAG(netPath);
 		
-		System.out.println(DistributionAnalysis.getPathLength(dependencyDAG));
+//		System.out.println(DistributionAnalysis.getPathLength(dependencyDAG));
 //		System.out.println("nDisconnected " + (1.0 * dependencyDAG.disconnectedKount / dependencyDAG.nodes.size()));
 //		generateSyntheticFromReal(dependencyDAG);
 		
@@ -266,16 +279,16 @@ public class ManagerHGPaper {
 //		Flattening
 		FlatNetwork.makeAndProcessFlat(dependencyDAG);	
 		CoreDetection.hScore = (1.0 - (realCore / FlatNetwork.flatNetworkCoreSize));
-		System.out.println("H-Score: " + CoreDetection.hScore);
+//		System.out.println("H-Score: " + CoreDetection.hScore);
 		
 //		Get Real to Model Networks
-//		getOptimalAlphaForModel(dependencyDAG, CoreDetection.hScore);
+		getOptimalAlphaForModel(dependencyDAG, CoreDetection.hScore);
 		//######
 //		if (netID.equals("court")) {
 //			netID = CourtCaseCornellParser.caseTopic;
 //		}
 //		compareRealNetworkWithOptimalAlphaNetwork(dependencyDAG, netID, 0.8);
-		// rat, monkey, abortion, pension, openssh, javamath => 1.8, 1.7, 1.1, 1.4, 0.7, 0.5
+		// rat, monkey, abortion, pension, openssh, javamath => 1.7, 1.7, 1.2, 1.3, 0.8, 0.8
 		
 //		ModelRealConnector modelRealConnector = new ModelRealConnector(dependencyDAG);
 //		modelRealConnector.generateModelNetwork(dependencyDAG, 0.5);
@@ -385,15 +398,11 @@ public class ManagerHGPaper {
 //	}
 	
 	private static void runScalabilityTest() throws Exception {
-		DependencyDAG.isSynthetic = true;
-		DependencyDAG.isSimpleModel = true;
-		DependencyDAG.isWeighted = false;
-		String DAGType = "SimpleModelDAG";
-		String alphas[] = { "1", "0", "-1" };
-//		String alphas[] = {"-1"};
+//		String alphas[] = { "0.5", "0", "-0.5" };
+		String alphas[] = {"0"};
 		String din = "1";
-		int numNodes[] = {1000, 5000, 10000, 20000, 30000, 50000};
-//		int numNodes[] = {20000};
+//		int numNodes[] = {1000, 5000, 10000, 20000, 30000, 50000};
+		int numNodes[] = {100000};
 		
 		for (int n: numNodes) {
 			for (String a: alphas) {
@@ -402,28 +411,38 @@ public class ManagerHGPaper {
 				int nS = n / 5;
 				String ratio = String.valueOf(n);
 				String networkID = "";
+		
+				DependencyDAG.isSynthetic = true;
+				DependencyDAG.isSimpleModel = true;
+				DependencyDAG.isWeighted = false;
+				String DAGType = "SimpleModelDAG";
 				
 //				if (!a.equals("0")) 
 //				{
-					networkID = DAGType + "n" + n + "a" + a;
-					AlmostZipfModel.generateNetwork(Integer.parseInt(a), Integer.parseInt(din), nT, nI, nS, n);
+					
+//				networkID = DAGType + "n" + n + "a" + a;
+//				AlmostZipfModel.generateNetwork(Integer.parseInt(a), Integer.parseInt(din), nT, nI, nS, n);
+					
 //				}
 //				else {
-//					networkID = DAGType + "r" + ratio + "a" + a + "d" + din;
-//					SimpleModelDAG.generateSimpleModel(Double.parseDouble(a), Integer.parseInt(din), nT, nI, nS, Double.parseDouble(ratio));
+					networkID = DAGType + "r" + ratio + "a" + a + "d" + din;
+					SimpleModelDAG.generateSimpleModel(Double.parseDouble(a), Integer.parseInt(din), nT, nI, nS, Double.parseDouble(ratio));
 //				}
 				
 				SimpleModelDAG.initModelProperties(nT, nI, nS, Integer.parseInt(din));
 
 				long startTime = System.nanoTime();
 				DependencyDAG dependencyDAG = new DependencyDAG("synthetic_callgraphs//" + networkID + ".txt");
+				dependencyDAG.printNetworkStat();
+//				dependencyDAG.printNetworkProperties();
 				CoreDetection.fullTraverse = false;
 				CoreDetection.getCore(dependencyDAG, networkID);
+
 //				double realCore = CoreDetection.minCoreSize;				
 //				FlatNetwork.makeAndProcessFlat(dependencyDAG);	
 //				CoreDetection.hScore = (1.0 - ((realCore - 1) / FlatNetwork.flatNetworkCoreSize));
 				long endTime = System.nanoTime();
-				System.out.println(networkID + "\t" + TimeUnit.NANOSECONDS.toMinutes(endTime - startTime) + "\t" + CoreDetection.minCoreSize);
+				System.out.println(networkID + "\t" + TimeUnit.NANOSECONDS.toSeconds(endTime - startTime) + "\t" + CoreDetection.minCoreSize);
 			}
 		}
 	}
@@ -634,7 +653,7 @@ public class ManagerHGPaper {
 	
 	private static void runThroughAllRealNets() throws Exception {
 		String data[] = {"rat", "monkey", "court", "court", "openssh-39", "commons-math"};
-		for (int i = 0; i < 6; ++i) {
+		for (int i = 4; i < 6; ++i) {
 			nID = data[i];
 			if (i == 2) {
 				kTopic = "abortion";
@@ -652,8 +671,8 @@ public class ManagerHGPaper {
 	public static void main(String[] args) throws Exception {		
 //		ManagerHGPaper.doRealNetworkAnalysis();
 //		Manager.measureTauEffectOnRealNetwork();
-//		ManagerHGPaper.runThroughAllRealNets();
-		ManagerHGPaper.runScalabilityTest();
+		ManagerHGPaper.runThroughAllRealNets();
+//		ManagerHGPaper.runScalabilityTest();
 		
 //		curve 1
 //		ManagerHGPaper.runSyntheticStatisticalSignificanceTests(333, 333, 333, 1);

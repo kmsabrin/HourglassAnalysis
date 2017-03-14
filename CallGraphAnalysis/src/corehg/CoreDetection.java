@@ -88,6 +88,7 @@ public class CoreDetection {
 			return;
 		}
 		
+		
 //		recompute through paths for all nodes
 		dependencyDAG.numOfTargetPath.clear();
 		dependencyDAG.numOfSourcePath.clear();
@@ -133,15 +134,16 @@ public class CoreDetection {
 		HashMap<Integer, TreeSet<String>> pathEquivalentNodeSet2 = new HashMap();
 		HashSet<String> forIteratingTiedMaxPathCentralityNodes = new HashSet(tiedMaxPathCentralityNodes);
 		for (String s : tiedMaxPathCentralityNodes) {
+			/*
 			if (alreadyInPES.contains(s)) {
 				continue;
 			}
 			
 			topRemovedWaistNodes.add(s);
 //			System.out.println("Blocking: " + s);
-			dependencyDAG.numOfTargetPath.clear();
-			dependencyDAG.numOfSourcePath.clear();
-			dependencyDAG.loadPathStatistics();
+//			dependencyDAG.numOfTargetPath.clear();
+//			dependencyDAG.numOfSourcePath.clear();
+//			dependencyDAG.loadPathStatistics();
 						
 			TreeSet<String> PESet = new TreeSet();
 			PESet.add(s);
@@ -163,10 +165,10 @@ public class CoreDetection {
 			topRemovedWaistNodes.remove(s);
 //			System.out.println("Adding " + PESet + " at " + nTiedNodes);
 			pathEquivalentNodeSet2.put(nTiedNodes++, new TreeSet(PESet));
-			
+			*/
 		}
 		
-//		pathEquivalentNodeSet2.put(nTiedNodes++, new TreeSet(tiedMaxPathCentralityNodes));
+		pathEquivalentNodeSet2.put(nTiedNodes++, new TreeSet(tiedMaxPathCentralityNodes));
 		
 //		System.out.println("Rank " + nodeRank); 
 //		for (HashSet<String> equivalanceKey: pathEquivalentNodeSet.keySet()) {
@@ -255,9 +257,9 @@ public class CoreDetection {
 		
 //		Compute through paths for all nodes
 		inCore = true;
-		dependencyDAG.numOfTargetPath.clear();
-		dependencyDAG.numOfSourcePath.clear();
-		dependencyDAG.loadPathStatistics();
+//		dependencyDAG.numOfTargetPath.clear();
+//		dependencyDAG.numOfSourcePath.clear();
+//		dependencyDAG.loadPathStatistics();
 		
 		traverseTreeHelper(dependencyDAG, 0, dependencyDAG.nTotalPath, 1, 1);
 		
@@ -453,25 +455,41 @@ public class CoreDetection {
 	
 		double numerator = 0;
 		double denominator = 0;
-//		double coveredSource = 0;
-//		double coveredTarget = 0;
-//		double coveredIntermediate = 0;
+		double coveredSource = 0;
+		double coveredTarget = 0;
+		double coveredIntermediate = 0;
+		double vTarget = 0;
+		double vIntermediate = 0;
+		double vSource = 0;
 		for (String s: dependencyDAG.nodes) {
 			dependencyDAG.checkReach(s);
 			// check if a node is in a source/target path
 			if (dependencyDAG.canReachSource && dependencyDAG.canReachTarget) {
 				++denominator;
+				if (dependencyDAG.isIntermediate(s)) ++vIntermediate;
+				if (dependencyDAG.isSource(s)) ++vSource;
+				if (dependencyDAG.isTarget(s)) ++vTarget;
 				if (coreNodeCoverage.contains(s)) {
 					++numerator;
-//					if (dependencyDAG.isIntermediate(s)) ++coveredIntermediate;
-//					if (dependencyDAG.isSource(s)) ++coveredSource;
-//					if (dependencyDAG.isTarget(s)) ++coveredTarget;
+					if (dependencyDAG.isIntermediate(s)) ++coveredIntermediate;
+					if (dependencyDAG.isSource(s)) ++coveredSource;
+					if (dependencyDAG.isTarget(s)) ++coveredTarget;
 				}
 			}
+			
+//			if (coreNodeCoverage.contains(s)) {
+//				if (dependencyDAG.isIntermediate(s)) ++coveredIntermediate;
+//				if (dependencyDAG.isSource(s)) ++coveredSource;
+//				if (dependencyDAG.isTarget(s)) ++coveredTarget;
+//			}
 		}
 		nodeCoverage = numerator / denominator;
-//		System.out.println(nodeCoverage + "\t" + numerator + "\t" + denominator);
-//		System.out.println(coveredT + "\t" + coveredI + "\t" + coveredS);
+//		System.out.println("X: " + nodeCoverage + "\t" + numerator + "\t" + denominator);
+//		System.out.println("Y: " + coveredTarget + "\t" + coveredIntermediate + "\t" + coveredSource);
+//		double totalUncover = denominator - numerator;
+//		System.out.println(((vTarget - coveredTarget)/totalUncover) 
+//				+ "\t" + ((vIntermediate - coveredIntermediate)/totalUncover) 
+//				+ "\t" + ((vSource - coveredSource)/totalUncover));
 	}
 	
 	private static void coreLocationAnalysis(DependencyDAG dependencyDAG) {

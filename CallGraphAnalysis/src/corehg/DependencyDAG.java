@@ -1,5 +1,6 @@
 package corehg;
 import java.io.File;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -35,6 +36,7 @@ public class DependencyDAG {
 	public Map<String, Double> lengthPathLocation;
 	
 	public double nTotalPath;
+//	public BigDecimal nTotalPath;
 	public HashMap<String, Double> nodePathThrough;
 	public HashMap<String, Double> geometricMeanPathCentrality;
 	public HashMap<String, Double> harmonicMeanPathCentrality;
@@ -182,8 +184,9 @@ public class DependencyDAG {
 //			removeDisconnectedNodesForSyntheticNetworks();
 		}
 		
-		countDisconnectedNodes();
-//		removeIsolatedNodes();
+//		countDisconnectedNodes();
+		
+/*		removeIsolatedNodes(); */
 		
 		loadDegreeMetric();
 				
@@ -957,84 +960,85 @@ public class DependencyDAG {
 		avgSourceDepth.clear();
 	}
 	
-	public void loadCyclicPathStatistics() {
-		HashMap<String, Double> edgeCentralityMap = new HashMap(); // for edge centrality
-		nTotalPath = 0;
-		nodePathThrough.clear();
-		
-		for (String s: nodes) { // for every source DAG
-			if (!isSource(s)) continue;
-			initPathTraversalDS();
-			
-			loadGoodEdge(s, "fromSource");
-//			System.out.println("Starting towards target traversal from " + s);
-			targetPathsTraverse(s);
-		
-			for (String r: nodes) { // from targets to source for this DAG, needed for total paths in this DAG
-				if (!isTarget(r)) continue;
-				sourcePathsTraverse(r);
-			}
-			
-			for (String r : nodes) {
-				double numSourcePath = 0;
-				if (numOfSourcePath.containsKey(r)) {
-					numSourcePath = numOfSourcePath.get(r);
-				}
-				double numTargetPath = 0;
-				if (numOfTargetPath.containsKey(r)) {
-					numTargetPath = numOfTargetPath.get(r);
-				}
-//				System.out.println(r + "\t" + tPath + "\t" + sPath);
-				double numPath = numSourcePath * numTargetPath;
-				if (nodePathThrough.containsKey(r)) {
-					numPath += nodePathThrough.get(r);
-				}
-				nodePathThrough.put(r, numPath);
-				
-				if (cyclicNumSourcePath.containsKey(r)) {
-					cyclicNumSourcePath.put(r, numSourcePath + cyclicNumSourcePath.get(r));
-				}
-				else {
-					cyclicNumSourcePath.put(r, numSourcePath);
-				}
-				
-				// for weighted path centrality
-				if (avgSourceDepth.containsKey(r) && !Double.isNaN(avgSourceDepth.get(r))) {
-					if (cyclicAvgSourceDepth.containsKey(r)) {
-						cyclicAvgSourceDepth.put(r, (cyclicAvgSourceDepth.get(r) + avgSourceDepth.get(r)) * 0.5);
-					}
-					else {
-						cyclicAvgSourceDepth.put(r, avgSourceDepth.get(r));
-					}
-				}
-			}
-			
-			nTotalPath += numOfTargetPath.get(s);		
-			
-			/* edge centrality - begin */
+//	public void loadCyclicPathStatistics() {
+//		HashMap<String, Double> edgeCentralityMap = new HashMap(); // for edge centrality
+//		nTotalPath = 0;
+//		nodePathThrough.clear();
+//		
+//		for (String s: nodes) { // for every source DAG
+//			if (!isSource(s)) continue;
+//			initPathTraversalDS();
+//			
+//			loadGoodEdge(s, "fromSource");
+////			System.out.println("Starting towards target traversal from " + s);
+//			targetPathsTraverse(s);
+//		
+//			for (String r: nodes) { // from targets to source for this DAG, needed for total paths in this DAG
+//				if (!isTarget(r)) continue;
+//				sourcePathsTraverse(r);
+//			}
+//			
 //			for (String r : nodes) {
-//				if (isTarget(r)) continue;
-//				for (String t : serves.get(r)) {
-//					double numSourcePath = 0;
-//					if (numOfSourcePath.containsKey(r)) {
-//						numSourcePath = numOfSourcePath.get(r);
-//					}
-//					double numTargetPath = 0;
-//					if (numOfTargetPath.containsKey(t)) {
-//						numTargetPath = numOfTargetPath.get(t);
-//					}
-//					double numEdgePath = numSourcePath * numTargetPath;
-//					String edge = r + "#" + t;
-//					if (edgeCentralityMap.containsKey(edge)) {
-//						edgeCentralityMap.put(edge, edgeCentralityMap.get(edge) + numEdgePath);
+//				double numSourcePath = 0;
+//				if (numOfSourcePath.containsKey(r)) {
+//					numSourcePath = numOfSourcePath.get(r);
+//				}
+//				double numTargetPath = 0;
+//				if (numOfTargetPath.containsKey(r)) {
+//					numTargetPath = numOfTargetPath.get(r);
+//				}
+////				System.out.println(r + "\t" + tPath + "\t" + sPath);
+//				double numPath = numSourcePath * numTargetPath;
+//				if (nodePathThrough.containsKey(r)) {
+//					numPath += nodePathThrough.get(r);
+//				}
+//				nodePathThrough.put(r, numPath);
+//				
+//				if (cyclicNumSourcePath.containsKey(r)) {
+//					cyclicNumSourcePath.put(r, numSourcePath + cyclicNumSourcePath.get(r));
+//				}
+//				else {
+//					cyclicNumSourcePath.put(r, numSourcePath);
+//				}
+//				
+//				// for weighted path centrality
+//				if (avgSourceDepth.containsKey(r) && !Double.isNaN(avgSourceDepth.get(r))) {
+//					if (cyclicAvgSourceDepth.containsKey(r)) {
+//						cyclicAvgSourceDepth.put(r, (cyclicAvgSourceDepth.get(r) + avgSourceDepth.get(r)) * 0.5);
 //					}
 //					else {
-//						edgeCentralityMap.put(edge, numEdgePath);
+//						cyclicAvgSourceDepth.put(r, avgSourceDepth.get(r));
 //					}
 //				}
 //			}
-			/* edge centrality - end */
-		}
+//			
+//			nTotalPath += numOfTargetPath.get(s);		
+//		
+//			/* edge centrality - begin */
+////			for (String r : nodes) {
+////				if (isTarget(r)) continue;
+////				for (String t : serves.get(r)) {
+////					double numSourcePath = 0;
+////					if (numOfSourcePath.containsKey(r)) {
+////						numSourcePath = numOfSourcePath.get(r);
+////					}
+////					double numTargetPath = 0;
+////					if (numOfTargetPath.containsKey(t)) {
+////						numTargetPath = numOfTargetPath.get(t);
+////					}
+////					double numEdgePath = numSourcePath * numTargetPath;
+////					String edge = r + "#" + t;
+////					if (edgeCentralityMap.containsKey(edge)) {
+////						edgeCentralityMap.put(edge, edgeCentralityMap.get(edge) + numEdgePath);
+////					}
+////					else {
+////						edgeCentralityMap.put(edge, numEdgePath);
+////					}
+////				}
+////			}
+//			/* edge centrality - end */
+//		
+//		}
 		
 		/* edge centrality - begin */
 //		for (String e : edgeCentralityMap.keySet()) {
@@ -1046,51 +1050,51 @@ public class DependencyDAG {
 		/* edge centrality - end */
 		
 		/* number of paths from targets - begin */
-		for (String s: nodes) {
-			if (!isTarget(s)) continue;
-			initPathTraversalDS();
-			loadGoodEdge(s, "fromTarget");
-			
-			for (String r: nodes) {
-				if (!isSource(r)) continue;
-				targetPathsTraverse(r);
-			}
-			
-			for (String r: nodes) {
-				double numTargetPath = 0;
-				if (numOfTargetPath.containsKey(r)) {
-					numTargetPath = numOfTargetPath.get(r);
-				}
-				
-				if (cyclicNumTargetPath.containsKey(r)) {
-					cyclicNumTargetPath.put(r, numTargetPath + cyclicNumTargetPath.get(r));
-				}
-				else {
-					cyclicNumTargetPath.put(r, numTargetPath);
-				}
-				
-				if (avgTargetDepth.containsKey(r)  && !Double.isNaN(avgTargetDepth.get(r))) {
-					if (cyclicAvgTargetDepth.containsKey(r)) {
-						cyclicAvgTargetDepth.put(r, (cyclicAvgTargetDepth.get(r) + avgTargetDepth.get(r)) * 0.5);
-					}
-					else {
-						cyclicAvgTargetDepth.put(r, avgTargetDepth.get(r));
-					}
-				}
-			}
-		}
-		/* number of target paths - end */
-		
-//		System.out.println("Total path: " + nTotalPath);		
-//		for (String r: nodes) {
-//			System.out.println(r + "\t" + nodePathThrough.get(r) + "\t" + cyclicNumSourcePath.get(r) + "\t" + cyclicNumTargetPath.get(r));
-//			System.out.println(r + "\t" + nodePathThrough.get(r) + "\t" + cyclicAvgSourceDepth.get(r) + "\t" + cyclicAvgTargetDepth.get(r));
-//			if (isSource(r)) {
-//				System.out.println(r + "\t" + avgTargetDepth.get(r));
+//		for (String s: nodes) {
+//			if (!isTarget(s)) continue;
+//			initPathTraversalDS();
+//			loadGoodEdge(s, "fromTarget");
+//			
+//			for (String r: nodes) {
+//				if (!isSource(r)) continue;
+//				targetPathsTraverse(r);
+//			}
+//			
+//			for (String r: nodes) {
+//				double numTargetPath = 0;
+//				if (numOfTargetPath.containsKey(r)) {
+//					numTargetPath = numOfTargetPath.get(r);
+//				}
+//				
+//				if (cyclicNumTargetPath.containsKey(r)) {
+//					cyclicNumTargetPath.put(r, numTargetPath + cyclicNumTargetPath.get(r));
+//				}
+//				else {
+//					cyclicNumTargetPath.put(r, numTargetPath);
+//				}
+//				
+//				if (avgTargetDepth.containsKey(r)  && !Double.isNaN(avgTargetDepth.get(r))) {
+//					if (cyclicAvgTargetDepth.containsKey(r)) {
+//						cyclicAvgTargetDepth.put(r, (cyclicAvgTargetDepth.get(r) + avgTargetDepth.get(r)) * 0.5);
+//					}
+//					else {
+//						cyclicAvgTargetDepth.put(r, avgTargetDepth.get(r));
+//					}
+//				}
 //			}
 //		}
-//		System.out.println("--------");
-	}
+//		/* number of target paths - end */
+//		
+////		System.out.println("Total path: " + nTotalPath);		
+////		for (String r: nodes) {
+////			System.out.println(r + "\t" + nodePathThrough.get(r) + "\t" + cyclicNumSourcePath.get(r) + "\t" + cyclicNumTargetPath.get(r));
+////			System.out.println(r + "\t" + nodePathThrough.get(r) + "\t" + cyclicAvgSourceDepth.get(r) + "\t" + cyclicAvgTargetDepth.get(r));
+////			if (isSource(r)) {
+////				System.out.println(r + "\t" + avgTargetDepth.get(r));
+////			}
+////		}
+////		System.out.println("--------");
+//	}
 	
 	public void loadRegularPathStatistics() {
 		numOfTargetPath.clear();
@@ -1113,7 +1117,7 @@ public class DependencyDAG {
 			loadWeightedPathStatistics();
 		}
 		else if (isCyclic) {
-			loadCyclicPathStatistics();
+//			loadCyclicPathStatistics();
 			return;
 		}
 		else {
@@ -1133,6 +1137,7 @@ public class DependencyDAG {
 			nodePathThrough.put(s, nPath);
 			if (isTarget(s)) { // is a target
 				nTotalPath += nPath;
+//				nTotalPath = nTotalPath.add(new BigDecimal(nPath));
 			}
 		}
 		
@@ -1267,7 +1272,10 @@ public class DependencyDAG {
 		for (String s: nodes) {			
 //			P-Centrality
 //			double npc = numOfTargetPath.get(s) * numOfSourcePath.get(s) * 1.0 / nTotalPath;
+			
 			double npc = nodePathThrough.get(s) / nTotalPath;
+//			double npc = new BigDecimal(nodePathThrough.get(s)).divide(nTotalPath).doubleValue();
+			
 //			npc = ((int) npc * 1000.0) / 1000.0;
 			normalizedPathCentrality.put(s, npc);			
 			
@@ -1300,7 +1308,7 @@ public class DependencyDAG {
 //			System.out.print(iCentrality.get(s) + "\t");
 //			System.out.print(sourcesReachable.get(s) + "\t");
 //			System.out.print(targetsReachable.get(s) + "\t");
-			System.out.println(s + "\t" + normalizedPathCentrality.get(s));
+//			System.out.println(s + "\t" + normalizedPathCentrality.get(s));
 //			System.out.println();
 //			System.out.println(s + "\t" + numPathLocation.get(s) + "\t" + lengthPathLocation.get(s));
 //			System.out.println(s + "\t" + numPathLocation.get(s) + "\t" + normalizedPathCentrality.get(s));
@@ -1313,7 +1321,7 @@ public class DependencyDAG {
 			}
 			
 //			System.out.println(s + "\t" + numPathLocation.get(s) + "\t" + normalizedPathCentrality.get(s));
-//			System.out.println(s + "\t" + lengthPathLocation.get(s) + "\t" + nodePathThrough.get(s) + "\t" + outDegree.get(s));
+			System.out.println(s + "\t" + lengthPathLocation.get(s) + "\t" + nodePathThrough.get(s) + "\t" + outDegree.get(s));
 			
 		}
 		
@@ -1423,6 +1431,6 @@ public class DependencyDAG {
 		System.out.println(" T: " + nTargets);
 		System.out.println(" E: " + nEdges);
 		System.out.println(" N: " + nodes.size());
-//		System.out.println(" Toal Path: " + nTotalPath);		
+		System.out.println(" Toal Path: " + nTotalPath);		
 	}
 }
