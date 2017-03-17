@@ -11,10 +11,10 @@ import java.util.TreeMap;
 import utilityhg.ZipfDistributionWrapper;
 
 public class ModelRealConnector {
-	private TreeMap<Integer, ArrayList<String>> levelNodeMap;
-	private HashMap<String, Integer> nodeLevelMap;
-	private HashMap<String, Integer> nodeIdMap;
-	private int targetLevel;
+	public TreeMap<Integer, ArrayList<String>> levelNodeMap;
+	public HashMap<String, Integer> nodeLevelMap;
+	public HashMap<String, Integer> nodeIdMap;
+	public int targetLevel;
 	private Random random;
 	
 	public ModelRealConnector(DependencyDAG dependencyDAG) {

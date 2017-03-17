@@ -320,7 +320,7 @@ public class CoreDetection {
 			}
 			
 			if (dependencyDAG.serves.containsKey(s)) {
-				for (String r: dependencyDAG.serversReachable.get(s)) {
+				for (String r: dependencyDAG.ancestors.get(s)) {
 					System.out.println(s + "\t" + r);
 					neighbors.add(r);
 				}
@@ -331,6 +331,7 @@ public class CoreDetection {
 	}
 	
 	public static void getCentralEdgeSubgraph(DependencyDAG dependencyDAG) {
+		/*
 		Collections.sort(dependencyDAG.edgePathCentrality);
 		double startingTotalPath = dependencyDAG.nTotalPath;
 		System.out.println(dependencyDAG.nTotalPath);
@@ -345,6 +346,7 @@ public class CoreDetection {
 				break;
 			}
 		}
+		*/
 	}
 	
 	public static void getCore2(DependencyDAG dependencyDAG) {

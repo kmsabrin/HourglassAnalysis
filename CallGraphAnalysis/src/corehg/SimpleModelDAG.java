@@ -232,6 +232,9 @@ public class SimpleModelDAG {
 //		HashMap<String, String> lexisIdHGIndex = new HashMap(); 
 		/** Lexis **/
 
+		/* used for mapping one large distribution to all small distributions */
+		/* speeding up simulations */
+		/* turn off for regular experiments */
 		if (Math.abs(alpha) != 0) {
 			zipfDistribution = new ZipfDistribution(maxZipfSize, alpha);
 			initiateRandomWeightedCollection(maxZipfSize, zipfDistribution);

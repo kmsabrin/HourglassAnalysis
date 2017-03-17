@@ -87,7 +87,7 @@ public class TarjanSCC {
 		DependencyDAG G = new DependencyDAG();
 		 PrintWriter pw = new PrintWriter(new File("metabolic_networks//monkey-consolidated.txt"));
 		 G.isMetabolic = true;
-		 G.loadCallGraph("metabolic_networks//monkey-links.txt"); // "metabolic_networks//rat-links.txt"
+		 G.loadGraph("metabolic_networks//monkey-links.txt"); // "metabolic_networks//rat-links.txt"
 
 //		PrintWriter pw = new PrintWriter(new File("jdk_class_dependency//commons-math-callgraph-consolidated.txt"));
 //		DependencyDAG.isClassDependency = true;

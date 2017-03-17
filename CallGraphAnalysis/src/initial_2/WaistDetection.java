@@ -620,11 +620,11 @@ public class WaistDetection {
 					dependencyDAG.loadRechablity(s); // find reachable nodes
 					
 					for (String r: averageWaistRank.keySet()) {
-						if (dependencyDAG.dependentsReachable.get(s).contains(r)) { // serving some waist node
+						if (dependencyDAG.successors.get(s).contains(r)) { // serving some waist node
 							++servesWaist;
 						}
 				
-						if (dependencyDAG.serversReachable.get(s).contains(r)) { // depending on some waist node
+						if (dependencyDAG.ancestors.get(s).contains(r)) { // depending on some waist node
 							++dependsOnWaist;
 						}
 					}

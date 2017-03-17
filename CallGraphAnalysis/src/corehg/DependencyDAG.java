@@ -38,11 +38,11 @@ public class DependencyDAG {
 	public double nTotalPath;
 //	public BigDecimal nTotalPath;
 	public HashMap<String, Double> nodePathThrough;
-	public HashMap<String, Double> geometricMeanPathCentrality;
-	public HashMap<String, Double> harmonicMeanPathCentrality;
+//	public HashMap<String, Double> geometricMeanPathCentrality;
+//	public HashMap<String, Double> harmonicMeanPathCentrality;
 	public HashMap<String, Double> normalizedPathCentrality;
 	public HashMap<String, Integer> centralityRank;
-	public HashMap<String, Double> iCentrality;
+//	public HashMap<String, Double> iCentrality;
 	public HashMap<String, Double> lengthWeightedPathCentrality;
 	
 	public Map<String, Integer> outDegree;
@@ -54,16 +54,16 @@ public class DependencyDAG {
 	public List<String> cycleList;
 	public ArrayList<ArrayList<String>> detectedCycles;
 
-	public HashMap<String, Set<String>> dependentsReachable;
-	public HashMap<String, Set<String>> serversReachable;
+	public HashMap<String, Set<String>> successors;
+	public HashMap<String, Set<String>> ancestors;
 	public HashMap<String, Integer> targetsReachable; // for iCentrality
 	public HashMap<String, Integer> sourcesReachable; // for iCentrality
 	public HashMap<String, HashSet<String>> nodesReachable;
 	
-	public HashMap<String, Double> pagerankSourceCompression; // for prCentrality
-	public HashMap<String, Double> pagerankTargetCompression; // for prCentrality
-	public HashMap<String, Double> geometricMeanPagerankCentrality;
-	public HashMap<String, Double> harmonicMeanPagerankCentrality;
+//	public HashMap<String, Double> pagerankSourceCompression; // for prCentrality
+//	public HashMap<String, Double> pagerankTargetCompression; // for prCentrality
+//	public HashMap<String, Double> geometricMeanPagerankCentrality;
+//	public HashMap<String, Double> harmonicMeanPagerankCentrality;
 		
 	public String dependencyGraphID;
 	
@@ -91,18 +91,18 @@ public class DependencyDAG {
 	
 	public HashMap<String, Integer> edgeWeights;
 	
-	public HashSet<String> goodEdgeToSource;
-	public HashSet<String> goodEdgeToTarget;
-	public HashSet<String> visitedGray;
-	public HashSet<String> visitedBlack;
-	public HashMap<String, Double> cyclicNumSourcePath;
-	public HashMap<String, Double> cyclicNumTargetPath;
-	public HashMap<String, Double> cyclicAvgSourceDepth;
-	public HashMap<String, Double> cyclicAvgTargetDepth;
+//	public HashSet<String> goodEdgeToSource;
+//	public HashSet<String> goodEdgeToTarget;
+//	public HashSet<String> visitedGray;
+//	public HashSet<String> visitedBlack;
+//	public HashMap<String, Double> cyclicNumSourcePath;
+//	public HashMap<String, Double> cyclicNumTargetPath;
+//	public HashMap<String, Double> cyclicAvgSourceDepth;
+//	public HashMap<String, Double> cyclicAvgTargetDepth;
 	
 	public HashMap<String, Double> numPathLocation;
 
-	public ArrayList<Edge> edgePathCentrality;
+//	public ArrayList<Edge> edgePathCentrality;
 	
 	public static int disconnectedKount; 
 	
@@ -123,27 +123,27 @@ public class DependencyDAG {
 		lengthPathLocation = new HashMap();
 
 		nodePathThrough = new HashMap();
-		geometricMeanPathCentrality = new HashMap();
-		harmonicMeanPathCentrality = new HashMap();
+//		geometricMeanPathCentrality = new HashMap();
+//		harmonicMeanPathCentrality = new HashMap();
 		normalizedPathCentrality = new HashMap();
 		centralityRank = new HashMap();
 		lengthWeightedPathCentrality = new HashMap();
 		
-		iCentrality = new HashMap();
+//		iCentrality = new HashMap();
 		
 		outDegree = new HashMap();
 		inDegree = new HashMap();
 		
-		geometricMeanPagerankCentrality = new HashMap();
-		harmonicMeanPagerankCentrality = new HashMap();
-		pagerankSourceCompression = new HashMap();
-		pagerankTargetCompression = new HashMap();
+//		geometricMeanPagerankCentrality = new HashMap();
+//		harmonicMeanPagerankCentrality = new HashMap();
+//		pagerankSourceCompression = new HashMap();
+//		pagerankTargetCompression = new HashMap();
 		
 		detectedCycles = new ArrayList();
 		cycleEdges = new HashMap();
 
-		dependentsReachable = new HashMap();
-		serversReachable = new HashMap();
+		successors = new HashMap();
+		ancestors = new HashMap();
 		
 		targetsReachable = new HashMap();
 		sourcesReachable = new HashMap();
@@ -156,16 +156,16 @@ public class DependencyDAG {
 		CoreDetection.topRemovedWaistNodes.clear();
 		
 		edgeWeights = new HashMap();
-		goodEdgeToSource = new HashSet();
-		goodEdgeToTarget = new HashSet();
-		cyclicNumSourcePath = new HashMap();
-		cyclicNumTargetPath = new HashMap();
-		cyclicAvgSourceDepth = new HashMap();
-		cyclicAvgTargetDepth = new HashMap();
+//		goodEdgeToSource = new HashSet();
+//		goodEdgeToTarget = new HashSet();
+//		cyclicNumSourcePath = new HashMap();
+//		cyclicNumTargetPath = new HashMap();
+//		cyclicAvgSourceDepth = new HashMap();
+//		cyclicAvgTargetDepth = new HashMap();
 		
 		numPathLocation = new HashMap();
 		
-		edgePathCentrality = new ArrayList();
+//		edgePathCentrality = new ArrayList();
 	}
 	
 	public DependencyDAG(String dependencyGraphID) throws Exception {
@@ -174,7 +174,7 @@ public class DependencyDAG {
 		this.dependencyGraphID = dependencyGraphID;
 			
 		// load & initialize the attributes of the dependency graph
-		loadCallGraph(dependencyGraphID);
+		loadGraph(dependencyGraphID);
 		
 		if (isCallgraph /*|| isClassDependency || isToy || isMetabolic || isCourtcase*/) {
 			removeCycles(); // or should I only ignore cycles?
@@ -186,7 +186,7 @@ public class DependencyDAG {
 		
 //		countDisconnectedNodes();
 		
-/*		removeIsolatedNodes(); */
+//		removeIsolatedNodes(); 
 		
 		loadDegreeMetric();
 				
@@ -195,7 +195,7 @@ public class DependencyDAG {
 		loadLocationMetric(); // must load degree metric before
 		
 //		loadReachablityAll();		
-//		loadServerReachabilityAll();
+		loadServerReachabilityAll();
 		
 		loadPathCentralityMetric();
 		
@@ -315,7 +315,7 @@ public class DependencyDAG {
 		return disconnectedKount;
 	}
 
-	public void loadCallGraph(String fileName) throws Exception {
+	public void loadGraph(String fileName) throws Exception {
 		Scanner scanner = new Scanner(new File(fileName));
 
 		int violation = 0;
@@ -655,17 +655,13 @@ public class DependencyDAG {
 			int out = 0;
 			
 			if (isTarget(s) || isIntermediate(s)) {
-//				System.out.println(s);
-				in = depends.get(s).size();
+				if (depends.containsKey(s)) { // isSynthetic or isRandomized check
+					in = depends.get(s).size();
+				}
 			}
 			
 			if (isSource(s) || isIntermediate(s)) {
-				if (isSynthetic) {
-					if (serves.containsKey(s)) {
-						out = serves.get(s).size();
-					}
-				}
-				else {
+				if (serves.containsKey(s)) { // isSynthetic or isRandomized check
 					out = serves.get(s).size();
 				}
 			}
@@ -679,11 +675,13 @@ public class DependencyDAG {
 			if (isTarget(s)) {
 				++nTargets;
 			}
+			
 			if (isSource(s)) {
 				++nSources;
 			}
 			else {
 				if (!isWeighted) {
+//					System.out.println(s);
 					nEdges += depends.get(s).size();
 				}
 				else {
@@ -757,7 +755,8 @@ public class DependencyDAG {
 		double sPath = 0;
 		if (!CoreDetection.topRemovedWaistNodes.contains(node)) { // special condition for waist detection
 			for (String s : depends.get(node)) {
-				if ((goodEdgeToSource.contains(node + "#" + s) || !isCyclic)) { // only for neuro
+//				if ((goodEdgeToSource.contains(node + "#" + s) || !isCyclic)) 
+				{ // only for neuro
 					sourcePathsTraverse(s);
 					nPath += numOfSourcePath.get(s);
 					sPath += numOfSourcePath.get(s) + sumOfSourcePath.get(s);
@@ -789,7 +788,8 @@ public class DependencyDAG {
 		if (!CoreDetection.topRemovedWaistNodes.contains(node)) { // special condition for waist detection
 			if (serves.containsKey(node)) { // for synthetic disconnected nodes
 				for (String s : serves.get(node)) {
-					if ((goodEdgeToTarget.contains(node + "#" + s) || !isCyclic)) {						
+//					if ((goodEdgeToTarget.contains(node + "#" + s) || !isCyclic)) 
+					{						
 						targetPathsTraverse(s);
 						nPath += numOfTargetPath.get(s);
 						sPath += numOfTargetPath.get(s) + sumOfTargetPath.get(s);
@@ -880,6 +880,7 @@ public class DependencyDAG {
 		}
 	}
 	
+	/*
 	private void traverseFromSource(String node) {
 		if (isTarget(node)) { // is target
 			return;
@@ -950,6 +951,7 @@ public class DependencyDAG {
 //		System.out.println(goodEdgeToTarget);
 //		System.out.println(goodEdgeToSource);
 	}
+	*/
 	
 	private void initPathTraversalDS() {
 		numOfTargetPath.clear();
@@ -1168,7 +1170,7 @@ public class DependencyDAG {
 			
 			double n = 0;
 			if (isCyclic) {
-				n = (cyclicNumSourcePath.get(s) - 1) / ((cyclicNumSourcePath.get(s) - 1) + (cyclicNumTargetPath.get(s) - 1));
+//				n = (cyclicNumSourcePath.get(s) - 1) / ((cyclicNumSourcePath.get(s) - 1) + (cyclicNumTargetPath.get(s) - 1));
 			}
 			else {
 				n = (numOfSourcePath.get(s) - 1) / ((numOfSourcePath.get(s) - 1) + (numOfTargetPath.get(s) - 1));
@@ -1240,7 +1242,7 @@ public class DependencyDAG {
 			kounter = 0;
 			reachableDownwardsNodes(s); // how many nodes she is using
 			visited.remove(s); // remove itself
-			serversReachable.put(s, new HashSet(visited)); // too heavy for court case
+			ancestors.put(s, new HashSet(visited)); // too heavy for court case
 		}
 	}
 	
@@ -1253,7 +1255,7 @@ public class DependencyDAG {
 			reachableUpwardsNodes(s); // how many nodes are using her
 			nodesReachable.put(s, new HashSet(visited));
 			visited.remove(s); // remove ifself
-			dependentsReachable.put(s, new HashSet(visited)); // too heavy for court case
+			successors.put(s, new HashSet(visited)); // too heavy for court case
 			targetsReachable.put(s, kounter);
 //			System.out.println("Targets reached: " + kounter);
 			
@@ -1262,7 +1264,7 @@ public class DependencyDAG {
 			reachableDownwardsNodes(s); // how many nodes she is using
 			nodesReachable.get(s).addAll(visited);
 			visited.remove(s); // remove itself
-			serversReachable.put(s, new HashSet(visited)); // too heavy for court case
+			ancestors.put(s, new HashSet(visited)); // too heavy for court case
 			sourcesReachable.put(s, kounter);
 //			System.out.println("Source reached: " + kounter);
 	}
@@ -1314,27 +1316,27 @@ public class DependencyDAG {
 //			System.out.println(s + "\t" + numPathLocation.get(s) + "\t" + normalizedPathCentrality.get(s));
 //			System.out.println(s + "\t" + numPathLocation.get(s));
 //			System.out.println(numPathLocation.get(s) + "\t" + Math.random() + "\t" + Math.log10(nodePathThrough.get(s)));
-			if (isCyclic) {
+//			if (isCyclic) {
 //				System.out.println(s + "\t" + cyclicAvgSourceDepth.get(s) + "\t" + cyclicAvgTargetDepth.get(s));
 //				System.out.println(s + "\t" + lengthWeightedPathCentrality.get(s) + "\t" + nodePathThrough.get(s));
 //				System.out.println(s + "\t" + nodePathThrough.get(s));				
-			}
+//			}
 			
 //			System.out.println(s + "\t" + numPathLocation.get(s) + "\t" + normalizedPathCentrality.get(s));
-			System.out.println(s + "\t" + lengthPathLocation.get(s) + "\t" + nodePathThrough.get(s) + "\t" + outDegree.get(s));
+//			System.out.println(s + "\t" + lengthPathLocation.get(s) + "\t" + nodePathThrough.get(s) + "\t" + outDegree.get(s));
 			
 		}
 		
 		System.out.println("Total path: " + nTotalPath);
 		
 		for (String s : nodes) {
-//			if (depends.containsKey(s)) {
-//				System.out.print(s + " depends on ");
-//				for (String r : depends.get(s)) {
-//					System.out.print("\t" + r);
-//				}
-//				System.out.println();
-//			}
+			if (depends.containsKey(s)) {
+				System.out.print(s + " depends on ");
+				for (String r : depends.get(s)) {
+					System.out.print("\t" + r);
+				}
+				System.out.println();
+			}
 			
 //			if (serves.containsKey(s)) {
 //				System.out.print(s + " serves ");
@@ -1394,26 +1396,18 @@ public class DependencyDAG {
 		lengthPathLocation = new HashMap();
 
 		nodePathThrough = new HashMap();
-		geometricMeanPathCentrality = new HashMap();
-		harmonicMeanPathCentrality = new HashMap();
 		normalizedPathCentrality = new HashMap();
 		centralityRank = new HashMap();
 		
-		iCentrality = new HashMap();
 		
 		outDegree = new HashMap();
 		inDegree = new HashMap();
 		
-		geometricMeanPagerankCentrality = new HashMap();
-		harmonicMeanPagerankCentrality = new HashMap();
-		pagerankSourceCompression = new HashMap();
-		pagerankTargetCompression = new HashMap();
-		
 		detectedCycles = new ArrayList();
 		cycleEdges = new HashMap();
 
-		dependentsReachable = new HashMap();
-		serversReachable = new HashMap();
+		successors = new HashMap();
+		ancestors = new HashMap();
 		
 		targetsReachable = new HashMap();
 		sourcesReachable = new HashMap();
@@ -1424,6 +1418,9 @@ public class DependencyDAG {
 		CoreDetection.topRemovedWaistNodes.clear();
 		
 		edgeWeights = new HashMap();
+		
+		nodesReachable = new HashMap();	
+		numPathLocation = new HashMap();
 	}
 	
 	public void printNetworkStat() {

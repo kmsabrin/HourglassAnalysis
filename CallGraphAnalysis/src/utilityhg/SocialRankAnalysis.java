@@ -14,7 +14,7 @@ public class SocialRankAnalysis {
 	static String network_file = "celegans_network_clean.txt";
 	static String network_id = "celegans";
 	
-	public static void printAgonyNetwork() throws Exception {
+	public static void getDataForSocialrankAnalysis() throws Exception {
 		HashMap<String, Integer> labelIdMap = new HashMap();
 		
 		Scanner scanner = new Scanner(new File(directory + "//" + network_file));
@@ -43,7 +43,7 @@ public class SocialRankAnalysis {
 		pw.close();
 	}
 	
-	public static void getAgonyCompliantNetwork() throws Exception {
+	public static void getSocialrankCompliantNetwork() throws Exception {
 		HashMap<Integer, String> idLabelMap = new HashMap();
 		HashMap<Integer, Integer> idRankMap = new HashMap();
 
@@ -65,7 +65,7 @@ public class SocialRankAnalysis {
 		scanner.close();
 		
 		scanner = new Scanner(new File(directory + "//" + network_id + ".edges"));
-		PrintWriter pw = new PrintWriter(new File(directory + "//" + network_id + ".agony.network"));
+		PrintWriter pw = new PrintWriter(new File(directory + "//" + network_id + ".socialrank.network"));
 		while (scanner.hasNext()) {
 			int substrate = scanner.nextInt();
 			int product = scanner.nextInt();
@@ -84,6 +84,6 @@ public class SocialRankAnalysis {
 	
 	public static void main(String[] args) throws Exception {
 //		printAgonyNetwork();
-		getAgonyCompliantNetwork();
+		getSocialrankCompliantNetwork();
 	}
 }

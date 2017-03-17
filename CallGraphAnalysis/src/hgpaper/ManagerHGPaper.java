@@ -17,6 +17,7 @@ import corehg.DependencyDAG;
 import corehg.FlatNetwork;
 import corehg.ModelRealConnector;
 import corehg.SimpleModelDAG;
+import corehg.UpstreamRandomize;
 
 public class ManagerHGPaper {	
 	public static String nID = "";
@@ -179,11 +180,11 @@ public class ManagerHGPaper {
 		
 //		String netID = "court";		
 //		String netID = "jetuml";
-//		String netID = "celegans";
+		String netID = "celegans";
 		
 //		String netID = "toy";
 		
-		String netID = nID;
+//		String netID = nID;
 		
 		DependencyDAG.resetFlags();
 		
@@ -243,12 +244,13 @@ public class ManagerHGPaper {
 		}
 
 		DependencyDAG dependencyDAG = new DependencyDAG(netPath);
+//		dependencyDAG.printNetworkStat();
 		
 //		System.out.println(DistributionAnalysis.getPathLength(dependencyDAG));
 //		System.out.println("nDisconnected " + (1.0 * dependencyDAG.disconnectedKount / dependencyDAG.nodes.size()));
 //		generateSyntheticFromReal(dependencyDAG);
 		
-//		dependencyDAG.printNetworkStat();
+		
 //		dependencyDAG.printNetworkProperties();
 //		DistributionAnalysis.getLocationColorWeightedHistogram(dependencyDAG);
 		
@@ -269,7 +271,12 @@ public class ManagerHGPaper {
 //		DistributionAnalysis.printEdgeList(dependencyDAG, netID);
 //		DistributionAnalysis.printAllCentralities(dependencyDAG, netID);
 //		DistributionAnalysis.findNDirectSrcTgtBypasses(dependencyDAG, netID);
+		
+		// Randomizations
+//		UpstreamRandomize.randomizeDAG(dependencyDAG);
+		UpstreamRandomize.hieararchyDistanceRandomizeDAG(dependencyDAG);
 
+		
 //		Core Detection
 		CoreDetection.fullTraverse = false;
 		CoreDetection.getCore(dependencyDAG, netID);
@@ -277,12 +284,14 @@ public class ManagerHGPaper {
 
 
 //		Flattening
+		DependencyDAG.isRandomized = false;
 		FlatNetwork.makeAndProcessFlat(dependencyDAG);	
 		CoreDetection.hScore = (1.0 - (realCore / FlatNetwork.flatNetworkCoreSize));
 //		System.out.println("H-Score: " + CoreDetection.hScore);
+		System.out.println(CoreDetection.hScore);
 		
 //		Get Real to Model Networks
-		getOptimalAlphaForModel(dependencyDAG, CoreDetection.hScore);
+//		getOptimalAlphaForModel(dependencyDAG, CoreDetection.hScore);
 		//######
 //		if (netID.equals("court")) {
 //			netID = CourtCaseCornellParser.caseTopic;
@@ -292,6 +301,7 @@ public class ManagerHGPaper {
 		
 //		ModelRealConnector modelRealConnector = new ModelRealConnector(dependencyDAG);
 //		modelRealConnector.generateModelNetwork(dependencyDAG, 0.5);
+		
 	}
 	
 	/*
@@ -402,7 +412,7 @@ public class ManagerHGPaper {
 		String alphas[] = {"0"};
 		String din = "1";
 //		int numNodes[] = {1000, 5000, 10000, 20000, 30000, 50000};
-		int numNodes[] = {100000};
+		int numNodes[] = {500};
 		
 		for (int n: numNodes) {
 			for (String a: alphas) {
@@ -426,11 +436,12 @@ public class ManagerHGPaper {
 //				}
 //				else {
 					networkID = DAGType + "r" + ratio + "a" + a + "d" + din;
-					SimpleModelDAG.generateSimpleModel(Double.parseDouble(a), Integer.parseInt(din), nT, nI, nS, Double.parseDouble(ratio));
+//					SimpleModelDAG.generateSimpleModel(Double.parseDouble(a), Integer.parseInt(din), nT, nI, nS, Double.parseDouble(ratio));
 //				}
 				
 				SimpleModelDAG.initModelProperties(nT, nI, nS, Integer.parseInt(din));
 
+				/*
 				long startTime = System.nanoTime();
 				DependencyDAG dependencyDAG = new DependencyDAG("synthetic_callgraphs//" + networkID + ".txt");
 				dependencyDAG.printNetworkStat();
@@ -438,11 +449,32 @@ public class ManagerHGPaper {
 				CoreDetection.fullTraverse = false;
 				CoreDetection.getCore(dependencyDAG, networkID);
 
-//				double realCore = CoreDetection.minCoreSize;				
-//				FlatNetwork.makeAndProcessFlat(dependencyDAG);	
-//				CoreDetection.hScore = (1.0 - ((realCore - 1) / FlatNetwork.flatNetworkCoreSize));
+				double realCore = CoreDetection.minCoreSize;				
+				FlatNetwork.makeAndProcessFlat(dependencyDAG);	
+				CoreDetection.hScore = (1.0 - ((realCore - 1) / FlatNetwork.flatNetworkCoreSize));
 				long endTime = System.nanoTime();
+				System.out.println(CoreDetection.hScore);
 				System.out.println(networkID + "\t" + TimeUnit.NANOSECONDS.toSeconds(endTime - startTime) + "\t" + CoreDetection.minCoreSize);
+				*/
+
+				
+				DependencyDAG dependencyDAG = new DependencyDAG("synthetic_callgraphs//" + networkID + ".txt");
+				// Randomizations
+				UpstreamRandomize.randomizeDAG(dependencyDAG);
+
+//				Core Detection
+				CoreDetection.fullTraverse = false;
+				CoreDetection.getCore(dependencyDAG, networkID);
+				double realCore = CoreDetection.minCoreSize;
+
+
+//				Flattening
+				DependencyDAG.isRandomized = false;
+				FlatNetwork.makeAndProcessFlat(dependencyDAG);	
+				CoreDetection.hScore = (1.0 - (realCore / FlatNetwork.flatNetworkCoreSize));
+//				System.out.println("H-Score: " + CoreDetection.hScore);
+				System.out.println(CoreDetection.hScore);
+				
 			}
 		}
 	}
@@ -668,11 +700,20 @@ public class ManagerHGPaper {
 		}
 	}
 	
+	private static void runRandomizationTest() throws Exception {
+		int nRun = 100;
+		for (int i = 0; i < nRun; ++i) {
+			doRealNetworkAnalysis();
+//			runScalabilityTest();
+		}
+	}
+	
 	public static void main(String[] args) throws Exception {		
 //		ManagerHGPaper.doRealNetworkAnalysis();
 //		Manager.measureTauEffectOnRealNetwork();
-		ManagerHGPaper.runThroughAllRealNets();
+//		ManagerHGPaper.runThroughAllRealNets();
 //		ManagerHGPaper.runScalabilityTest();
+		ManagerHGPaper.runRandomizationTest();
 		
 //		curve 1
 //		ManagerHGPaper.runSyntheticStatisticalSignificanceTests(333, 333, 333, 1);

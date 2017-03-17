@@ -11,7 +11,7 @@ public class FlatNetwork {
 		for (String s: dependencyDAG.nodes) {
 			if (dependencyDAG.isSource(s)) {
 				dependencyDAG.loadRechablity(s);
-				for (String r: dependencyDAG.dependentsReachable.get(s)) {
+				for (String r: dependencyDAG.successors.get(s)) {
 					if (dependencyDAG.isTarget(r)) {
 						pw.println(s + "\t" + r);
 					}

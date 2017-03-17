@@ -8,7 +8,6 @@ import java.util.HashSet;
 import java.util.Scanner;
 
 import utilityhg.DistributionAnalysis;
-import utilityhg.Visualization;
 
 import com.google.common.collect.Ordering;
 import com.google.common.collect.TreeMultimap;
@@ -61,9 +60,15 @@ public class ManagerNeuro {
 	private static void writeFile(String edgeFileName, HashSet<Integer> source, HashSet<Integer> target, HashSet<Integer> intermediate, HashSet<Integer> nodes) throws Exception {
 		Scanner scan = new Scanner(new File(edgeFileName));
 		PrintWriter pw = new PrintWriter(new File("neuro_networks//celegans_network_clean.txt"));
-		int nRemovedInedges = 0;
-		int nRemovedOutedges = 0;
+		int nRemovedInedge = 0;
+		int nRemovedOutedge = 0;
+		int totalEdge = 0;
+		HashMap<Integer, Integer> indeg = new HashMap();
+		HashMap<Integer, Integer> outdeg = new HashMap();
+		HashSet<Integer> retainedNode = new HashSet();
 		
+		System.out.println("Sizes " + nodes.size() + "\t" + source.size() + "\t" + intermediate.size() + "\t" + target.size());
+//		int edgeConsidered = 0;
 		while (scan.hasNext()) {
 			int src = scan.nextInt();
 			int dst = scan.nextInt();
@@ -74,23 +79,72 @@ public class ManagerNeuro {
 			}
 			
 			if (target.contains(src)) {
-				++nRemovedInedges;
+				++nRemovedOutedge;
 			}
 			
 			if (source.contains(dst)) {
-				++nRemovedOutedges;
+				++nRemovedInedge;
 			}
 			
 			if (target.contains(src) || source.contains(dst)) {
+//				System.out.println(src + "\t" + dst);
 				continue;
 			}
 						
 			pw.println(src + "\t" + dst);
+			++totalEdge;
+			retainedNode.add(src);
+			retainedNode.add(dst);
+			
+			if (indeg.containsKey(dst)) {
+				indeg.put(dst, indeg.get(dst) + 1);
+			}
+			else {
+				indeg.put(dst, 1);
+			}
+			
+			if (outdeg.containsKey(src)) {
+				outdeg.put(src, outdeg.get(src) + 1);
+			}
+			else {
+				outdeg.put(src, 1);
+			}
 		}
 		
-		System.out.println("Removed in-edges " + nRemovedInedges);
-		System.out.println("Removed out-edges " + nRemovedOutedges);
+		System.out.println("Removed in-edges " + nRemovedInedge);
+		System.out.println("Removed out-edges " + nRemovedOutedge);
+		System.out.println("Total edge " + totalEdge);
+		System.out.println("Total node " + retainedNode.size());
 		
+		int disS = 0;
+		int disT = 0;
+		int disI = 0;
+		int isolated = 0;
+		for (int i: nodes) {
+			if (source.contains(i) && !outdeg.containsKey(i)) {
+				++disS;
+			}
+			else if (target.contains(i) && !indeg.containsKey(i)) {
+				++disT;
+				System.out.println(i + "\t" + outdeg.containsKey(i) + "\t" + disT);
+//				if (retainedNode.contains(i)) {
+//					System.out.println("1node " + i + "\t" + indeg.containsKey(i) + "\t" + outdeg.containsKey(i));
+//				}
+			}
+			else if (intermediate.contains(i) && (!indeg.containsKey(i) || !outdeg.containsKey(i))) {
+				++disI;
+			}
+			
+			if (!indeg.containsKey(i) && !outdeg.containsKey(i)) {
+				++isolated;
+//				if (source.contains(i)) System.out.println("isolated source");
+//				if (target.contains(i)) System.out.println("isolated target");
+//				if (intermediate.contains(i)) System.out.println("isolated intermediate");
+			}
+		}
+		
+		System.out.println("Disconnected nodes " + disS + "\t" + disI + "\t" + disT);
+		System.out.println("Isolated " + isolated);
 		scan.close();
 		pw.close();
 	}
@@ -294,8 +348,8 @@ public class ManagerNeuro {
 	}
 	
 	public static void main(String[] args) throws Exception {
-//		getCleanNeuroNetwork();
-		doNeuroNetworkAnalysis();
+		getCleanNeuroNetwork();
+//		doNeuroNetworkAnalysis();
 //		statisticalRun();
 //		traverseAllPaths();
 	}
