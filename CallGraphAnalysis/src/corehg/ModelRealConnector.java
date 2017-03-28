@@ -74,13 +74,13 @@ public class ModelRealConnector {
 			}
 		}
 		
-//		for (int i: levelNodeMap.keySet()) {
-//			System.out.print(i);
-//			for (String r: levelNodeMap.get(i)) {
-//				System.out.print("\t" + r);
-//			}
-//			System.out.println();
-//		}
+		for (int i: levelNodeMap.keySet()) {
+			System.out.print(i);
+			for (String r: levelNodeMap.get(i)) {
+				System.out.print("\t" + r);
+			}
+			System.out.println();
+		}
 	}
 	
 	private int getLevel(int itemIndex, int level) {

@@ -272,23 +272,22 @@ public class ManagerHGPaper {
 //		DistributionAnalysis.printAllCentralities(dependencyDAG, netID);
 //		DistributionAnalysis.findNDirectSrcTgtBypasses(dependencyDAG, netID);
 		
-		// Randomizations
+//		Randomizations
 //		UpstreamRandomize.randomizeDAG(dependencyDAG);
 		UpstreamRandomize.hieararchyDistanceRandomizeDAG(dependencyDAG);
-
 		
 //		Core Detection
-		CoreDetection.fullTraverse = false;
-		CoreDetection.getCore(dependencyDAG, netID);
-		double realCore = CoreDetection.minCoreSize;
+//		CoreDetection.fullTraverse = false;
+//		CoreDetection.getCore(dependencyDAG, netID);
+//		double realCore = CoreDetection.minCoreSize;
 
 
 //		Flattening
-		DependencyDAG.isRandomized = false;
-		FlatNetwork.makeAndProcessFlat(dependencyDAG);	
-		CoreDetection.hScore = (1.0 - (realCore / FlatNetwork.flatNetworkCoreSize));
+//		DependencyDAG.isRandomized = false;
+//		FlatNetwork.makeAndProcessFlat(dependencyDAG);	
+//		CoreDetection.hScore = (1.0 - (realCore / FlatNetwork.flatNetworkCoreSize));
 //		System.out.println("H-Score: " + CoreDetection.hScore);
-		System.out.println(CoreDetection.hScore);
+//		System.out.println(CoreDetection.hScore);
 		
 //		Get Real to Model Networks
 //		getOptimalAlphaForModel(dependencyDAG, CoreDetection.hScore);
@@ -709,11 +708,11 @@ public class ManagerHGPaper {
 	}
 	
 	public static void main(String[] args) throws Exception {		
-//		ManagerHGPaper.doRealNetworkAnalysis();
+		ManagerHGPaper.doRealNetworkAnalysis();
 //		Manager.measureTauEffectOnRealNetwork();
 //		ManagerHGPaper.runThroughAllRealNets();
 //		ManagerHGPaper.runScalabilityTest();
-		ManagerHGPaper.runRandomizationTest();
+//		ManagerHGPaper.runRandomizationTest();
 		
 //		curve 1
 //		ManagerHGPaper.runSyntheticStatisticalSignificanceTests(333, 333, 333, 1);

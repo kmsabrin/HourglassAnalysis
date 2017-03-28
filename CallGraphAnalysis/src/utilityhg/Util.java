@@ -169,15 +169,15 @@ public class Util {
 //		extractJavaClassDependency();
 		//
 		
-//		int n = 3;
-//		PoissonDistribution poissonDistribution = new PoissonDistribution(7);
-//		ZipfDistribution zipfDistribution = new ZipfDistribution(n, 1.0);
-//		for (int i = 1; i <= n; ++i) {
+		int n = 3;
+		PoissonDistribution poissonDistribution = new PoissonDistribution(7);
+		ZipfDistribution zipfDistribution = new ZipfDistribution(n, 1.0);
+		for (int i = 1; i <= n; ++i) {
 //			 System.out.println(i + "\t" + zipfDistribution.probability(n - i + 1));
 //			 System.out.println(zipfDistribution.sample());
-//			 System.out.println(i + "\t" + zipfDistribution.probability(i));
+			 System.out.println(i + "\t" + zipfDistribution.probability(i));
 //			 System.out.println(i + "\t" + poissonDistribution.probability(i));
-//		}
+		}
 		
 		//
 		// System.out.println("----------");

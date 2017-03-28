@@ -18,15 +18,15 @@ public class ZipfDistributionWrapper {
 	public boolean alphaNegative;
 	public double alpha;
 	
-	public ZipfDistributionWrapper(int nElements, double alpha) {
+	public ZipfDistributionWrapper(int nElements, double a) {
 		random = new Random(System.nanoTime());
 		
-		if (alpha < 0) {
+		if (a < 0) {
 			alphaNegative = true;
 		} else {
 			alphaNegative = false;
 		}
-		this.alpha = Math.abs(alpha);
+		this.alpha = Math.abs(a);
 		
 		zipfDistribution = new ZipfDistribution(nElements, alpha);
 		initiateRandomWeightedCollection(nElements, zipfDistribution);
@@ -51,6 +51,14 @@ public class ZipfDistributionWrapper {
         int elementIndex = randomWeightedCollection.ceilingEntry(value).getValue();
 //        System.out.println(value + "\t" + elementIndex);
         return startNodeIndex + elementIndex - 1;
+	}
+	
+	public double getProbabilityFromZipfDistribution(int nElements, int nodeIndex) {
+		if (alphaNegative == true) {
+			nodeIndex = nElements - nodeIndex + 1;
+		}
+		
+		return zipfDistribution.probability(nodeIndex);
 	}
 	
 	private void initiateRandomWeightedCollection(int nElements, ZipfDistribution zipfDistribution) {
