@@ -14,14 +14,15 @@ public class UpstreamRandomize {
 		Random random = new Random(System.nanoTime());
 		ModelRealConnector modelRealConnector = new ModelRealConnector(dependencyDAG);
 		alphaEstimates = new ArrayList();
+		HashMap<Integer, HashMap<Integer, Integer>> levelInputDistanceFrequencyMap = new HashMap();
 		
 		HashMap<Integer, Integer> biasCount = new HashMap();
 		int total = 0;
-		
 		for (String s: dependencyDAG.nodes) {
 			if (dependencyDAG.isSource(s)) continue;
+//			if (dependencyDAG.isTarget(s)) continue;
 			
-			
+			int currentNodeLevel = modelRealConnector.nodeLevelMap.get(s);
 			HashSet<String> ancestors = new HashSet(dependencyDAG.ancestors.get(s));
 			HashSet<String> substrates = new HashSet(dependencyDAG.depends.get(s));
 			HashSet<String> newSubstrates = new HashSet();
@@ -30,6 +31,7 @@ public class UpstreamRandomize {
 				// only considering layer 2 and above (layering start at source with 0)
 				// if a node has only 1 substrate skip it
 //				System.out.println("Processing: " + s);
+//				System.out.println("For " + s );
 				alphaEstimates.add(getMLAlpha(s, modelRealConnector, dependencyDAG));
 			}
 			
@@ -39,28 +41,44 @@ public class UpstreamRandomize {
 			
 			dependencyDAG.depends.get(s).clear();
 			
-			System.out.print("For " + s );
+//			System.out.println("For " + s );
 			for (String r: substrates) {
 				int substrateLevel = modelRealConnector.nodeLevelMap.get(r);
-				int distance = (modelRealConnector.nodeLevelMap.get(s) - substrateLevel);
-				System.out.print("  " + r + "," + distance);
+				int distance = currentNodeLevel - substrateLevel;
+//				System.out.print("  " + r + "," + distance);
+				
 				if (biasCount.containsKey(distance)) {
 					biasCount.put(distance, biasCount.get(distance) + 1);
 				}
 				else {
 					biasCount.put(distance, 1);
 				}
+				
+				if (!levelInputDistanceFrequencyMap.containsKey(currentNodeLevel)) {
+					levelInputDistanceFrequencyMap.put(currentNodeLevel, new HashMap<Integer, Integer>());
+				}	
+				
+				HashMap<Integer, Integer> frequencyMap = levelInputDistanceFrequencyMap.get(currentNodeLevel);
+				if (frequencyMap.containsKey(distance)) {
+					frequencyMap.put(distance, frequencyMap.get(distance) + 1);
+				}
+				else {
+					frequencyMap.put(distance, 1);
+				}
+				
 				++total;
 				
+				
+				/* randomization start */
 				ArrayList<String> sameLevelAncestors = new ArrayList();
-				boolean allAncestor = true;
+				boolean allAncestor = false; // all or subtree only ancestors
 				for (String w: modelRealConnector.levelNodeMap.get(substrateLevel)) {
 					if (ancestors.contains(w) || allAncestor) {
 						sameLevelAncestors.add(w);
 					}
 				}
 				if (sameLevelAncestors.size() > 1) {
-					sameLevelAncestors.remove(r);
+//					sameLevelAncestors.remove(r); // creates deadlock
 				}
 				
 //				System.out.println("For sub " + r + " candidate " + sameLevelAncestors);
@@ -74,8 +92,9 @@ public class UpstreamRandomize {
 				newSubstrates.add(newSub);
 				dependencyDAG.depends.get(s).add(newSub);
 				dependencyDAG.serves.get(newSub).add(s);
+				/* end randomization */
 			}
-			System.out.println();
+//			System.out.println();
 		}	
 		
 		for (String s: dependencyDAG.nodes) {
@@ -91,7 +110,24 @@ public class UpstreamRandomize {
 		}
 		
 		for (int i: biasCount.keySet()) {
-			System.out.println(i + "\t" + (biasCount.get(i) * 1.0 / total));
+//			System.out.println(i + "\t" + (biasCount.get(i) * 1.0 / total));
+		}
+		
+		for (int i: levelInputDistanceFrequencyMap.keySet()) {
+			System.out.println(i);
+			HashMap<Integer, Integer> frequencyMap = levelInputDistanceFrequencyMap.get(i);
+			double sum = 0;
+			for (int j: frequencyMap.keySet()) {
+				sum += frequencyMap.get(j);
+			}
+			
+			for (int j: frequencyMap.keySet()) {
+				System.out.println(j + "\t" + (frequencyMap.get(j) / sum));
+//				System.out.print((frequencyMap.get(j) / sum) + "\t");
+			}
+			
+			System.out.println("## ## ##");
+//			System.out.println();
 		}
 		
 		regenerateDAGProperties(dependencyDAG);
@@ -111,17 +147,17 @@ public class UpstreamRandomize {
 			ZipfDistributionWrapper zipfDistributionWrapper = new ZipfDistributionWrapper(maxLevel, alpha);
 //			System.out.println(zipfDistributionWrapper.alphaNegative);
 			double logLikelihood = 0;
-			boolean skipOneSubstrateFlag = true;
+			boolean skipOneNextLayerSubstrateFlag = true;
 			boolean firstTerm = true;
 			for (String r: substrates) {
 				int substrateLevel = modelRealConnector.nodeLevelMap.get(r);
-				substrateLevel = maxLevel - substrateLevel;
-				if (substrateLevel == 1 && skipOneSubstrateFlag) {
-					skipOneSubstrateFlag = false;
+				int substrateRank = maxLevel - substrateLevel;
+				if (substrateRank == 1 && skipOneNextLayerSubstrateFlag) {
+					skipOneNextLayerSubstrateFlag = false;
 					continue;
 				}
 				
-				double substrateProbabilty = zipfDistributionWrapper.getProbabilityFromZipfDistribution(maxLevel, substrateLevel);
+				double substrateProbabilty = zipfDistributionWrapper.getProbabilityFromZipfDistribution(maxLevel, substrateRank);
 				if (firstTerm) {
 					logLikelihood = Math.log(substrateProbabilty);
 					firstTerm = false;
@@ -139,6 +175,8 @@ public class UpstreamRandomize {
 //				System.out.println("Max LL " + maxLogLikelihood + "\t" + alpha);
 			}
 		}
+		
+//		System.out.println(alphaEstimate + "\t" + dependencyDAG.nodePathThrough.get(node));
 		
 		return alphaEstimate;
 	}

@@ -16,6 +16,7 @@ public class ModelRealConnector {
 	public HashMap<String, Integer> nodeIdMap;
 	public int targetLevel;
 	private Random random;
+	public boolean giveMaxTargetLevel = false;
 	
 	public ModelRealConnector(DependencyDAG dependencyDAG) {
 		random = new Random(System.nanoTime());
@@ -43,7 +44,11 @@ public class ModelRealConnector {
 			targetLevel = maxLevel;
 		}
 		
-		if (dependencyDAG.isTarget(s)) return;
+		if (giveMaxTargetLevel) {
+			if (dependencyDAG.isTarget(s)) {
+				return;
+			}
+		}
 		
 		++maxLevel;
 		nodeLevelMap.put(s, maxLevel);
@@ -65,22 +70,24 @@ public class ModelRealConnector {
 			}
 		}
 		
-		++targetLevel;
-		levelNodeMap.put(targetLevel, new ArrayList());
-		for (String s: dependencyDAG.nodes) {
-			if (dependencyDAG.isTarget(s)) {
-				nodeLevelMap.put(s, targetLevel);
-				levelNodeMap.get(targetLevel).add(s);
+		if (giveMaxTargetLevel) {
+			++targetLevel;
+			levelNodeMap.put(targetLevel, new ArrayList());
+			for (String s : dependencyDAG.nodes) {
+				if (dependencyDAG.isTarget(s)) {
+					nodeLevelMap.put(s, targetLevel);
+					levelNodeMap.get(targetLevel).add(s);
+				}
 			}
 		}
 		
-		for (int i: levelNodeMap.keySet()) {
-			System.out.print(i);
-			for (String r: levelNodeMap.get(i)) {
-				System.out.print("\t" + r);
-			}
-			System.out.println();
-		}
+//		for (int i: levelNodeMap.keySet()) {
+//			System.out.print(i);
+//			for (String r: levelNodeMap.get(i)) {
+//				System.out.print("\t" + r);
+//			}
+//			System.out.println();
+//		}
 	}
 	
 	private int getLevel(int itemIndex, int level) {
