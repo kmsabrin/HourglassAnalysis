@@ -4,17 +4,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
+import java.util.TreeMap;
 
 import utilityhg.ZipfDistributionWrapper;
 
 public class UpstreamRandomize {
 	public static ArrayList<Double> alphaEstimates;
 
-	public static void hieararchyDistanceRandomizeDAG(DependencyDAG dependencyDAG) {
+	public static void hieararchyPreservingRandomizeDAG(DependencyDAG dependencyDAG) {
 		Random random = new Random(System.nanoTime());
 		ModelRealConnector modelRealConnector = new ModelRealConnector(dependencyDAG);
 		alphaEstimates = new ArrayList();
-		HashMap<Integer, HashMap<Integer, Integer>> levelInputDistanceFrequencyMap = new HashMap();
+		TreeMap<Integer, TreeMap<Integer, Integer>> levelInputDistanceFrequencyMap = new TreeMap();
 		
 		HashMap<Integer, Integer> biasCount = new HashMap();
 		int total = 0;
@@ -55,10 +56,9 @@ public class UpstreamRandomize {
 				}
 				
 				if (!levelInputDistanceFrequencyMap.containsKey(currentNodeLevel)) {
-					levelInputDistanceFrequencyMap.put(currentNodeLevel, new HashMap<Integer, Integer>());
+					levelInputDistanceFrequencyMap.put(currentNodeLevel, new TreeMap<Integer, Integer>());
 				}	
-				
-				HashMap<Integer, Integer> frequencyMap = levelInputDistanceFrequencyMap.get(currentNodeLevel);
+				TreeMap<Integer, Integer> frequencyMap = levelInputDistanceFrequencyMap.get(currentNodeLevel);
 				if (frequencyMap.containsKey(distance)) {
 					frequencyMap.put(distance, frequencyMap.get(distance) + 1);
 				}
@@ -114,20 +114,20 @@ public class UpstreamRandomize {
 		}
 		
 		for (int i: levelInputDistanceFrequencyMap.keySet()) {
-			System.out.println(i);
-			HashMap<Integer, Integer> frequencyMap = levelInputDistanceFrequencyMap.get(i);
+//			System.out.println(i);
+			TreeMap<Integer, Integer> frequencyMap = levelInputDistanceFrequencyMap.get(i);
 			double sum = 0;
 			for (int j: frequencyMap.keySet()) {
 				sum += frequencyMap.get(j);
 			}
 			
 			for (int j: frequencyMap.keySet()) {
-				System.out.println(j + "\t" + (frequencyMap.get(j) / sum));
-//				System.out.print((frequencyMap.get(j) / sum) + "\t");
+//				System.out.println(j + "\t" + (frequencyMap.get(j) / sum));
+				System.out.print((frequencyMap.get(j) / sum) + "\t");
 			}
 			
-			System.out.println("## ## ##");
-//			System.out.println();
+//			System.out.println("## ## ##");
+			System.out.println();
 		}
 		
 		regenerateDAGProperties(dependencyDAG);
@@ -182,12 +182,14 @@ public class UpstreamRandomize {
 	}
 	
 	public static void randomizeDAG(DependencyDAG dependencyDAG) {
-		
 		Random random = new Random(System.nanoTime());
+		TreeMap<Integer, TreeMap<Integer, Integer>> randomizedLevelInputDistanceFrequencyMap = new TreeMap();
+		ModelRealConnector modelRealConnector = new ModelRealConnector(dependencyDAG);
 		
 		for (String s: dependencyDAG.nodes) {
 			if (dependencyDAG.isSource(s)) continue;
-//			System.out.println("Processing: " + s);
+			int currentNodeLevel = modelRealConnector.nodeLevelMap.get(s); 
+			System.out.println("Processing: " + s + " at level " + currentNodeLevel);
 			
 			int sampleSize = dependencyDAG.ancestors.get(s).size();
 			ArrayList<String> ancestor = new ArrayList(dependencyDAG.ancestors.get(s));
@@ -207,10 +209,22 @@ public class UpstreamRandomize {
 				while (newSubstrateID.contains(shuffleID));
 				
 				newSubstrateID.add(shuffleID);
-				String shuffledAncestor = ancestor.get(shuffleID);
-				dependencyDAG.depends.get(s).add(shuffledAncestor);
-				dependencyDAG.serves.get(shuffledAncestor).add(s);
-//				System.out.println("Adding: " + shuffledAncestor);
+				String newSubstrate = ancestor.get(shuffleID);
+				dependencyDAG.depends.get(s).add(newSubstrate);
+				dependencyDAG.serves.get(newSubstrate).add(s);
+				System.out.println("Adding: " + newSubstrate);
+				
+				int distance = currentNodeLevel - modelRealConnector.nodeLevelMap.get(newSubstrate);
+				if (!randomizedLevelInputDistanceFrequencyMap.containsKey(currentNodeLevel)) {
+					randomizedLevelInputDistanceFrequencyMap.put(currentNodeLevel, new TreeMap<Integer, Integer>());
+				}
+				TreeMap<Integer, Integer> frequencyMap = randomizedLevelInputDistanceFrequencyMap.get(currentNodeLevel);
+				if (frequencyMap.containsKey(distance)) {
+					frequencyMap.put(distance, frequencyMap.get(distance) + 1);
+				}
+				else {
+					frequencyMap.put(distance, 1);
+				}
 			}
 		}	
 		
@@ -220,6 +234,23 @@ public class UpstreamRandomize {
 					dependencyDAG.serves.remove(s); // allow new targets
 				}
 			}
+		}
+		
+		for (int i: randomizedLevelInputDistanceFrequencyMap.keySet()) {
+//			System.out.println(i);
+			TreeMap<Integer, Integer> frequencyMap = randomizedLevelInputDistanceFrequencyMap.get(i);
+			double sum = 0;
+			for (int j: frequencyMap.keySet()) {
+				sum += frequencyMap.get(j);
+			}
+			
+			for (int j: frequencyMap.keySet()) {
+//				System.out.println(j + "\t" + (frequencyMap.get(j) / sum));
+				System.out.print((frequencyMap.get(j) / sum) + "\t");
+			}
+			
+//			System.out.println("## ## ##");
+			System.out.println();
 		}
 		
 		regenerateDAGProperties(dependencyDAG);

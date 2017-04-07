@@ -273,8 +273,8 @@ public class ManagerHGPaper {
 //		DistributionAnalysis.findNDirectSrcTgtBypasses(dependencyDAG, netID);
 		
 //		Randomizations
-//		UpstreamRandomize.randomizeDAG(dependencyDAG);
-		UpstreamRandomize.hieararchyDistanceRandomizeDAG(dependencyDAG);
+		UpstreamRandomize.randomizeDAG(dependencyDAG);
+//		UpstreamRandomize.hieararchyPreservingRandomizeDAG(dependencyDAG);
 		
 //		Core Detection
 //		CoreDetection.fullTraverse = false;
