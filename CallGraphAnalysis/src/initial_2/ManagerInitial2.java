@@ -285,7 +285,7 @@ public class ManagerInitial2 {
 		
 //		MaxFlowReduction.reduceToMaxFlowMinCutNetwork(dependencyDAG, netID);
 		
-		UpstreamRandomize.randomizeDAG(toyDependencyDAG);
+		UpstreamRandomize.randomizeDAG(toyDependencyDAG, "x");
 //		printNetworkStat(toyDependencyDAG);
 		toyDependencyDAG.printNetworkProperties();
 		WaistDetection.randomizedWaistDetection(toyDependencyDAG, netID);

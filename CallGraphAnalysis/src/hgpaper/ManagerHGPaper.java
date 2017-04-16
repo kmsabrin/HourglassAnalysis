@@ -273,8 +273,11 @@ public class ManagerHGPaper {
 //		DistributionAnalysis.findNDirectSrcTgtBypasses(dependencyDAG, netID);
 		
 //		Randomizations
-		UpstreamRandomize.randomizeDAG(dependencyDAG);
-//		UpstreamRandomize.hieararchyPreservingRandomizeDAG(dependencyDAG);
+		if (netID.equals("court")) {
+			netID = CourtCaseCornellParser.caseTopic;
+		}
+//		UpstreamRandomize.randomizeDAG(dependencyDAG, netID);
+		UpstreamRandomize.hieararchyPreservingRandomizeDAG(dependencyDAG);
 		
 //		Core Detection
 //		CoreDetection.fullTraverse = false;
@@ -459,7 +462,7 @@ public class ManagerHGPaper {
 				
 				DependencyDAG dependencyDAG = new DependencyDAG("synthetic_callgraphs//" + networkID + ".txt");
 				// Randomizations
-				UpstreamRandomize.randomizeDAG(dependencyDAG);
+				UpstreamRandomize.randomizeDAG(dependencyDAG, "x");
 
 //				Core Detection
 				CoreDetection.fullTraverse = false;
@@ -700,19 +703,21 @@ public class ManagerHGPaper {
 	}
 	
 	private static void runRandomizationTest() throws Exception {
-		int nRun = 100;
+		int nRun = 1;
+		UpstreamRandomize.globalKounter = 0;
 		for (int i = 0; i < nRun; ++i) {
 			doRealNetworkAnalysis();
+			++UpstreamRandomize.globalKounter;
 //			runScalabilityTest();
 		}
 	}
 	
 	public static void main(String[] args) throws Exception {		
-		ManagerHGPaper.doRealNetworkAnalysis();
+//		ManagerHGPaper.doRealNetworkAnalysis();
 //		Manager.measureTauEffectOnRealNetwork();
 //		ManagerHGPaper.runThroughAllRealNets();
 //		ManagerHGPaper.runScalabilityTest();
-//		ManagerHGPaper.runRandomizationTest();
+		ManagerHGPaper.runRandomizationTest();
 		
 //		curve 1
 //		ManagerHGPaper.runSyntheticStatisticalSignificanceTests(333, 333, 333, 1);
