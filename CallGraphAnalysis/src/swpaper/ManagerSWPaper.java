@@ -2,6 +2,7 @@ package swpaper;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -10,13 +11,13 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.commons.math3.distribution.TDistribution;
 import org.apache.commons.math3.stat.StatUtils;
+import org.apache.commons.math3.stat.correlation.KendallsCorrelation;
+import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 
-import utilityhg.DistributionAnalysis;
-import utilityhg.Visualization;
 import corehg.CoreDetection;
 import corehg.DependencyDAG;
-import corehg.FlatNetwork;
 
 public class ManagerSWPaper {	
 	static String callgraphName = "sqlite";
@@ -280,9 +281,9 @@ public class ManagerSWPaper {
 //					}
 //				}
 //				
-////				System.out.println(patchedFunctions.size() + "\t" + nonCorePatched + "\t" + nonCore + "\t" + corePatched);
-////				System.out.println((nonCorePatched / nonCore) + "\t" + (corePatched / CoreDetection.sampleCore.size()));
-////				System.out.println((linePatchedNoncore / nonCore) + "\t" + (linePatchedCore / CoreDetection.sampleCore.size()));
+//				System.out.println(patchedFunctions.size() + "\t" + nonCorePatched + "\t" + nonCore + "\t" + corePatched);
+//				System.out.println((nonCorePatched / nonCore) + "\t" + (corePatched / CoreDetection.sampleCore.size()));
+//				System.out.println((linePatchedNoncore / nonCore) + "\t" + (linePatchedCore / CoreDetection.sampleCore.size()));
 //			}
 			
 //			CoreDetection.pathCoverageTau = 0.9999;
@@ -341,14 +342,86 @@ public class ManagerSWPaper {
 //		}
 	}
 	
-//	private static void analyzePatch() {
-//		for (int i = 2; i <= 39; ++i) {
-//			DependencyDAG.resetFlags();
-//			DependencyDAG.isCallgraph = true;
-//			DependencyDAG dependencyDAG = new DependencyDAG("openssh_callgraphs" + "//" + "full.graph-openssh-" + i);
-//			for (String s: dependencyDAG.nodes) {
-//			}
-//	}
+	private static void addValueMap(HashMap<String, Double> map, String key, double value) {
+		if (map.containsKey(key)) {
+			double current = map.get(key);
+			map.put(key, current + value);
+		}
+		else {
+			map.put(key, value);
+		}
+	}
+	
+	private static void avgValueMap(HashMap<String, Double> map, String key, double value) {
+		if (map.containsKey(key)) {
+			double current = map.get(key);
+			map.put(key, (current + value) / 2.0);
+		}
+		else {
+			map.put(key, value);
+		}
+	}
+	
+	private static double getCorrelation(HashMap<String, Double> amap, HashMap<String, Double> bmap) {
+		int sz = Math.min(amap.size(), bmap.size());
+		double a[] = new double[sz];
+		double b[] = new double[sz];
+		
+		int idx = 0;
+		for (String s: amap.keySet()) {
+			if (bmap.containsKey(s)) {
+				a[idx] = amap.get(s);
+				b[idx] = bmap.get(s);
+				++idx;
+			}
+		}
+		
+		if (idx < sz) {
+			a = Arrays.copyOfRange(a, 0, idx);
+			b = Arrays.copyOfRange(b, 0, idx);
+		}
+		
+		double kendalT = new KendallsCorrelation().correlation(a, b);
+		double spmanC = new SpearmansCorrelation().correlation(a, b);
+		
+		double t = spmanC * Math.sqrt((a.length - 2) / (1 - spmanC * spmanC));
+		double p = 1 - new TDistribution(a.length - 1).cumulativeProbability(t);
+//		if (numTail == 1)
+//			 return pval < p;
+//		else
+//			 return pval < 2 * p;
+		
+		System.out.println(spmanC + "\t" + p + "\t" + kendalT);
+		return spmanC;
+	}
+	
+	private static void analyzePatch() throws Exception {
+		HashMap<String, Double> freqPF = new HashMap();
+		HashMap<String, Double> avgSizePf = new HashMap();
+		HashMap<String, Double> avgCentralityPF = new HashMap();
+		HashMap<String, Double> avgLocationPF = new HashMap();
+		for (int i = 2; i <= 39; ++i) {
+			DependencyDAG.resetFlags();
+			DependencyDAG.isCallgraph = true;
+			DependencyDAG dependencyDAG = new DependencyDAG("openssh_callgraphs" + "//" + "full.graph-openssh-" + i);
+		
+			HashMap<String, Integer> patchedFunctions = null;
+			patchedFunctions = PatchAnalysis.getPatchedFunctions("openssh_patches//patch-" + i + ".txt", dependencyDAG.nodes);
+		
+			for (String s: dependencyDAG.nodes) {
+				if (patchedFunctions.containsKey(s)) {
+					addValueMap(freqPF, s, 1);
+					avgValueMap(avgSizePf, s, patchedFunctions.get(s));
+				}
+				
+				avgValueMap(avgCentralityPF, s, dependencyDAG.normalizedPathCentrality.get(s));
+				avgValueMap(avgLocationPF, s, dependencyDAG.numPathLocation.get(s));
+			}
+		}
+		
+		getCorrelation(freqPF, avgCentralityPF);
+		getCorrelation(freqPF, avgLocationPF);
+	}
 	
 	private static void getWeightedJaccard(HashMap<String, Double> previous, HashMap<String, Double> current, int stage) {
 		double denominator = 0;
@@ -390,14 +463,14 @@ public class ManagerSWPaper {
 			double meanNonCoreNumLineK = 0;
 			for (String s : dependencyDAG.nodes) {
 				if (CoreDetection.sampleCore.contains(s)) {
-					if (LineOfCodeGenerator.functionNumLines.containsKey(s)) {
-						meanCoreNumLine += LineOfCodeGenerator.functionNumLines
+					if (LineOfCodeCount.functionNumLines.containsKey(s)) {
+						meanCoreNumLine += LineOfCodeCount.functionNumLines
 								.get(s);
 						++meanCoreNumLineK;
 					}
 				} else {
-					if (LineOfCodeGenerator.functionNumLines.containsKey(s)) {
-						meanNonCoreNumLine += LineOfCodeGenerator.functionNumLines
+					if (LineOfCodeCount.functionNumLines.containsKey(s)) {
+						meanNonCoreNumLine += LineOfCodeCount.functionNumLines
 								.get(s);
 						++meanNonCoreNumLineK;
 					}
@@ -511,11 +584,11 @@ public class ManagerSWPaper {
 //		ManagerSWPaper.doRealNetworkAnalysis("openssh_callgraphs", "full.graph-openssh-39");
 		
 //		ManagerSWPaper.analyzeNetworks();
-//		ManagerSWPaper.analyzePatch();
+		ManagerSWPaper.analyzePatch();
 //		ManagerSWPaper.analyzeNetworks2();
 //		ManagerSWPaper.analyzeNetworks3();
 		
-		ManagerSWPaper.analyzeNetworks4();
+//		ManagerSWPaper.analyzeNetworks4();
 //		System.out.println("Done!");
 	}
 }

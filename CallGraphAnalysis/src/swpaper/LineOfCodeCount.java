@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.Set;
 
-public class LineOfCodeGenerator {
+public class LineOfCodeCount {
 	static List<String> sourceFilePath = new ArrayList<String>();
 	static HashMap<String, Integer> functionNumLines = new HashMap();
 	
@@ -45,7 +45,7 @@ public class LineOfCodeGenerator {
     		if (line.endsWith(";")) continue;
     		if (line.contains("=")) continue;
     		String r = containsFunctionName(line, functionNames);
-    		if (r !=null) {
+    		if (r != null) {
     			found.add(r);
     			if (lastFoundLine > 0) {
     				functionNumLines.put(lastFoundFunc, currentLine - lastFoundLine - 1);
