@@ -205,6 +205,7 @@ public class CoreDetection {
 			
 //			analysis
 //			update average waist entry rank and path contribution
+//			for full traversal the average will make sensem, for single traverse it's the single rank			
 			if (averageCoreRank.containsKey(representative)) {
 				double currentRank = averageCoreRank.get(representative);
 				averageCoreRank.put(representative, (currentRank + nodeRank) * 0.5 );

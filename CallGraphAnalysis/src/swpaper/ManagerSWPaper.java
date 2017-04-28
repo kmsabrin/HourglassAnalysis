@@ -395,32 +395,127 @@ public class ManagerSWPaper {
 		return spmanC;
 	}
 	
+	private static void ignoreWrapperBlankNodes(DependencyDAG dependencyDAG, int version) throws Exception{
+		CoreDetection.topRemovedWaistNodes.clear();
+		LineOfCodeCount.parseFile("openssh_callgraphs" + "//" + "openssh-" + version + ".c", dependencyDAG.nodes);
+		for (String s: dependencyDAG.nodes) {
+			if (LineOfCodeCount.functionNumLines.containsKey(s) && LineOfCodeCount.functionNumLines.get(s) < 40) {
+//				System.out.println("removing " + s);
+				CoreDetection.topRemovedWaistNodes.add(s);
+			}
+		}
+	}
+	
+	private static int getBucket(double feature) {
+		double binBoundary[] = new double[]{0.0001, 0.001, 0.005, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1, 0.15, 0.20, 1.0};
+		
+		int idx = 0;
+		for (double d: binBoundary) {
+			if (feature <= d) {
+				return idx;
+			}
+			++idx;
+		}
+		
+		return -1;
+	}
+	
 	private static void analyzePatch() throws Exception {
 		HashMap<String, Double> freqPF = new HashMap();
 		HashMap<String, Double> avgSizePf = new HashMap();
 		HashMap<String, Double> avgCentralityPF = new HashMap();
 		HashMap<String, Double> avgLocationPF = new HashMap();
-		for (int i = 2; i <= 39; ++i) {
+		HashMap<String, Double> appearanceCount = new HashMap();
+		
+		int numBucket = 16;
+		int pcBucketFreq[] = new int[numBucket];
+		int locBucket[] = new int[numBucket];
+		int pcBucketPatchCount[] = new int[numBucket];
+		int locBucketPatchCount[] = new int[numBucket];
+		int maxRank = 200;
+		int rankPatchFreq[] = new int[maxRank + 1];
+				
+		for (int i = 1; i <= 39; ++i) {
 			DependencyDAG.resetFlags();
 			DependencyDAG.isCallgraph = true;
 			DependencyDAG dependencyDAG = new DependencyDAG("openssh_callgraphs" + "//" + "full.graph-openssh-" + i);
+			
+			for (String s: dependencyDAG.nodes) {
+				addValueMap(appearanceCount, s, 1);
+			}
+		}
 		
+		for (int i = 2; i <= 39; ++i) {
+			DependencyDAG.resetFlags();
+			DependencyDAG.isCallgraph = true;
+			DependencyDAG dependencyDAG = new DependencyDAG("openssh_callgraphs" + "//" + "full.graph-openssh-" + (i - 1));
+		
+
 			HashMap<String, Integer> patchedFunctions = null;
 			patchedFunctions = PatchAnalysis.getPatchedFunctions("openssh_patches//patch-" + i + ".txt", dependencyDAG.nodes);
 		
 			for (String s: dependencyDAG.nodes) {
+//				if (appearanceCount.get(s) < 10) continue; // filter out in-frequent functions
+				
 				if (patchedFunctions.containsKey(s)) {
 					addValueMap(freqPF, s, 1);
 					avgValueMap(avgSizePf, s, patchedFunctions.get(s));
 				}
+//				
+//				avgValueMap(avgCentralityPF, s, dependencyDAG.normalizedPathCentrality.get(s));
+//				avgValueMap(avgLocationPF, s, dependencyDAG.numPathLocation.get(s));
 				
-				avgValueMap(avgCentralityPF, s, dependencyDAG.normalizedPathCentrality.get(s));
-				avgValueMap(avgLocationPF, s, dependencyDAG.numPathLocation.get(s));
+				double featurePC = dependencyDAG.normalizedPathCentrality.get(s);
+				double featureLoc = dependencyDAG.numPathLocation.get(s);
+				if (featureLoc > 0.99) featureLoc = 0.99; // for location
+				double feature = featurePC;
+				
+//				int bucketIndex = ((int)(feature * 10)) % 10;
+				int bucketIndex = getBucket(feature);
+				
+//				if (bucketIndex > 5) System.out.println(s + "\t" + feature + "\t" + (i - 1));
+				
+				pcBucketFreq[bucketIndex]++;
+				if (patchedFunctions.containsKey(s)) {
+					pcBucketPatchCount[bucketIndex]++;
+//					System.out.println(featurePC);
+				}
 			}
+			
+//			System.out.println((i - 1) + "\t" + (patchedFunctions.size() * 1.0 / dependencyDAG.nodes.size()));
+			
+
+//			ignoreWrapperBlankNodes(dependencyDAG, i - 1);
+//			CoreDetection.fullTraverse = false;
+//			CoreDetection.pathCoverageTau = 1.0;
+//			CoreDetection.getCore(dependencyDAG, "full.graph-openssh-" + (i - 1));
+//			System.out.println("Core Size: " + CoreDetection.minCoreSize);
+//			for (String s: CoreDetection.averageCoreRank.keySet()) {
+////				if (appearanceCount.get(s) < 10) continue; // filter out in-frequent functions
+//				
+//				int rank = CoreDetection.averageCoreRank.get(s).intValue();
+//				if (rank > maxRank) continue;
+//				
+////				if (rank == 1) System.out.println(s + "\t" + i);
+////				if (rank == 2) System.out.println(s + "\t" + i);
+//				
+//				if (patchedFunctions.containsKey(s)) {
+//					rankPatchFreq[rank]++;
+//				}
+//			}
 		}
 		
-		getCorrelation(freqPF, avgCentralityPF);
-		getCorrelation(freqPF, avgLocationPF);
+		for (int i = 0; i < numBucket; ++i) {
+			System.out.println((i + 1) + "\t" + (pcBucketPatchCount[i] * 1.0 / pcBucketFreq[i]) + "\t" + pcBucketFreq[i]);
+//			System.out.println((i + 1) + "\t" + pcBucketFreq[i]);
+		}
+		
+		for (int i = 1; i <= maxRank; ++i) {
+//			System.out.println(i + "\t" + (rankPatchFreq[i] / 39.0));
+		}
+		
+//		getCorrelation(freqPF, avgCentralityPF);
+//		getCorrelation(freqPF, avgLocationPF);
 	}
 	
 	private static void getWeightedJaccard(HashMap<String, Double> previous, HashMap<String, Double> current, int stage) {

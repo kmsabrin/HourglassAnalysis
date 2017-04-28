@@ -12,6 +12,7 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeSet;
 
+import swpaper.LineOfCodeCount;
 import utilityhg.CourtCaseCornellParser;
 import utilityhg.Edge;
 
@@ -367,6 +368,7 @@ public class DependencyDAG {
 				if (dependent.equals("do_log") || server.equals("do_log")
 					|| dependent.equals("main") || server.equals("main")	
 					|| dependent.equals("do_exec") || server.equals("do_exec")
+//					|| dependent.equals("packet_send") || server.equals("packed_send")
 						) { 
 					// no more location metric noise! 
 					// compiler generated
@@ -962,7 +964,7 @@ public class DependencyDAG {
 		avgSourceDepth.clear();
 	}
 	
-//	public void loadCyclicPathStatistics() {
+	public void loadCyclicPathStatistics() {
 //		HashMap<String, Double> edgeCentralityMap = new HashMap(); // for edge centrality
 //		nTotalPath = 0;
 //		nodePathThrough.clear();
@@ -1096,7 +1098,7 @@ public class DependencyDAG {
 ////			}
 ////		}
 ////		System.out.println("--------");
-//	}
+	}
 	
 	public void loadRegularPathStatistics() {
 		numOfTargetPath.clear();
@@ -1112,7 +1114,6 @@ public class DependencyDAG {
 			targetPathsTraverse(s);
 		}		
 	}
-
 
 	public void loadPathStatistics() {	
 		if (isWeighted) {
@@ -1430,4 +1431,5 @@ public class DependencyDAG {
 		System.out.println(" N: " + nodes.size());
 		System.out.println(" Toal Path: " + nTotalPath);		
 	}
+	
 }
