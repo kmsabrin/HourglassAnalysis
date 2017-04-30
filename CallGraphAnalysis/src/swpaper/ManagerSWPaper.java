@@ -3,6 +3,7 @@ package swpaper;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -15,6 +16,7 @@ import org.apache.commons.math3.distribution.TDistribution;
 import org.apache.commons.math3.stat.StatUtils;
 import org.apache.commons.math3.stat.correlation.KendallsCorrelation;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
+import org.omg.CORBA.VersionSpecHelper;
 
 import corehg.CoreDetection;
 import corehg.DependencyDAG;
@@ -342,7 +344,7 @@ public class ManagerSWPaper {
 //		}
 	}
 	
-	private static void addValueMap(HashMap<String, Double> map, String key, double value) {
+	private static void sumValueMap(HashMap<String, Double> map, String key, double value) {
 		if (map.containsKey(key)) {
 			double current = map.get(key);
 			map.put(key, current + value);
@@ -407,7 +409,9 @@ public class ManagerSWPaper {
 	}
 	
 	private static int getBucket(double feature) {
-		double binBoundary[] = new double[]{0.0001, 0.001, 0.005, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1, 0.15, 0.20, 1.0};
+		double binBoundary[] = new double[]{0.00001, 0.0001, 0.001, 0.005, 
+				                            0.01, 0.02, 0.08, 
+				                            0.20, 1.0};
 		
 		int idx = 0;
 		for (double d: binBoundary) {
@@ -420,14 +424,55 @@ public class ManagerSWPaper {
 		return -1;
 	}
 	
-	private static void analyzePatch() throws Exception {
-		HashMap<String, Double> freqPF = new HashMap();
-		HashMap<String, Double> avgSizePf = new HashMap();
-		HashMap<String, Double> avgCentralityPF = new HashMap();
-		HashMap<String, Double> avgLocationPF = new HashMap();
-		HashMap<String, Double> appearanceCount = new HashMap();
+	private static class CentralityVersionPatch implements Comparable<CentralityVersionPatch> {
+		private double centrality;
+		private String node;
+		private boolean patched;
+		private int version;
 		
-		int numBucket = 16;
+		CentralityVersionPatch(double centrality, String node, boolean patched, int version) {
+			this.centrality = centrality;
+			this.node = node;
+			this.patched = patched;
+			this.version = version;
+		}
+		
+		public int compareTo(CentralityVersionPatch instance2) {
+			if (this.centrality < instance2.centrality) return -1;
+			else if (this.centrality > instance2.centrality) return 1;
+			else return 0;
+		}
+	}
+	
+	private static void getBucket2(ArrayList<CentralityVersionPatch> list) {
+		int index = 0;
+		while (index < list.size()) {
+			int kount = 0;
+			int patchKount = 0;
+			double centralityBoundary = -1;
+			while (index < list.size() && kount < 1000) {
+				centralityBoundary = list.get(index).centrality;
+				if (list.get(index).patched) {
+					++patchKount;
+				}
+				++kount;
+				++index;
+			}
+			System.out.println(centralityBoundary + "\t" + (patchKount * 1.0 / kount));
+		}
+	}
+	
+	private static void analyzePatch() throws Exception {
+		HashMap<String, Double> functionPatchFreq = new HashMap();
+		HashMap<String, Double> avgFunctionPatchSize = new HashMap();
+		HashMap<String, Double> avgCentralityPatchedFunction = new HashMap();
+		HashMap<String, Double> avgLocationPatchedFunction = new HashMap();
+		HashMap<String, Double> functionAppearanceCount = new HashMap();
+		HashMap<String, Double> avgFunctionLOC = new HashMap();
+		HashMap<String, Double> normFunctionPatchFreq = new HashMap();
+		ArrayList<CentralityVersionPatch> patchCentralityVersionFunctionList = new ArrayList();
+		
+		int numBucket = 9;
 		int pcBucketFreq[] = new int[numBucket];
 		int locBucket[] = new int[numBucket];
 		int pcBucketPatchCount[] = new int[numBucket];
@@ -440,8 +485,13 @@ public class ManagerSWPaper {
 			DependencyDAG.isCallgraph = true;
 			DependencyDAG dependencyDAG = new DependencyDAG("openssh_callgraphs" + "//" + "full.graph-openssh-" + i);
 			
+			LineOfCodeCount.parseFile("openssh_callgraphs" + "//" + "openssh-" + i + ".c", dependencyDAG.nodes);
 			for (String s: dependencyDAG.nodes) {
-				addValueMap(appearanceCount, s, 1);
+				sumValueMap(functionAppearanceCount, s, 1);
+				
+				if (LineOfCodeCount.functionNumLines.containsKey(s)) {
+					avgValueMap(avgFunctionLOC, s, LineOfCodeCount.functionNumLines.get(s));
+				}
 			}
 		}
 		
@@ -457,9 +507,11 @@ public class ManagerSWPaper {
 			for (String s: dependencyDAG.nodes) {
 //				if (appearanceCount.get(s) < 10) continue; // filter out in-frequent functions
 				
+				boolean patched = false;
 				if (patchedFunctions.containsKey(s)) {
-					addValueMap(freqPF, s, 1);
-					avgValueMap(avgSizePf, s, patchedFunctions.get(s));
+					sumValueMap(functionPatchFreq, s, 1);
+					avgValueMap(avgFunctionPatchSize, s, patchedFunctions.get(s));
+					patched = true;
 				}
 //				
 //				avgValueMap(avgCentralityPF, s, dependencyDAG.normalizedPathCentrality.get(s));
@@ -479,6 +531,19 @@ public class ManagerSWPaper {
 				if (patchedFunctions.containsKey(s)) {
 					pcBucketPatchCount[bucketIndex]++;
 //					System.out.println(featurePC);
+				}
+				
+				patchCentralityVersionFunctionList.add(new CentralityVersionPatch(feature, s, patched, (i - 1)));
+			}
+			
+			Collections.sort(patchCentralityVersionFunctionList);
+			
+			for (String s: functionAppearanceCount.keySet()) {
+				if (functionPatchFreq.containsKey(s)) {
+					normFunctionPatchFreq.put(s, functionPatchFreq.get(s) / functionAppearanceCount.get(s));
+				}
+				else {
+					normFunctionPatchFreq.put(s, 0.0);
 				}
 			}
 			
@@ -506,7 +571,7 @@ public class ManagerSWPaper {
 		}
 		
 		for (int i = 0; i < numBucket; ++i) {
-			System.out.println((i + 1) + "\t" + (pcBucketPatchCount[i] * 1.0 / pcBucketFreq[i]) + "\t" + pcBucketFreq[i]);
+//			System.out.println((i + 1) + "\t" + (pcBucketPatchCount[i] * 1.0 / pcBucketFreq[i]) + "\t" + pcBucketFreq[i]);
 //			System.out.println((i + 1) + "\t" + pcBucketFreq[i]);
 		}
 		
@@ -516,6 +581,10 @@ public class ManagerSWPaper {
 		
 //		getCorrelation(freqPF, avgCentralityPF);
 //		getCorrelation(freqPF, avgLocationPF);
+//		getCorrelation(normFunctionPatchFreq, avgFunctionLOC);
+		
+//		System.out.println(patchCentralityVersionFunctionList.size());
+		getBucket2(patchCentralityVersionFunctionList);
 	}
 	
 	private static void getWeightedJaccard(HashMap<String, Double> previous, HashMap<String, Double> current, int stage) {
