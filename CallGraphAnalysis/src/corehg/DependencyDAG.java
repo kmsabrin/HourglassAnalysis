@@ -90,7 +90,7 @@ public class DependencyDAG {
 	
 	public static HashSet<String> largestWCCNodes;
 	
-	public HashMap<String, Integer> edgeWeights;
+	public HashMap<String, Double> edgeWeights;
 	
 //	public HashSet<String> goodEdgeToSource;
 //	public HashSet<String> goodEdgeToTarget;
@@ -419,10 +419,11 @@ public class DependencyDAG {
 				if (isWeighted) {
 					server = tokens[0];
 					dependent = tokens[1];
-					int weight = Integer.parseInt(tokens[2]);
-					if (weight > 1) {
+					double weight = Double.parseDouble(tokens[2]);
+//					if (weight > 1) {
 						edgeWeights.put(server + "#" + dependent, weight);
-					}
+//						System.out.println("putting " + server + "#" + dependent + " w:" + weight);
+//					}
 				} 
 				else {
 					server = tokens[0];
@@ -496,7 +497,7 @@ public class DependencyDAG {
 						edgeWeights.put(weightKey, edgeWeights.get(weightKey) + 1);
 					}
 					else {
-						edgeWeights.put(weightKey, 1);
+						edgeWeights.put(weightKey, 1.0);
 					}
 				}
 				continue;
@@ -688,6 +689,7 @@ public class DependencyDAG {
 				}
 				else {
 					for (String r: depends.get(s)) {
+//						System.out.println("getting: " + r + " -> " + s);
 						nEdges += edgeWeights.get(r + "#" + s); 
 					}
 				}
@@ -806,7 +808,7 @@ public class DependencyDAG {
 		avgTargetDepth.put(node, sPath / nPath);
 	}
 	
-	private int getEdgeWeight(String n1, String n2) {
+	private double getEdgeWeight(String n1, String n2) {
 		if (edgeWeights.containsKey(n1 + "#" + n2)) {
 			return edgeWeights.get(n1 + "#" + n2);
 		}
@@ -1382,6 +1384,34 @@ public class DependencyDAG {
 		isLexis = false;
 		isCyclic = false;
 		nDirectSourceTargetEdges = 0;
+	}
+
+	public void initPathStat() {
+		nTotalPath = 0;
+
+		numOfTargetPath = new HashMap();
+		sumOfTargetPath = new HashMap();
+		avgTargetDepth = new HashMap();
+		numOfSourcePath = new HashMap();
+		sumOfSourcePath = new HashMap();
+		avgSourceDepth = new HashMap();
+
+		lengthPathLocation = new HashMap();
+		numPathLocation = new HashMap();
+
+		nodePathThrough = new HashMap();
+		normalizedPathCentrality = new HashMap();
+
+		successors = new HashMap();
+		ancestors = new HashMap();
+		
+//		targetsReachable = new HashMap();
+//		sourcesReachable = new HashMap();
+//		nodesReachable = new HashMap();	
+
+		visited = new HashSet();
+		
+		edgeWeights = new HashMap();
 	}
 	
 	public void init() {

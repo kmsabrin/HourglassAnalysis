@@ -429,37 +429,60 @@ public class ManagerSWPaper {
 		private String node;
 		private boolean patched;
 		private int version;
+		private double LOC;
 		
-		CentralityVersionPatch(double centrality, String node, boolean patched, int version) {
+		CentralityVersionPatch(double centrality, String node, boolean patched, int version, double LOC) {
 			this.centrality = centrality;
 			this.node = node;
 			this.patched = patched;
 			this.version = version;
+			this.LOC = LOC;
 		}
 		
+//		public int compareTo(CentralityVersionPatch instance2) {
+//			if (this.centrality < instance2.centrality) return -1;
+//			else if (this.centrality > instance2.centrality) return 1;
+//			else return 0;
+//		}
+		
 		public int compareTo(CentralityVersionPatch instance2) {
-			if (this.centrality < instance2.centrality) return -1;
-			else if (this.centrality > instance2.centrality) return 1;
+			if (this.LOC < instance2.LOC) return -1;
+			else if (this.LOC > instance2.LOC) return 1;
 			else return 0;
 		}
 	}
 	
 	private static void getBucket2(ArrayList<CentralityVersionPatch> list) {
 		int index = 0;
+		int bucketMaxItem = 1000;
+		int arrSize = list.size() / bucketMaxItem;
+		if (list.size() % 1000 != 0) ++arrSize;
+		
+		double a[] = new double[arrSize];
+		double b[] = new double[arrSize];
+		int arrIndex = 0;
+		
 		while (index < list.size()) {
 			int kount = 0;
 			int patchKount = 0;
-			double centralityBoundary = -1;
-			while (index < list.size() && kount < 1000) {
-				centralityBoundary = list.get(index).centrality;
+			double boundaryValue = -1;
+			while (index < list.size() && kount < bucketMaxItem) {
+//				boundaryValue = list.get(index).centrality;
+				boundaryValue = list.get(index).LOC;
 				if (list.get(index).patched) {
 					++patchKount;
 				}
 				++kount;
 				++index;
 			}
-			System.out.println(centralityBoundary + "\t" + (patchKount * 1.0 / kount));
+			System.out.println(boundaryValue + "\t" + (patchKount * 1.0 / kount));
+			a[arrIndex] = boundaryValue;
+			b[arrIndex] = (patchKount * 1.0 / kount);
+			++arrIndex;
 		}
+		
+		double spmanC = new SpearmansCorrelation().correlation(a, b);
+		System.out.println("Spearman: " + spmanC);
 	}
 	
 	private static void analyzePatch() throws Exception {
@@ -499,7 +522,7 @@ public class ManagerSWPaper {
 			DependencyDAG.resetFlags();
 			DependencyDAG.isCallgraph = true;
 			DependencyDAG dependencyDAG = new DependencyDAG("openssh_callgraphs" + "//" + "full.graph-openssh-" + (i - 1));
-		
+			LineOfCodeCount.parseFile("openssh_callgraphs" + "//" + "openssh-" + (i - 1) + ".c", dependencyDAG.nodes);
 
 			HashMap<String, Integer> patchedFunctions = null;
 			patchedFunctions = PatchAnalysis.getPatchedFunctions("openssh_patches//patch-" + i + ".txt", dependencyDAG.nodes);
@@ -533,7 +556,12 @@ public class ManagerSWPaper {
 //					System.out.println(featurePC);
 				}
 				
-				patchCentralityVersionFunctionList.add(new CentralityVersionPatch(feature, s, patched, (i - 1)));
+//				patchCentralityVersionFunctionList.add(new CentralityVersionPatch(feature, s, patched, (i - 1)));
+				
+				if (LineOfCodeCount.functionNumLines.containsKey(s)) {	
+					patchCentralityVersionFunctionList.add(
+							new CentralityVersionPatch(feature, s, patched, (i - 1), LineOfCodeCount.functionNumLines.get(s)));
+				}
 			}
 			
 			Collections.sort(patchCentralityVersionFunctionList);

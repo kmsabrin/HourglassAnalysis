@@ -180,9 +180,9 @@ public class ManagerHGPaper {
 		
 //		String netID = "court";		
 //		String netID = "jetuml";
-		String netID = "celegans";
+//		String netID = "celegans";
 		
-//		String netID = "toy";
+		String netID = "toy";
 		
 //		String netID = nID;
 		
@@ -208,8 +208,8 @@ public class ManagerHGPaper {
 //			DependencyDAG.isCyclic = true;
 		}
 		else if (netID.equals("court")) {
-//			CourtCaseCornellParser.caseTopic = "abortion";
-			CourtCaseCornellParser.caseTopic = "pension";
+			CourtCaseCornellParser.caseTopic = "abortion";
+//			CourtCaseCornellParser.caseTopic = "pension";
 //			CourtCaseCornellParser.caseTopic = kTopic;
 			CourtCaseCornellParser.loadCuratedCaseIDs();
 			netPath = "supremecourt_networks//court.txt";
@@ -273,24 +273,24 @@ public class ManagerHGPaper {
 //		DistributionAnalysis.findNDirectSrcTgtBypasses(dependencyDAG, netID);
 		
 //		Randomizations
-		if (netID.equals("court")) {
-			netID = CourtCaseCornellParser.caseTopic;
-		}
+//		if (netID.equals("court")) {
+//			netID = CourtCaseCornellParser.caseTopic;
+//		}
 //		UpstreamRandomize.randomizeDAG(dependencyDAG, netID);
-		UpstreamRandomize.hieararchyPreservingRandomizeDAG(dependencyDAG);
+//		UpstreamRandomize.hieararchyPreservingRandomizeDAG(dependencyDAG);
 		
 //		Core Detection
-//		CoreDetection.fullTraverse = false;
-//		CoreDetection.getCore(dependencyDAG, netID);
-//		double realCore = CoreDetection.minCoreSize;
+		CoreDetection.fullTraverse = false;
+		CoreDetection.getCore(dependencyDAG, netID);
+		double realCore = CoreDetection.minCoreSize;
 
 
 //		Flattening
-//		DependencyDAG.isRandomized = false;
-//		FlatNetwork.makeAndProcessFlat(dependencyDAG);	
-//		CoreDetection.hScore = (1.0 - (realCore / FlatNetwork.flatNetworkCoreSize));
-//		System.out.println("H-Score: " + CoreDetection.hScore);
-//		System.out.println(CoreDetection.hScore);
+		DependencyDAG.isRandomized = false;
+		FlatNetwork.makeAndProcessFlat(dependencyDAG);	
+		CoreDetection.hScore = (1.0 - (realCore / FlatNetwork.flatNetworkCoreSize));
+		System.out.println("H-Score: " + CoreDetection.hScore);
+		System.out.println(CoreDetection.hScore);
 		
 //		Get Real to Model Networks
 //		getOptimalAlphaForModel(dependencyDAG, CoreDetection.hScore);
@@ -713,11 +713,11 @@ public class ManagerHGPaper {
 	}
 	
 	public static void main(String[] args) throws Exception {		
-//		ManagerHGPaper.doRealNetworkAnalysis();
+		ManagerHGPaper.doRealNetworkAnalysis();
 //		Manager.measureTauEffectOnRealNetwork();
 //		ManagerHGPaper.runThroughAllRealNets();
 //		ManagerHGPaper.runScalabilityTest();
-		ManagerHGPaper.runRandomizationTest();
+//		ManagerHGPaper.runRandomizationTest();
 		
 //		curve 1
 //		ManagerHGPaper.runSyntheticStatisticalSignificanceTests(333, 333, 333, 1);

@@ -198,7 +198,7 @@ public class CoreDetection {
 //			add to waist and remove from the network
 			topRemovedWaistNodes.add(representative);
 			representativeLocation.put(representative, getMedianPESLocation(equivalentNodes, dependencyDAG));
-			if (!FlatNetwork.isProcessingFlat & viewCore) {
+			if (/*!FlatNetwork.isProcessingFlat &*/ viewCore) {
 				System.out.println("[Core] " + representative + "\t" + ((cumulativePathCovered + maxPathCovered) / totalPath) + "\t" + dependencyDAG.lengthPathLocation.get(representative));
 //				System.out.println(((cumulativePathCovered + maxPathCovered) / totalPath));
 			}
