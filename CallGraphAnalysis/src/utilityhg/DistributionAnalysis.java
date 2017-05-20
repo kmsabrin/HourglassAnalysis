@@ -167,6 +167,7 @@ public class DistributionAnalysis {
 
 //		return StatUtils.percentile(pathLengths, 50);
 //		return StatUtils.mean(pathLengths);
+//		System.out.println(sumOfPathLengths / dependencyDAG.nTotalPath);
 		return sumOfPathLengths / dependencyDAG.nTotalPath;
 	}
 

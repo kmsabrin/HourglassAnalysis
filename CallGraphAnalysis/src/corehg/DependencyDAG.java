@@ -12,6 +12,8 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeSet;
 
+import org.apache.commons.lang3.StringUtils;
+
 import swpaper.LineOfCodeCount;
 import utilityhg.CourtCaseCornellParser;
 import utilityhg.Edge;
@@ -177,7 +179,7 @@ public class DependencyDAG {
 		// load & initialize the attributes of the dependency graph
 		loadGraph(dependencyGraphID);
 		
-		if (isCallgraph /*|| isClassDependency || isToy || isMetabolic || isCourtcase*/) {
+		if (isCallgraph || isClassDependency /*|| isToy || isMetabolic || isCourtcase*/) {
 			removeCycles(); // or should I only ignore cycles?
 		}
 		
@@ -187,7 +189,7 @@ public class DependencyDAG {
 		
 //		countDisconnectedNodes();
 		
-//		removeIsolatedNodes(); 
+		removeIsolatedNodes(); 
 		
 		loadDegreeMetric();
 				
@@ -365,13 +367,34 @@ public class DependencyDAG {
 //					server = tokens[1].substring(0, tokens[1].length()); // for scc-consolidation: a b
 //				}
 				
-				if (dependent.equals("do_log") || server.equals("do_log")
-					|| dependent.equals("main") || server.equals("main")	
-					|| dependent.equals("do_exec") || server.equals("do_exec")
-//					|| dependent.equals("packet_send") || server.equals("packed_send")
+				if (/*dependent.equals("do_exec") || server.equals("do_exec") ||*/
+//					dependent.contains("exec") || server.contains("exec")	
+					dependent.contains("exit") || server.contains("exit")
+					|| dependent.contains("_log") || server.contains("_log")
+					|| dependent.contains("main") || server.contains("main")
+					|| dependent.contains("fatal") || server.contains("fatal")
+					|| dependent.contains("error") || server.contains("error")
+					|| dependent.contains("_fail") || server.contains("_fail")
+					|| dependent.contains("debug") || server.contains("debug")
+//					dependent.contains("@plt") || server.contains("@plt")
+					
+//					|| dependent.contains("xrealloc") || server.contains("xrealloc")
+//					|| dependent.contains("xmalloc") || server.contains("xmalloc")
+//					|| dependent.contains("xfree") || server.contains("xfree")
+					/*dependent.equals("fatal") || server.equals("fatal")
+					|| dependent.equals("debug") || server.equals("debug")
+					|| dependent.equals("error") || server.equals("error")
+					|| dependent.equals("__stack_chk_fail@plt") || server.equals("__stack_chk_fail@plt")
+					|| dependent.equals("__errno_location@plt") || server.equals("__errno_location@plt")
+					|| dependent.equals("debug3") || server.equals("debug3")
+					|| dependent.equals("debug2") || server.equals("debug2")
+					|| dependent.equals("strerror@plt") || server.equals("strerror@plt")
+					||dependent.equals("main") || server.equals("main")*/
+					
 						) { 
 					// no more location metric noise! 
 					// compiler generated
+//					System.out.println(dependent + "\t" + server);
 					continue;
 				}
 				
@@ -403,9 +426,22 @@ public class DependencyDAG {
 				server = tokens[0];
 				dependent = tokens[1];
 				
-//				if (largestWCCNodes.contains(server) == false || largestWCCNodes.contains(dependent) == false) {
-//					continue;
-//				}
+//				if (StringUtils.containsIgnoreCase(server, "java.")) continue;
+//				if (StringUtils.containsIgnoreCase(dependent, "java.")) continue;
+//				if (StringUtils.containsIgnoreCase(server, "int[]")) continue;
+//				if (StringUtils.containsIgnoreCase(dependent, "int[]")) continue;
+//				if (StringUtils.containsIgnoreCase(server, "double[]")) continue;
+//				if (StringUtils.containsIgnoreCase(dependent, "double[]")) continue;
+				
+				if (StringUtils.containsIgnoreCase(server, "exception")) continue;
+				if (StringUtils.containsIgnoreCase(dependent, "exception")) continue;
+				
+				if (StringUtils.containsIgnoreCase(server, "object")) continue;
+				if (StringUtils.containsIgnoreCase(dependent, "object")) continue;
+				
+				if (largestWCCNodes.contains(server) == false || largestWCCNodes.contains(dependent) == false) {
+					continue;
+				}
 			}
 			else if (isMetabolic) {
 				// for metabolic and synthetic networks
@@ -433,12 +469,12 @@ public class DependencyDAG {
 //						continue;
 //					}
 					
-					if (dependent.equals("do_log") || server.equals("do_log")
-							|| dependent.equals("main") || server.equals("main")	
-							|| dependent.equals("do_exec") || server.equals("do_exec")
-							) {
-							continue;
-					}
+//					if (dependent.equals("do_log") || server.equals("do_log")
+//							|| dependent.equals("main") || server.equals("main")	
+//							|| dependent.equals("do_exec") || server.equals("do_exec")
+//							) {
+//							continue;
+//					}
 				}
 			}
 			else if (isCourtcase) {
@@ -1117,7 +1153,10 @@ public class DependencyDAG {
 		}		
 	}
 
-	public void loadPathStatistics() {	
+	public void loadPathStatistics() {
+//		System.out.println("In path stat: " + isWeighted + "\t" + CoreDetection.topRemovedWaistNodes);
+		
+		
 		if (isWeighted) {
 			loadWeightedPathStatistics();
 		}
@@ -1325,22 +1364,26 @@ public class DependencyDAG {
 //				System.out.println(s + "\t" + nodePathThrough.get(s));				
 //			}
 			
-//			System.out.println(s + "\t" + numPathLocation.get(s) + "\t" + normalizedPathCentrality.get(s));
-//			System.out.println(s + "\t" + lengthPathLocation.get(s) + "\t" + nodePathThrough.get(s) + "\t" + outDegree.get(s));
+			System.out.println(s + "\t" + numPathLocation.get(s) + "\t" + normalizedPathCentrality.get(s));
+//			System.out.println(s + "\t" + lengthPathLocation.get(s) + "\t" + normalizedPathCentrality.get(s) + "\t" + outDegree.get(s));
 			
+//			System.out.println();
+//			if (isSource(s)) {
+//				System.out.println(s + "\t" + outDegree.get(s) + "\t" + normalizedPathCentrality.get(s));
+//			}
 		}
 		
-		System.out.println("Total path: " + nTotalPath);
+//		System.out.println("Total path: " + nTotalPath);
 		
-		for (String s : nodes) {
-			if (depends.containsKey(s)) {
-				System.out.print(s + " depends on ");
-				for (String r : depends.get(s)) {
-					System.out.print("\t" + r);
-				}
-				System.out.println();
-			}
-			
+//		for (String s : nodes) {
+//			if (depends.containsKey(s)) {
+//				System.out.print(s + " depends on ");
+//				for (String r : depends.get(s)) {
+//					System.out.print("\t" + r);
+//				}
+//				System.out.println();
+//			}
+//			
 //			if (serves.containsKey(s)) {
 //				System.out.print(s + " serves ");
 //				for (String r : serves.get(s)) {
@@ -1348,7 +1391,7 @@ public class DependencyDAG {
 //				}
 //				System.out.println();
 //			}
-		}
+//		}
 		
 		
 //		String[] jetumlCore = new String[]{"ca.mcgill.cs.stg.jetuml.TestUMLEditor", "ca.mcgill.cs.stg.jetuml.graph.Node",

@@ -16,7 +16,7 @@ public class ModelRealConnector {
 	public HashMap<String, Integer> nodeIdMap;
 	public int targetLevel;
 	private Random random;
-	public boolean giveMaxTargetLevel = false;
+	public boolean giveMaxTargetLevel = true;
 	
 	public ModelRealConnector(DependencyDAG dependencyDAG) {
 		random = new Random(System.nanoTime());
@@ -153,6 +153,11 @@ public class ModelRealConnector {
 				dependencyDAG.reachableDownwardsNodes(product);
 				dependencyDAG.visited.remove(product);
 				
+				if (dependencyDAG.visited.size() < 1) {
+					System.out.println(product + "\t" + nodeLevelMap.get(product)); 
+//				    dependencyDAG.depends.get(product).size());
+					continue;
+				}
 				HashSet<String> uniqueEdge = new HashSet();
 				ZipfDistributionWrapper zipfDistributionWrapper = new ZipfDistributionWrapper(dependencyDAG.visited.size(), alpha);
 
@@ -186,12 +191,13 @@ public class ModelRealConnector {
 						// outdeg preferential selection
 //						substrate = getDegreePreferredSubstrate(candidateList, nodeOutdeg);
 						edge = substrate + "#" + product;
-//						substrateLevel = Math.max(0, substrateLevel - 1);
+						substrateLevel = Math.max(0, substrateLevel - 1);
 //						System.out.println(edge);
 					} while(uniqueEdge.contains(edge));
 					uniqueEdge.add(edge);
 					
 //					System.out.println(substrate + "\t" + product);
+//					System.out.println(nodeIdMap.get(substrate) + "\t" + nodeIdMap.get(product));
 					int v = nodeOutdeg.get(substrate);
 					nodeOutdeg.put(substrate, v + 1);
 					pw.println(nodeIdMap.get(substrate) + "\t" + nodeIdMap.get(product));
@@ -272,7 +278,7 @@ public class ModelRealConnector {
 		modelRealConnector.generateModelNetwork2(toyDependencyDAG, 1);
 //		String netID = "toy_dag";
 //		toyDependencyDAG.printNetworkStat();
-//		toyDependencyDAG.printNetworkProperties();
+		toyDependencyDAG.printNetworkProperties();
 
 //		CoreDetection.fullTraverse = false;
 //		CoreDetection.getCore(toyDependencyDAG, netID);

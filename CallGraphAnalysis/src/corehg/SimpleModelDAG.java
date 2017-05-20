@@ -235,10 +235,10 @@ public class SimpleModelDAG {
 		/* used for mapping one large distribution to all small distributions */
 		/* speeding up simulations */
 		/* turn off for regular experiments */
-		if (Math.abs(alpha) != 0) {
-			zipfDistribution = new ZipfDistribution(maxZipfSize, alpha);
-			initiateRandomWeightedCollection(maxZipfSize, zipfDistribution);
-		}
+//		if (Math.abs(alpha) != 0) {
+//			zipfDistribution = new ZipfDistribution(maxZipfSize, alpha);
+//			initiateRandomWeightedCollection(maxZipfSize, zipfDistribution);
+//		}
 		
 		for (int productIndex = sS - 1; productIndex >= 0; --productIndex) {	
 //			System.out.println(productIndex);
@@ -259,10 +259,9 @@ public class SimpleModelDAG {
 					}
 				} 
 				else { // zipf distribution
-					/*
 					zipfDistribution = new ZipfDistribution(endNodeIndex - startNodeIndex + 1, alpha);
 					initiateRandomWeightedCollection(endNodeIndex - startNodeIndex + 1, zipfDistribution);
-					*/
+					
 				}
 			}
 			
@@ -291,10 +290,11 @@ public class SimpleModelDAG {
 				} 
 				else {
 //					substrateIndex = getNodeFromZipfDistribution(startNodeIndex, endNodeIndex);
-//					substrateIndex = getNodeFromZipfDistribution2(startNodeIndex);
-					
-					int elementIndex = getNodeFromZipfDistribution2();
-					substrateIndex = getProportionalIndex(startNodeIndex, endNodeIndex, elementIndex);
+					substrateIndex = getNodeFromZipfDistribution2(startNodeIndex);
+//					
+					// special case for very large network 
+//					int elementIndex = getNodeFromZipfDistribution2();
+//					substrateIndex = getProportionalIndex(startNodeIndex, endNodeIndex, elementIndex);
 					
 //					special case: no order among sources
 					if (substrateIndex >= sS) {

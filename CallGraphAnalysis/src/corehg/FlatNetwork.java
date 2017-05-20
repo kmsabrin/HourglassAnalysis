@@ -51,20 +51,23 @@ public class FlatNetwork {
 	
 	public static void makeAndProcessFlat(DependencyDAG dependencyDAG) throws Exception {
 //		System.out.println("Flattening");
-//		writeFlattenWeighted(dependencyDAG);
-		writeFlatten(dependencyDAG);
+		
+		writeFlattenWeighted(dependencyDAG);
+//		writeFlatten(dependencyDAG);
 		if (DependencyDAG.isSynthetic == false) { // for real networks only
 			DependencyDAG.resetFlags();
 			DependencyDAG.isToy = true;
 		}
 		
-		DependencyDAG.isWeighted = false;
+//		DependencyDAG.isWeighted = false;
+		DependencyDAG.isWeighted = true;
 		DependencyDAG flatDAG = new DependencyDAG("flat_networks//current_flat.txt");
 //		flatDAG.printNetworkProperties();
 		CoreDetection.fullTraverse = false;
 		isProcessingFlat = true;
 		CoreDetection.getCore(flatDAG, "flatDAG");
 		isProcessingFlat = false;
+		DependencyDAG.isWeighted = false;
 		FlatNetwork.flatNetworkCoreSize = CoreDetection.minCoreSize;
 	}
 }

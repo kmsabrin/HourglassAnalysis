@@ -13,9 +13,9 @@ import org.apache.commons.math3.stat.StatUtils;
 import utilityhg.ConfidenceInterval;
 
 public class EdgeCopyingModel {
-	static int nSources = 400;
-	static int nTargets = 400;
-	static int nIntermediates = 400;
+	static int nSources = 200;
+	static int nTargets = 200;
+	static int nIntermediates = 600;
 //	static int nSources = 3;
 //	static int nTargets = 3;
 //	static int nIntermediates = 4;
@@ -82,7 +82,7 @@ public class EdgeCopyingModel {
 				CoreDetection.getCore(copyDependencyDAG, copyDAGName);
 				double realCore = CoreDetection.minCoreSize;
 				FlatNetwork.makeAndProcessFlat(copyDependencyDAG);
-				CoreDetection.hScore = (1.0 - ((realCore - 1) / FlatNetwork.flatNetworkCoreSize));
+				CoreDetection.hScore = (1.0 - (realCore / FlatNetwork.flatNetworkCoreSize));
 				hScores[r] = CoreDetection.hScore;
 			}
 //			System.out.println(b + "\t" + StatUtils.percentile(hScores, 50));

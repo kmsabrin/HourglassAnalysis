@@ -316,7 +316,7 @@ public class ManagerNeuro {
 	
 			neuroDependencyDAG = new DependencyDAG("neuro_networks//" + neuroDAGName + ".txt");
 			FlatNetwork.makeAndProcessFlat(neuroDependencyDAG);
-			CoreDetection.hScore = (1.0 - ((coreSize - 1) / FlatNetwork.flatNetworkCoreSize));
+			CoreDetection.hScore = (1.0 - (coreSize / FlatNetwork.flatNetworkCoreSize));
 			System.out.println(coreSize + "\t" + CoreDetection.hScore);
 		}
 	}
@@ -333,23 +333,23 @@ public class ManagerNeuro {
 
 //		DistributionAnalysis.getPathLength(neuroDependencyDAG);
 //		CoreDetection.getCentralEdgeSubgraph(neuroDependencyDAG);
-		DistributionAnalysis.getDistributionCCDF(neuroDependencyDAG, netID, 1);
+//		DistributionAnalysis.getDistributionCCDF(neuroDependencyDAG, netID, 1);
 		
 //		Visualization.printDOTNetwork(neuroDependencyDAG);
-//		CoreDetection.pathCoverageTau = 1.0;
-//		CoreDetection.fullTraverse = false;
-//		CoreDetection.getCore(neuroDependencyDAG, netID);
-//		double realCore = CoreDetection.minCoreSize;
+		CoreDetection.pathCoverageTau = 0.99;
+		CoreDetection.fullTraverse = false;
+		CoreDetection.getCore(neuroDependencyDAG, netID);
+		double realCore = CoreDetection.minCoreSize;
 //
-//		neuroDependencyDAG = new DependencyDAG("neuro_networks//" + neuroDAGName + ".txt");
-//		FlattenNetwork.makeAndProcessFlat(neuroDependencyDAG);
-//		CoreDetection.hScore = (1.0 - ((realCore - 1) / FlattenNetwork.flatNetworkCoreSize));
-//		System.out.println("[h-Score] " + CoreDetection.hScore);
+		neuroDependencyDAG = new DependencyDAG("neuro_networks//" + neuroDAGName + ".txt");
+		FlatNetwork.makeAndProcessFlat(neuroDependencyDAG);
+		CoreDetection.hScore = (1.0 - (realCore / FlatNetwork.flatNetworkCoreSize));
+		System.out.println("[h-Score] " + CoreDetection.hScore);
 	}
 	
 	public static void main(String[] args) throws Exception {
 		getCleanNeuroNetwork();
-//		doNeuroNetworkAnalysis();
+		doNeuroNetworkAnalysis();
 //		statisticalRun();
 //		traverseAllPaths();
 	}

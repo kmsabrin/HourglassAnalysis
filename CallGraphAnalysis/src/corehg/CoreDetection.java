@@ -13,8 +13,8 @@ import org.apache.commons.math3.stat.StatUtils;
 import utilityhg.Edge;
 
 public class CoreDetection {
-	public static boolean viewCore = false;
-	public static boolean viewStat = false;
+	public static boolean viewCore = true;
+	public static boolean viewStat = true;
 	public static HashSet<String> topRemovedWaistNodes = new HashSet();
 	public static HashMap<String, Double> averageCoreRank;
 	public static HashMap<String, Double> averagePathCovered;
@@ -102,7 +102,7 @@ public class CoreDetection {
 //			find the node with largest through path
 			
 			/* cancer data - special case */
-			if (s.equals("miR429") || s.equals("dummy-in") || s.equals("dummy-out")) continue;
+//			if (s.equals("miR429") || s.equals("dummy-in") || s.equals("dummy-out")) continue;
 			
 //			double numPathCovered = 0;
 //			if (dependencyDAG.numOfSourcePath.containsKey(s) && dependencyDAG.numOfTargetPath.containsKey(s)) {
@@ -126,8 +126,9 @@ public class CoreDetection {
 			}
 		}
 			
-//		System.out.println("WTF  " + tiedMaxPathCentralityNodes);
-//		System.out.println(maxPathCovered + "\t" + totalPath);
+//		System.out.println("WTF-1  " + tiedMaxPathCentralityNodes);
+//		System.out.println("WTF-2  " + topRemovedWaistNodes);
+//		System.out.println("Covering: " + maxPathCovered + "\t" + cumulativePathCovered + "\t" + totalPath);
 //		/** Detect exact path equivalent nodes - 2 **/
 		HashSet<String> alreadyInPES = new HashSet();
 		int nTiedNodes = 0;
@@ -198,9 +199,9 @@ public class CoreDetection {
 //			add to waist and remove from the network
 			topRemovedWaistNodes.add(representative);
 			representativeLocation.put(representative, getMedianPESLocation(equivalentNodes, dependencyDAG));
-			if (/*!FlatNetwork.isProcessingFlat &*/ viewCore) {
-				System.out.println("[Core] " + representative + "\t" + ((cumulativePathCovered + maxPathCovered) / totalPath) + "\t" + dependencyDAG.lengthPathLocation.get(representative));
-//				System.out.println(((cumulativePathCovered + maxPathCovered) / totalPath));
+			if (!FlatNetwork.isProcessingFlat & viewCore) {
+				System.out.println(representative + "\t" + ((cumulativePathCovered + maxPathCovered) / totalPath) + "\t" + dependencyDAG.numPathLocation.get(representative));
+//				System.out.println((nodeRank + "\t" + (cumulativePathCovered + maxPathCovered) / totalPath));
 			}
 			
 //			analysis
@@ -230,7 +231,7 @@ public class CoreDetection {
 		}
 	}
 	
-	private static void init() {
+	public static void init() {
 		topRemovedWaistNodes = new HashSet();
 		averageCoreRank = new HashMap();
 		averagePathCovered = new HashMap();
@@ -246,6 +247,10 @@ public class CoreDetection {
 		coreDependentCoverage =  new HashSet();
 		
 		representativeLocation = new HashMap();
+		sampleCore = new TreeSet();
+		coreWeights = new HashMap();
+		
+		fullTraverse = false;
 	}
 	
 	public static void getCore(DependencyDAG dependencyDAG, String filePath) {
