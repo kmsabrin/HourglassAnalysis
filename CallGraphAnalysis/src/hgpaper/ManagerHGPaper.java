@@ -84,6 +84,7 @@ public class ManagerHGPaper {
 		double nodeCoverage[] = new double [nRun];
 		double avgCoreLocation[] = new double [nRun];
 		double coreSize[] = new double [nRun];
+		double hScore[] = new double [nRun];
 		String netID = "";
 		
 		for (int i = 0; i < nRun; ++i) {
@@ -94,7 +95,6 @@ public class ManagerHGPaper {
 			ModelRealConnector modelRealConnector = new ModelRealConnector(dependencyDAG);
 			modelRealConnector.generateModelNetwork2(dependencyDAG, optimalAlphaScore);
 
-			System.out.println("here here ...");
 			DependencyDAG.resetFlags();
 			SimpleModelDAG.initModelProperties((int)dependencyDAG.nTargets, (int)(dependencyDAG.nodes.size() - dependencyDAG.nTargets - dependencyDAG.nSources), (int)dependencyDAG.nSources, -1);
 			DependencyDAG.isSynthetic = true;
@@ -111,6 +111,12 @@ public class ManagerHGPaper {
 			nodeCoverage[i] = CoreDetection.nodeCoverage;
 			avgCoreLocation[i] = CoreDetection.weightedCoreLocation;
 			coreSize[i] = CoreDetection.minCoreSize;
+			double realCore = CoreDetection.minCoreSize;
+
+			System.out.println("here here ...");
+			DependencyDAG.isSynthetic = false;
+			FlatNetwork.makeAndProcessFlat(dependencyDAG);	
+			hScore[i] = (1.0 - (realCore / FlatNetwork.flatNetworkCoreSize));
 			
 //			netID = nid + "-model-" + i;
 //			DistributionAnalysis.getDistributionCCDF(modelDependencyDAG, netID, 1); // 1=centrality, 2=outdegree
@@ -118,12 +124,13 @@ public class ManagerHGPaper {
 		}
 		
 		System.out.println(netID);
-		System.out.println("PathLength: " + StatUtils.mean(pathLengths) + "\t" + Math.sqrt(StatUtils.variance(pathLengths)));
+//		System.out.println("PathLength: " + StatUtils.mean(pathLengths) + "\t" + Math.sqrt(StatUtils.variance(pathLengths)));
 //		System.out.println("DisconnectedFraction: " + StatUtils.mean(disconnectedFractions) + "\t" + Math.sqrt(StatUtils.variance(disconnectedFractions)));
 		
-		System.out.println("nodeCoverage: " + StatUtils.mean(nodeCoverage) + "\t" + Math.sqrt(StatUtils.variance(nodeCoverage)));
-		System.out.println("avgCoreLocation: " + StatUtils.mean(avgCoreLocation) + "\t" + Math.sqrt(StatUtils.variance(avgCoreLocation)));
-		System.out.println("coreSize: " + StatUtils.mean(coreSize) + "\t" + Math.sqrt(StatUtils.variance(coreSize)));
+//		System.out.println("nodeCoverage: " + StatUtils.mean(nodeCoverage) + "\t" + Math.sqrt(StatUtils.variance(nodeCoverage)));
+//		System.out.println("avgCoreLocation: " + StatUtils.mean(avgCoreLocation) + "\t" + Math.sqrt(StatUtils.variance(avgCoreLocation)));
+//		System.out.println("coreSize: " + StatUtils.mean(coreSize) + "\t" + Math.sqrt(StatUtils.variance(coreSize)));
+		System.out.println("hscore: " + StatUtils.mean(hScore) + "\t" + Math.sqrt(StatUtils.variance(hScore)));
 	}
 	
 	private static void getOptimalAlphaForModel(DependencyDAG dependencyDAG, double realHScore) throws Exception {
@@ -134,7 +141,7 @@ public class ManagerHGPaper {
 		
 		System.out.println(nID + "\t" + kTopic + "\t" + realHScore);
 		
-		for (double a = 2; a <= 3; a += 0.1) {
+		for (double a = 2.2; a <= 2.4; a += 0.1) {
 			for (int i = 0; i < nRun; ++i) {
 				DependencyDAG.resetFlags();
 				DependencyDAG.isToy = true;
@@ -154,6 +161,7 @@ public class ManagerHGPaper {
 				double realCore = CoreDetection.minCoreSize;
 //				System.out.println(CoreDetection.minCoreSize);
 				
+				DependencyDAG.isSynthetic = false;
 				FlatNetwork.makeAndProcessFlat(modelDependencyDAG);
 				CoreDetection.hScore = (1.0 - (realCore / FlatNetwork.flatNetworkCoreSize));
 			
@@ -178,14 +186,14 @@ public class ManagerHGPaper {
 //		String netID = "rat";
 //		String netID = "monkey";
 		
-		String netID = "commons-math";
+//		String netID = "commons-math";
 //		String netID = "openssh-39";
 		
 //		String netID = "apache-commons-3.4";
 		
 //		String netID = "court";		
 //		String netID = "jetuml";
-//		String netID = "celegans";
+		String netID = "celegans";
 		
 //		String netID = "toy";
 		
@@ -193,7 +201,7 @@ public class ManagerHGPaper {
 		
 		DependencyDAG.resetFlags();
 		
-		if (netID.equals("rat") || netID.equals("monkey") || netID.equals("commons-math")) {
+		if (netID.equals("rat") || netID.equals("monkey") /*|| netID.equals("commons-math")*/) {
 			loadLargestWCC(netID);
 		}
 		
@@ -213,8 +221,8 @@ public class ManagerHGPaper {
 //			DependencyDAG.isCyclic = true;
 		}
 		else if (netID.equals("court")) {
-			CourtCaseCornellParser.caseTopic = "abortion";
-//			CourtCaseCornellParser.caseTopic = "pension";
+//			CourtCaseCornellParser.caseTopic = "abortion";
+			CourtCaseCornellParser.caseTopic = "pension";
 //			CourtCaseCornellParser.caseTopic = kTopic;
 			CourtCaseCornellParser.loadCuratedCaseIDs();
 			netPath = "supremecourt_networks//court.txt";
@@ -258,8 +266,7 @@ public class ManagerHGPaper {
 //		System.out.println("nDisconnected " + (1.0 * dependencyDAG.disconnectedKount / dependencyDAG.nodes.size()));
 //		generateSyntheticFromReal(dependencyDAG);
 		
-		
-//		dependencyDAG.printNetworkProperties();
+		dependencyDAG.printNetworkProperties();
 //		DistributionAnalysis.getLocationColorWeightedHistogram(dependencyDAG);
 		
 //		Visualization.printDOTNetwork(dependencyDAG);
@@ -269,7 +276,7 @@ public class ManagerHGPaper {
 //		DistributionAnalysis.getPathLength(dependencyDAG);
 //		DistributionAnalysis.getDegreeHistogram(dependencyDAG);
 //		DistributionAnalysis.getDegreeHistogramSpecialized(dependencyDAG);
-		DistributionAnalysis.findWeaklyConnectedComponents(dependencyDAG, netID);		
+//		DistributionAnalysis.findWeaklyConnectedComponents(dependencyDAG, netID);		
 //		DistributionAnalysis.printCentralityRanks(dependencyDAG, netID);
 //		int centralityIndex = 1;
 //		DistributionAnalysis.getDistributionCCDF(dependencyDAG, netID, 1);
@@ -289,7 +296,7 @@ public class ManagerHGPaper {
 		
 //		Core Detection
 		CoreDetection.fullTraverse = false;
-		CoreDetection.pathCoverageTau = 0.8;
+		CoreDetection.pathCoverageTau = 0.95;
 		CoreDetection.getCore(dependencyDAG, netID);
 		double realCore = CoreDetection.minCoreSize;
 //		System.out.println(CoreDetection.minCoreSize);
@@ -297,12 +304,13 @@ public class ManagerHGPaper {
 //		System.out.println(CoreDetection.weightedCoreLocation);
 
 //		Flattening
-		DependencyDAG.isRandomized = false;
+//		DependencyDAG.isRandomized = false;
 		FlatNetwork.makeAndProcessFlat(dependencyDAG);	
 		CoreDetection.hScore = (1.0 - (realCore / FlatNetwork.flatNetworkCoreSize));
-		System.out.println("H-Score: " + CoreDetection.hScore);
+//		System.out.println("H-Score: " + CoreDetection.hScore);
 //		System.out.println(CoreDetection.minCoreSize);
 //		System.out.println("\t" + CoreDetection.hScore);
+//		System.out.println(CoreDetection.pathCoverageTau + "\t" + realCore + "\t" + FlatNetwork.flatNetworkCoreSize + "\t" + CoreDetection.hScore);
 		
 //		Get Real to Model Networks
 //		getOptimalAlphaForModel(dependencyDAG, CoreDetection.hScore);
@@ -669,8 +677,9 @@ public class ManagerHGPaper {
 	*/
 	
 	private static void measureTauEffectOnRealNetwork() throws Exception {
-		String data[] = {"openssh-39", "commons-math", "rat", "monkey", "court", "court"};
-		int idx = 1;
+//		String data[] = {"openssh-39", "commons-math", "rat", "monkey", "court", "court"};
+		String data[] = {"celegans"};
+		int idx = 0;
 		PrintWriter pw = new PrintWriter(new File("analysis//hscore-vs-tau-" + data[idx] + ".txt"));
 		nID = data[idx];
 		if (idx == 4) {
@@ -682,12 +691,12 @@ public class ManagerHGPaper {
 		else {
 			kTopic = "";
 		}
-		for (int i = 50; i <= 98; i += 2) {
+		for (int i = 50; i <= 100; i += 1) {
 			CoreDetection.pathCoverageTau = i / 100.0;
 			DependencyDAG.resetFlags();
 			doRealNetworkAnalysis();
 //			System.out.println(CoreDetection.hScore);
-			System.out.println(CoreDetection.pathCoverageTau + "\t" + CoreDetection.hScore);
+//			System.out.println(CoreDetection.pathCoverageTau + "\t" + CoreDetection.hScore);
 			pw.println(CoreDetection.pathCoverageTau + "\t" + CoreDetection.hScore + "\t" + CoreDetection.minCoreSize);
 		}
 		pw.close();
@@ -714,7 +723,7 @@ public class ManagerHGPaper {
 		double matchedAlpha[] = {2.3, 2.5, 2,7, 2.4, 1, 2.3};
 		double matchedTau[] = {0.85, 0.85, 0.95, 0.95, 0.8, 0.8};
 		
-		for (int i = 3; i < 6; ++i) {
+		for (int i = 0; i < 6; ++i) {
 			nID = data[i];
 			CoreDetection.pathCoverageTau = matchedTau[i]; 
 			alphaModel = matchedAlpha[i];

@@ -19,6 +19,11 @@ import corehg.FlatNetwork;
 public class ManagerNeuro {
 	public static HashMap<String, String> idNeuronMap = new HashMap();
 	public static double numPaths = 0;
+	public static HashSet<Integer> source = new HashSet();
+	public static HashSet<Integer> intermediate = new HashSet();
+	public static HashSet<Integer> target = new HashSet();
+	public static HashSet<Integer> nodes = new HashSet();
+	public static HashSet<Integer> dualNodes = new HashSet();
 	
 	private static void loadNodes(HashSet<Integer> nodes, HashSet<Integer> typeNode, String fileName) throws Exception {
 		Scanner scan = new Scanner(new File(fileName));
@@ -57,6 +62,12 @@ public class ManagerNeuro {
 		nodes.removeAll(toRemove);
 	}
 	
+	private static int getTypeIndex(int node) {
+		if (source.contains(node)) return 0;
+		if (intermediate.contains(node)) return 1;
+		return 2;
+	}
+	
 	private static void writeFile(String edgeFileName, HashSet<Integer> source, HashSet<Integer> target, HashSet<Integer> intermediate, HashSet<Integer> nodes) throws Exception {
 		Scanner scan = new Scanner(new File(edgeFileName));
 		PrintWriter pw = new PrintWriter(new File("neuro_networks//celegans_network_clean.txt"));
@@ -67,28 +78,44 @@ public class ManagerNeuro {
 		HashMap<Integer, Integer> outdeg = new HashMap();
 		HashSet<Integer> retainedNode = new HashSet();
 		
-		System.out.println("Sizes " + nodes.size() + "\t" + source.size() + "\t" + intermediate.size() + "\t" + target.size());
+//		System.out.println("Sizes " + nodes.size() + "\t" + source.size() + "\t" + intermediate.size() + "\t" + target.size());
 //		int edgeConsidered = 0;
+		int dualNodeRemovedEdge = 0;
+		int totalRemovedEdge = 0;
+		int a[][] = new int[3][3];
 		while (scan.hasNext()) {
 			int src = scan.nextInt();
 			int dst = scan.nextInt();
 			double weight = scan.nextDouble();
 			
+			int srcType = getTypeIndex(src);
+			int dstType = getTypeIndex(dst);
+			a[srcType][dstType]++;
+			
 			if (!nodes.contains(src) || !nodes.contains(dst)) {
+				++dualNodeRemovedEdge;
 				continue;
 			}
 			
-			if (target.contains(src)) {
-				++nRemovedOutedge;
+			if (target.contains(src) && (intermediate.contains(dst) || source.contains(dst))) {
+//				++nRemovedOutedge;
+//				System.out.println(target.contains(dst) + "\t" + source.contains(dst) + "\t" + intermediate.contains(dst));
+				continue;
 			}
 			
-			if (source.contains(dst)) {
-				++nRemovedInedge;
+			if (intermediate.contains(src) && source.contains(dst)) {
+//				++nRemovedInedge;
+//				System.out.println(target.contains(src) + "\t" + source.contains(src) + "\t" + intermediate.contains(src));
+				continue;
+			}
+			
+			if (target.contains(src) || source.contains(dst)) {
+//				++totalRemovedEdge;
 			}
 			
 			if (target.contains(src) || source.contains(dst)) {
 //				System.out.println(src + "\t" + dst);
-				continue;
+//				continue;
 			}
 						
 			pw.println(src + "\t" + dst);
@@ -111,10 +138,19 @@ public class ManagerNeuro {
 			}
 		}
 		
-		System.out.println("Removed in-edges " + nRemovedInedge);
-		System.out.println("Removed out-edges " + nRemovedOutedge);
+//		System.out.println("Removed in-edges " + nRemovedInedge);
+//		System.out.println("Removed out-edges " + nRemovedOutedge);
+//		System.out.println("Removed total edge" + totalRemovedEdge);
 		System.out.println("Total edge " + totalEdge);
 		System.out.println("Total node " + retainedNode.size());
+//		System.out.println("Dual Node Removed Edge " + dualNodeRemovedEdge);
+		
+		for (int i = 0; i < 3; ++i) {
+			for (int j = 0; j < 3; ++j) {
+				System.out.print(a[i][j] + "\t");
+			}
+			System.out.println();
+		}
 		
 		int disS = 0;
 		int disT = 0;
@@ -126,13 +162,16 @@ public class ManagerNeuro {
 			}
 			else if (target.contains(i) && !indeg.containsKey(i)) {
 				++disT;
-				System.out.println(i + "\t" + outdeg.containsKey(i) + "\t" + disT);
+//				System.out.println(i + "\t" + outdeg.containsKey(i) + "\t" + disT);
 //				if (retainedNode.contains(i)) {
 //					System.out.println("1node " + i + "\t" + indeg.containsKey(i) + "\t" + outdeg.containsKey(i));
 //				}
 			}
 			else if (intermediate.contains(i) && (!indeg.containsKey(i) || !outdeg.containsKey(i))) {
 				++disI;
+//				if (!indeg.containsKey(i) && outdeg.containsKey(i)) System.out.println("Inter no in " + i);
+//				if (!outdeg.containsKey(i) && indeg.containsKey(i)) System.out.println("Inter no out " + i);
+//				if (!outdeg.containsKey(i) && !indeg.containsKey(i)) System.out.println("Inter no in/out " + i);
 			}
 			
 			if (!indeg.containsKey(i) && !outdeg.containsKey(i)) {
@@ -141,38 +180,62 @@ public class ManagerNeuro {
 //				if (target.contains(i)) System.out.println("isolated target");
 //				if (intermediate.contains(i)) System.out.println("isolated intermediate");
 			}
+			
+			if (source.contains(i)) {
+//				System.out.println(i);
+			}
 		}
 		
-		System.out.println("Disconnected nodes " + disS + "\t" + disI + "\t" + disT);
-		System.out.println("Isolated " + isolated);
+//		System.out.println("Disconnected nodes " + disS + "\t" + disI + "\t" + disT);
+//		System.out.println("Isolated " + isolated);
 		scan.close();
 		pw.close();
 	}
 	
-	private static void getCleanNeuroNetwork() throws Exception {
-		HashSet<Integer> source = new HashSet();
-		HashSet<Integer> intermediate = new HashSet();
-		HashSet<Integer> target = new HashSet();
-		HashSet<Integer> nodes = new HashSet();
-		
+	public static void loadNeuroMetaNetwork() throws Exception {
+		loadNodes(nodes, source, "neuro_networks//sensory_neurons.txt");
+		loadNodes(nodes, intermediate, "neuro_networks//inter_neurons.txt");
+		loadNodes(nodes, target, "neuro_networks//motor_neurons.txt");
+		loadNeurons("neuro_networks//celegans_labels.txt");
+	}
+	
+	public static void getCleanNeuroNetwork() throws Exception {		
 		loadNodes(nodes, source, "neuro_networks//sensory_neurons.txt");
 		loadNodes(nodes, intermediate, "neuro_networks//inter_neurons.txt");
 		loadNodes(nodes, target, "neuro_networks//motor_neurons.txt");
 		
+		int maxLabel = 279;
+		for (int i = 1; i <= maxLabel; ++i) {
+			int k = 0;
+			if (source.contains(i)) ++k;
+			if (intermediate.contains(i)) ++k;
+			if (target.contains(i)) ++k;
+			if (k > 1) {
+//				System.out.println(i + "\t" + k);
+//				System.out.println(source.contains(i) + "\t" + intermediate.contains(i) + "\t" + target.contains(i));
+			}
+			dualNodes.add(i);
+		}
+		
 		loadNeurons("neuro_networks//celegans_labels.txt");
 		
+		/* temporary turn off */
+		/*
 		removeDuplicate(source, intermediate, target, nodes);
 		removeDuplicate(intermediate, source, target, nodes);
 		removeDuplicate(target, source, intermediate, nodes);
+		*/
+		removeDuplicate(target, source, source, nodes); // only removing dual definition source-target nodes
 		
-		System.out.println("Total nodes: " + nodes.size());
-		System.out.println("Sources: " + source.size());
-		System.out.println("Intermediate: " + intermediate.size());
-		System.out.println("Target: " + target.size());
+//		System.out.println("Total nodes: " + nodes.size());
+//		System.out.println("Sources: " + source.size());
+//		System.out.println("Intermediate: " + intermediate.size());
+//		System.out.println("Target: " + target.size());
 		
 		writeFile("neuro_networks//celegans_graph.txt", source, target, intermediate, nodes);
 	}
 	
+	/*
 	private static void getLocationColorWeightedHistogram(DependencyDAG dependencyDAG) {
 		double binWidth = 0.1;
 		int numBin = (int)(1.0 / binWidth) + 2;
@@ -320,14 +383,24 @@ public class ManagerNeuro {
 			System.out.println(coreSize + "\t" + CoreDetection.hScore);
 		}
 	}
+	*/
 	
 	private static void doNeuroNetworkAnalysis() throws Exception {
-		DependencyDAG.isCyclic = true;
-		String neuroDAGName = "celegans_network_clean";
-		DependencyDAG neuroDependencyDAG = new DependencyDAG("neuro_networks//" + neuroDAGName + ".txt");
+//		DependencyDAG.isCyclic = true;
+//		String neuroDAGName = "celegans_network_clean";
+//		DependencyDAG neuroDependencyDAG = new DependencyDAG("neuro_networks//" + neuroDAGName + ".txt");
 		
-		String netID = "neuro_network";
-//		neuroDependencyDAG.printNetworkStat();
+		DependencyDAG.isToy = true;
+//		int disconnectedInterNeurons[] = {4,5,7,9,19,20,21,22,34,36,44,53,85,93,125,272};
+//		for (int i: disconnectedInterNeurons) {
+//			CoreDetection.topRemovedWaistNodes.add(Integer.toString(i));
+//		}
+		DependencyDAG neuroDependencyDAG = new DependencyDAG("neuro_networks//celegans.socialrank.network");
+		
+		String netID = "celegans";
+		neuroDependencyDAG.printNetworkStat();
+//		neuroDependencyDAG.printNetworkProperties();
+//		DistributionAnalysis.getDistributionCCDF(neuroDependencyDAG, netID, 1);
 //		getLocationColorWeightedHistogram(neuroDependencyDAG);
 //		neuroDependencyDAG.printNetworkProperties();
 
@@ -336,19 +409,19 @@ public class ManagerNeuro {
 //		DistributionAnalysis.getDistributionCCDF(neuroDependencyDAG, netID, 1);
 		
 //		Visualization.printDOTNetwork(neuroDependencyDAG);
-		CoreDetection.pathCoverageTau = 0.99;
+		CoreDetection.pathCoverageTau = 0.98;
 		CoreDetection.fullTraverse = false;
 		CoreDetection.getCore(neuroDependencyDAG, netID);
 		double realCore = CoreDetection.minCoreSize;
-//
-		neuroDependencyDAG = new DependencyDAG("neuro_networks//" + neuroDAGName + ".txt");
-		FlatNetwork.makeAndProcessFlat(neuroDependencyDAG);
-		CoreDetection.hScore = (1.0 - (realCore / FlatNetwork.flatNetworkCoreSize));
-		System.out.println("[h-Score] " + CoreDetection.hScore);
+
+//		neuroDependencyDAG = new DependencyDAG("neuro_networks//" + neuroDAGName + ".txt");
+//		FlatNetwork.makeAndProcessFlat(neuroDependencyDAG);
+//		CoreDetection.hScore = (1.0 - (realCore / FlatNetwork.flatNetworkCoreSize));
+//		System.out.println("[h-Score] " + CoreDetection.hScore);
 	}
 	
 	public static void main(String[] args) throws Exception {
-		getCleanNeuroNetwork();
+//		getCleanNeuroNetwork();
 		doNeuroNetworkAnalysis();
 //		statisticalRun();
 //		traverseAllPaths();

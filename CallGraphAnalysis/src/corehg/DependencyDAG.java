@@ -439,9 +439,9 @@ public class DependencyDAG {
 				if (StringUtils.containsIgnoreCase(server, "object")) continue;
 				if (StringUtils.containsIgnoreCase(dependent, "object")) continue;
 				
-				if (largestWCCNodes.contains(server) == false || largestWCCNodes.contains(dependent) == false) {
-					continue;
-				}
+//				if (largestWCCNodes.contains(server) == false || largestWCCNodes.contains(dependent) == false) {
+//					continue;
+//				}
 			}
 			else if (isMetabolic) {
 				// for metabolic and synthetic networks
@@ -459,6 +459,7 @@ public class DependencyDAG {
 //					if (weight > 1) {
 						edgeWeights.put(server + "#" + dependent, weight);
 //						System.out.println("putting " + server + "#" + dependent + " w:" + weight);
+//						System.out.println(weight);
 //					}
 				} 
 				else {
@@ -1363,14 +1364,14 @@ public class DependencyDAG {
 //				System.out.println(s + "\t" + lengthWeightedPathCentrality.get(s) + "\t" + nodePathThrough.get(s));
 //				System.out.println(s + "\t" + nodePathThrough.get(s));				
 //			}
-			
+//			System.out.println(nodePathThrough.get(s));
 			System.out.println(s + "\t" + numPathLocation.get(s) + "\t" + normalizedPathCentrality.get(s));
 //			System.out.println(s + "\t" + lengthPathLocation.get(s) + "\t" + normalizedPathCentrality.get(s) + "\t" + outDegree.get(s));
 			
 //			System.out.println();
-//			if (isSource(s)) {
+			if (isSource(s)) {
 //				System.out.println(s + "\t" + outDegree.get(s) + "\t" + normalizedPathCentrality.get(s));
-//			}
+			}
 		}
 		
 //		System.out.println("Total path: " + nTotalPath);

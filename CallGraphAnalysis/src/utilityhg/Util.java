@@ -13,6 +13,8 @@ import org.apache.commons.math3.distribution.AbstractRealDistribution;
 import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.apache.commons.math3.distribution.ZipfDistribution;
 import org.apache.commons.math3.stat.StatUtils;
+import org.apache.commons.math3.stat.correlation.KendallsCorrelation;
+import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 
 import corehg.DependencyDAG;
@@ -168,15 +170,15 @@ public class Util {
 //		extractJavaClassDependency();
 		//
 		
-		int n = 3;
-		PoissonDistribution poissonDistribution = new PoissonDistribution(7);
-		ZipfDistribution zipfDistribution = new ZipfDistribution(n, 1.0);
-		for (int i = 1; i <= n; ++i) {
-//			 System.out.println(i + "\t" + zipfDistribution.probability(n - i + 1));
-//			 System.out.println(zipfDistribution.sample());
-			 System.out.println(i + "\t" + zipfDistribution.probability(i));
-//			 System.out.println(i + "\t" + poissonDistribution.probability(i));
-		}
+//		int n = 3;
+//		PoissonDistribution poissonDistribution = new PoissonDistribution(7);
+//		ZipfDistribution zipfDistribution = new ZipfDistribution(n, 1.0);
+//		for (int i = 1; i <= n; ++i) {
+////			 System.out.println(i + "\t" + zipfDistribution.probability(n - i + 1));
+////			 System.out.println(zipfDistribution.sample());
+//			 System.out.println(i + "\t" + zipfDistribution.probability(i));
+////			 System.out.println(i + "\t" + poissonDistribution.probability(i));
+//		}
 		
 		//
 		// System.out.println("----------");
@@ -209,18 +211,24 @@ public class Util {
 		//
 		// Files.write(Paths.get("binfile.txt"), aBytes); //creates, overwrites
 
-		// Scanner scanner = new Scanner(new File("ci-test.txt"));
-		//
-		// double a[] = new double[100];
-		// double b[] = new double[100];
-		// int i = 0;
-		// while (scanner.hasNext()) {
-		// // System.out.println(scanner.next());
-		// // System.out.println(scanner.next());
-		// a[i] = Double.valueOf(scanner.next());
-		// b[i] = Double.valueOf(scanner.next());
-		// ++i;
-		// }
+		 Scanner scanner = new Scanner(new File("spearman.txt"));
+		
+		 double a[] = new double[250];
+		 double b[] = new double[250];
+		 int i = 0;
+		 while (scanner.hasNext()) {
+		 // System.out.println(scanner.next());
+		 // System.out.println(scanner.next());
+		 a[i] = Double.valueOf(scanner.next());
+		 b[i] = Double.valueOf(scanner.next());
+		 ++i;
+		 }
+		 
+		 SpearmansCorrelation spearmanCorrealtion = new SpearmansCorrelation();
+		 KendallsCorrelation kendallsCorrelation = new KendallsCorrelation();
+		 System.out.println(spearmanCorrealtion.correlation(a, b));
+		 System.out.println(kendallsCorrelation.correlation(a, b));
+		 
 		//
 		// double mA = StatUtils.mean(a);
 		// double mB = StatUtils.mean(b);
@@ -232,14 +240,14 @@ public class Util {
 		// System.out.println(mB + "\t" + Math.sqrt(StatUtils.variance(b)) +
 		// "\t" + ciB);
 		
-		double[] v = new double[9989];
-		int i = 0;
-		Scanner scanner = new Scanner(new File("analysis//test.txt"));
-		while (scanner.hasNext()) {
-			v[i++] = scanner.nextInt();
-		}
-		scanner.close();
-		getCCDF(v);
+//		double[] v = new double[9989];
+//		int i = 0;
+//		Scanner scanner = new Scanner(new File("analysis//test.txt"));
+//		while (scanner.hasNext()) {
+//			v[i++] = scanner.nextInt();
+//		}
+//		scanner.close();
+//		getCCDF(v);
 	}
 
 }

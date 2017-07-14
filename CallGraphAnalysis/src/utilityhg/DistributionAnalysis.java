@@ -98,33 +98,55 @@ public class DistributionAnalysis {
 	public static TreeMap<Double, Double> getDistributionCCDF(
 			DependencyDAG dependencyDAG, String filePath, int key)
 			throws Exception {
-		String[] dist = { "", "centrality", "outdegree" };
+		String[] dist = { "", "centrality", "outdegree", "edgeWeight" };
 		PrintWriter pw = new PrintWriter(new File("analysis//"+ dist[key] + "-ccdf-" + filePath + ".txt"));
 
 		Map<Double, Double> histogram = new TreeMap<Double, Double>();
 		Map<Double, Double> CDF = new TreeMap<Double, Double>();
 
-		for (String s : dependencyDAG.nodes) {
-			double v = 0;
-			if (key == 1)
-				v = dependencyDAG.normalizedPathCentrality.get(s); // dependencyDAG.nTotalPath;
-			else if (key == 2)
-				v = dependencyDAG.outDegree.get(s);
-			
-			if (histogram.containsKey(v)) {
-				histogram.put(v, histogram.get(v) + 1.0);
-			} else {
-				histogram.put(v, 1.0);
+		if (key == 3) { // special case: celegans neuro
+			for (String s : dependencyDAG.edgeWeights.keySet()) {
+				double v = dependencyDAG.edgeWeights.get(s);
+				if (histogram.containsKey(v)) {
+					histogram.put(v, histogram.get(v) + 1.0);
+				} else {
+					histogram.put(v, 1.0);
+				}
+			}
+
+			// CDF: Cumulative Distribution Function
+			double cumulativeSum = 0;
+			for (double d : histogram.keySet()) {
+				double v = histogram.get(d);
+				// System.out.println(d + "\t" + v);
+				cumulativeSum += v;
+				CDF.put(d, cumulativeSum / dependencyDAG.edgeWeights.size());
 			}
 		}
+		else {
+			for (String s : dependencyDAG.nodes) {
+				double v = 0;
+				if (key == 1)
+//					v = dependencyDAG.normalizedPathCentrality.get(s); // dependencyDAG.nTotalPath;
+				    v = dependencyDAG.nodePathThrough.get(s);
+				else if (key == 2)
+					v = dependencyDAG.outDegree.get(s);
+				
+				if (histogram.containsKey(v)) {
+					histogram.put(v, histogram.get(v) + 1.0);
+				} else {
+					histogram.put(v, 1.0);
+				}
+			}
 
-		// CDF: Cumulative Distribution Function
-		double cumulativeSum = 0;
-		for (double d : histogram.keySet()) {
-			double v = histogram.get(d);
-			// System.out.println(d + "\t" + v);
-			cumulativeSum += v;
-			CDF.put(d, cumulativeSum / dependencyDAG.nodes.size());
+			// CDF: Cumulative Distribution Function
+			double cumulativeSum = 0;
+			for (double d : histogram.keySet()) {
+				double v = histogram.get(d);
+				// System.out.println(d + "\t" + v);
+				cumulativeSum += v;
+				CDF.put(d, cumulativeSum / dependencyDAG.nodes.size());
+			}
 		}
 
 		// CCDF: Complementary CDF

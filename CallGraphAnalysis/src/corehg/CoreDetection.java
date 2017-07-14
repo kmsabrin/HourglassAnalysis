@@ -102,7 +102,10 @@ public class CoreDetection {
 //			find the node with largest through path
 			
 			/* cancer data - special case */
-//			if (s.equals("miR429") || s.equals("dummy-in") || s.equals("dummy-out")) continue;
+			if (s.equals("miR429") || s.equals("dummy-in") || s.equals("dummy-out")) continue;
+			
+			/* celegans - special case */
+			if (s.equals("1000") || s.equals("2000")) continue;
 			
 //			double numPathCovered = 0;
 //			if (dependencyDAG.numOfSourcePath.containsKey(s) && dependencyDAG.numOfTargetPath.containsKey(s)) {
@@ -266,9 +269,20 @@ public class CoreDetection {
 //		dependencyDAG.numOfTargetPath.clear();
 //		dependencyDAG.numOfSourcePath.clear();
 //		dependencyDAG.loadPathStatistics();
-		
+
+		/* for neuro case start */
+//		int disconnectedInterNeurons[] = {4,5,7,9,19,20,21,22,34,36,44,53,85,93,125,272};
+//		TreeSet<String> blockedNodeSet = new TreeSet();
+//		for (int i: disconnectedInterNeurons) {
+//			blockedNodeSet.add(Integer.toString(i));
+//		}
+//		topRemovedWaistNodes.addAll(blockedNodeSet);
+		/* for neuro case end */
+
 		traverseTreeHelper(dependencyDAG, 0, dependencyDAG.nTotalPath, 1, 1);
 		
+		topRemovedWaistNodes.clear();
+//		System.out.println(coreSet.size() + "\t" + coreSet);
 //		Remove sub-optimal cores 
 //		Keep the core with min size first and then max coverage
 		int optimalCoreCount = 0;
@@ -299,6 +313,8 @@ public class CoreDetection {
 		
 //		Use the first core as a sample
 		sampleCore = coreSet.keySet().iterator().next();
+//		sampleCore.removeAll(blockedNodeSet);
+//		System.out.println(sampleCore);
 		getNodeCoverage(dependencyDAG, sampleCore);
 //		getNodeCoverage2(dependencyDAG, sampleCore);
 		coreLocationAnalysis(dependencyDAG);
@@ -505,10 +521,10 @@ public class CoreDetection {
 		weightedCoreLocation = 0;
 		double corePathContribution = 0;
 		for (String s: sampleCore) {
+//			System.out.println(s + " -- " + representativeLocation.get(s) + " -- " + averagePathCovered.get(s));
 //			weightedCoreLocation += dependencyDAG.location.get(s) * averagePathCovered.get(s);
 			weightedCoreLocation += representativeLocation.get(s) * averagePathCovered.get(s);
 			corePathContribution += averagePathCovered.get(s);
-//			System.out.println(s + " -- " + representativeLocation.get(s) + " -- " + averagePathCovered.get(s));
 		}
 //		System.out.println();
 		

@@ -3,6 +3,8 @@ package corehg;
 import java.io.File;
 import java.io.PrintWriter;
 
+import utilityhg.DistributionAnalysis;
+
 public class FlatNetwork {
 	public static double flatNetworkCoreSize = -1;
 	public static boolean isProcessingFlat = false;
@@ -62,7 +64,9 @@ public class FlatNetwork {
 //		DependencyDAG.isWeighted = false;
 		DependencyDAG.isWeighted = true;
 		DependencyDAG flatDAG = new DependencyDAG("flat_networks//current_flat.txt");
+//		flatDAG.printNetworkStat();
 //		flatDAG.printNetworkProperties();
+//		DistributionAnalysis.getDistributionCCDF(flatDAG, "celegans-fat", 3);
 		CoreDetection.fullTraverse = false;
 		isProcessingFlat = true;
 		CoreDetection.getCore(flatDAG, "flatDAG");
