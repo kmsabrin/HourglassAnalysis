@@ -1,20 +1,19 @@
 package corehg;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import org.apache.commons.math3.stat.StatUtils;
+import neuro.ManagerNeuro;
 
-import utilityhg.Edge;
+import org.apache.commons.math3.stat.StatUtils;
 
 public class CoreDetection {
 	public static boolean viewCore = true;
-	public static boolean viewStat = true;
+	public static boolean viewStat = false;
 	public static HashSet<String> topRemovedWaistNodes = new HashSet();
 	public static HashMap<String, Double> averageCoreRank;
 	public static HashMap<String, Double> averagePathCovered;
@@ -105,7 +104,11 @@ public class CoreDetection {
 			if (s.equals("miR429") || s.equals("dummy-in") || s.equals("dummy-out")) continue;
 			
 			/* celegans - special case */
-			if (s.equals("1000") || s.equals("2000")) continue;
+			if (DependencyDAG.isCelegans) {
+				if (s.equals("1000") || s.equals("2000")) {
+					continue;
+				}
+			}
 			
 //			double numPathCovered = 0;
 //			if (dependencyDAG.numOfSourcePath.containsKey(s) && dependencyDAG.numOfTargetPath.containsKey(s)) {
@@ -322,6 +325,11 @@ public class CoreDetection {
 				
 		if (!FlatNetwork.isProcessingFlat & viewStat) {
 			System.out.println("Sample Core: " + sampleCore);
+			if (DependencyDAG.isCelegans) {
+				for (String s: sampleCore) {
+					System.out.println(s + "\t" + ManagerNeuro.getType(s) + "\t" + dependencyDAG.getNodeType(s));
+				}
+			}
 			System.out.println("Number of coreSet: " + optimalCoreCount);
 			System.out.println("Min core size: " + minCoreSize);
 			System.out.println("Node Coverage: " + nodeCoverage);

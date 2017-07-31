@@ -12,6 +12,8 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeSet;
 
+import neuro.ManagerNeuro;
+
 import org.apache.commons.lang3.StringUtils;
 
 import swpaper.LineOfCodeCount;
@@ -87,6 +89,7 @@ public class DependencyDAG {
 	public static boolean isRandomized = false;
 	public static boolean isLexis = false;
 	public static boolean isCyclic = false;
+	public static boolean isCelegans = false;
 	
 	public static int nDirectSourceTargetEdges = 0;
 	
@@ -744,6 +747,9 @@ public class DependencyDAG {
 		else if (isRandomized){
 			return sources.contains(node);
 		}
+//		else if (isCelegans) {
+//			return ManagerNeuro.source.contains(node);
+//		}
 		else {
 			return !depends.containsKey(node);
 		}
@@ -759,6 +765,9 @@ public class DependencyDAG {
 		else if (isRandomized){
 			return targets.contains(node);
 		}
+//		else if (isCelegans) {
+//			return ManagerNeuro.target.contains(node);
+//		}
 		else {
 			return !serves.containsKey(node);
 		}
@@ -1198,6 +1207,10 @@ public class DependencyDAG {
 //		}	
 		
 //		System.out.println("Total path: " + nTotalPath);
+		
+//		if (DependencyDAG.isCelegans) {
+//			nTotalPath = 5564398; // wrong
+//		}
 	}
 		
 	public void loadLocationMetric() {
@@ -1339,6 +1352,7 @@ public class DependencyDAG {
 	
 	public void printNetworkProperties() {
 		for (String s: nodes) {
+			if (DependencyDAG.isCelegans && (s.equals("1000") || s.equals("2000"))) continue;
 //			if (normalizedPathCentrality.get(s) < 0.4) continue;
 //			System.out.print("Node: " + s + "\t");
 //			System.out.print("Complexity: " + numOfSourcePath.get(s) + "\t");
@@ -1503,7 +1517,16 @@ public class DependencyDAG {
 		System.out.println(" T: " + nTargets);
 		System.out.println(" E: " + nEdges);
 		System.out.println(" N: " + nodes.size());
-		System.out.println(" Toal Path: " + nTotalPath);		
+		System.out.println(" Toal Path: " + nTotalPath);	
+		
+		if (DependencyDAG.isCelegans) {
+			System.out.println(nodePathThrough.get("1000") + "\t" + nodePathThrough.get("2000"));
+		}
 	}
 	
+	public String getNodeType(String node) {
+		if (isSource(node)) return "source";
+		else if (isTarget(node)) return "target";
+		return "intermediate";
+	}
 }

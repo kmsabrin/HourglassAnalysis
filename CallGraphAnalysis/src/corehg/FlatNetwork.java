@@ -3,6 +3,7 @@ package corehg;
 import java.io.File;
 import java.io.PrintWriter;
 
+import neuro.ManagerNeuro;
 import utilityhg.DistributionAnalysis;
 
 public class FlatNetwork {
@@ -26,22 +27,34 @@ public class FlatNetwork {
 	private static void writeFlattenWeighted(DependencyDAG dependencyDAG) throws Exception {
 		PrintWriter pw = new PrintWriter(new File("flat_networks//current_flat.txt"));
 		
+//		System.out.println(DependencyDAG.isCelegans);
+//		System.out.println(ManagerNeuro.source);
+//		System.out.println(dependencyDAG.nodes);
+		
+		
 		CoreDetection.topRemovedWaistNodes.clear();
 		for (String s: dependencyDAG.nodes) {
-			if (dependencyDAG.isSource(s)) {
+			if ((!DependencyDAG.isCelegans && dependencyDAG.isSource(s)) || (DependencyDAG.isCelegans && ManagerNeuro.source.contains(s))) {
 				CoreDetection.topRemovedWaistNodes.add(s);
+//				System.out.println("Adding " + s);
+			}
+			else {
+//				System.out.println(DependencyDAG.isCelegans + " " +  ManagerNeuro.source.contains(s) + " " + s);
 			}
 		}
 		
 		for (String s: dependencyDAG.nodes) {
-			if (dependencyDAG.isSource(s)) {
+			if ((!DependencyDAG.isCelegans && dependencyDAG.isSource(s)) || (DependencyDAG.isCelegans && ManagerNeuro.source.contains(s))) {
 				dependencyDAG.initPathStat();
 				CoreDetection.topRemovedWaistNodes.remove(s);
 				dependencyDAG.loadPathStatistics();
 				for (String r: dependencyDAG.nodes) {
-					if (dependencyDAG.isTarget(r)) {
+					if ((!DependencyDAG.isCelegans && dependencyDAG.isTarget(r)) || (DependencyDAG.isCelegans && ManagerNeuro.target.contains(r))) {
 						if (dependencyDAG.nodePathThrough.get(r) > 0) {
 							pw.println(s + "\t" + r + "\t" + dependencyDAG.nodePathThrough.get(r));
+						}
+						else {
+//							System.out.println(s + "\t" + r + "\t" + dependencyDAG.nodePathThrough.get(r));
 						}
 					}
 				}
@@ -66,7 +79,8 @@ public class FlatNetwork {
 		DependencyDAG flatDAG = new DependencyDAG("flat_networks//current_flat.txt");
 //		flatDAG.printNetworkStat();
 //		flatDAG.printNetworkProperties();
-//		DistributionAnalysis.getDistributionCCDF(flatDAG, "celegans-fat", 3);
+//		DistributionAnalysis.getDistributionCCDF(flatDAG, "celegans-flat", 1);
+//		DistributionAnalysis.getDistributionCCDF(flatDAG, "celegans-flat", 3);
 		CoreDetection.fullTraverse = false;
 		isProcessingFlat = true;
 		CoreDetection.getCore(flatDAG, "flatDAG");

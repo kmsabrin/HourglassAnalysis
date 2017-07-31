@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Scanner;
 
+import neuro.ManagerNeuro;
+
 import org.apache.commons.math3.stat.StatUtils;
 
 import utilityhg.ConfidenceInterval;
@@ -257,6 +259,8 @@ public class ManagerHGPaper {
 		else if (netID.equals("celegans")) {			
 			netPath = "neuro_networks//celegans.socialrank.network";
 			DependencyDAG.isToy = true;
+			ManagerNeuro.loadNeuroMetaNetwork();
+			DependencyDAG.isCelegans = true;
 		}
 
 		DependencyDAG dependencyDAG = new DependencyDAG(netPath);
@@ -266,7 +270,7 @@ public class ManagerHGPaper {
 //		System.out.println("nDisconnected " + (1.0 * dependencyDAG.disconnectedKount / dependencyDAG.nodes.size()));
 //		generateSyntheticFromReal(dependencyDAG);
 		
-		dependencyDAG.printNetworkProperties();
+//		dependencyDAG.printNetworkProperties();
 //		DistributionAnalysis.getLocationColorWeightedHistogram(dependencyDAG);
 		
 //		Visualization.printDOTNetwork(dependencyDAG);
@@ -296,7 +300,7 @@ public class ManagerHGPaper {
 		
 //		Core Detection
 		CoreDetection.fullTraverse = false;
-		CoreDetection.pathCoverageTau = 0.95;
+//		CoreDetection.pathCoverageTau = 0.98;
 		CoreDetection.getCore(dependencyDAG, netID);
 		double realCore = CoreDetection.minCoreSize;
 //		System.out.println(CoreDetection.minCoreSize);
@@ -307,10 +311,7 @@ public class ManagerHGPaper {
 //		DependencyDAG.isRandomized = false;
 		FlatNetwork.makeAndProcessFlat(dependencyDAG);	
 		CoreDetection.hScore = (1.0 - (realCore / FlatNetwork.flatNetworkCoreSize));
-//		System.out.println("H-Score: " + CoreDetection.hScore);
-//		System.out.println(CoreDetection.minCoreSize);
-//		System.out.println("\t" + CoreDetection.hScore);
-//		System.out.println(CoreDetection.pathCoverageTau + "\t" + realCore + "\t" + FlatNetwork.flatNetworkCoreSize + "\t" + CoreDetection.hScore);
+		System.out.println(CoreDetection.pathCoverageTau + "\t" + realCore + "\t" + FlatNetwork.flatNetworkCoreSize + "\t" + CoreDetection.hScore);
 		
 //		Get Real to Model Networks
 //		getOptimalAlphaForModel(dependencyDAG, CoreDetection.hScore);
@@ -751,8 +752,8 @@ public class ManagerHGPaper {
 	}
 	
 	public static void main(String[] args) throws Exception {		
-		ManagerHGPaper.doRealNetworkAnalysis();
-//		ManagerHGPaper.measureTauEffectOnRealNetwork();
+//		ManagerHGPaper.doRealNetworkAnalysis();
+		ManagerHGPaper.measureTauEffectOnRealNetwork();
 //		ManagerHGPaper.runThroughAllRealNets();
 //		ManagerHGPaper.runScalabilityTest();
 //		ManagerHGPaper.runRandomizationTest();

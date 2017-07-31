@@ -94,10 +94,10 @@ public class SocialRankAnalysis {
 			idLabelMap.put(id, label);
 			/* special case */
 //			System.out.println(label + "\t" + ManagerNeuro.source.contains(Integer.parseInt(label)));
-			if (ManagerNeuro.source.contains(Integer.parseInt(label))) {
+			if (ManagerNeuro.source.contains(label)) {
 				pw.println("1000" + "\t" + label);
 			}
-			if (ManagerNeuro.target.contains(Integer.parseInt(label))) {
+			if (ManagerNeuro.target.contains(label)) {
 				pw.println(label + "\t" + "2000");
 			}
 		}
@@ -112,6 +112,7 @@ public class SocialRankAnalysis {
 			levelCounter[rank]++;
 			int demoCategory = getDemoCategory(Integer.parseInt(idLabelMap.get(id)));
 			levelDemography[rank][demoCategory]++;
+			System.out.println(idLabelMap.get(id) + "\t" + rank + "\t" + agony);
 		}
 		scanner.close();
 		
@@ -159,9 +160,9 @@ public class SocialRankAnalysis {
 		pw.close();
 		scanner.close();
 		
-//		for (int i = 0; i < nLevels; ++i) {
-//			System.out.println(i + "\t" + levelCounter[i]);
-//		}
+		for (int i = 0; i < nLevels; ++i) {
+			System.out.println(i + "\t" + levelCounter[i]);
+		}
 //		
 //		System.out.println();
 //		
@@ -213,7 +214,8 @@ public class SocialRankAnalysis {
 	public static void main(String[] args) throws Exception {
 //		randomizationTest = true;
 //		random = new Random();
-//		getDataForSocialrankAnalysis();
+		
+		getDataForSocialrankAnalysis();
 		getSocialrankCompliantNetwork();
 	}
 }

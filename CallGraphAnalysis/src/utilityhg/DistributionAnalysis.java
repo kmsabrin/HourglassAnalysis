@@ -125,6 +125,7 @@ public class DistributionAnalysis {
 		}
 		else {
 			for (String s : dependencyDAG.nodes) {
+				if (DependencyDAG.isCelegans && (s.equals("1000") || s.equals("2000"))) continue;
 				double v = 0;
 				if (key == 1)
 //					v = dependencyDAG.normalizedPathCentrality.get(s); // dependencyDAG.nTotalPath;

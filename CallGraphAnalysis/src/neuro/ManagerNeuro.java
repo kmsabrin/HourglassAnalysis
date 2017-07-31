@@ -19,16 +19,16 @@ import corehg.FlatNetwork;
 public class ManagerNeuro {
 	public static HashMap<String, String> idNeuronMap = new HashMap();
 	public static double numPaths = 0;
-	public static HashSet<Integer> source = new HashSet();
-	public static HashSet<Integer> intermediate = new HashSet();
-	public static HashSet<Integer> target = new HashSet();
-	public static HashSet<Integer> nodes = new HashSet();
-	public static HashSet<Integer> dualNodes = new HashSet();
+	public static HashSet<String> source = new HashSet();
+	public static HashSet<String> intermediate = new HashSet();
+	public static HashSet<String> target = new HashSet();
+	public static HashSet<String> nodes = new HashSet();
+	public static HashSet<String> dualNodes = new HashSet();
 	
-	private static void loadNodes(HashSet<Integer> nodes, HashSet<Integer> typeNode, String fileName) throws Exception {
+	private static void loadNodes(HashSet<String> nodes, HashSet<String> typeNode, String fileName) throws Exception {
 		Scanner scan = new Scanner(new File(fileName));
 		while (scan.hasNext()) {
-			int i = scan.nextInt();
+			String i = scan.next();
 			typeNode.add(i);
 			nodes.add(i);
 		}
@@ -45,9 +45,9 @@ public class ManagerNeuro {
 		scan.close();
 	}
 	
-	private static void removeDuplicate(HashSet<Integer> from, HashSet<Integer> to1, HashSet<Integer> to2, HashSet<Integer> nodes) {
-		HashSet<Integer> toRemove = new HashSet();
-		for (int i: from) {
+	private static void removeDuplicate(HashSet<String> from, HashSet<String> to1, HashSet<String> to2, HashSet<String> nodes) {
+		HashSet<String> toRemove = new HashSet();
+		for (String i: from) {
 			if (to1.contains(i)) {
 				to1.remove(i);
 				toRemove.add(i);
@@ -62,21 +62,27 @@ public class ManagerNeuro {
 		nodes.removeAll(toRemove);
 	}
 	
-	private static int getTypeIndex(int node) {
+	private static int getTypeIndex(String node) {
 		if (source.contains(node)) return 0;
 		if (intermediate.contains(node)) return 1;
 		return 2;
 	}
 	
-	private static void writeFile(String edgeFileName, HashSet<Integer> source, HashSet<Integer> target, HashSet<Integer> intermediate, HashSet<Integer> nodes) throws Exception {
+	public static String getType(String node) {
+		if (source.contains(node)) return "sensory";
+		if (intermediate.contains(node)) return "inter";
+		return "motor";
+	}
+	
+	private static void writeFile(String edgeFileName, HashSet<String> source, HashSet<String> target, HashSet<String> intermediate, HashSet<String> nodes) throws Exception {
 		Scanner scan = new Scanner(new File(edgeFileName));
 		PrintWriter pw = new PrintWriter(new File("neuro_networks//celegans_network_clean.txt"));
 		int nRemovedInedge = 0;
 		int nRemovedOutedge = 0;
 		int totalEdge = 0;
-		HashMap<Integer, Integer> indeg = new HashMap();
-		HashMap<Integer, Integer> outdeg = new HashMap();
-		HashSet<Integer> retainedNode = new HashSet();
+		HashMap<String, Integer> indeg = new HashMap();
+		HashMap<String, Integer> outdeg = new HashMap();
+		HashSet<String> retainedNode = new HashSet();
 		
 //		System.out.println("Sizes " + nodes.size() + "\t" + source.size() + "\t" + intermediate.size() + "\t" + target.size());
 //		int edgeConsidered = 0;
@@ -84,8 +90,8 @@ public class ManagerNeuro {
 		int totalRemovedEdge = 0;
 		int a[][] = new int[3][3];
 		while (scan.hasNext()) {
-			int src = scan.nextInt();
-			int dst = scan.nextInt();
+			String src = scan.next();
+			String dst = scan.next();
 			double weight = scan.nextDouble();
 			
 			int srcType = getTypeIndex(src);
@@ -156,7 +162,7 @@ public class ManagerNeuro {
 		int disT = 0;
 		int disI = 0;
 		int isolated = 0;
-		for (int i: nodes) {
+		for (String i: nodes) {
 			if (source.contains(i) && !outdeg.containsKey(i)) {
 				++disS;
 			}
@@ -214,7 +220,7 @@ public class ManagerNeuro {
 //				System.out.println(i + "\t" + k);
 //				System.out.println(source.contains(i) + "\t" + intermediate.contains(i) + "\t" + target.contains(i));
 			}
-			dualNodes.add(i);
+			dualNodes.add(Integer.toString(i));
 		}
 		
 		loadNeurons("neuro_networks//celegans_labels.txt");
@@ -227,10 +233,10 @@ public class ManagerNeuro {
 		*/
 		removeDuplicate(target, source, source, nodes); // only removing dual definition source-target nodes
 		
-//		System.out.println("Total nodes: " + nodes.size());
-//		System.out.println("Sources: " + source.size());
-//		System.out.println("Intermediate: " + intermediate.size());
-//		System.out.println("Target: " + target.size());
+		System.out.println("Total nodes: " + nodes.size());
+		System.out.println("Sources: " + source.size());
+		System.out.println("Intermediate: " + intermediate.size());
+		System.out.println("Target: " + target.size());
 		
 		writeFile("neuro_networks//celegans_graph.txt", source, target, intermediate, nodes);
 	}
@@ -390,6 +396,9 @@ public class ManagerNeuro {
 //		String neuroDAGName = "celegans_network_clean";
 //		DependencyDAG neuroDependencyDAG = new DependencyDAG("neuro_networks//" + neuroDAGName + ".txt");
 		
+		loadNeuroMetaNetwork();
+		DependencyDAG.isCelegans = true;
+		
 		DependencyDAG.isToy = true;
 //		int disconnectedInterNeurons[] = {4,5,7,9,19,20,21,22,34,36,44,53,85,93,125,272};
 //		for (int i: disconnectedInterNeurons) {
@@ -398,8 +407,8 @@ public class ManagerNeuro {
 		DependencyDAG neuroDependencyDAG = new DependencyDAG("neuro_networks//celegans.socialrank.network");
 		
 		String netID = "celegans";
-		neuroDependencyDAG.printNetworkStat();
-//		neuroDependencyDAG.printNetworkProperties();
+//		neuroDependencyDAG.printNetworkStat();
+		neuroDependencyDAG.printNetworkProperties();
 //		DistributionAnalysis.getDistributionCCDF(neuroDependencyDAG, netID, 1);
 //		getLocationColorWeightedHistogram(neuroDependencyDAG);
 //		neuroDependencyDAG.printNetworkProperties();
@@ -415,14 +424,16 @@ public class ManagerNeuro {
 		double realCore = CoreDetection.minCoreSize;
 
 //		neuroDependencyDAG = new DependencyDAG("neuro_networks//" + neuroDAGName + ".txt");
-//		FlatNetwork.makeAndProcessFlat(neuroDependencyDAG);
-//		CoreDetection.hScore = (1.0 - (realCore / FlatNetwork.flatNetworkCoreSize));
-//		System.out.println("[h-Score] " + CoreDetection.hScore);
+		FlatNetwork.makeAndProcessFlat(neuroDependencyDAG);
+		CoreDetection.hScore = (1.0 - (realCore / FlatNetwork.flatNetworkCoreSize));
+		System.out.println("[h-Score] " + CoreDetection.hScore);
 	}
 	
 	public static void main(String[] args) throws Exception {
 //		getCleanNeuroNetwork();
 		doNeuroNetworkAnalysis();
+		
+		
 //		statisticalRun();
 //		traverseAllPaths();
 	}
