@@ -407,19 +407,20 @@ public class ManagerNeuro {
 		DependencyDAG neuroDependencyDAG = new DependencyDAG("neuro_networks//celegans.socialrank.network");
 		
 		String netID = "celegans";
-//		neuroDependencyDAG.printNetworkStat();
-		neuroDependencyDAG.printNetworkProperties();
+		neuroDependencyDAG.printNetworkStat();
+//		neuroDependencyDAG.printNetworkProperties();
 //		DistributionAnalysis.getDistributionCCDF(neuroDependencyDAG, netID, 1);
 //		getLocationColorWeightedHistogram(neuroDependencyDAG);
 //		neuroDependencyDAG.printNetworkProperties();
+//		DistributionAnalysis.printAllCentralities(neuroDependencyDAG, netID);
 
 //		DistributionAnalysis.getPathLength(neuroDependencyDAG);
 //		CoreDetection.getCentralEdgeSubgraph(neuroDependencyDAG);
 //		DistributionAnalysis.getDistributionCCDF(neuroDependencyDAG, netID, 1);
 		
 //		Visualization.printDOTNetwork(neuroDependencyDAG);
-		CoreDetection.pathCoverageTau = 0.98;
-		CoreDetection.fullTraverse = false;
+		CoreDetection.pathCoverageTau = 0.99;
+//		CoreDetection.fullTraverse = false;
 		CoreDetection.getCore(neuroDependencyDAG, netID);
 		double realCore = CoreDetection.minCoreSize;
 

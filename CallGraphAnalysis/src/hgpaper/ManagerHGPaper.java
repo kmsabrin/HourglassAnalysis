@@ -195,7 +195,9 @@ public class ManagerHGPaper {
 		
 //		String netID = "court";		
 //		String netID = "jetuml";
-		String netID = "celegans";
+//		String netID = "celegans";
+		
+		String netID = "chain";
 		
 //		String netID = "toy";
 		
@@ -262,9 +264,13 @@ public class ManagerHGPaper {
 			ManagerNeuro.loadNeuroMetaNetwork();
 			DependencyDAG.isCelegans = true;
 		}
+		else if (netID.equals("chain")) {
+			netPath = "chain_networks//chain_24.txt";
+			DependencyDAG.isToy = true;
+		}
 
 		DependencyDAG dependencyDAG = new DependencyDAG(netPath);
-//		dependencyDAG.printNetworkStat();
+		dependencyDAG.printNetworkStat();
 		
 //		System.out.println(DistributionAnalysis.getPathLength(dependencyDAG));
 //		System.out.println("nDisconnected " + (1.0 * dependencyDAG.disconnectedKount / dependencyDAG.nodes.size()));
@@ -300,7 +306,7 @@ public class ManagerHGPaper {
 		
 //		Core Detection
 		CoreDetection.fullTraverse = false;
-//		CoreDetection.pathCoverageTau = 0.98;
+		CoreDetection.pathCoverageTau = 0.90;
 		CoreDetection.getCore(dependencyDAG, netID);
 		double realCore = CoreDetection.minCoreSize;
 //		System.out.println(CoreDetection.minCoreSize);
@@ -752,8 +758,8 @@ public class ManagerHGPaper {
 	}
 	
 	public static void main(String[] args) throws Exception {		
-//		ManagerHGPaper.doRealNetworkAnalysis();
-		ManagerHGPaper.measureTauEffectOnRealNetwork();
+		ManagerHGPaper.doRealNetworkAnalysis();
+//		ManagerHGPaper.measureTauEffectOnRealNetwork();
 //		ManagerHGPaper.runThroughAllRealNets();
 //		ManagerHGPaper.runScalabilityTest();
 //		ManagerHGPaper.runRandomizationTest();

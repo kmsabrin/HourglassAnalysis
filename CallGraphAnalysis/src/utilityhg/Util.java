@@ -14,6 +14,7 @@ import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.apache.commons.math3.distribution.ZipfDistribution;
 import org.apache.commons.math3.stat.StatUtils;
 import org.apache.commons.math3.stat.correlation.KendallsCorrelation;
+import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
 
@@ -145,6 +146,29 @@ public class Util {
 		System.out.println(-1 / s1);
 	}
 
+	private static void getCorrelation(int inputSize) throws Exception {
+		 Scanner scanner = new Scanner(new File("correl.txt"));
+		 double a[] = new double[inputSize];
+		 double b[] = new double[inputSize];
+		 int i = 0;
+		 while (scanner.hasNext()) {
+			 // System.out.println(scanner.next());
+			 // System.out.println(scanner.next());
+			 a[i] = Double.valueOf(scanner.next());
+			 b[i] = Double.valueOf(scanner.next());
+			 ++i;
+		 }
+		 
+		 SpearmansCorrelation spearmanCorrealtion = new SpearmansCorrelation();
+		 KendallsCorrelation kendallsCorrelation = new KendallsCorrelation();
+		 PearsonsCorrelation pearsonCorrelation = new PearsonsCorrelation();
+		 System.out.println(spearmanCorrealtion.correlation(a, b));
+		 System.out.println(kendallsCorrelation.correlation(a, b));
+		 System.out.println(pearsonCorrelation.correlation(a, b));
+		 
+		 scanner.close();
+	}
+	
 	public static void main(String[] args) throws Exception {
 		// pointLineDistance(1, 1, 5, 5, 3, 5);
 		// pointLineDistance(1, 0.608621667612025, 302, 0.9659671015314805, 30,
@@ -156,6 +180,7 @@ public class Util {
 		// getCCDF(new ParetoDistribution());
 
 		// tryWilcoxonRankSumTest();
+		getCorrelation(270);
 
 		// System.out.println(Math.log(0.13));
 		// System.out.println(Math.exp(-2.0402208285265546));
@@ -211,23 +236,6 @@ public class Util {
 		//
 		// Files.write(Paths.get("binfile.txt"), aBytes); //creates, overwrites
 
-		 Scanner scanner = new Scanner(new File("spearman.txt"));
-		
-		 double a[] = new double[250];
-		 double b[] = new double[250];
-		 int i = 0;
-		 while (scanner.hasNext()) {
-		 // System.out.println(scanner.next());
-		 // System.out.println(scanner.next());
-		 a[i] = Double.valueOf(scanner.next());
-		 b[i] = Double.valueOf(scanner.next());
-		 ++i;
-		 }
-		 
-		 SpearmansCorrelation spearmanCorrealtion = new SpearmansCorrelation();
-		 KendallsCorrelation kendallsCorrelation = new KendallsCorrelation();
-		 System.out.println(spearmanCorrealtion.correlation(a, b));
-		 System.out.println(kendallsCorrelation.correlation(a, b));
 		 
 		//
 		// double mA = StatUtils.mean(a);

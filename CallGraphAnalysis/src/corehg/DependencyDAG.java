@@ -1189,7 +1189,7 @@ public class DependencyDAG {
 			}
 			
 			nodePathThrough.put(s, nPath);
-			if (isTarget(s)) { // is a target
+			if (isSource(s)) { // is a target
 				nTotalPath += nPath;
 //				nTotalPath = nTotalPath.add(new BigDecimal(nPath));
 			}
@@ -1209,7 +1209,7 @@ public class DependencyDAG {
 //		System.out.println("Total path: " + nTotalPath);
 		
 //		if (DependencyDAG.isCelegans) {
-//			nTotalPath = 5564398; // wrong
+//			nTotalPath = 2197933; // wrong
 //		}
 	}
 		

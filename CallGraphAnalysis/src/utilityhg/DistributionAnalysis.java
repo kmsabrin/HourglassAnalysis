@@ -407,8 +407,8 @@ public class DistributionAnalysis {
 
 		while (scanner.hasNext()) {
 			String node = scanner.next();
-			double indeg_c = scanner.nextDouble();
-			double outdeg_c = scanner.nextDouble();
+			double deg_c = scanner.nextDouble();
+			double eigen_c = scanner.nextDouble();
 			double closeness_c = scanner.nextDouble();
 			double betwenness_c = scanner.nextDouble();
 			if (dependencyDAG.nodes.contains(node) == false)
@@ -417,7 +417,7 @@ public class DistributionAnalysis {
 			// closeness_c + " " + betwenness_c + " " +
 			// dependencyDAG.location.get(node) + " " +
 			// dependencyDAG.normalizedPathCentrality.get(node));
-			pw.println(indeg_c + "\t" + outdeg_c + "\t" + closeness_c + "\t"
+			pw.println(deg_c + "\t" + eigen_c + "\t" + closeness_c + "\t"
 					+ betwenness_c + "\t" + dependencyDAG.lengthPathLocation.get(node)
 					+ "\t" + dependencyDAG.normalizedPathCentrality.get(node));
 		}

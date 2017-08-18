@@ -49,12 +49,14 @@ public class FlatNetwork {
 				CoreDetection.topRemovedWaistNodes.remove(s);
 				dependencyDAG.loadPathStatistics();
 				for (String r: dependencyDAG.nodes) {
-					if ((!DependencyDAG.isCelegans && dependencyDAG.isTarget(r)) || (DependencyDAG.isCelegans && ManagerNeuro.target.contains(r))) {
+					if (!DependencyDAG.isCelegans && dependencyDAG.isTarget(r)) {
 						if (dependencyDAG.nodePathThrough.get(r) > 0) {
 							pw.println(s + "\t" + r + "\t" + dependencyDAG.nodePathThrough.get(r));
 						}
-						else {
-//							System.out.println(s + "\t" + r + "\t" + dependencyDAG.nodePathThrough.get(r));
+					}
+					if (DependencyDAG.isCelegans && ManagerNeuro.target.contains(r)) {
+						if(dependencyDAG.numOfSourcePath.get(r) > 0) {
+							pw.println(s + "\t" + r + "\t" + dependencyDAG.numOfSourcePath.get(r));
 						}
 					}
 				}
