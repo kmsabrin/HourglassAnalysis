@@ -21,6 +21,43 @@ public class DistributionAnalysis {
 	static HashSet<String> visited;
 	static int wccSize;
 
+	public static void getDegreeStatistics(String edgeFilePath) throws Exception {
+		Scanner scanner = new Scanner(new File(edgeFilePath));
+		HashMap<String, Integer> inDeg = new HashMap();
+		HashMap<String, Integer> outDeg = new HashMap();
+		
+		while (scanner.hasNext()) {
+			String src = scanner.next();
+			String dst = scanner.next();
+			String wgt = scanner.next();
+			
+			if (inDeg.containsKey(dst)) {
+				inDeg.put(dst, inDeg.get(dst) + 1);
+			}
+			else {
+				inDeg.put(dst, 1);
+			}
+			
+			if (outDeg.containsKey(src)) {
+				outDeg.put(src, outDeg.get(src) + 1);
+			}
+			else {
+				outDeg.put(src, 1);
+			}
+		}
+		
+		for (String s: inDeg.keySet()) {
+			if (outDeg.containsKey(s)) {
+				if (inDeg.get(s) / outDeg.get(s) == 1) {
+//					System.out.println(inDeg.get(s) + "\t" + outDeg.get(s));
+					System.out.println(s);
+				}
+			}
+		}
+		
+		scanner.close();
+	}
+	
 	private static void WCCHelper(String s, DependencyDAG dependencyDAG) {
 		// if (visited.contains(s)) return;
 		++wccSize;

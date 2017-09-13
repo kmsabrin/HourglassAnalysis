@@ -11,14 +11,14 @@ import org.apache.commons.math3.stat.StatUtils;
 import neuro.ManagerNeuro;
 
 public class SocialRankAnalysis {
-//	static String directory = "metabolic_networks";
-//	static String network_file = "rat-links.txt";
-//	static String network_id = "rat";
+	static String directory = "metabolic_networks";
+	static String network_file = "rat-links.txt";
+	static String network_id = "rat";
 	
-	static String directory = "neuro_networks";
+//	static String directory = "neuro_networks";
 //	static String network_file = "celegans_graph.txt";
-	static String network_file = "celegans_network_clean.txt";
-	static String network_id = "celegans";
+//	static String network_file = "celegans_network_clean.txt";
+//	static String network_id = "celegans";
 //	static String network_id = "celegans_no_filter";
 	
 	static boolean randomizationTest = false;
@@ -72,24 +72,69 @@ public class SocialRankAnalysis {
 	}
 	
 	public static void getSocialrankCompliantNetwork() throws Exception {
-		HashMap<Integer, String> idLabelMap = new HashMap();
-		HashMap<Integer, Integer> idRankMap = new HashMap();
-		int nLevels = 17;
+		HashMap<String, String> idLabelMap = new HashMap();
+		HashMap<String, Integer> idRankMap = new HashMap();
+		PrintWriter pw = new PrintWriter(new File(directory + "//" + network_id + ".socialrank.network"));
+
+		Scanner scanner = new Scanner(new File(directory + "//" + network_id + ".nodes"));
+		while (scanner.hasNext()) {
+			String id = scanner.next();
+			String label = scanner.next();
+			idLabelMap.put(id, label);
+		}
+		scanner.close();
+		
+		scanner = new Scanner(new File(directory + "//" + network_id + ".ranks"));
+		while (scanner.hasNext()) {
+			String id = scanner.next();
+			int rank = scanner.nextInt();
+			int agony = scanner.nextInt();
+			idRankMap.put(id, rank);
+//			System.out.println(idLabelMap.get(id) + "\t" + rank + "\t" + agony);
+		}
+		scanner.close();
+		
+		scanner = new Scanner(new File(directory + "//" + network_id + ".edges"));
+		while (scanner.hasNext()) {
+			String substrate = scanner.next();
+			String product = scanner.next();
+
+			int substrateRank = idRankMap.get(substrate);
+			int productRank = idRankMap.get(product);
+			
+			if (substrateRank < productRank) {
+//				System.out.println(idLabelMap.get(substrate) + "\t" + idLabelMap.get(product));
+				pw.println(idLabelMap.get(substrate) + "\t" + idLabelMap.get(product));
+			}
+			else {
+				/* rank violation */
+				System.out.println(idLabelMap.get(substrate) + "\t" + idLabelMap.get(product));
+//				System.out.println(substrateRank + "\t" + productRank);
+			}
+		}
+		pw.close();
+		scanner.close();
+	}
+	
+	public static void getSocialrankCompliantNetworkNeuro() throws Exception {
+		HashMap<String, String> idLabelMap = new HashMap();
+		HashMap<String, Integer> idRankMap = new HashMap();
+		int nLevels = 35;
 		int levelCounter[] = new int[nLevels];
 		double levelIn[] = new double[nLevels];
 		double levelOut[] = new double[nLevels];
 		double levelEdgeDirection[][] = new double[nLevels][nLevels];
 		double levelDemography[][] = new double[nLevels][3];
 		ManagerNeuro.loadNeuroMetaNetwork(); // for finding sensory, inter and motor neurons
-		HashMap<Integer, Double> nodeOutMap = new HashMap();
-		HashMap<Integer, Double> nodeInMap = new HashMap();
+		HashMap<String, Double> nodeOutMap = new HashMap();
+		HashMap<String, Double> nodeInMap = new HashMap();
 		PrintWriter pw = new PrintWriter(new File(directory + "//" + network_id + ".socialrank.network"));
 
 		Scanner scanner = new Scanner(new File(directory + "//" + network_id + ".nodes"));
 //		System.out.println(ManagerNeuro.source.size() + "\t" + ManagerNeuro.target.size());
 //		System.out.println(ManagerNeuro.source);
 		while (scanner.hasNext()) {
-			int id = scanner.nextInt();
+			String id = scanner.next();
 			String label = scanner.next();
 			idLabelMap.put(id, label);
 			/* special case */
@@ -105,13 +150,13 @@ public class SocialRankAnalysis {
 		
 		scanner = new Scanner(new File(directory + "//" + network_id + ".ranks"));
 		while (scanner.hasNext()) {
-			int id = scanner.nextInt();
+			String id = scanner.next();
 			int rank = scanner.nextInt();
 			int agony = scanner.nextInt();
 			idRankMap.put(id, rank);
 			levelCounter[rank]++;
-			int demoCategory = getDemoCategory(Integer.parseInt(idLabelMap.get(id)));
-			levelDemography[rank][demoCategory]++;
+//			int demoCategory = getDemoCategory(Integer.parseInt(idLabelMap.get(id))); String vs int error, convert to string
+//			levelDemography[rank][demoCategory]++;
 			System.out.println(idLabelMap.get(id) + "\t" + rank + "\t" + agony);
 		}
 		scanner.close();
@@ -119,8 +164,8 @@ public class SocialRankAnalysis {
 		scanner = new Scanner(new File(directory + "//" + network_id + ".edges"));
 //		PrintWriter pw = new PrintWriter(new File(directory + "//" + network_id + ".socialrank.network"));
 		while (scanner.hasNext()) {
-			int substrate = scanner.nextInt();
-			int product = scanner.nextInt();
+			String substrate = scanner.next();
+			String product = scanner.next();
 
 			int substrateRank = idRankMap.get(substrate);
 			int productRank = idRankMap.get(product);
@@ -174,7 +219,7 @@ public class SocialRankAnalysis {
 			double ins[] = new double[levelCounter[i]];
 			double outs[] = new double[levelCounter[i]];
 			int knt = 0;
-			for (int j: idRankMap.keySet()) {
+			for (String j: idRankMap.keySet()) {
 				if (idRankMap.get(j) != i) continue;
 				double v = 0;
 				if (nodeInMap.containsKey(j)) v = nodeInMap.get(j);
@@ -214,8 +259,8 @@ public class SocialRankAnalysis {
 	public static void main(String[] args) throws Exception {
 //		randomizationTest = true;
 //		random = new Random();
-		
-		getDataForSocialrankAnalysis();
+//		getDataForSocialrankAnalysis();
+
 		getSocialrankCompliantNetwork();
 	}
 }

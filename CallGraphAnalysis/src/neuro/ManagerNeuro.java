@@ -407,7 +407,7 @@ public class ManagerNeuro {
 		DependencyDAG neuroDependencyDAG = new DependencyDAG("neuro_networks//celegans.socialrank.network");
 		
 		String netID = "celegans";
-		neuroDependencyDAG.printNetworkStat();
+//		neuroDependencyDAG.printNetworkStat();
 //		neuroDependencyDAG.printNetworkProperties();
 //		DistributionAnalysis.getDistributionCCDF(neuroDependencyDAG, netID, 1);
 //		getLocationColorWeightedHistogram(neuroDependencyDAG);
@@ -419,15 +419,15 @@ public class ManagerNeuro {
 //		DistributionAnalysis.getDistributionCCDF(neuroDependencyDAG, netID, 1);
 		
 //		Visualization.printDOTNetwork(neuroDependencyDAG);
-		CoreDetection.pathCoverageTau = 0.99;
-//		CoreDetection.fullTraverse = false;
+		CoreDetection.pathCoverageTau = 0.98;
+		CoreDetection.fullTraverse = false;
 		CoreDetection.getCore(neuroDependencyDAG, netID);
 		double realCore = CoreDetection.minCoreSize;
 
 //		neuroDependencyDAG = new DependencyDAG("neuro_networks//" + neuroDAGName + ".txt");
 		FlatNetwork.makeAndProcessFlat(neuroDependencyDAG);
 		CoreDetection.hScore = (1.0 - (realCore / FlatNetwork.flatNetworkCoreSize));
-		System.out.println("[h-Score] " + CoreDetection.hScore);
+//		System.out.println("[h-Score] " + CoreDetection.hScore);
 	}
 	
 	public static void main(String[] args) throws Exception {

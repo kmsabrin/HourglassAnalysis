@@ -210,19 +210,22 @@ public class ManagerHGPaper {
 		}
 		
 		if (netID.equals("rat")) {
-			netPath = "metabolic_networks//rat-consolidated.txt";
+//			netPath = "metabolic_networks//rat-consolidated.txt";
 //			netPath = "metabolic_networks//rat-links.txt";
 			DependencyDAG.isMetabolic = true;
 //			DependencyDAG.isCyclic = true;
 			
-//			netPath = "metabolic_networks//rat.agony.network";
+			netPath = "metabolic_networks//rat.socialrank.network";
 //			DependencyDAG.isToy = true;
 		}
 		else if (netID.equals("monkey")) {
-			netPath = "metabolic_networks//monkey-consolidated.txt";
+//			netPath = "metabolic_networks//monkey-consolidated.txt";
 //			netPath = "metabolic_networks//monkey-links.txt";
 			DependencyDAG.isMetabolic = true;
 //			DependencyDAG.isCyclic = true;
+			
+			netPath = "metabolic_networks//monkey.socialrank.network";
+//			DependencyDAG.isToy = true;
 		}
 		else if (netID.equals("court")) {
 //			CourtCaseCornellParser.caseTopic = "abortion";
@@ -265,7 +268,7 @@ public class ManagerHGPaper {
 			DependencyDAG.isCelegans = true;
 		}
 		else if (netID.equals("chain")) {
-			netPath = "chain_networks//chain_24.txt";
+			netPath = "chain_networks//chain_38.txt";
 			DependencyDAG.isToy = true;
 		}
 
@@ -305,8 +308,8 @@ public class ManagerHGPaper {
 //		UpstreamRandomize.hieararchyPreservingRandomizeDAG(dependencyDAG);
 		
 //		Core Detection
-		CoreDetection.fullTraverse = false;
-		CoreDetection.pathCoverageTau = 0.90;
+//		CoreDetection.fullTraverse = true;
+		CoreDetection.pathCoverageTau = 0.85;
 		CoreDetection.getCore(dependencyDAG, netID);
 		double realCore = CoreDetection.minCoreSize;
 //		System.out.println(CoreDetection.minCoreSize);
@@ -331,7 +334,6 @@ public class ManagerHGPaper {
 		
 //		ModelRealConnector modelRealConnector = new ModelRealConnector(dependencyDAG);
 //		modelRealConnector.generateModelNetwork(dependencyDAG, 0.5);
-		
 	}
 	
 	/*
@@ -685,7 +687,8 @@ public class ManagerHGPaper {
 	
 	private static void measureTauEffectOnRealNetwork() throws Exception {
 //		String data[] = {"openssh-39", "commons-math", "rat", "monkey", "court", "court"};
-		String data[] = {"celegans"};
+//		String data[] = {"celegans"};
+		String data[] = {"rat"};
 		int idx = 0;
 		PrintWriter pw = new PrintWriter(new File("analysis//hscore-vs-tau-" + data[idx] + ".txt"));
 		nID = data[idx];

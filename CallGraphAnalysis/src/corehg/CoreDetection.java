@@ -141,7 +141,7 @@ public class CoreDetection {
 		HashMap<Integer, TreeSet<String>> pathEquivalentNodeSet2 = new HashMap();
 		HashSet<String> forIteratingTiedMaxPathCentralityNodes = new HashSet(tiedMaxPathCentralityNodes);
 		for (String s : tiedMaxPathCentralityNodes) {
-			/*
+			
 			if (alreadyInPES.contains(s)) {
 				continue;
 			}
@@ -172,7 +172,7 @@ public class CoreDetection {
 			topRemovedWaistNodes.remove(s);
 //			System.out.println("Adding " + PESet + " at " + nTiedNodes);
 			pathEquivalentNodeSet2.put(nTiedNodes++, new TreeSet(PESet));
-			*/
+			
 		}
 		
 		pathEquivalentNodeSet2.put(nTiedNodes++, new TreeSet(tiedMaxPathCentralityNodes));

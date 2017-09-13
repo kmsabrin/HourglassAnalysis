@@ -97,8 +97,7 @@ public class CourtCaseCornellParser {
 
 					int matchIndex = -1;
 					if (flg == 0) {
-						matchIndex = line.substring(0, line.indexOf("v."))
-								.indexOf(s);
+						matchIndex = line.substring(0, line.indexOf("v.")).indexOf(s);
 					} else {
 						matchIndex = line.indexOf(s, line.indexOf("v."));
 					}

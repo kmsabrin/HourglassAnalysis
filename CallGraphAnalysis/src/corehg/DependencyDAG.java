@@ -192,7 +192,7 @@ public class DependencyDAG {
 		
 //		countDisconnectedNodes();
 		
-		removeIsolatedNodes(); 
+//		removeIsolatedNodes(); 
 		
 		loadDegreeMetric();
 				
@@ -450,9 +450,9 @@ public class DependencyDAG {
 				// for metabolic and synthetic networks
 				server = tokens[0];
 				dependent = tokens[1];
-				if (largestWCCNodes.contains(server) == false || largestWCCNodes.contains(dependent) == false) {
-					continue;
-				}
+//				if (largestWCCNodes.contains(server) == false || largestWCCNodes.contains(dependent) == false) {
+//					continue;
+//				}
 			}
 			else if (isSynthetic || isToy || isCyclic) {
 				if (isWeighted) {
@@ -503,6 +503,8 @@ public class DependencyDAG {
 					++violation;
 					continue;
 				}
+				
+				System.out.println(server + "\t" + dependent);
 			}
 			else if (isLexis) {
 				// temporary fix

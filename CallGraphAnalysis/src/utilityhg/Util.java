@@ -169,7 +169,29 @@ public class Util {
 		 scanner.close();
 	}
 	
+	private static void getNeuronBirthTimeBuckets() throws Exception {
+		Scanner scanner = new Scanner(new File("neuro_networks//birth_times.txt"));
+		
+		double buckets[] = new double[250 + 1];
+		
+		while (scanner.hasNext()) {
+			double time = scanner.nextDouble();
+			
+			int timeBucket = (int)(time / 10);
+			
+			buckets[timeBucket]++;
+		}
+		
+		for (int i = 0; i <= 250; ++i) {
+			System.out.println((i * 10 + 5) + "\t" + buckets[i]);
+		}
+	}
+	
 	public static void main(String[] args) throws Exception {
+//		DistributionAnalysis.getDegreeStatistics("neuro_networks//celegans_graph.txt");
+		
+		getNeuronBirthTimeBuckets();
+		
 		// pointLineDistance(1, 1, 5, 5, 3, 5);
 		// pointLineDistance(1, 0.608621667612025, 302, 0.9659671015314805, 30,
 		// 0.9381735677821894);
@@ -180,7 +202,7 @@ public class Util {
 		// getCCDF(new ParetoDistribution());
 
 		// tryWilcoxonRankSumTest();
-		getCorrelation(270);
+//		getCorrelation(270);
 
 		// System.out.println(Math.log(0.13));
 		// System.out.println(Math.exp(-2.0402208285265546));

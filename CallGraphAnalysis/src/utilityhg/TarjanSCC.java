@@ -85,15 +85,19 @@ public class TarjanSCC {
 
 	public static void main(String[] args) throws Exception {
 		DependencyDAG G = new DependencyDAG();
-		 
-//		PrintWriter pw = new PrintWriter(new File("metabolic_networks//rat-consolidated.txt"));
-//		G.isMetabolic = true;
-//		G.loadGraph("metabolic_networks//rat-links.txt"); 
+
+//		PrintWriter pw = new PrintWriter(new File("neuro_networks//celegans-consolidated.txt"));
+//		G.isToy = true;
+//		G.loadGraph("neuro_networks//celegans_graph.txt"); 
+		
+		PrintWriter pw = new PrintWriter(new File("metabolic_networks//rat-consolidated.txt"));
+		G.isMetabolic = true;
+		G.loadGraph("metabolic_networks//rat-links.txt"); 
 //		G.loadGraph("metabolic_networks//rat-links.txt");
 
-		PrintWriter pw = new PrintWriter(new File("jdk_class_dependency//commons-math-callgraph-consolidated.txt"));
-		DependencyDAG.isClassDependency = true;
-		G.loadGraph("jdk_class_dependency//commons-math-callgraph.txt");
+//		PrintWriter pw = new PrintWriter(new File("jdk_class_dependency//commons-math-callgraph-consolidated.txt"));
+//		DependencyDAG.isClassDependency = true;
+//		G.loadGraph("jdk_class_dependency//commons-math-callgraph.txt");
 
 		// openssh_callgraphs//full.graph-openssh-39
 		// String graphFile = "sw_callgraphs//full-graph-Sqlite";
@@ -132,9 +136,9 @@ public class TarjanSCC {
 		ArrayList<Double> numbers = new ArrayList();
 		for (String s : sccs.keySet()) {
 			if (sccs.get(s).size() < 2)
-//				continue; // show the non-trivial SCCs only
+				continue; // show the non-trivial SCCs only
 			++kNonTrivialSCC;
-			 System.out.print(s + "\t");
+			 System.out.print(s + "\t" + sccs.get(s).size() + "\t");
 			 for (String r: sccs.get(s)) {
 				 System.out.print(r + ", ");
 			 }
