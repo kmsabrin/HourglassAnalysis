@@ -193,11 +193,11 @@ public class ManagerHGPaper {
 		
 //		String netID = "apache-commons-3.4";
 		
-//		String netID = "court";		
+		String netID = "court";		
 //		String netID = "jetuml";
 //		String netID = "celegans";
 		
-		String netID = "chain";
+//		String netID = "chain";
 		
 //		String netID = "toy";
 		
@@ -210,21 +210,21 @@ public class ManagerHGPaper {
 		}
 		
 		if (netID.equals("rat")) {
-//			netPath = "metabolic_networks//rat-consolidated.txt";
+			netPath = "metabolic_networks//rat-consolidated.txt";
 //			netPath = "metabolic_networks//rat-links.txt";
 			DependencyDAG.isMetabolic = true;
 //			DependencyDAG.isCyclic = true;
 			
-			netPath = "metabolic_networks//rat.socialrank.network";
+//			netPath = "metabolic_networks//rat.socialrank.network";
 //			DependencyDAG.isToy = true;
 		}
 		else if (netID.equals("monkey")) {
-//			netPath = "metabolic_networks//monkey-consolidated.txt";
+			netPath = "metabolic_networks//monkey-consolidated.txt";
 //			netPath = "metabolic_networks//monkey-links.txt";
 			DependencyDAG.isMetabolic = true;
 //			DependencyDAG.isCyclic = true;
 			
-			netPath = "metabolic_networks//monkey.socialrank.network";
+//			netPath = "metabolic_networks//monkey.socialrank.network";
 //			DependencyDAG.isToy = true;
 		}
 		else if (netID.equals("court")) {
@@ -257,23 +257,27 @@ public class ManagerHGPaper {
 		}
 		else if (netID.equals("toy")) {
 //			netPath = "toy_networks//toy_dag_paper_2.txt";
-			netPath = "toy_networks//model-run-1.txt";
+//			netPath = "toy_networks//model-run-1.txt";
 //			netPath = "real_model_networks//real-model-test.txt";
+			netPath = "toy_networks//example-5.txt";
 			DependencyDAG.isToy = true;
 		}
 		else if (netID.equals("celegans")) {			
 			netPath = "neuro_networks//celegans.socialrank.network";
 			DependencyDAG.isToy = true;
 			ManagerNeuro.loadNeuroMetaNetwork();
-			DependencyDAG.isCelegans = true;
+//			DependencyDAG.isCelegans = true;
 		}
 		else if (netID.equals("chain")) {
 			netPath = "chain_networks//chain_38.txt";
 			DependencyDAG.isToy = true;
 		}
-
+		
 		DependencyDAG dependencyDAG = new DependencyDAG(netPath);
-		dependencyDAG.printNetworkStat();
+//		dependencyDAG.printNetworkStat();
+		
+		// to get the largest weakly connected component
+//		DistributionAnalysis.findWeaklyConnectedComponents(dependencyDAG, netID);		
 		
 //		System.out.println(DistributionAnalysis.getPathLength(dependencyDAG));
 //		System.out.println("nDisconnected " + (1.0 * dependencyDAG.disconnectedKount / dependencyDAG.nodes.size()));
@@ -289,7 +293,6 @@ public class ManagerHGPaper {
 //		DistributionAnalysis.getPathLength(dependencyDAG);
 //		DistributionAnalysis.getDegreeHistogram(dependencyDAG);
 //		DistributionAnalysis.getDegreeHistogramSpecialized(dependencyDAG);
-//		DistributionAnalysis.findWeaklyConnectedComponents(dependencyDAG, netID);		
 //		DistributionAnalysis.printCentralityRanks(dependencyDAG, netID);
 //		int centralityIndex = 1;
 //		DistributionAnalysis.getDistributionCCDF(dependencyDAG, netID, 1);
@@ -309,7 +312,7 @@ public class ManagerHGPaper {
 		
 //		Core Detection
 //		CoreDetection.fullTraverse = true;
-		CoreDetection.pathCoverageTau = 0.85;
+		CoreDetection.pathCoverageTau = 1.0;
 		CoreDetection.getCore(dependencyDAG, netID);
 		double realCore = CoreDetection.minCoreSize;
 //		System.out.println(CoreDetection.minCoreSize);
@@ -321,6 +324,8 @@ public class ManagerHGPaper {
 		FlatNetwork.makeAndProcessFlat(dependencyDAG);	
 		CoreDetection.hScore = (1.0 - (realCore / FlatNetwork.flatNetworkCoreSize));
 		System.out.println(CoreDetection.pathCoverageTau + "\t" + realCore + "\t" + FlatNetwork.flatNetworkCoreSize + "\t" + CoreDetection.hScore);
+//		if (CoreDetection.hScore < 0) CoreDetection.hScore = 0;
+//		System.out.println(CoreDetection.hScore);
 		
 //		Get Real to Model Networks
 //		getOptimalAlphaForModel(dependencyDAG, CoreDetection.hScore);
@@ -751,7 +756,7 @@ public class ManagerHGPaper {
 	}
 	
 	private static void runRandomizationTest() throws Exception {
-		int nRun = 1;
+		int nRun = 100;
 		UpstreamRandomize.globalKounter = 0;
 		for (int i = 0; i < nRun; ++i) {
 			doRealNetworkAnalysis();

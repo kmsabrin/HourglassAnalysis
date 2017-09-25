@@ -11,14 +11,15 @@ import org.apache.commons.math3.stat.StatUtils;
 import neuro.ManagerNeuro;
 
 public class SocialRankAnalysis {
-	static String directory = "metabolic_networks";
-	static String network_file = "rat-links.txt";
-	static String network_id = "rat";
+//	static String directory = "metabolic_networks";
+//	static String network_file = "rat-links.txt";
+//	static String network_id = "rat";
 	
-//	static String directory = "neuro_networks";
-//	static String network_file = "celegans_graph.txt";
-//	static String network_file = "celegans_network_clean.txt";
-//	static String network_id = "celegans";
+	static String directory = "neuro_networks";;
+	static String network_file = "celegans_network_clean.txt";
+	static String network_id = "celegans";
+	
+//	static String network_file = "celegans_graph.txt"
 //	static String network_id = "celegans_no_filter";
 	
 	static boolean randomizationTest = false;
@@ -140,10 +141,10 @@ public class SocialRankAnalysis {
 			/* special case */
 //			System.out.println(label + "\t" + ManagerNeuro.source.contains(Integer.parseInt(label)));
 			if (ManagerNeuro.source.contains(label)) {
-				pw.println("1000" + "\t" + label);
+//				pw.println("1000" + "\t" + label);
 			}
 			if (ManagerNeuro.target.contains(label)) {
-				pw.println(label + "\t" + "2000");
+//				pw.println(label + "\t" + "2000");
 			}
 		}
 		scanner.close();
@@ -255,6 +256,7 @@ public class SocialRankAnalysis {
 //					+ "\t" + levelDemography[i][2]/levelCounter[i]);
 //		}
 	}
+	
 	
 	public static void main(String[] args) throws Exception {
 //		randomizationTest = true;

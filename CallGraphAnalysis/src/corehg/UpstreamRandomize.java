@@ -56,7 +56,7 @@ public class UpstreamRandomize {
 				
 //				if (currentNodeLevel == 5) System.out.println(distance);
 				
-				if (distance == 1 && oneSkipFlag == true) {
+				if (distance == 1 && oneSkipFlag == true) { // skipping one because this is what causes the hierarchy level
 					oneSkipFlag = false;
 					continue;
 				}
@@ -80,8 +80,7 @@ public class UpstreamRandomize {
 				}
 				
 				++total;
-				
-				
+								
 				/* randomization start */
 				ArrayList<String> sameLevelAncestors = new ArrayList();
 				boolean allAncestor = false; // all or subtree only ancestors
@@ -208,6 +207,8 @@ public class UpstreamRandomize {
 		
 		for (String s: dependencyDAG.nodes) {
 			if (dependencyDAG.isSource(s)) continue;
+			
+			
 			int currentNodeLevel = modelRealConnector.nodeLevelMap.get(s); 
 			if (currentNodeLevel > maxLevel) maxLevel = currentNodeLevel;
 //			System.out.println("Processing: " + s + " at level " + currentNodeLevel);
@@ -272,7 +273,7 @@ public class UpstreamRandomize {
 			}
 			
 			if (sum >= 10) {
-				System.out.println(i + "\t" + (wSum / sum));
+//				System.out.println(i + "\t" + (wSum / sum));
 				pw.println(i + "\t" + (wSum / sum));
 			}
 //			System.out.println("## ## ##");

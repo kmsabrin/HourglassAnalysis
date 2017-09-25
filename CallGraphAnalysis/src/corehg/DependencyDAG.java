@@ -188,8 +188,12 @@ public class DependencyDAG {
 		
 		if (isSynthetic) {
 //			removeDisconnectedNodesForSyntheticNetworks();
-		}
+		}		
 		
+		loadNetworkAttributes();
+	}
+	
+	private void loadNetworkAttributes() {
 //		countDisconnectedNodes();
 		
 //		removeIsolatedNodes(); 
@@ -450,9 +454,9 @@ public class DependencyDAG {
 				// for metabolic and synthetic networks
 				server = tokens[0];
 				dependent = tokens[1];
-//				if (largestWCCNodes.contains(server) == false || largestWCCNodes.contains(dependent) == false) {
-//					continue;
-//				}
+				if (largestWCCNodes.contains(server) == false || largestWCCNodes.contains(dependent) == false) {
+					continue;
+				}
 			}
 			else if (isSynthetic || isToy || isCyclic) {
 				if (isWeighted) {
@@ -504,7 +508,7 @@ public class DependencyDAG {
 					continue;
 				}
 				
-				System.out.println(server + "\t" + dependent);
+//				System.out.println(server + "\t" + dependent);
 			}
 			else if (isLexis) {
 				// temporary fix
@@ -591,6 +595,40 @@ public class DependencyDAG {
 //				removeNode(s);
 //			}
 //		}
+	}
+	
+	public void addEdgeAndReload(String server, String dependent) {
+//		nodes.add(dependent);
+//		nodes.add(server);
+
+		if (dependent.equals(server)) { // loop, do not add the edge
+			return;
+		}
+
+		if (serves.containsKey(server)) {
+			serves.get(server).add(dependent);
+		} else {
+			HashSet<String> hs = new HashSet();
+			hs.add(dependent);
+			serves.put(server, hs);
+		}
+
+		if (depends.containsKey(dependent)) {
+			depends.get(dependent).add(server);
+		} else {
+			HashSet<String> hs = new HashSet();
+			hs.add(server);
+			depends.put(dependent, hs);
+		}
+		
+		init();
+		loadNetworkAttributes();
+	}
+	
+	public void removeEdgeAndReload(String server, String dependent) {
+		removeEdge(server, dependent);
+		init();
+		loadNetworkAttributes();
 	}
 		
 	public void removeIsolatedNodes() {
@@ -1369,7 +1407,7 @@ public class DependencyDAG {
 //			System.out.print(iCentrality.get(s) + "\t");
 //			System.out.print(sourcesReachable.get(s) + "\t");
 //			System.out.print(targetsReachable.get(s) + "\t");
-//			System.out.println(s + "\t" + normalizedPathCentrality.get(s));
+			System.out.println(s + "\t" + normalizedPathCentrality.get(s));
 //			System.out.println();
 //			System.out.println(s + "\t" + numPathLocation.get(s) + "\t" + lengthPathLocation.get(s));
 //			System.out.println(s + "\t" + numPathLocation.get(s) + "\t" + normalizedPathCentrality.get(s));
@@ -1381,7 +1419,7 @@ public class DependencyDAG {
 //				System.out.println(s + "\t" + nodePathThrough.get(s));				
 //			}
 //			System.out.println(nodePathThrough.get(s));
-			System.out.println(s + "\t" + numPathLocation.get(s) + "\t" + normalizedPathCentrality.get(s));
+//			System.out.println(s + "\t" + numPathLocation.get(s) + "\t" + normalizedPathCentrality.get(s));
 //			System.out.println(s + "\t" + lengthPathLocation.get(s) + "\t" + normalizedPathCentrality.get(s) + "\t" + outDegree.get(s));
 			
 //			System.out.println();
@@ -1522,7 +1560,7 @@ public class DependencyDAG {
 		System.out.println(" Toal Path: " + nTotalPath);	
 		
 		if (DependencyDAG.isCelegans) {
-			System.out.println(nodePathThrough.get("1000") + "\t" + nodePathThrough.get("2000"));
+//			System.out.println(nodePathThrough.get("1000") + "\t" + nodePathThrough.get("2000"));
 		}
 	}
 	

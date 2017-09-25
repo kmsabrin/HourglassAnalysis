@@ -154,17 +154,22 @@ public class Util {
 		 while (scanner.hasNext()) {
 			 // System.out.println(scanner.next());
 			 // System.out.println(scanner.next());
-			 a[i] = Double.valueOf(scanner.next());
-			 b[i] = Double.valueOf(scanner.next());
+			 a[i] = Double.valueOf(scanner.next()); // pcen
+			 b[i] = Double.valueOf(scanner.next()); // deg
+			 Double.valueOf(scanner.next()); // close
+			 Double.valueOf(scanner.next()); // between
+			 Double.valueOf(scanner.next()); // katz
+			 //Double.valueOf(scanner.next()); // eigen
+			 //Double.valueOf(scanner.next()); // pagerank
 			 ++i;
 		 }
 		 
 		 SpearmansCorrelation spearmanCorrealtion = new SpearmansCorrelation();
 		 KendallsCorrelation kendallsCorrelation = new KendallsCorrelation();
 		 PearsonsCorrelation pearsonCorrelation = new PearsonsCorrelation();
-		 System.out.println(spearmanCorrealtion.correlation(a, b));
+//		 System.out.println(spearmanCorrealtion.correlation(a, b));
 		 System.out.println(kendallsCorrelation.correlation(a, b));
-		 System.out.println(pearsonCorrelation.correlation(a, b));
+//		 System.out.println(pearsonCorrelation.correlation(a, b));
 		 
 		 scanner.close();
 	}
@@ -190,7 +195,7 @@ public class Util {
 	public static void main(String[] args) throws Exception {
 //		DistributionAnalysis.getDegreeStatistics("neuro_networks//celegans_graph.txt");
 		
-		getNeuronBirthTimeBuckets();
+//		getNeuronBirthTimeBuckets();
 		
 		// pointLineDistance(1, 1, 5, 5, 3, 5);
 		// pointLineDistance(1, 0.608621667612025, 302, 0.9659671015314805, 30,
@@ -202,7 +207,7 @@ public class Util {
 		// getCCDF(new ParetoDistribution());
 
 		// tryWilcoxonRankSumTest();
-//		getCorrelation(270);
+		getCorrelation(1502);
 
 		// System.out.println(Math.log(0.13));
 		// System.out.println(Math.exp(-2.0402208285265546));

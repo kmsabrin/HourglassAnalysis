@@ -2,15 +2,11 @@ package neuro;
 
 import java.io.File;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Scanner;
-
-import utilityhg.DistributionAnalysis;
-
-import com.google.common.collect.Ordering;
-import com.google.common.collect.TreeMultimap;
+import java.util.TreeMap;
 
 import corehg.CoreDetection;
 import corehg.DependencyDAG;
@@ -430,9 +426,93 @@ public class ManagerNeuro {
 //		System.out.println("[h-Score] " + CoreDetection.hScore);
 	}
 	
+	private static void optimizeAcyclicity() throws Exception {
+		loadNeuroMetaNetwork();
+		DependencyDAG.isCelegans = true;
+		DependencyDAG.isToy = true;
+		DependencyDAG neuroDependencyDAG = new DependencyDAG("neuro_networks//celegans.socialrank.network");
+		
+		HashMap<String, Integer> idRankMap = new HashMap();
+		HashMap<String, String> idLabelMap = new HashMap();
+		Scanner scanner = new Scanner(new File("neuro_networks//celegans.nodes"));
+		while (scanner.hasNext()) {
+			String id = scanner.next();
+			String label = scanner.next();
+			idLabelMap.put(id, label);
+		}
+		scanner.close();
+		
+		scanner = new Scanner(new File("neuro_networks//celegans.ranks"));
+		while (scanner.hasNext()) {
+			String id = scanner.next();
+			int rank = scanner.nextInt();
+			int agony = scanner.nextInt();
+			idRankMap.put(id, rank);
+		}
+		scanner.close();
+		
+		int totalRemoved = 0;
+		int causeCycle = 0;
+		scanner = new Scanner(new File("neuro_networks//celegans.edges"));
+		TreeMap<Integer, HashSet<String>> agonySorted = new TreeMap();
+		Random random = new Random(System.nanoTime());
+		while (scanner.hasNext()) {
+			String substrate = scanner.next();
+			String product = scanner.next();
+			int substrateRank = idRankMap.get(substrate);
+			int productRank = idRankMap.get(product);
+			if (substrateRank >= productRank) {
+//				System.out.println(idLabelMap.get(substrate) + "\t" + idLabelMap.get(product));
+				String start = idLabelMap.get(substrate);
+				String end = idLabelMap.get(product);
+				neuroDependencyDAG.loadRechablity(end);
+//				System.out.println();
+//				System.out.println(neuroDependencyDAG.successors.get(end));
+				if (neuroDependencyDAG.successors.get(end).contains(start)) {
+					++causeCycle;
+				}
+				++totalRemoved;
+				int agony = substrateRank - productRank + 1;
+//				agony *= -1;
+				agony = random.nextInt(1000);
+				if (agonySorted.containsKey(agony)) {
+					agonySorted.get(agony).add(substrate + "," + product);
+				}
+				else {
+					HashSet<String> hs = new HashSet();
+					hs.add(substrate + "," + product);
+					agonySorted.put(agony, hs);
+				}
+			}
+		}
+		scanner.close();
+		
+		int restoredEdge = 0;
+		for (int agony: agonySorted.keySet()) {
+			HashSet<String> hs = agonySorted.get(agony);
+			for (String s: hs) {
+				int index = s.indexOf(",");
+				String substrate = s.substring(0, index);
+				String product = s.substring(index + 1);
+				String start = idLabelMap.get(substrate);
+				String end = idLabelMap.get(product);
+				neuroDependencyDAG.loadRechablity(end);
+				if (!neuroDependencyDAG.successors.get(end).contains(start)) {
+					// no cycle
+					// edge restored
+					neuroDependencyDAG.addEdgeAndReload(start, end);
+					++restoredEdge;
+				}
+			}
+		}
+		
+		System.out.println(totalRemoved + "\t" + causeCycle + "\t" + restoredEdge);
+	}
+	
 	public static void main(String[] args) throws Exception {
 //		getCleanNeuroNetwork();
-		doNeuroNetworkAnalysis();
+//		doNeuroNetworkAnalysis();
+		optimizeAcyclicity();
 		
 		
 //		statisticalRun();
