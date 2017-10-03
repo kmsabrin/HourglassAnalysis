@@ -129,22 +129,13 @@ public class DependencyDAG {
 		lengthPathLocation = new HashMap();
 
 		nodePathThrough = new HashMap();
-//		geometricMeanPathCentrality = new HashMap();
-//		harmonicMeanPathCentrality = new HashMap();
 		normalizedPathCentrality = new HashMap();
 		centralityRank = new HashMap();
 		lengthWeightedPathCentrality = new HashMap();
 		
-//		iCentrality = new HashMap();
-		
 		outDegree = new HashMap();
 		inDegree = new HashMap();
-		
-//		geometricMeanPagerankCentrality = new HashMap();
-//		harmonicMeanPagerankCentrality = new HashMap();
-//		pagerankSourceCompression = new HashMap();
-//		pagerankTargetCompression = new HashMap();
-		
+				
 		detectedCycles = new ArrayList();
 		cycleEdges = new HashMap();
 
@@ -154,24 +145,29 @@ public class DependencyDAG {
 		targetsReachable = new HashMap();
 		sourcesReachable = new HashMap();
 		
-		nodesReachable = new HashMap();
-	
-//		largestWCCNodes = new HashSet();
+		nodesReachable = new HashMap();	
 		visited = new HashSet();
 		
 		CoreDetection.topRemovedWaistNodes.clear();
 		
-		edgeWeights = new HashMap();
+		edgeWeights = new HashMap();		
+		numPathLocation = new HashMap();
+		
+//		edgePathCentrality = new ArrayList();
 //		goodEdgeToSource = new HashSet();
 //		goodEdgeToTarget = new HashSet();
 //		cyclicNumSourcePath = new HashMap();
 //		cyclicNumTargetPath = new HashMap();
 //		cyclicAvgSourceDepth = new HashMap();
 //		cyclicAvgTargetDepth = new HashMap();
-		
-		numPathLocation = new HashMap();
-		
-//		edgePathCentrality = new ArrayList();
+//		largestWCCNodes = new HashSet();
+//		geometricMeanPagerankCentrality = new HashMap();
+//		harmonicMeanPagerankCentrality = new HashMap();
+//		pagerankSourceCompression = new HashMap();
+//		pagerankTargetCompression = new HashMap();
+//		geometricMeanPathCentrality = new HashMap();
+//		harmonicMeanPathCentrality = new HashMap();		
+//		iCentrality = new HashMap();
 	}
 	
 	public DependencyDAG(String dependencyGraphID) throws Exception {
@@ -194,22 +190,24 @@ public class DependencyDAG {
 	}
 	
 	private void loadNetworkAttributes() {
-//		countDisconnectedNodes();
-		
-//		removeIsolatedNodes(); 
-		
 		loadDegreeMetric();
 				
 		loadPathStatistics();
 		
 		loadLocationMetric(); // must load degree metric before
-		
-//		loadReachablityAll();		
+				
 		loadServerReachabilityAll();
 		
 		loadPathCentralityMetric();
 		
+//		countDisconnectedNodes();
+		
+//		removeIsolatedNodes(); 
+		
+//		loadReachablityAll();		
+		
 //		loadPagerankCentralityMetric();		
+		
 //		DistributionAnalysis.rankNodeByCentrality(this, this.normalizedPathCentrality);
 	}
 	
@@ -512,41 +510,46 @@ public class DependencyDAG {
 			}
 			else if (isLexis) {
 				// temporary fix
-				dependent = tokens[0];
-				if (dependent.equals("N0")) {
-					dependent += "_" + lexisTargetKount++;
-				}
-				nodes.add(dependent);
-				
-				for (int i = 2; i < tokens.length; ++i) {
-					server = tokens[i]; 
-					nodes.add(server);
-
-					if (serves.containsKey(server)) {
-						serves.get(server).add(dependent);
-					} else {
-						HashSet<String> hs = new HashSet();
-						hs.add(dependent);
-						serves.put(server, hs);
-					}
-					
-					if (depends.containsKey(dependent)) {
-						depends.get(dependent).add(server);
-					} else {
-						HashSet<String> hs = new HashSet();
-						hs.add(server);
-						depends.put(dependent, hs);
-					}
-					
-					String weightKey = server + "#" + dependent;
-					if (edgeWeights.containsKey(weightKey)) {
-						edgeWeights.put(weightKey, edgeWeights.get(weightKey) + 1);
-					}
-					else {
-						edgeWeights.put(weightKey, 1.0);
-					}
-				}
-				continue;
+//				dependent = tokens[0];
+//				if (dependent.equals("N0")) {
+//					dependent += "_" + lexisTargetKount++;
+//				}
+//				nodes.add(dependent);
+//				
+//				for (int i = 2; i < tokens.length; ++i) {
+//					server = tokens[i]; 
+//					nodes.add(server);
+//
+//					if (serves.containsKey(server)) {
+//						serves.get(server).add(dependent);
+//					} else {
+//						HashSet<String> hs = new HashSet();
+//						hs.add(dependent);
+//						serves.put(server, hs);
+//					}
+//					
+//					if (depends.containsKey(dependent)) {
+//						depends.get(dependent).add(server);
+//					} else {
+//						HashSet<String> hs = new HashSet();
+//						hs.add(server);
+//						depends.put(dependent, hs);
+//					}
+//					
+//					String weightKey = server + "#" + dependent;
+//					if (edgeWeights.containsKey(weightKey)) {
+//						edgeWeights.put(weightKey, edgeWeights.get(weightKey) + 1);
+//					}
+//					else {
+//						edgeWeights.put(weightKey, 1.0);
+//					}
+//				}
+//				continue;
+//				
+				server = tokens[0];
+				dependent = tokens[1];
+				double weight = Double.parseDouble(tokens[2]);
+				edgeWeights.put(server + "#" + dependent, weight);
 			}
 
 //			System.out.println(dependent + " - " + dependent.length() + "\t" + server + " - " + server.length());
@@ -598,8 +601,8 @@ public class DependencyDAG {
 	}
 	
 	public void addEdgeAndReload(String server, String dependent) {
-//		nodes.add(dependent);
-//		nodes.add(server);
+		nodes.add(dependent);
+		nodes.add(server);
 
 		if (dependent.equals(server)) { // loop, do not add the edge
 			return;
@@ -1515,6 +1518,9 @@ public class DependencyDAG {
 	public void init() {
 		nTotalPath = 0;
 		nDirectSourceTargetEdges = 0;
+		
+		targets = new HashSet();
+		sources = new HashSet();
 
 		numOfTargetPath = new HashMap();
 		sumOfTargetPath = new HashMap();
@@ -1541,7 +1547,6 @@ public class DependencyDAG {
 		targetsReachable = new HashMap();
 		sourcesReachable = new HashMap();
 	
-//		largestWCCNodes = new HashSet();
 		visited = new HashSet();
 		
 		CoreDetection.topRemovedWaistNodes.clear();

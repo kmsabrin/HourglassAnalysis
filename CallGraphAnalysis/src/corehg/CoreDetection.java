@@ -12,7 +12,7 @@ import neuro.ManagerNeuro;
 import org.apache.commons.math3.stat.StatUtils;
 
 public class CoreDetection {
-	public static boolean viewCore = true;
+	public static boolean viewCore = false;
 	public static boolean viewStat = false;
 	public static HashSet<String> topRemovedWaistNodes = new HashSet();
 	public static HashMap<String, Double> averageCoreRank;
@@ -36,7 +36,8 @@ public class CoreDetection {
 	public static HashSet<String> coreServerCoverage;
 	public static HashSet<String> coreDependentCoverage;
 	
-	public static TreeSet<String> sampleCore;	
+	public static TreeSet<String> sampleCores; // both real and flat
+	public static TreeSet<String> realCores;
 	public static HashMap<String, Double> coreWeights;
 	public static HashMap<String, Double> representativeLocation; 
 	
@@ -210,17 +211,19 @@ public class CoreDetection {
 //				System.out.println((nodeRank + "\t" + (cumulativePathCovered + maxPathCovered) / totalPath));
 			}
 			
-//			analysis
-//			update average waist entry rank and path contribution
-//			for full traversal the average will make sensem, for single traverse it's the single rank			
-			if (averageCoreRank.containsKey(representative)) {
-				double currentRank = averageCoreRank.get(representative);
-				averageCoreRank.put(representative, (currentRank + nodeRank) * 0.5 );
-				averagePathCovered.put(representative, (averagePathCovered.get(representative) + maxPathCovered) * 0.5);
-			}
-			else {
-				averageCoreRank.put(representative, nodeRank * 1.0);
-				averagePathCovered.put(representative, maxPathCovered);
+			if (!FlatNetwork.isProcessingFlat) {
+//				analysis
+//				update average waist entry rank and path contribution
+//				for full traversal the average will make sensem, for single traverse it's the single rank			
+				if (averageCoreRank.containsKey(representative)) {
+					double currentRank = averageCoreRank.get(representative);
+					averageCoreRank.put(representative, (currentRank + nodeRank) * 0.5 );
+					averagePathCovered.put(representative, (averagePathCovered.get(representative) + maxPathCovered) * 0.5);
+				}
+				else {
+					averageCoreRank.put(representative, nodeRank * 1.0);
+					averagePathCovered.put(representative, maxPathCovered);
+				}
 			}
 			
 //			recurse
@@ -239,24 +242,27 @@ public class CoreDetection {
 	
 	public static void init() {
 		topRemovedWaistNodes = new HashSet();
-		averageCoreRank = new HashMap();
-		averagePathCovered = new HashMap();
 		
 		coreSet = new HashMap();
 		
 		visitedCoreByDepth = new HashMap();
 		minCoreSize = 10e10;
 		maxCoreCoverage = -1;
-
-		coreNodeCoverage = new HashSet();
-		coreServerCoverage =  new HashSet();
-		coreDependentCoverage =  new HashSet();
 		
 		representativeLocation = new HashMap();
-		sampleCore = new TreeSet();
-		coreWeights = new HashMap();
+		sampleCores = new TreeSet();
 		
 		fullTraverse = false;
+		
+		if (!FlatNetwork.isProcessingFlat) {
+			realCores = new TreeSet();
+			averageCoreRank = new HashMap();
+			averagePathCovered = new HashMap();
+			coreNodeCoverage = new HashSet();
+			coreServerCoverage =  new HashSet();
+			coreDependentCoverage =  new HashSet();
+			coreWeights = new HashMap();
+		}
 	}
 	
 	public static void getCore(DependencyDAG dependencyDAG, String filePath) {
@@ -315,18 +321,22 @@ public class CoreDetection {
 		}
 		
 //		Use the first core as a sample
-		sampleCore = coreSet.keySet().iterator().next();
+		if (!FlatNetwork.isProcessingFlat) {
+			realCores = coreSet.keySet().iterator().next();
+			getNodeCoverage(dependencyDAG, sampleCores);
+//			getNodeCoverage2(dependencyDAG, sampleCore);
+			coreLocationAnalysis(dependencyDAG);
+//			getCoreNeighborhood(dependencyDAG, sampleCore);
+		}
+		sampleCores = coreSet.keySet().iterator().next();
 //		sampleCore.removeAll(blockedNodeSet);
 //		System.out.println(sampleCore);
-		getNodeCoverage(dependencyDAG, sampleCore);
-//		getNodeCoverage2(dependencyDAG, sampleCore);
-		coreLocationAnalysis(dependencyDAG);
-//		getCoreNeighborhood(dependencyDAG, sampleCore);
+
 				
 		if (!FlatNetwork.isProcessingFlat & viewStat) {
-			System.out.println("Sample Core: " + sampleCore);
+			System.out.println("Sample Core: " + sampleCores);
 			if (DependencyDAG.isCelegans) {
-				for (String s: sampleCore) {
+				for (String s: sampleCores) {
 					System.out.println(s + "\t" + ManagerNeuro.getType(s) + "\t" + dependencyDAG.getNodeType(s));
 				}
 			}
@@ -414,16 +424,16 @@ public class CoreDetection {
 			++rank;
 		}
 		
-		sampleCore = new TreeSet(cores);
-		CoreDetection.minCoreSize = sampleCore.size();
+		sampleCores = new TreeSet(cores);
+		CoreDetection.minCoreSize = sampleCores.size();
 		
 		topRemovedWaistNodes.clear();
 		dependencyDAG.loadPathStatistics();
-		getNodeCoverage(dependencyDAG, sampleCore);
+		getNodeCoverage(dependencyDAG, sampleCores);
 		coreLocationAnalysis2(dependencyDAG);
 				
 		if (!FlatNetwork.isProcessingFlat && true) {
-			System.out.println("Sample Core: " + sampleCore);
+			System.out.println("Sample Core: " + sampleCores);
 			System.out.println("Min core size: " + minCoreSize);
 			System.out.println("Node Coverage: " + nodeCoverage);
 			System.out.println("WeightedCoreLocation: " + weightedCoreLocation); // does not apply
@@ -528,7 +538,7 @@ public class CoreDetection {
 		coreWeights = new HashMap();
 		weightedCoreLocation = 0;
 		double corePathContribution = 0;
-		for (String s: sampleCore) {
+		for (String s: sampleCores) {
 //			System.out.println(s + " -- " + representativeLocation.get(s) + " -- " + averagePathCovered.get(s));
 //			weightedCoreLocation += dependencyDAG.location.get(s) * averagePathCovered.get(s);
 			weightedCoreLocation += representativeLocation.get(s) * averagePathCovered.get(s);
@@ -539,7 +549,7 @@ public class CoreDetection {
 		weightedCoreLocation /= corePathContribution;
 //		System.out.println(weightedCoreLocation);
 		
-		for (String s: sampleCore) {
+		for (String s: sampleCores) {
 			double loc = representativeLocation.get(s);
 			double weight = averagePathCovered.get(s) / corePathContribution;
 //			System.out.println(loc + "\t" + weight);
@@ -554,12 +564,12 @@ public class CoreDetection {
 	private static void coreLocationAnalysis2(DependencyDAG dependencyDAG) {
 		coreWeights = new HashMap();
 		double coreSumCentrality = 0;
-		for (String s: sampleCore) {
+		for (String s: sampleCores) {
 			coreSumCentrality += dependencyDAG.normalizedPathCentrality.get(s);
 		}
 
 		weightedCoreLocation = 0;
-		for (String s: sampleCore) {
+		for (String s: sampleCores) {
 			double location = dependencyDAG.numPathLocation.get(s);
 			double weight = dependencyDAG.normalizedPathCentrality.get(s) / coreSumCentrality;
 			weightedCoreLocation += location * weight;

@@ -109,7 +109,7 @@ public class SocialRankAnalysis {
 			}
 			else {
 				/* rank violation */
-				System.out.println(idLabelMap.get(substrate) + "\t" + idLabelMap.get(product));
+//				System.out.println(idLabelMap.get(substrate) + "\t" + idLabelMap.get(product));
 //				System.out.println(substrateRank + "\t" + productRank);
 			}
 		}
@@ -141,10 +141,10 @@ public class SocialRankAnalysis {
 			/* special case */
 //			System.out.println(label + "\t" + ManagerNeuro.source.contains(Integer.parseInt(label)));
 			if (ManagerNeuro.source.contains(label)) {
-//				pw.println("1000" + "\t" + label);
+				pw.println("1000" + "\t" + label);
 			}
 			if (ManagerNeuro.target.contains(label)) {
-//				pw.println(label + "\t" + "2000");
+				pw.println(label + "\t" + "2000");
 			}
 		}
 		scanner.close();
@@ -158,7 +158,7 @@ public class SocialRankAnalysis {
 			levelCounter[rank]++;
 //			int demoCategory = getDemoCategory(Integer.parseInt(idLabelMap.get(id))); String vs int error, convert to string
 //			levelDemography[rank][demoCategory]++;
-			System.out.println(idLabelMap.get(id) + "\t" + rank + "\t" + agony);
+//			System.out.println(idLabelMap.get(id) + "\t" + rank + "\t" + agony);
 		}
 		scanner.close();
 		
@@ -263,6 +263,7 @@ public class SocialRankAnalysis {
 //		random = new Random();
 //		getDataForSocialrankAnalysis();
 
-		getSocialrankCompliantNetwork();
+//		getSocialrankCompliantNetwork();
+		getSocialrankCompliantNetworkNeuro();
 	}
 }

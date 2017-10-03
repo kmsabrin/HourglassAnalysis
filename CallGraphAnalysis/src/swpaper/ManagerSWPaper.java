@@ -217,7 +217,7 @@ public class ManagerSWPaper {
 			if (i > 1) {
 				
 //				getNodeInsertDeleteInfo(previousNodes, dependencyDAG.nodes, i);
-				getNodeInsertDeleteInfo2(previousNodes, dependencyDAG.nodes, previousCore, CoreDetection.sampleCore, i);
+				getNodeInsertDeleteInfo2(previousNodes, dependencyDAG.nodes, previousCore, CoreDetection.sampleCores, i);
 				
 //				getPathCentralityDeviations(previouseNormalizedPathCentrality, dependencyDAG.normalizedPathCentrality, 
 //						previousGrayCore, CoreDetection.sampleCore, nonCoreDeviation, false);
@@ -229,7 +229,7 @@ public class ManagerSWPaper {
 			}
 		
 //			previousGrayCore = new TreeSet(CoreDetection.sampleCore);
-			previousCore = new TreeSet(CoreDetection.sampleCore);
+			previousCore = new TreeSet(CoreDetection.sampleCores);
 			previousNodes = new HashSet(dependencyDAG.nodes);
 			previouseNormalizedPathCentrality = new HashMap(dependencyDAG.normalizedPathCentrality);
 		}
@@ -654,7 +654,7 @@ public class ManagerSWPaper {
 			double meanNonCoreNumLine = 0;
 			double meanNonCoreNumLineK = 0;
 			for (String s : dependencyDAG.nodes) {
-				if (CoreDetection.sampleCore.contains(s)) {
+				if (CoreDetection.sampleCores.contains(s)) {
 					if (LineOfCodeCount.functionNumLines.containsKey(s)) {
 						meanCoreNumLine += LineOfCodeCount.functionNumLines
 								.get(s);
@@ -684,7 +684,7 @@ public class ManagerSWPaper {
 //			CoreDetection.pathCoverageTau = 0.90;
 			
 			doRealNetworkAnalysis(callgraphName + "_callgraphs", "full.graph-" + callgraphName + "-" + i);
-			for (String s: CoreDetection.sampleCore) {
+			for (String s: CoreDetection.sampleCores) {
 				if (nodeWeightByVersion.containsKey(s)) {
 					nodeWeightByVersion.get(s)[i] = CoreDetection.coreWeights.get(s);
 				}
