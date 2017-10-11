@@ -12,8 +12,8 @@ import neuro.ManagerNeuro;
 import org.apache.commons.math3.stat.StatUtils;
 
 public class CoreDetection {
-	public static boolean viewCore = false;
-	public static boolean viewStat = false;
+	public static boolean viewCore = true;
+	public static boolean viewStat = true;
 	public static HashSet<String> topRemovedWaistNodes = new HashSet();
 	public static HashMap<String, Double> averageCoreRank;
 	public static HashMap<String, Double> averagePathCovered;
@@ -37,7 +37,7 @@ public class CoreDetection {
 	public static HashSet<String> coreDependentCoverage;
 	
 	public static TreeSet<String> sampleCores; // both real and flat
-	public static TreeSet<String> realCores;
+	public static TreeSet<String> realCores; // only real
 	public static HashMap<String, Double> coreWeights;
 	public static HashMap<String, Double> representativeLocation; 
 	

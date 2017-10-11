@@ -25,6 +25,8 @@ public class SocialRankAnalysis {
 	static boolean randomizationTest = false;
 	static Random random;
 	
+	static boolean addBackEdge = true;
+	
 	public static void getDataForSocialrankAnalysis() throws Exception {
 		HashMap<String, Integer> labelIdMap = new HashMap();
 		
@@ -203,8 +205,17 @@ public class SocialRankAnalysis {
 			
 			levelEdgeDirection[substrateRank][productRank]++;
 		}
-		pw.close();
 		scanner.close();
+		
+		if (addBackEdge) {
+			scanner = new Scanner(new File(directory + "//" + "celegansEdgeAddBack.txt"));
+			while (scanner.hasNext()) {
+				String substrate = scanner.next();
+				String product = scanner.next();
+				pw.println(substrate + "\t" + product);
+			}
+		}		
+		pw.close();
 		
 		for (int i = 0; i < nLevels; ++i) {
 			System.out.println(i + "\t" + levelCounter[i]);

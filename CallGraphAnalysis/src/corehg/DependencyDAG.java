@@ -108,66 +108,13 @@ public class DependencyDAG {
 	
 	public HashMap<String, Double> numPathLocation;
 
-//	public ArrayList<Edge> edgePathCentrality;
+	public ArrayList<Edge> edgePathCentrality;
+	public HashSet<String> edgeSkip;
 	
 	public static int disconnectedKount; 
 	
 	public DependencyDAG() { 
-		nodes = new TreeSet();
-		serves = new HashMap();
-		depends = new HashMap();
-		
-		targets = new HashSet();
-		sources = new HashSet();
-				
-		numOfTargetPath = new HashMap();
-		sumOfTargetPath = new HashMap();
-		avgTargetDepth = new HashMap();
-		numOfSourcePath = new HashMap();
-		sumOfSourcePath = new HashMap();
-		avgSourceDepth = new HashMap();
-		lengthPathLocation = new HashMap();
-
-		nodePathThrough = new HashMap();
-		normalizedPathCentrality = new HashMap();
-		centralityRank = new HashMap();
-		lengthWeightedPathCentrality = new HashMap();
-		
-		outDegree = new HashMap();
-		inDegree = new HashMap();
-				
-		detectedCycles = new ArrayList();
-		cycleEdges = new HashMap();
-
-		successors = new HashMap();
-		ancestors = new HashMap();
-		
-		targetsReachable = new HashMap();
-		sourcesReachable = new HashMap();
-		
-		nodesReachable = new HashMap();	
-		visited = new HashSet();
-		
-		CoreDetection.topRemovedWaistNodes.clear();
-		
-		edgeWeights = new HashMap();		
-		numPathLocation = new HashMap();
-		
-//		edgePathCentrality = new ArrayList();
-//		goodEdgeToSource = new HashSet();
-//		goodEdgeToTarget = new HashSet();
-//		cyclicNumSourcePath = new HashMap();
-//		cyclicNumTargetPath = new HashMap();
-//		cyclicAvgSourceDepth = new HashMap();
-//		cyclicAvgTargetDepth = new HashMap();
-//		largestWCCNodes = new HashSet();
-//		geometricMeanPagerankCentrality = new HashMap();
-//		harmonicMeanPagerankCentrality = new HashMap();
-//		pagerankSourceCompression = new HashMap();
-//		pagerankTargetCompression = new HashMap();
-//		geometricMeanPathCentrality = new HashMap();
-//		harmonicMeanPathCentrality = new HashMap();		
-//		iCentrality = new HashMap();
+		init();
 	}
 	
 	public DependencyDAG(String dependencyGraphID) throws Exception {
@@ -633,6 +580,11 @@ public class DependencyDAG {
 		init();
 		loadNetworkAttributes();
 	}
+	
+	public void reload() {
+		init();
+		loadNetworkAttributes();
+	}
 		
 	public void removeIsolatedNodes() {
 		HashSet<String> removable = new HashSet<String>();
@@ -848,8 +800,9 @@ public class DependencyDAG {
 		double sPath = 0;
 		if (!CoreDetection.topRemovedWaistNodes.contains(node)) { // special condition for waist detection
 			for (String s : depends.get(node)) {
-//				if ((goodEdgeToSource.contains(node + "#" + s) || !isCyclic)) 
-				{ // only for neuro
+//				if ((goodEdgeToSource.contains(node + "#" + s) || !isCyclic)) // only for neuro 
+				{ 
+					if (edgeSkip.contains(node + "," + s)) continue;
 					sourcePathsTraverse(s);
 					nPath += numOfSourcePath.get(s);
 					sPath += numOfSourcePath.get(s) + sumOfSourcePath.get(s);
@@ -882,7 +835,8 @@ public class DependencyDAG {
 			if (serves.containsKey(node)) { // for synthetic disconnected nodes
 				for (String s : serves.get(node)) {
 //					if ((goodEdgeToTarget.contains(node + "#" + s) || !isCyclic)) 
-					{						
+					{		
+						if (edgeSkip.contains(node + "," + s)) continue;
 						targetPathsTraverse(s);
 						nPath += numOfTargetPath.get(s);
 						sPath += numOfTargetPath.get(s) + sumOfTargetPath.get(s);
@@ -1208,8 +1162,6 @@ public class DependencyDAG {
 
 	public void loadPathStatistics() {
 //		System.out.println("In path stat: " + isWeighted + "\t" + CoreDetection.topRemovedWaistNodes);
-		
-		
 		if (isWeighted) {
 			loadWeightedPathStatistics();
 		}
@@ -1239,15 +1191,20 @@ public class DependencyDAG {
 		}
 		
 		/* edge path computation */
-//		for (String s : nodes) {
-//			if (isTarget(s)) continue;
-//			for (String r : serves.get(s)) {
-//				double numEdgePath = numOfSourcePath.get(s) * numOfTargetPath.get(r);
-//				Edge e = new Edge(s, r, numEdgePath);
-//				edgePathCentrality.add(e);
+		for (String s : nodes) {
+			if (isTarget(s)) continue;
+			for (String r : serves.get(s)) {
+				if (isCelegans) {
+					if (s.equals("1000") || r.equals("1000")) continue;
+					if (s.equals("2000") || r.equals("2000")) continue;
+				}
+				double numEdgePath = numOfSourcePath.get(s) * numOfTargetPath.get(r);
+				Edge e = new Edge(s, r, numEdgePath);
+				edgePathCentrality.add(e);
 //				System.out.println(s + "\t" + r + "\t" + numEdgePath);
-//			}
-//		}	
+			}
+		}	
+		Collections.sort(edgePathCentrality);
 		
 //		System.out.println("Total path: " + nTotalPath);
 		
@@ -1513,15 +1470,18 @@ public class DependencyDAG {
 		visited = new HashSet();
 		
 		edgeWeights = new HashMap();
+		
+		edgePathCentrality = new ArrayList();
 	}
 	
-	public void init() {
-		nTotalPath = 0;
-		nDirectSourceTargetEdges = 0;
+	public void init() {		
+		nodes = new TreeSet();
+		serves = new HashMap();
+		depends = new HashMap();
 		
 		targets = new HashSet();
 		sources = new HashSet();
-
+				
 		numOfTargetPath = new HashMap();
 		sumOfTargetPath = new HashMap();
 		avgTargetDepth = new HashMap();
@@ -1533,11 +1493,11 @@ public class DependencyDAG {
 		nodePathThrough = new HashMap();
 		normalizedPathCentrality = new HashMap();
 		centralityRank = new HashMap();
-		
+		lengthWeightedPathCentrality = new HashMap();
 		
 		outDegree = new HashMap();
 		inDegree = new HashMap();
-		
+				
 		detectedCycles = new ArrayList();
 		cycleEdges = new HashMap();
 
@@ -1546,15 +1506,31 @@ public class DependencyDAG {
 		
 		targetsReachable = new HashMap();
 		sourcesReachable = new HashMap();
-	
+		
+		nodesReachable = new HashMap();	
 		visited = new HashSet();
 		
 		CoreDetection.topRemovedWaistNodes.clear();
 		
-		edgeWeights = new HashMap();
-		
-		nodesReachable = new HashMap();	
+		edgeWeights = new HashMap();		
 		numPathLocation = new HashMap();
+		
+		edgePathCentrality = new ArrayList();
+		edgeSkip = new HashSet();
+//		goodEdgeToSource = new HashSet();
+//		goodEdgeToTarget = new HashSet();
+//		cyclicNumSourcePath = new HashMap();
+//		cyclicNumTargetPath = new HashMap();
+//		cyclicAvgSourceDepth = new HashMap();
+//		cyclicAvgTargetDepth = new HashMap();
+//		largestWCCNodes = new HashSet();
+//		geometricMeanPagerankCentrality = new HashMap();
+//		harmonicMeanPagerankCentrality = new HashMap();
+//		pagerankSourceCompression = new HashMap();
+//		pagerankTargetCompression = new HashMap();
+//		geometricMeanPathCentrality = new HashMap();
+//		harmonicMeanPathCentrality = new HashMap();		
+//		iCentrality = new HashMap();
 	}
 	
 	public void printNetworkStat() {

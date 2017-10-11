@@ -29,11 +29,13 @@ public class ManagerNeuro {
 	public static HashMap<String, Integer> coreVarianceMembers = new HashMap();
 	public static HashMap<String, Double> hscoreCoreVarianceMembers = new HashMap();
 	public static HashMap<String, Double> locationVariance = new HashMap();
+	public static HashMap<String, Double> pcenVariance = new HashMap();
 	public static HashMap<String, Integer> coreVarianceOrdered = new HashMap();
 	public static double restoredEdgesVariance[];
 	public static Random random  = new Random(System.nanoTime());
 	public static int nRun = 1;
 	public static int method = 1;
+	public static int maxEdgeBack = 106;
 	
 	private static void loadNodes(HashSet<String> nodes, HashSet<String> typeNode, String fileName) throws Exception {
 		Scanner scan = new Scanner(new File(fileName));
@@ -520,7 +522,7 @@ public class ManagerNeuro {
 			int substrateRank = idRankMap.get(substrate);
 			int productRank = idRankMap.get(product);
 			if (substrateRank >= productRank) {
-//				System.out.println(idLabelMap.get(substrate) + "\t" + idLabelMap.get(product));
+				if (substrateRank == productRank) System.out.println(idLabelMap.get(substrate) + "\t" + idLabelMap.get(product));
 				String start = idLabelMap.get(substrate);
 				String end = idLabelMap.get(product);
 				neuroDependencyDAG.loadRechablity(end);
@@ -561,6 +563,7 @@ public class ManagerNeuro {
 		}
 		
 		int restoredEdge = 0;
+		HashSet<String> restoredEdgeSet = new HashSet();
 		for (int agony: agonySorted.keySet()) {
 			ArrayList<String> alist = new ArrayList(agonySorted.get(agony));
 			Collections.shuffle(alist, random);
@@ -575,6 +578,7 @@ public class ManagerNeuro {
 					// no cycle -- edge restored
 					neuroDependencyDAG.addEdgeAndReload(start, end);
 					++restoredEdge;
+					restoredEdgeSet.add(start + ", " + end);
 					
 //					CoreDetection.pathCoverageTau = 0.98;
 //					CoreDetection.fullTraverse = false;
@@ -589,14 +593,24 @@ public class ManagerNeuro {
 			}
 		}
 		
+		if (restoredEdge >= maxEdgeBack) {
+//			System.out.println(restoredEdge);
+			for (String s: restoredEdgeSet) {
+//				System.out.println(s);
+			}
+		}
+		
+		if (true) return;
+		
 //		System.out.println(totalRemoved + "\t" + causeCycle + "\t" + restoredEdge);
+//		neuroDependencyDAG.printNetworkProperties();
 		CoreDetection.pathCoverageTau = 0.96;
 		CoreDetection.fullTraverse = false;
 		CoreDetection.getCore(neuroDependencyDAG, netID);
 		double realCore = CoreDetection.minCoreSize;
 		HashMap<String, Double> realLocation = new HashMap(neuroDependencyDAG.numPathLocation);
-		FlatNetwork.makeAndProcessFlat(neuroDependencyDAG);
-		CoreDetection.hScore = (1.0 - (realCore / FlatNetwork.flatNetworkCoreSize));
+//		FlatNetwork.makeAndProcessFlat(neuroDependencyDAG);
+//		CoreDetection.hScore = (1.0 - (realCore / FlatNetwork.flatNetworkCoreSize));
 		for (String r: CoreDetection.realCores) {
 			if (nodeVariance.containsKey(r)) {
 				nodeVariance.put(r, nodeVariance.get(r) + 1);
@@ -610,6 +624,15 @@ public class ManagerNeuro {
 			}
 			else {
 				locationVariance.put(r, realLocation.get(r));
+			}
+		}
+		
+		for (String r: neuroDependencyDAG.nodes) {
+			if (pcenVariance.containsKey(r)) {
+				pcenVariance.put(r, (pcenVariance.get(r) + neuroDependencyDAG.normalizedPathCentrality.get(r)) * 0.5);
+			}
+			else {
+				pcenVariance.put(r, neuroDependencyDAG.normalizedPathCentrality.get(r));
 			}
 		}
 		
@@ -659,40 +682,42 @@ public class ManagerNeuro {
 	
 	private static void randomRuns() throws Exception {
 		random = new Random(System.nanoTime());
-		nRun = 100;
+		nRun = 500;
 		restoredEdgesVariance = new double[nRun];
 		
 		for (int i = 1; i <= 3; ++i) {
-			nRun = 100;
 			method = i;
 			while (--nRun >= 0) {
 				optimizeAcyclicityNeuro();
 			}
-			nRun = 100;
-			System.out.println(StatUtils.mean(restoredEdgesVariance) + "\t" + Math.sqrt(StatUtils.variance(restoredEdgesVariance)));
+			nRun = 500;
+//			System.out.println(StatUtils.mean(restoredEdgesVariance) + "\t" + Math.sqrt(StatUtils.variance(restoredEdgesVariance)));
 		}
 		
 		for (String s: nodeVariance.keySet()) {
-			System.out.println(s + "\t" + nodeVariance.get(s) + "\t" + locationVariance.get(s));
+//			System.out.println(s + "\t" + nodeVariance.get(s) + "\t" + locationVariance.get(s));
 		}
 		for (double d: hscoreVariance.keySet()) {
 //			System.out.println(d + "\t" + hscoreVariance.get(d));
 		}
-		System.out.println("###\n");
+//		System.out.println("###\n");
 		for (String s: hscoreCoreVarianceMembers.keySet()) {
-			System.out.println(s + "\t" + hscoreCoreVarianceMembers.get(s));
+//			System.out.println(s + "\t" + hscoreCoreVarianceMembers.get(s));
 		}
 		
 		
 		for (String s: coreVarianceMembers.keySet()) {
-			System.out.println((coreVarianceMembers.get(s) / 900.0) + "\t" + s);
+//			System.out.println((coreVarianceMembers.get(s) / 900.0) + "\t" + s);
 		}
 //		System.out.println(" -------- \n");
 		for (String s: coreVarianceOrdered.keySet()) {
-//			System.out.println((coreVarianceOrdered.get(s) / 900.0) + "\t" + s);
+//			System.out.println((coreVarianceOrdered.get(s) / 300.0) + "\t" + s);
 		}
 		
 //		System.out.println(StatUtils.mean(restoredEdgesVariance) + "\t" + Math.sqrt(StatUtils.variance(restoredEdgesVariance)));
+		for (String r: pcenVariance.keySet()) {
+//			System.out.println(r + "\t" + pcenVariance.get(r));
+		}
 	}
 	
 	private static void optimizeAcyclicityOld() throws Exception {
@@ -780,11 +805,11 @@ public class ManagerNeuro {
 	
 	public static void main(String[] args) throws Exception {
 //		getCleanNeuroNetwork();
-//		doNeuroNetworkAnalysis();
+		doNeuroNetworkAnalysis();
 	
 //		optimizeAcyclicityOld();
 //		optimizeAcyclicityNeuro();
-		randomRuns();
+//		randomRuns();
 		
 //		statisticalRun();
 //		traverseAllPaths();

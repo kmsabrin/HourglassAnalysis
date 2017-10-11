@@ -14,4 +14,8 @@ public class Edge implements Comparable<Edge> {
 	public int compareTo(Edge other) {
 	    return -1 * Double.compare(this.pathCentrality, other.pathCentrality);
 	}
+	
+	public String toString() {
+		return source + "\t" + target; // + "\t" + pathCentrality;
+	}
 }

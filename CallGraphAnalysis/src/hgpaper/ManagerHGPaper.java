@@ -185,7 +185,7 @@ public class ManagerHGPaper {
 	private static void doRealNetworkAnalysis() throws Exception {
 		String netPath = "";
 		
-//		String netID = "rat";
+		String netID = "rat";
 //		String netID = "monkey";
 		
 //		String netID = "commons-math";
@@ -199,7 +199,7 @@ public class ManagerHGPaper {
 		
 //		String netID = "chain";
 		
-		String netID = "toy";
+//		String netID = "toy";
 		
 //		String netID = nID;
 		
