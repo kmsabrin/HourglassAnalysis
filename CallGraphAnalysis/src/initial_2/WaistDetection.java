@@ -617,7 +617,7 @@ public class WaistDetection {
 			int servesWaist = 0, dependsOnWaist = 0;
 			if (dependencyDAG.serves.containsKey(s) && dependencyDAG.depends.containsKey(s)) { // intermediate node
 				if (!averageWaistRank.containsKey(s)) { // not a waist node
-					dependencyDAG.loadRechablity(s); // find reachable nodes
+					dependencyDAG.loadReachability(s); // find reachable nodes
 					
 					for (String r: averageWaistRank.keySet()) {
 						if (dependencyDAG.successors.get(s).contains(r)) { // serving some waist node

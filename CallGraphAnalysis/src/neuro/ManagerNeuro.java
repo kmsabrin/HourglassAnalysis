@@ -36,6 +36,8 @@ public class ManagerNeuro {
 	public static int nRun = 1;
 	public static int method = 1;
 	public static int maxEdgeBack = 106;
+	public static int maxKount;
+	public static HashSet<String> maxRedundantOrder;
 	
 	private static void loadNodes(HashSet<String> nodes, HashSet<String> typeNode, String fileName) throws Exception {
 		Scanner scan = new Scanner(new File(fileName));
@@ -95,12 +97,18 @@ public class ManagerNeuro {
 		HashMap<String, Integer> indeg = new HashMap();
 		HashMap<String, Integer> outdeg = new HashMap();
 		HashSet<String> retainedNode = new HashSet();
+		HashMap<String, Integer> forwardEdges = new HashMap();
+		HashMap<String, Integer> backwardEdges = new HashMap();
 		
 //		System.out.println("Sizes " + nodes.size() + "\t" + source.size() + "\t" + intermediate.size() + "\t" + target.size());
 //		int edgeConsidered = 0;
 		int dualNodeRemovedEdge = 0;
 		int totalRemovedEdge = 0;
 		int a[][] = new int[3][3];
+		double feedForwardCount = 0;
+		double feedBackCount = 0;
+		double feedForwardSum = 0;
+		double feedBackSum = 0;
 		while (scan.hasNext()) {
 			String src = scan.next();
 			String dst = scan.next();
@@ -118,12 +126,18 @@ public class ManagerNeuro {
 			if (target.contains(src) && (intermediate.contains(dst) || source.contains(dst))) {
 //				++nRemovedOutedge;
 //				System.out.println(target.contains(dst) + "\t" + source.contains(dst) + "\t" + intermediate.contains(dst));
+				feedBackSum += weight;
+				feedBackCount++;
+				backwardEdges.put(src + "," + dst, (int)weight);
 				continue;
 			}
 			
 			if (intermediate.contains(src) && source.contains(dst)) {
 //				++nRemovedInedge;
 //				System.out.println(target.contains(src) + "\t" + source.contains(src) + "\t" + intermediate.contains(src));
+				feedBackSum += weight;
+				feedBackCount++;
+				backwardEdges.put(src + "," + dst, (int)weight);
 				continue;
 			}
 			
@@ -135,6 +149,10 @@ public class ManagerNeuro {
 //				System.out.println(src + "\t" + dst);
 //				continue;
 			}
+			
+			feedForwardSum += weight;
+			feedForwardCount++;
+			forwardEdges.put(src + "," + dst, (int)weight);
 						
 			pw.println(src + "\t" + dst);
 			++totalEdge;
@@ -162,6 +180,27 @@ public class ManagerNeuro {
 		System.out.println("Total edge " + totalEdge);
 		System.out.println("Total node " + retainedNode.size());
 //		System.out.println("Dual Node Removed Edge " + dualNodeRemovedEdge);
+//		System.out.println((feedForwardSum/feedForwardCount) + "\t" + (feedBackSum/feedBackCount));
+		
+		HashMap<Integer, Integer> diffFrequencey = new HashMap();
+		for (String s: forwardEdges.keySet()) {
+			String src = s.substring(0, s.indexOf(","));
+			String tgt = s.substring(s.indexOf(",") + 1);
+			String rev = tgt + "," + src;
+			if (backwardEdges.containsKey(rev)) {
+//				System.out.println("Weight diff: " + "\t" + (forwardEdges.get(s) - backwardEdges.get(rev)));
+				int diffWeight = forwardEdges.get(s) - backwardEdges.get(rev);
+				if (diffFrequencey.containsKey(diffWeight)) {
+					diffFrequencey.put(diffWeight, diffFrequencey.get(diffWeight) + 1);
+				}
+				else {
+					diffFrequencey.put(diffWeight, 1);
+				}
+			}
+		}
+		for (int i: diffFrequencey.keySet()) {
+			System.out.println(i + "\t" + diffFrequencey.get(i));
+		}
 		
 		for (int i = 0; i < 3; ++i) {
 			for (int j = 0; j < 3; ++j) {
@@ -243,7 +282,7 @@ public class ManagerNeuro {
 		removeDuplicate(intermediate, source, target, nodes);
 		removeDuplicate(target, source, intermediate, nodes);
 		*/
-		removeDuplicate(target, source, source, nodes); // only removing dual definition source-target nodes
+//		removeDuplicate(target, source, source, nodes); // only removing dual definition source-target nodes
 		
 		System.out.println("Total nodes: " + nodes.size());
 		System.out.println("Sources: " + source.size());
@@ -403,22 +442,147 @@ public class ManagerNeuro {
 	}
 	*/
 	
+	private static void getWeightedNetwork() throws Exception {
+		Scanner scanner = new Scanner(new File("neuro_networks//celegans_graph.txt"));
+		HashMap<String, String> weights = new HashMap();
+		while (scanner.hasNext()) {
+			String src = scanner.next();
+			String tgt = scanner.next();
+			String wgt = scanner.next();
+			weights.put(src + "," + tgt, wgt);
+		}
+		scanner.close();
+		PrintWriter pw = new PrintWriter(new File("neuro_networks//celegans.socialrank.network.weighted"));
+		scanner = new Scanner(new File("neuro_networks//celegans.socialrank.network"));
+		while (scanner.hasNext()) {
+			String src = scanner.next();
+			String tgt = scanner.next();
+			String wgt = "1.00";
+			if (weights.containsKey(src + "," + tgt)) {
+				wgt = weights.get(src + "," + tgt);
+			}
+			pw.println(src + " " + tgt + " " + wgt);
+		}
+		pw.close();
+		scanner.close();
+	}
+	
+	private static void reduceNetwork() throws Exception {
+		loadNeuroMetaNetwork();
+		DependencyDAG.isCelegans = true;
+		DependencyDAG.isToy = true;
+//		String netID = "celegans";
+//		String netPath = "toy_networks//toy_dag_paper.txt";
+		String netPath = "neuro_networks//celegans_full.txt";
+//		String netPath = "metabolic_networks//rat-links.txt";
+		DependencyDAG neuroDependencyDAG = new DependencyDAG(netPath);
+		
+		
+//		neuroDependencyDAG.printNetworkProperties();
+//		neuroDependencyDAG.printNetworkStat();
+		
+		int originSTPair = neuroDependencyDAG.connectedSourceTargetPair;
+		
+//		System.out.println(originSTPair);
+		ArrayList<String> redundant = new ArrayList();
+		/*
+		HashSet<String> tempNodes = new HashSet(neuroDependencyDAG.nodes);
+		for (String s: tempNodes) {
+			DependencyDAG tempDAG = new DependencyDAG(netPath);
+			tempDAG.removeNodeAndReload(s);
+//			if (tempDAG.connectedSourceTargetPair >= originSTPair) {
+//				System.out.println(s);
+//			}
+//			System.out.println(s + "\t" + tempDAG.connectedSourceTargetPair);
+//			tempDAG.printNetworkProperties();
+			if (tempDAG.connectedSourceTargetPair == originSTPair) {
+				redundant.add(s);
+			}
+		}
+		*/
+		Scanner scanner = new Scanner(new File("neuro_networks//coupling_redundant.txt"));
+		while (scanner.hasNext()) {
+			redundant.add(scanner.next());
+		}
+		scanner.close();
+		
+		Collections.shuffle(redundant);
+		int kount = 0;
+		HashSet<String> redundantOrder = new HashSet();
+		for (String s: redundant) {
+			neuroDependencyDAG.removeNodeAndReload(s);
+			if (neuroDependencyDAG.connectedSourceTargetPair < originSTPair) {
+				break;
+			}
+			redundantOrder.add(s);
+			++kount;
+		}
+		if (kount > maxKount) {
+			maxKount = kount;
+			maxRedundantOrder = new HashSet(redundantOrder);
+		}
+//		neuroDependencyDAG.reload();
+//		System.out.println(kount + "\t" + neuroDependencyDAG.connectedSourceTargetPair);
+	}	
+	
+	private static void doNeuroNetworkAnalysis2() throws Exception {
+		loadNeuroMetaNetwork();
+//		DependencyDAG.isCelegans = true;
+		DependencyDAG.isToy = true;
+		String netID = "celegans";
+//		DependencyDAG neuroDependencyDAG = new DependencyDAG("neuro_networks//celegans_full.txt");
+//		DependencyDAG neuroDependencyDAG = new DependencyDAG("toy_networks//toy_dag_paper.txt");
+		DependencyDAG neuroDependencyDAG = new DependencyDAG("metabolic_networks//rat-links.txt");
+		
+		
+//		int disconnectedInterNeurons[] = {4,5,7,9,19,20,21,22,34,36,44,53,85,93,125,272};
+//		for (int i: disconnectedInterNeurons) {
+//			CoreDetection.topRemovedWaistNodes.add(Integer.toString(i));
+//		}
+		
+		neuroDependencyDAG.printNetworkProperties();
+		neuroDependencyDAG.printNetworkStat();
+//		DistributionAnalysis.getDistributionCCDF(neuroDependencyDAG, netID, 1);
+//		getLocationColorWeightedHistogram(neuroDependencyDAG);
+//		neuroDependencyDAG.printNetworkProperties();
+//		DistributionAnalysis.printAllCentralities(neuroDependencyDAG, netID);
+
+//		DistributionAnalysis.getPathLength(neuroDependencyDAG);
+//		CoreDetection.getCentralEdgeSubgraph(neuroDependencyDAG);
+//		DistributionAnalysis.getDistributionCCDF(neuroDependencyDAG, netID, 1);
+		
+//		Visualization.printDOTNetwork(neuroDependencyDAG);
+//		CoreDetection.pathCoverageTau = 1.0;
+//		CoreDetection.fullTraverse = false;
+//		CoreDetection.getCore(neuroDependencyDAG, netID);
+//		double realCore = CoreDetection.minCoreSize;
+
+//		neuroDependencyDAG = new DependencyDAG("neuro_networks//" + neuroDAGName + ".txt");
+//		FlatNetwork.makeAndProcessFlat(neuroDependencyDAG);
+//		CoreDetection.hScore = (1.0 - (realCore / FlatNetwork.flatNetworkCoreSize));
+//		System.out.println("[h-Score] " + CoreDetection.hScore);
+	}
+
 	private static void doNeuroNetworkAnalysis() throws Exception {
 //		DependencyDAG.isCyclic = true;
 //		String neuroDAGName = "celegans_network_clean";
 //		DependencyDAG neuroDependencyDAG = new DependencyDAG("neuro_networks//" + neuroDAGName + ".txt");
 		
+		getWeightedNetwork();
 		loadNeuroMetaNetwork();
 		DependencyDAG.isCelegans = true;
-		
 		DependencyDAG.isToy = true;
+		String netID = "celegans";
+		DependencyDAG.isWeighted = true;
+//		DependencyDAG neuroDependencyDAG = new DependencyDAG("neuro_networks//celegans.socialrank.network");
+		DependencyDAG neuroDependencyDAG = new DependencyDAG("neuro_networks//celegans.socialrank.network.weighted");		
+		
+		
 //		int disconnectedInterNeurons[] = {4,5,7,9,19,20,21,22,34,36,44,53,85,93,125,272};
 //		for (int i: disconnectedInterNeurons) {
 //			CoreDetection.topRemovedWaistNodes.add(Integer.toString(i));
 //		}
-		DependencyDAG neuroDependencyDAG = new DependencyDAG("neuro_networks//celegans.socialrank.network");
 		
-		String netID = "celegans";
 //		neuroDependencyDAG.printNetworkStat();
 //		neuroDependencyDAG.printNetworkProperties();
 //		DistributionAnalysis.getDistributionCCDF(neuroDependencyDAG, netID, 1);
@@ -431,7 +595,7 @@ public class ManagerNeuro {
 //		DistributionAnalysis.getDistributionCCDF(neuroDependencyDAG, netID, 1);
 		
 //		Visualization.printDOTNetwork(neuroDependencyDAG);
-		CoreDetection.pathCoverageTau = 0.98;
+		CoreDetection.pathCoverageTau = 1.0;
 		CoreDetection.fullTraverse = false;
 		CoreDetection.getCore(neuroDependencyDAG, netID);
 		double realCore = CoreDetection.minCoreSize;
@@ -452,7 +616,7 @@ public class ManagerNeuro {
 		while (scanner.hasNext()) {
 			String substrate = scanner.next();
 			String product = scanner.next();
-			dependencyDAG.loadRechablity(product);
+			dependencyDAG.loadReachability(product);
 //			System.out.println(substrate + "\t" + product);
 //			System.out.println(dependencyDAG.successors.get(product));
 			if (dependencyDAG.successors.get(product).contains(substrate)) {
@@ -468,7 +632,7 @@ public class ManagerNeuro {
 		while (scanner.hasNext()) {
 			String substrate = scanner.next();
 			String product = scanner.next();
-			dependencyDAG.loadRechablity(product);
+			dependencyDAG.loadReachability(product);
 			if (!dependencyDAG.successors.get(product).contains(substrate)) {
 				dependencyDAG.addEdgeAndReload(substrate, product);
 				++restoredEdge;
@@ -525,7 +689,7 @@ public class ManagerNeuro {
 				if (substrateRank == productRank) System.out.println(idLabelMap.get(substrate) + "\t" + idLabelMap.get(product));
 				String start = idLabelMap.get(substrate);
 				String end = idLabelMap.get(product);
-				neuroDependencyDAG.loadRechablity(end);
+				neuroDependencyDAG.loadReachability(end);
 //				System.out.println(substrateRank - productRank + 1);
 //				System.out.println(neuroDependencyDAG.successors.get(end));
 				if (neuroDependencyDAG.successors.get(end).contains(start)) {
@@ -573,7 +737,7 @@ public class ManagerNeuro {
 				String product = s.substring(index + 1);
 				String start = idLabelMap.get(substrate);
 				String end = idLabelMap.get(product);
-				neuroDependencyDAG.loadRechablity(end);
+				neuroDependencyDAG.loadReachability(end);
 				if (!neuroDependencyDAG.successors.get(end).contains(start)) {
 					// no cycle -- edge restored
 					neuroDependencyDAG.addEdgeAndReload(start, end);
@@ -682,7 +846,10 @@ public class ManagerNeuro {
 	
 	private static void randomRuns() throws Exception {
 		random = new Random(System.nanoTime());
-		nRun = 500;
+		nRun = 100;
+		maxKount = 0;
+		
+		/*
 		restoredEdgesVariance = new double[nRun];
 		
 		for (int i = 1; i <= 3; ++i) {
@@ -717,6 +884,16 @@ public class ManagerNeuro {
 //		System.out.println(StatUtils.mean(restoredEdgesVariance) + "\t" + Math.sqrt(StatUtils.variance(restoredEdgesVariance)));
 		for (String r: pcenVariance.keySet()) {
 //			System.out.println(r + "\t" + pcenVariance.get(r));
+		}
+		*/
+		
+		for (int i = 1; i <= nRun; ++i) {
+			reduceNetwork();
+		}
+		
+		System.out.println(" -- " + maxKount);
+		for (String s: maxRedundantOrder) {
+			System.out.println(s);
 		}
 	}
 	
@@ -759,7 +936,7 @@ public class ManagerNeuro {
 //				System.out.println(idLabelMap.get(substrate) + "\t" + idLabelMap.get(product));
 				String start = idLabelMap.get(substrate);
 				String end = idLabelMap.get(product);
-				neuroDependencyDAG.loadRechablity(end);
+				neuroDependencyDAG.loadReachability(end);
 //				System.out.println();
 //				System.out.println(neuroDependencyDAG.successors.get(end));
 				if (neuroDependencyDAG.successors.get(end).contains(start)) {
@@ -790,7 +967,7 @@ public class ManagerNeuro {
 				String product = s.substring(index + 1);
 				String start = idLabelMap.get(substrate);
 				String end = idLabelMap.get(product);
-				neuroDependencyDAG.loadRechablity(end);
+				neuroDependencyDAG.loadReachability(end);
 				if (!neuroDependencyDAG.successors.get(end).contains(start)) {
 					// no cycle
 					// edge restored
@@ -805,11 +982,13 @@ public class ManagerNeuro {
 	
 	public static void main(String[] args) throws Exception {
 //		getCleanNeuroNetwork();
-		doNeuroNetworkAnalysis();
+//		doNeuroNetworkAnalysis();
+//		doNeuroNetworkAnalysis2();
+//		reduceNetwork();
 	
 //		optimizeAcyclicityOld();
 //		optimizeAcyclicityNeuro();
-//		randomRuns();
+		randomRuns();
 		
 //		statisticalRun();
 //		traverseAllPaths();

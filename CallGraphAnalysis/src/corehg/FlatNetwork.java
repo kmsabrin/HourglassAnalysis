@@ -13,7 +13,7 @@ public class FlatNetwork {
 		PrintWriter pw = new PrintWriter(new File("flat_networks//current_flat.txt"));
 		for (String s: dependencyDAG.nodes) {
 			if (dependencyDAG.isSource(s)) {
-				dependencyDAG.loadRechablity(s);
+				dependencyDAG.loadReachability(s);
 				for (String r: dependencyDAG.successors.get(s)) {
 					if (dependencyDAG.isTarget(r)) {
 						pw.println(s + "\t" + r);

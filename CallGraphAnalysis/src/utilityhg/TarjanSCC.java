@@ -86,14 +86,14 @@ public class TarjanSCC {
 	public static void main(String[] args) throws Exception {
 		DependencyDAG G = new DependencyDAG();
 
-		PrintWriter pw = new PrintWriter(new File("neuro_networks//celegans_network_clean_consolidated.txt"));
-		G.isToy = true;
-		G.loadGraph("neuro_networks//celegans_network_clean.txt"); 
+//		PrintWriter pw = new PrintWriter(new File("neuro_networks//celegans_full_consolidated.txt"));
+//		G.isToy = true;
+//		G.loadGraph("neuro_networks//celegans_full.txt"); 
 		
-//		PrintWriter pw = new PrintWriter(new File("metabolic_networks//rat-consolidated.txt"));
+		PrintWriter pw = new PrintWriter(new File("metabolic_networks//rat-consolidated.txt"));
 //		G.isMetabolic = true;
-//		G.loadGraph("metabolic_networks//rat-links.txt"); 
-//		G.loadGraph("metabolic_networks//rat-links.txt");
+		G.isToy = true;
+		G.loadGraph("metabolic_networks//rat-links.txt");
 
 //		PrintWriter pw = new PrintWriter(new File("jdk_class_dependency//commons-math-callgraph-consolidated.txt"));
 //		DependencyDAG.isClassDependency = true;
