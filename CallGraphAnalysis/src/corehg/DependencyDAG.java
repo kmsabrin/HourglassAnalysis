@@ -1,6 +1,6 @@
 package corehg;
 import java.io.File;
-import java.math.BigDecimal;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -16,7 +16,6 @@ import neuro.ManagerNeuro;
 
 import org.apache.commons.lang3.StringUtils;
 
-import swpaper.LineOfCodeCount;
 import utilityhg.CourtCaseCornellParser;
 import utilityhg.Edge;
 
@@ -96,7 +95,7 @@ public class DependencyDAG {
 	public static boolean isCyclic = false;
 	public static boolean isCelegans = false;
 	
-	public static int nDirectSourceTargetEdges = 0;
+	public int nDirectSourceTargetEdges = 0;
 	
 	public static HashSet<String> largestWCCNodes;
 	
@@ -116,7 +115,7 @@ public class DependencyDAG {
 	public ArrayList<Edge> edgePathCentrality;
 	public HashSet<String> edgeSkip;
 	
-	public static int disconnectedKount; 
+	public int disconnectedKount; 
 	
 	public DependencyDAG() { 
 		init();
@@ -144,14 +143,15 @@ public class DependencyDAG {
 	private void loadNetworkAttributes() {
 		loadDegreeMetric();
 				
-//		loadPathStatistics();
-//		loadLocationMetric(); // must load degree metric before
-//		loadServerReachabilityAll();
-//		loadPathCentralityMetric();
+		loadPathStatistics();
+		loadLocationMetric(); // must load degree metric before
+		loadServerReachabilityAll();
+		loadPathCentralityMetric();
+		
+//		loadReachablityAll();
 		
 //		countDisconnectedNodes();
 //		removeIsolatedNodes(); 
-		loadReachablityAll();		
 //		loadPagerankCentralityMetric();		
 //		DistributionAnalysis.rankNodeByCentrality(this, this.normalizedPathCentrality);
 	}
@@ -551,7 +551,7 @@ public class DependencyDAG {
 //		}
 	}
 	
-	public void addEdgeAndReload(String server, String dependent) {
+	public void addEdge(String server, String dependent) {
 		nodes.add(dependent);
 		nodes.add(server);
 
@@ -574,7 +574,10 @@ public class DependencyDAG {
 			hs.add(server);
 			depends.put(dependent, hs);
 		}
-		
+	}
+	
+	public void addEdgeAndReload(String server, String dependent) {
+		addEdge(server, dependent);	
 		initAuxiliary();
 		loadNetworkAttributes();
 	}
@@ -743,7 +746,8 @@ public class DependencyDAG {
 			return sources.contains(node);
 		}
 		else if (isCelegans) {
-			return ManagerNeuro.source.contains(node);
+//			return ManagerNeuro.source.contains(node);
+			return node.equals("1000");
 		}
 		else {
 			return !depends.containsKey(node);
@@ -761,7 +765,8 @@ public class DependencyDAG {
 			return targets.contains(node);
 		}
 		else if (isCelegans) {
-			return ManagerNeuro.target.contains(node);
+//			return ManagerNeuro.target.contains(node);
+			return node.equals("2000");
 		}
 		else {
 			return !serves.containsKey(node);
@@ -779,7 +784,9 @@ public class DependencyDAG {
 			return !targets.contains(node) && !sources.contains(node);
 		}
 		else if (isCelegans) {
-			return ManagerNeuro.intermediate.contains(node);
+//			return ManagerNeuro.intermediate.contains(node);
+//			return !ManagerNeuro.source.contains(node) && !ManagerNeuro.target.contains(node);
+			return !isTarget(node) && !isSource(node);
 		}
 		else {
 			return depends.containsKey(node) && serves.containsKey(node);
@@ -802,13 +809,15 @@ public class DependencyDAG {
 		double nPath = 0;
 		double sPath = 0;
 		if (!CoreDetection.topRemovedWaistNodes.contains(node)) { // special condition for waist detection
-			for (String s : depends.get(node)) {
-//				if ((goodEdgeToSource.contains(node + "#" + s) || !isCyclic)) // only for neuro 
-				{ 
-					if (edgeSkip.contains(s + "," + node)) continue;
-					sourcePathsTraverse(s);
-					nPath += numOfSourcePath.get(s);
-					sPath += numOfSourcePath.get(s) + sumOfSourcePath.get(s);
+			if (depends.containsKey(node)) {
+				for (String s : depends.get(node)) {
+					// if ((goodEdgeToSource.contains(node + "#" + s) || // !isCyclic)) // only for neuro
+					{
+						if (edgeSkip.contains(s + "," + node)) continue;
+						sourcePathsTraverse(s);
+						nPath += numOfSourcePath.get(s);
+						sPath += numOfSourcePath.get(s) + sumOfSourcePath.get(s);
+					}
 				}
 			}
 		}
@@ -877,14 +886,16 @@ public class DependencyDAG {
 		double nPath = 0;
 		double sPath = 0;
 		if (!CoreDetection.topRemovedWaistNodes.contains(node)) { // special condition for waist detection
-			for (String s : depends.get(node)) {
-				if (edgeSkip.contains(s + "," + node)) {
-					System.out.println("Skipped: " + s + "," + node);
-					continue;
+			if (depends.containsKey(node)) {
+				for (String s : depends.get(node)) {
+					if (edgeSkip.contains(s + "," + node)) {
+						System.out.println("Skipped: " + s + "," + node);
+						continue;
+					}
+					weightedSourcePathDepth(s);
+					nPath += numOfSourcePath.get(s) * getEdgeWeight(s, node);
+					sPath += (numOfSourcePath.get(s) + sumOfSourcePath.get(s)) * getEdgeWeight(s, node);
 				}
-				weightedSourcePathDepth(s);
-				nPath += numOfSourcePath.get(s) * getEdgeWeight(s, node);
-				sPath += (numOfSourcePath.get(s) + sumOfSourcePath.get(s)) * getEdgeWeight(s, node);
 			}
 		}
 		
@@ -1203,7 +1214,7 @@ public class DependencyDAG {
 		
 		/* edge path computation */
 		for (String s : nodes) {
-			if (isTarget(s)) continue;
+			if (!serves.containsKey(s)) continue;
 			for (String r : serves.get(s)) {
 				if (isCelegans) {
 					if (s.equals("1000") || r.equals("1000")) continue;
@@ -1405,6 +1416,7 @@ public class DependencyDAG {
 //			System.out.print(targetsReachable.get(s) + "\t");
 //			System.out.println(s + "\t" + normalizedPathCentrality.get(s));
 //			System.out.println();
+			System.out.println(s + "\t" + nodePathThrough.get(s));
 //			System.out.println(s + "\t" + numPathLocation.get(s) + "\t" + lengthPathLocation.get(s));
 //			System.out.println(s + "\t" + numPathLocation.get(s) + "\t" + normalizedPathCentrality.get(s));
 //			System.out.println(s + "\t" + numPathLocation.get(s));
@@ -1419,18 +1431,18 @@ public class DependencyDAG {
 //			System.out.println(s + "\t" + lengthPathLocation.get(s) + "\t" + normalizedPathCentrality.get(s) + "\t" + outDegree.get(s));
 			
 //			System.out.println();
-//			if (isSource(s)) {
+			if (isIntermediate(s)) {
 //				System.out.println(s + "\t" + outDegree.get(s) + "\t" + normalizedPathCentrality.get(s));
-//			}
+//				System.out.println(s);
+			}
 			
 			
-			System.out.print(s + "\t" + sourcesReachableKount.get(s) + "\t" + targetsReachableKount.get(s));
-//			System.out.println("\t" + sourcesReachable.get(s) + "\t" + targetsReachable.get(s));
-			System.out.println("\t" + sourcesReachableKount.get(s) * targetsReachableKount.get(s));
+//			System.out.print(s + "\t" + sourcesReachableKount.get(s) + "\t" + targetsReachableKount.get(s));
+//			System.out.println("\t" + sourcesReachableKount.get(s) * targetsReachableKount.get(s));
 		}
 		
 //		System.out.println("Total path: " + nTotalPath);
-		System.out.println("Total ST pair: " + connectedSourceTargetPair);
+//		System.out.println("Total ST pair: " + connectedSourceTargetPair);
 		
 //		for (String s : nodes) {
 //			if (depends.containsKey(s)) {
@@ -1483,7 +1495,7 @@ public class DependencyDAG {
 		isRandomized = false;
 		isLexis = false;
 		isCyclic = false;
-		nDirectSourceTargetEdges = 0;
+//		nDirectSourceTargetEdges = 0;
 	}
 
 	public void initPathStat() {
@@ -1597,5 +1609,28 @@ public class DependencyDAG {
 		if (isSource(node)) return "source";
 		else if (isTarget(node)) return "target";
 		return "intermediate";
+	}
+	
+	public void printReuse(String id) throws Exception {
+		PrintWriter pw1 = new PrintWriter(new File(id + "_links.txt"));
+		PrintWriter pw2 = new PrintWriter(new File(id + "_sources.txt"));
+		PrintWriter pw3 = new PrintWriter(new File(id + "_targets.txt"));
+		for (String s : nodes) {
+			if (serves.containsKey(s)) {
+				for (String r : serves.get(s)) {
+					pw1.println(s + "\t" + r);
+				}
+			}
+			else {
+				pw3.println(s);
+			}
+			
+			if (!depends.containsKey(s)) {
+				pw2.println(s);
+			}
+		}
+		pw1.close();
+		pw2.close();
+		pw3.close();
 	}
 }

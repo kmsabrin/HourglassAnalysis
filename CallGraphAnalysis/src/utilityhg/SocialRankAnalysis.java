@@ -3,12 +3,13 @@ package utilityhg;
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Random;
 import java.util.Scanner;
 
-import org.apache.commons.math3.stat.StatUtils;
-
 import neuro.ManagerNeuro;
+
+import org.apache.commons.math3.stat.StatUtils;
 
 public class SocialRankAnalysis {
 //	static String directory = "metabolic_networks";
@@ -142,12 +143,13 @@ public class SocialRankAnalysis {
 			idLabelMap.put(id, label);
 			/* special case */
 //			System.out.println(label + "\t" + ManagerNeuro.source.contains(Integer.parseInt(label)));
-			if (ManagerNeuro.source.contains(label)) {
-				pw.println("1000" + "\t" + label);
-			}
-			if (ManagerNeuro.target.contains(label)) {
-				pw.println(label + "\t" + "2000");
-			}
+			
+//			if (ManagerNeuro.source.contains(label)) {
+//				pw.println("1000" + "\t" + label);
+//			}
+//			if (ManagerNeuro.target.contains(label)) {
+//				pw.println(label + "\t" + "2000");
+//			}
 		}
 		scanner.close();
 		
@@ -165,7 +167,25 @@ public class SocialRankAnalysis {
 		scanner.close();
 		
 		scanner = new Scanner(new File(directory + "//" + network_id + ".edges"));
+		HashSet<String> edges = new HashSet();
+		while (scanner.hasNext()) {
+			edges.add(scanner.next() + "#" + scanner.next());	
+		}
+		scanner.close();
+		
+		scanner = new Scanner(new File("neuro_networks//celegans_graph.txt"));
+		HashMap<String, Double> weights = new HashMap();
+		while (scanner.hasNext()) {
+			String src = scanner.next();
+			String tgt = scanner.next();
+			double wgt = scanner.nextDouble();
+			weights.put(src + "#" + tgt, wgt);
+		}
+		scanner.close();
+		
+		scanner = new Scanner(new File(directory + "//" + network_id + ".edges"));
 //		PrintWriter pw = new PrintWriter(new File(directory + "//" + network_id + ".socialrank.network"));
+		int tiedRankKount = 0;
 		while (scanner.hasNext()) {
 			String substrate = scanner.next();
 			String product = scanner.next();
@@ -176,8 +196,6 @@ public class SocialRankAnalysis {
 			if (substrateRank < productRank) {
 //				System.out.println(idLabelMap.get(substrate) + "\t" + idLabelMap.get(product));
 				pw.println(idLabelMap.get(substrate) + "\t" + idLabelMap.get(product));
-				
-				
 				
 //				levelEdgeDirection[substrateRank][productRank]++;
 				levelOut[substrateRank]++;
@@ -196,16 +214,62 @@ public class SocialRankAnalysis {
 				else {
 					nodeInMap.put(product, 1.0);
 				}
+				
+				if (edges.contains(product + "#" + substrate)) {
+					String oSubstrate = idLabelMap.get(substrate);
+					String oProduct = idLabelMap.get(product);
+					double aW = weights.get(oSubstrate + "#" + oProduct);
+					double bW = weights.get(oProduct + "#" + oSubstrate);
+//					System.out.println((productRank - substrateRank) + "\t" + (aW - bW));
+//					++tiedRankKount;
+				}
+				else {
+					
+				}
 			}
 			else {
 //				System.out.println(idLabelMap.get(substrate) + "\t" + idLabelMap.get(product));
 //				System.out.println(substrateRank + "\t" + productRank);
 //				levelEdgeDirection[substrateRank][productRank]++;
+				if (substrateRank == productRank) {
+//					++tiedRankKount;
+					String oSubstrate = idLabelMap.get(substrate);
+					String oProduct = idLabelMap.get(product);
+					if (edges.contains(product + "#" + substrate)) {
+//						++tiedRankKount;
+						double aW = weights.get(oSubstrate + "#" + oProduct);
+						double bW = weights.get(oProduct + "#" + oSubstrate);
+						if (aW != bW) {
+//							++tiedRankKount;
+						}
+						
+						if (aW > bW) {
+							pw.println(oSubstrate + "\t" + oProduct);
+						}
+						else if (aW < bW) {
+//							pw.println(oProduct + "\t" + oSubstrate);
+						}
+						else {
+//							System.out.println("Double tied: " + oSubstrate + "\t" + oProduct);
+							pw.println(oSubstrate + "\t" + oProduct);
+						}
+					}
+					else {
+//						System.out.println(oSubstrate + "\t" + oProduct  + "\t" + weights.get(oSubstrate + "#" + oProduct));
+					}
+				}
+				else {
+					if (!edges.contains(product + "#" + substrate)) {
+						++tiedRankKount;
+					}
+				}
 			}
 			
 			levelEdgeDirection[substrateRank][productRank]++;
 		}
 		scanner.close();
+		
+		System.out.println("Tied rank: " + tiedRankKount);
 		
 		if (addBackEdge) {
 			scanner = new Scanner(new File(directory + "//" + "celegansEdgeAddBack.txt"));
@@ -218,7 +282,7 @@ public class SocialRankAnalysis {
 		pw.close();
 		
 		for (int i = 0; i < nLevels; ++i) {
-			System.out.println(i + "\t" + levelCounter[i]);
+//			System.out.println(i + "\t" + levelCounter[i]);
 		}
 //		
 //		System.out.println();
@@ -244,9 +308,9 @@ public class SocialRankAnalysis {
 				++knt;
 			}
 			
-			System.out.println("Level\t" + i);
-			System.out.println(StatUtils.mean(ins) + "\t" + Math.sqrt(StatUtils.variance(ins)));
-			System.out.println(StatUtils.mean(outs) + "\t" + Math.sqrt(StatUtils.variance(outs)));
+//			System.out.println("Level\t" + i);
+//			System.out.println(StatUtils.mean(ins) + "\t" + Math.sqrt(StatUtils.variance(ins)));
+//			System.out.println(StatUtils.mean(outs) + "\t" + Math.sqrt(StatUtils.variance(outs)));
 		}
 		
 		
@@ -256,9 +320,9 @@ public class SocialRankAnalysis {
 		for (int i = 0; i < nLevels; ++i) {
 			for (int j = 0; j < nLevels; ++j) {
 //				System.out.print(levelEdgeDirection[i][j] + "\t");
-				System.out.print((levelCounter[i] * levelCounter[j]) + "\t");
+//				System.out.print((levelCounter[i] * levelCounter[j]) + "\t");
 			}
-			System.out.println();
+//			System.out.println();
 		}
 		
 //		for (int i = 0; i < nLevels; ++i) {

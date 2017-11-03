@@ -185,7 +185,7 @@ public class ManagerHGPaper {
 	private static void doRealNetworkAnalysis() throws Exception {
 		String netPath = "";
 		
-		String netID = "rat";
+//		String netID = "rat";
 //		String netID = "monkey";
 		
 //		String netID = "commons-math";
@@ -195,7 +195,7 @@ public class ManagerHGPaper {
 		
 //		String netID = "court";		
 //		String netID = "jetuml";
-//		String netID = "celegans";
+		String netID = "celegans";
 		
 //		String netID = "chain";
 		
@@ -276,7 +276,8 @@ public class ManagerHGPaper {
 		}
 		
 		DependencyDAG dependencyDAG = new DependencyDAG(netPath);
-		dependencyDAG.printNetworkStat();
+//		dependencyDAG.printNetworkStat();
+//		dependencyDAG.printReuse("javamath");
 		
 		// to get the largest weakly connected component
 //		DistributionAnalysis.findWeaklyConnectedComponents(dependencyDAG, netID);		
@@ -314,7 +315,7 @@ public class ManagerHGPaper {
 		
 //		Core Detection
 //		CoreDetection.fullTraverse = true;
-		CoreDetection.pathCoverageTau = 0.95;
+		CoreDetection.pathCoverageTau = 0.98;
 		CoreDetection.getCore(dependencyDAG, netID);
 		double realCore = CoreDetection.minCoreSize;
 //		System.out.println(CoreDetection.minCoreSize);

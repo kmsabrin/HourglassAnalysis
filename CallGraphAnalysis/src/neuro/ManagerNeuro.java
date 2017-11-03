@@ -9,8 +9,7 @@ import java.util.HashSet;
 import java.util.Random;
 import java.util.Scanner;
 import java.util.TreeMap;
-
-import org.apache.commons.math3.stat.StatUtils;
+import java.util.TreeSet;
 
 import corehg.CoreDetection;
 import corehg.DependencyDAG;
@@ -23,7 +22,7 @@ public class ManagerNeuro {
 	public static HashSet<String> intermediate = new HashSet();
 	public static HashSet<String> target = new HashSet();
 	public static HashSet<String> nodes = new HashSet();
-	public static HashSet<String> dualNodes = new HashSet();
+//	public static HashSet<String> dualNodes = new HashSet();
 	public static HashMap<String, Integer> nodeVariance = new HashMap();
 	public static HashMap<Double, Integer> hscoreVariance = new HashMap();
 	public static HashMap<String, Integer> coreVarianceMembers = new HashMap();
@@ -271,7 +270,7 @@ public class ManagerNeuro {
 //				System.out.println(i + "\t" + k);
 //				System.out.println(source.contains(i) + "\t" + intermediate.contains(i) + "\t" + target.contains(i));
 			}
-			dualNodes.add(Integer.toString(i));
+//			dualNodes.add(Integer.toString(i));
 		}
 		
 		loadNeurons("neuro_networks//celegans_labels.txt");
@@ -282,7 +281,7 @@ public class ManagerNeuro {
 		removeDuplicate(intermediate, source, target, nodes);
 		removeDuplicate(target, source, intermediate, nodes);
 		*/
-//		removeDuplicate(target, source, source, nodes); // only removing dual definition source-target nodes
+		removeDuplicate(target, source, source, nodes); // only removing dual definition source-target nodes
 		
 		System.out.println("Total nodes: " + nodes.size());
 		System.out.println("Sources: " + source.size());
@@ -290,7 +289,23 @@ public class ManagerNeuro {
 		System.out.println("Target: " + target.size());
 		
 		writeFile("neuro_networks//celegans_graph.txt", source, target, intermediate, nodes);
+		writeSourceTarget();
 	}
+	
+	private static void writeSourceTarget() throws Exception {
+		PrintWriter pw = new PrintWriter(new File("neuro_networks//celegans_sources.txt"));
+		for (String s: source) {
+			pw.println(s);
+		}
+		pw.close();
+		
+		pw = new PrintWriter(new File("neuro_networks//celegans_targets.txt"));
+		for (String s: target) {
+			pw.println(s);
+		}
+		pw.close();
+	}
+	
 	
 	/*
 	private static void getLocationColorWeightedHistogram(DependencyDAG dependencyDAG) {
@@ -467,7 +482,91 @@ public class ManagerNeuro {
 		scanner.close();
 	}
 	
-	private static void reduceNetwork() throws Exception {
+	private static void reduceNetwork_2() throws Exception {
+		loadNeuroMetaNetwork();
+//		DependencyDAG.isCelegans = true;
+		DependencyDAG.isToy = true;
+		String netPath = "toy_networks//toy_cyclic_2.txt";
+//		String netPath = "neuro_networks//celegans_full.txt";
+//		String netPath = "metabolic_networks//rat-links.txt";
+		DependencyDAG neuroDependencyDAG = new DependencyDAG(netPath);
+				
+//		neuroDependencyDAG.printNetworkProperties();
+//		neuroDependencyDAG.printNetworkStat();		
+		int originSTPair = neuroDependencyDAG.connectedSourceTargetPair;
+		
+		class CouplingCentralitySorted implements Comparable<CouplingCentralitySorted> {
+			String name;
+			int couplingCentrality;
+			int totalDegree;
+			
+			CouplingCentralitySorted(String node, int couplingCentrality, int totalDegree) {
+				this.name = node;
+				this.couplingCentrality = couplingCentrality;
+				this.totalDegree = totalDegree;
+			}
+			
+			@Override
+			public int compareTo(CouplingCentralitySorted another) {
+				if (this.couplingCentrality < another.couplingCentrality) return -1;
+				else if (this.couplingCentrality > another.couplingCentrality) return 1;
+				else {
+					if (this.totalDegree < another.totalDegree) return -1;
+					else if (this.totalDegree > another.totalDegree) return 1;
+					else return 0;
+				}
+			}
+		}
+		
+		HashSet<String> removed = new HashSet();
+		while (true) {	
+			TreeSet<CouplingCentralitySorted> ts = new TreeSet();
+			for (String s: neuroDependencyDAG.nodes) {
+				if (neuroDependencyDAG.isSource(s) || neuroDependencyDAG.isTarget(s)) continue;
+				int couplintCentrality = neuroDependencyDAG.sourcesReachableKount.get(s) * neuroDependencyDAG.targetsReachableKount.get(s);
+				int totalDegree = neuroDependencyDAG.inDegree.get(s) + neuroDependencyDAG.outDegree.get(s);
+				ts.add(new CouplingCentralitySorted(s, couplintCentrality, totalDegree));
+			}
+			
+			String toRemove = "";
+			DependencyDAG tempDAG = new DependencyDAG(netPath);
+			for (String r: removed) {
+				tempDAG.removeNode(r);
+			}
+			for (CouplingCentralitySorted node: ts) {	
+				HashSet<String> serves;
+				if (tempDAG.serves.containsKey(node.name)) serves = new HashSet(tempDAG.serves.get(node.name));
+				else serves = new HashSet();
+				HashSet<String> depends;
+				if (tempDAG.depends.containsKey(node.name)) depends = new HashSet(tempDAG.depends.get(node.name));
+				else depends = new HashSet();
+				
+				tempDAG.removeNode(node.name);
+				tempDAG.reload();
+				
+				if (tempDAG.connectedSourceTargetPair == originSTPair) {
+					toRemove = node.name;
+					removed.add(toRemove);
+					break;
+				}
+				
+				for (String r: serves) {
+					tempDAG.addEdge(node.name, r);
+				}
+				for (String r: depends) {
+					tempDAG.addEdge(r, node.name);
+				}
+			}
+			
+			if (toRemove.equals("")) break;
+			System.out.println(toRemove);
+			neuroDependencyDAG.removeNodeAndReload(toRemove);
+		}
+		
+		System.out.println(removed);
+	}
+	
+	private static void reduceNetwork_1() throws Exception {
 		loadNeuroMetaNetwork();
 		DependencyDAG.isCelegans = true;
 		DependencyDAG.isToy = true;
@@ -525,20 +624,28 @@ public class ManagerNeuro {
 //		System.out.println(kount + "\t" + neuroDependencyDAG.connectedSourceTargetPair);
 	}	
 	
-	private static void doNeuroNetworkAnalysis2() throws Exception {
+	private static void doNeuroNetworkAnalysis_2() throws Exception {
 		loadNeuroMetaNetwork();
-//		DependencyDAG.isCelegans = true;
+		DependencyDAG.isCelegans = true;
 		DependencyDAG.isToy = true;
 		String netID = "celegans";
-//		DependencyDAG neuroDependencyDAG = new DependencyDAG("neuro_networks//celegans_full.txt");
+		DependencyDAG neuroDependencyDAG = new DependencyDAG("neuro_networks//celegans_full.txt");
 //		DependencyDAG neuroDependencyDAG = new DependencyDAG("toy_networks//toy_dag_paper.txt");
-		DependencyDAG neuroDependencyDAG = new DependencyDAG("metabolic_networks//rat-links.txt");
+//		DependencyDAG neuroDependencyDAG = new DependencyDAG("metabolic_networks//rat-links.txt");
 		
 		
 //		int disconnectedInterNeurons[] = {4,5,7,9,19,20,21,22,34,36,44,53,85,93,125,272};
 //		for (int i: disconnectedInterNeurons) {
 //			CoreDetection.topRemovedWaistNodes.add(Integer.toString(i));
 //		}
+		
+		Scanner scanner = new Scanner(new File("neuro_networks//coupling_redundant_ari.txt"));
+		while (scanner.hasNext()) {
+			String s = scanner.next();
+			neuroDependencyDAG.removeNode(s);
+		}
+		neuroDependencyDAG.reload();
+		scanner.close();
 		
 		neuroDependencyDAG.printNetworkProperties();
 		neuroDependencyDAG.printNetworkStat();
@@ -563,19 +670,20 @@ public class ManagerNeuro {
 //		System.out.println("[h-Score] " + CoreDetection.hScore);
 	}
 
-	private static void doNeuroNetworkAnalysis() throws Exception {
+	private static void doNeuroNetworkAnalysis_1() throws Exception {
 //		DependencyDAG.isCyclic = true;
 //		String neuroDAGName = "celegans_network_clean";
 //		DependencyDAG neuroDependencyDAG = new DependencyDAG("neuro_networks//" + neuroDAGName + ".txt");
 		
-		getWeightedNetwork();
+//		getWeightedNetwork();
 		loadNeuroMetaNetwork();
-		DependencyDAG.isCelegans = true;
 		DependencyDAG.isToy = true;
+		DependencyDAG.isCelegans = true;
 		String netID = "celegans";
-		DependencyDAG.isWeighted = true;
+//		DependencyDAG.isWeighted = true;
 //		DependencyDAG neuroDependencyDAG = new DependencyDAG("neuro_networks//celegans.socialrank.network");
-		DependencyDAG neuroDependencyDAG = new DependencyDAG("neuro_networks//celegans.socialrank.network.weighted");		
+//		DependencyDAG neuroDependencyDAG = new DependencyDAG("neuro_networks//celegans.socialrank.network.weighted");
+		DependencyDAG neuroDependencyDAG = new DependencyDAG("neuro_networks//toy_links.txt");
 		
 		
 //		int disconnectedInterNeurons[] = {4,5,7,9,19,20,21,22,34,36,44,53,85,93,125,272};
@@ -584,7 +692,7 @@ public class ManagerNeuro {
 //		}
 		
 //		neuroDependencyDAG.printNetworkStat();
-//		neuroDependencyDAG.printNetworkProperties();
+		neuroDependencyDAG.printNetworkProperties();
 //		DistributionAnalysis.getDistributionCCDF(neuroDependencyDAG, netID, 1);
 //		getLocationColorWeightedHistogram(neuroDependencyDAG);
 //		neuroDependencyDAG.printNetworkProperties();
@@ -595,7 +703,8 @@ public class ManagerNeuro {
 //		DistributionAnalysis.getDistributionCCDF(neuroDependencyDAG, netID, 1);
 		
 //		Visualization.printDOTNetwork(neuroDependencyDAG);
-		CoreDetection.pathCoverageTau = 1.0;
+		/*
+		CoreDetection.pathCoverageTau = 0.98;
 		CoreDetection.fullTraverse = false;
 		CoreDetection.getCore(neuroDependencyDAG, netID);
 		double realCore = CoreDetection.minCoreSize;
@@ -604,38 +713,50 @@ public class ManagerNeuro {
 		FlatNetwork.makeAndProcessFlat(neuroDependencyDAG);
 		CoreDetection.hScore = (1.0 - (realCore / FlatNetwork.flatNetworkCoreSize));
 		System.out.println("[h-Score] " + CoreDetection.hScore);
+		*/
 	}
 	
 	private static void optimizeAcyclicity() throws Exception {
 		DependencyDAG.isToy = true;
-		DependencyDAG dependencyDAG = new DependencyDAG("toy_networks//toy_dag_paper.txt");
+		DependencyDAG.isCelegans = true;
+		DependencyDAG dependencyDAG = new DependencyDAG("neuro_networks//celegans.socialrank.network");
 		
-		Scanner scanner = new Scanner(new File("toy_networks//violation_edge_1.txt"));
-		int totalRemoved = 0;
-		int causeCycle = 0;
-		while (scanner.hasNext()) {
-			String substrate = scanner.next();
-			String product = scanner.next();
-			dependencyDAG.loadReachability(product);
-//			System.out.println(substrate + "\t" + product);
-//			System.out.println(dependencyDAG.successors.get(product));
-			if (dependencyDAG.successors.get(product).contains(substrate)) {
-				++causeCycle;
-			}
-			++totalRemoved;
-		}
-		scanner.close();
-		System.out.println(totalRemoved + "\t" + causeCycle);
+//		Scanner scanner = new Scanner(new File("toy_networks//violation_edge_1.txt"));
+//		int totalRemoved = 0;
+//		int causeCycle = 0;
+//		while (scanner.hasNext()) {
+//			String substrate = scanner.next();
+//			String product = scanner.next();
+//			dependencyDAG.loadReachability(product);
+////			System.out.println(substrate + "\t" + product);
+////			System.out.println(dependencyDAG.successors.get(product));
+//			if (dependencyDAG.successors.get(product).contains(substrate)) {
+//				++causeCycle;
+//			}
+//			++totalRemoved;
+//		}
+//		scanner.close();
+//		System.out.println(totalRemoved + "\t" + causeCycle);
 		
 		int restoredEdge = 0;
-		scanner = new Scanner(new File("toy_networks//violation_edge_1.txt"));
+		Scanner scanner = new Scanner(new File("neuro_networks//violation_edge_2.txt"));
+		ArrayList<String> violationEdges = new ArrayList();
 		while (scanner.hasNext()) {
 			String substrate = scanner.next();
 			String product = scanner.next();
+			violationEdges.add(substrate + "#" + product);
+		}
+		Collections.shuffle(violationEdges);
+		for (String s: violationEdges) {
+			String substrate = s.substring(0, s.indexOf("#"));
+			String product = s.substring(s.indexOf("#") + 1);
 			dependencyDAG.loadReachability(product);
 			if (!dependencyDAG.successors.get(product).contains(substrate)) {
 				dependencyDAG.addEdgeAndReload(substrate, product);
 				++restoredEdge;
+//				System.out.println(substrate + "\t" + product);
+			}
+			else {
 				System.out.println(substrate + "\t" + product);
 			}
 		}
@@ -844,7 +965,7 @@ public class ManagerNeuro {
 		}
 	}
 	
-	private static void randomRuns() throws Exception {
+	private static void randomSimulations() throws Exception {
 		random = new Random(System.nanoTime());
 		nRun = 100;
 		maxKount = 0;
@@ -888,7 +1009,7 @@ public class ManagerNeuro {
 		*/
 		
 		for (int i = 1; i <= nRun; ++i) {
-			reduceNetwork();
+			reduceNetwork_1();
 		}
 		
 		System.out.println(" -- " + maxKount);
@@ -897,7 +1018,7 @@ public class ManagerNeuro {
 		}
 	}
 	
-	private static void optimizeAcyclicityOld() throws Exception {
+	private static void optimizeAcyclicityBasic() throws Exception {
 		loadNeuroMetaNetwork();
 		DependencyDAG.isCelegans = true;
 		DependencyDAG.isToy = true;
@@ -980,15 +1101,70 @@ public class ManagerNeuro {
 		System.out.println(totalRemoved + "\t" + causeCycle + "\t" + restoredEdge);
 	}
 	
+	private static void getFeedbackAndSimpleCycleRemovedNetwork() throws Exception {
+		Scanner scanner = new Scanner(new File("neuro_networks//celegans_network_clean.txt"));
+		HashSet<String> edges = new HashSet();
+		while (scanner.hasNext()) {
+			String src = scanner.next();
+			String dst = scanner.next();
+			edges.add(src + "#" + dst);
+		}
+		scanner.close();
+		
+		HashMap<String, Double> weightedEdges = new HashMap();
+		scanner = new Scanner(new File("neuro_networks//celegans_graph.txt"));
+		while (scanner.hasNext()) {
+			String src = scanner.next();
+			String dst = scanner.next();
+			double wgt = scanner.nextDouble();
+			weightedEdges.put(src + "#" + dst, wgt);
+		}
+		scanner.close();
+		
+		HashSet<String> remove = new HashSet();
+		for (String s: edges) {
+			int index = s.indexOf("#");
+			String src = s.substring(0, index);
+			String dst = s.substring(index + 1);
+			String a = src + "#" + dst;
+			String b = dst + "#" + src;
+			if (edges.contains(dst + "#" + src)) {
+				double aW = weightedEdges.get(a);
+				double bW = weightedEdges.get(b);
+				if (aW < bW) {
+					remove.add(a);
+				}
+				else if (bW < aW) {
+					remove.add(b);
+				}
+			}
+		}
+		edges.removeAll(remove);
+		
+		System.out.println(edges.size());
+		for (String s: edges) {
+			int index = s.indexOf("#");
+			String src = s.substring(0, index);
+			String dst = s.substring(index + 1);
+			System.out.println(src + "\t" + dst);
+		}
+	}
+	
 	public static void main(String[] args) throws Exception {
 //		getCleanNeuroNetwork();
-//		doNeuroNetworkAnalysis();
-//		doNeuroNetworkAnalysis2();
-//		reduceNetwork();
+//		getFeedbackAndSimpleCycleRemovedNetwork();
+		
+//		doNeuroNetworkAnalysis_1();
+//		doNeuroNetworkAnalysis_2();
+		
+//		reduceNetwork_1();
+//		reduceNetwork_2();
 	
-//		optimizeAcyclicityOld();
+//		optimizeAcyclicityBasic();
 //		optimizeAcyclicityNeuro();
-		randomRuns();
+		optimizeAcyclicity();
+		
+//		randomSimulations();
 		
 //		statisticalRun();
 //		traverseAllPaths();

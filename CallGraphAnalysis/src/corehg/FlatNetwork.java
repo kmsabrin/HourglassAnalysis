@@ -78,6 +78,7 @@ public class FlatNetwork {
 		
 //		DependencyDAG.isWeighted = false;
 		DependencyDAG.isWeighted = true;
+		DependencyDAG.isCelegans = false;
 		DependencyDAG flatDAG = new DependencyDAG("flat_networks//current_flat.txt");
 //		flatDAG.printNetworkStat();
 //		flatDAG.printNetworkProperties();
