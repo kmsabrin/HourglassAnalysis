@@ -9,8 +9,6 @@ import java.util.Scanner;
 
 import neuro.ManagerNeuro;
 
-import org.apache.commons.math3.stat.StatUtils;
-
 public class SocialRankAnalysis {
 //	static String directory = "metabolic_networks";
 //	static String network_file = "rat-links.txt";
@@ -120,7 +118,7 @@ public class SocialRankAnalysis {
 		scanner.close();
 	}
 	
-	public static void getSocialrankCompliantNetworkNeuro() throws Exception {
+	public static void getSocialrankCompliantNetworkNeuro_1() throws Exception {
 		HashMap<String, String> idLabelMap = new HashMap();
 		HashMap<String, Integer> idRankMap = new HashMap();
 		int nLevels = 35;
@@ -331,14 +329,119 @@ public class SocialRankAnalysis {
 //					+ "\t" + levelDemography[i][2]/levelCounter[i]);
 //		}
 	}
-	
+
+	public static void getSocialrankCompliantNetworkNeuro_2() throws Exception {
+		HashMap<String, String> idLabelMap = new HashMap();
+		HashMap<String, Integer> idRankMap = new HashMap();
+		ManagerNeuro.loadNeuroMetaNetwork(); // for finding sensory, inter and motor neurons
+		PrintWriter pw = new PrintWriter(new File(directory + "//" + network_id + ".socialrank.network"));
+
+		Scanner scanner = new Scanner(new File(directory + "//" + network_id + ".nodes"));
+		while (scanner.hasNext()) {
+			String id = scanner.next();
+			String label = scanner.next();
+			idLabelMap.put(id, label);
+		}
+		scanner.close();
+		
+		scanner = new Scanner(new File(directory + "//" + network_id + ".ranks"));
+		while (scanner.hasNext()) {
+			String id = scanner.next();
+			int rank = scanner.nextInt();
+			int agony = scanner.nextInt();
+			idRankMap.put(id, rank);
+		}
+		scanner.close();
+		
+		scanner = new Scanner(new File(directory + "//" + network_id + ".edges"));
+		HashSet<String> edges = new HashSet();
+		while (scanner.hasNext()) {
+			edges.add(scanner.next() + "#" + scanner.next());	
+		}
+		scanner.close();
+		
+		scanner = new Scanner(new File("neuro_networks//celegans_graph.txt"));
+		HashMap<String, Double> weights = new HashMap();
+		while (scanner.hasNext()) {
+			String src = scanner.next();
+			String tgt = scanner.next();
+			double wgt = scanner.nextDouble();
+			weights.put(src + "#" + tgt, wgt);
+		}
+		scanner.close();
+		
+		scanner = new Scanner(new File(directory + "//" + network_id + ".edges"));
+		while (scanner.hasNext()) {
+			String substrate = scanner.next();
+			String product = scanner.next();
+			int substrateRank = idRankMap.get(substrate);
+			int productRank = idRankMap.get(product);
+			String oSubstrate = idLabelMap.get(substrate);
+			String oProduct = idLabelMap.get(product);
+			if (substrateRank < productRank) {
+				pw.println(oSubstrate + "\t" + oProduct);
+				
+				/*
+				if (edges.contains(product + "#" + substrate)) {
+					String oSubstrate = idLabelMap.get(substrate);
+					String oProduct = idLabelMap.get(product);
+					double aW = weights.get(oSubstrate + "#" + oProduct);
+					double bW = weights.get(oProduct + "#" + oSubstrate);
+					System.out.println((productRank - substrateRank) + "\t" + (aW - bW));
+				}
+				*/
+			}
+			else if (substrateRank == productRank) {
+				if (edges.contains(product + "#" + substrate)) {
+					double currentDirectionWeight = weights.get(oSubstrate + "#" + oProduct);
+					double backDirectionWeight = weights.get(oProduct + "#" + oSubstrate);
+					if (currentDirectionWeight != backDirectionWeight) {
+						if (currentDirectionWeight > backDirectionWeight) {
+							pw.println(oSubstrate + "\t" + oProduct);
+						}
+						else {
+							// conjugate case, skip
+							System.out.println(oSubstrate + "\t" + oProduct);
+						}
+					}
+					else {
+						// 12 case, add back
+//						System.out.println(oSubstrate + "\t" + oProduct);
+					}
+				}
+				else {
+					// 54 of 58 case, add back
+//					System.out.println(oSubstrate + "\t" + oProduct);
+				}
+			}
+			else {
+				// try to add back in increasing rank-difference order
+//				System.out.println(oSubstrate + "\t" + oProduct + "\t" + (substrateRank - productRank));
+			}
+		}
+		scanner.close();
+		
+		/*
+		if (addBackEdge) {
+			scanner = new Scanner(new File(directory + "//" + "celegansEdgeAddBack.txt"));
+			while (scanner.hasNext()) {
+				String substrate = scanner.next();
+				String product = scanner.next();
+				pw.println(substrate + "\t" + product);
+			}
+		}
+		*/		
+		pw.close();		
+	}
 	
 	public static void main(String[] args) throws Exception {
+		System.out.println("Start: ");
 //		randomizationTest = true;
 //		random = new Random();
 //		getDataForSocialrankAnalysis();
 
 //		getSocialrankCompliantNetwork();
-		getSocialrankCompliantNetworkNeuro();
+//		getSocialrankCompliantNetworkNeuro_1();
+		getSocialrankCompliantNetworkNeuro_2();
 	}
 }

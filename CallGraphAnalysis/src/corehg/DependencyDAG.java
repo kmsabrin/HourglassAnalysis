@@ -1611,10 +1611,22 @@ public class DependencyDAG {
 		return "intermediate";
 	}
 	
-	public void printReuse(String id) throws Exception {
-		PrintWriter pw1 = new PrintWriter(new File(id + "_links.txt"));
-		PrintWriter pw2 = new PrintWriter(new File(id + "_sources.txt"));
-		PrintWriter pw3 = new PrintWriter(new File(id + "_targets.txt"));
+	public void printLinks(String id) throws Exception {
+		PrintWriter pw1 = new PrintWriter(new File("data//" + id + "_links.txt"));
+		for (String s : nodes) {
+			if (serves.containsKey(s)) {
+				for (String r : serves.get(s)) {
+					pw1.println(s + "\t" + r);
+				}
+			}
+		}
+		pw1.close();
+	}
+	
+	public void printNetwork(String id) throws Exception {
+		PrintWriter pw1 = new PrintWriter(new File("data//" + id + "_links.txt"));
+		PrintWriter pw2 = new PrintWriter(new File("data//" + id + "_sources.txt"));
+		PrintWriter pw3 = new PrintWriter(new File("data//" + id + "_targets.txt"));
 		for (String s : nodes) {
 			if (serves.containsKey(s)) {
 				for (String r : serves.get(s)) {

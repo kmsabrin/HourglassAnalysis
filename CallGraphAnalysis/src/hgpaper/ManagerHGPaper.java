@@ -195,11 +195,11 @@ public class ManagerHGPaper {
 		
 //		String netID = "court";		
 //		String netID = "jetuml";
-		String netID = "celegans";
+//		String netID = "celegans";
 		
 //		String netID = "chain";
 		
-//		String netID = "toy";
+		String netID = "toy";
 		
 //		String netID = nID;
 		
@@ -260,9 +260,15 @@ public class ManagerHGPaper {
 //			netPath = "toy_networks//model-run-1.txt";
 //			netPath = "real_model_networks//real-model-test.txt";
 //			netPath = "toy_networks//example-5.txt";
-			netPath = "toy_networks//7_g_converted.txt";
-			DependencyDAG.isToy = true;
-			DependencyDAG.isWeighted = true;
+//			DependencyDAG.isToy = true;
+//			DependencyDAG.isWeighted = true;
+
+			netPath = "toy_networks//RPModelDAG_links.txt";
+			DependencyDAG.isSynthetic = true;
+			DependencyDAG.isWeighted = false;
+			DependencyDAG.isSimpleModel = true;
+			String DAGType = "SimpleModelDAG";	
+			SimpleModelDAG.initModelProperties(250, 250, 500, 1);
 		}
 		else if (netID.equals("celegans")) {			
 			netPath = "neuro_networks//celegans.socialrank.network";
@@ -277,7 +283,7 @@ public class ManagerHGPaper {
 		
 		DependencyDAG dependencyDAG = new DependencyDAG(netPath);
 //		dependencyDAG.printNetworkStat();
-//		dependencyDAG.printReuse("javamath");
+//		dependencyDAG.printReuse("openssh");
 		
 		// to get the largest weakly connected component
 //		DistributionAnalysis.findWeaklyConnectedComponents(dependencyDAG, netID);		
@@ -315,7 +321,7 @@ public class ManagerHGPaper {
 		
 //		Core Detection
 //		CoreDetection.fullTraverse = true;
-		CoreDetection.pathCoverageTau = 0.98;
+		CoreDetection.pathCoverageTau = 0.9;
 		CoreDetection.getCore(dependencyDAG, netID);
 		double realCore = CoreDetection.minCoreSize;
 //		System.out.println(CoreDetection.minCoreSize);

@@ -11,6 +11,7 @@ import java.util.Scanner;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import clean.HourglassAnalysis;
 import corehg.CoreDetection;
 import corehg.DependencyDAG;
 import corehg.FlatNetwork;
@@ -305,8 +306,7 @@ public class ManagerNeuro {
 		}
 		pw.close();
 	}
-	
-	
+		
 	/*
 	private static void getLocationColorWeightedHistogram(DependencyDAG dependencyDAG) {
 		double binWidth = 0.1;
@@ -716,30 +716,9 @@ public class ManagerNeuro {
 		*/
 	}
 	
-	private static void optimizeAcyclicity() throws Exception {
-		DependencyDAG.isToy = true;
-		DependencyDAG.isCelegans = true;
-		DependencyDAG dependencyDAG = new DependencyDAG("neuro_networks//celegans.socialrank.network");
-		
-//		Scanner scanner = new Scanner(new File("toy_networks//violation_edge_1.txt"));
-//		int totalRemoved = 0;
-//		int causeCycle = 0;
-//		while (scanner.hasNext()) {
-//			String substrate = scanner.next();
-//			String product = scanner.next();
-//			dependencyDAG.loadReachability(product);
-////			System.out.println(substrate + "\t" + product);
-////			System.out.println(dependencyDAG.successors.get(product));
-//			if (dependencyDAG.successors.get(product).contains(substrate)) {
-//				++causeCycle;
-//			}
-//			++totalRemoved;
-//		}
-//		scanner.close();
-//		System.out.println(totalRemoved + "\t" + causeCycle);
-		
+	private static void repeatedAddBack(DependencyDAG dependencyDAG, String addBackFile) throws Exception {
 		int restoredEdge = 0;
-		Scanner scanner = new Scanner(new File("neuro_networks//violation_edge_2.txt"));
+		Scanner scanner = new Scanner(new File("neuro_networks//" + addBackFile + ".txt"));
 		ArrayList<String> violationEdges = new ArrayList();
 		while (scanner.hasNext()) {
 			String substrate = scanner.next();
@@ -757,12 +736,35 @@ public class ManagerNeuro {
 //				System.out.println(substrate + "\t" + product);
 			}
 			else {
-				System.out.println(substrate + "\t" + product);
+//				System.out.println(substrate + "\t" + product);
 			}
 		}
 		scanner.close();
+//		System.out.println(restoredEdge);
+	}
+	
+	private static void optimizeAcyclicity() throws Exception {
+		DependencyDAG.isToy = true;
+//		DependencyDAG.isCelegans = true;
+		DependencyDAG dependencyDAG = new DependencyDAG("neuro_networks//celegans.socialrank.network");
+
+		repeatedAddBack(dependencyDAG, "add_back_1");
+		repeatedAddBack(dependencyDAG, "add_back_2");
+		repeatedAddBack(dependencyDAG, "add_back_3");
+		repeatedAddBack(dependencyDAG, "add_back_4");
+		repeatedAddBack(dependencyDAG, "add_back_5");
+		dependencyDAG.printLinks("celegans");
 		
-		System.out.println(restoredEdge);
+		HourglassAnalysis hourglassAnalysis = new HourglassAnalysis();
+		hourglassAnalysis.runAnalysis("celegans");
+		for (String s: hourglassAnalysis.savedCores) {
+			if (coreVarianceMembers.containsKey(s)) {
+				coreVarianceMembers.put(s, coreVarianceMembers.get(s) + 1);
+			}
+			else {
+				coreVarianceMembers.put(s, 1);
+			}
+		}
 	}
 	
 	private static void optimizeAcyclicityNeuro() throws Exception {
@@ -967,7 +969,7 @@ public class ManagerNeuro {
 	
 	private static void randomSimulations() throws Exception {
 		random = new Random(System.nanoTime());
-		nRun = 100;
+		nRun = 1000;
 		maxKount = 0;
 		
 		/*
@@ -1009,12 +1011,17 @@ public class ManagerNeuro {
 		*/
 		
 		for (int i = 1; i <= nRun; ++i) {
-			reduceNetwork_1();
+//			reduceNetwork_1();
+			optimizeAcyclicity();
 		}
 		
-		System.out.println(" -- " + maxKount);
-		for (String s: maxRedundantOrder) {
-			System.out.println(s);
+//		System.out.println(" -- " + maxKount);
+//		for (String s: maxRedundantOrder) {
+//			System.out.println(s);
+//		}
+		
+		for (String s: coreVarianceMembers.keySet()) {
+			System.out.println(s + "\t" + (coreVarianceMembers.get(s) * 1.0 / 100.0));
 		}
 	}
 	
@@ -1162,9 +1169,9 @@ public class ManagerNeuro {
 	
 //		optimizeAcyclicityBasic();
 //		optimizeAcyclicityNeuro();
-		optimizeAcyclicity();
+//		optimizeAcyclicity();
 		
-//		randomSimulations();
+		randomSimulations();
 		
 //		statisticalRun();
 //		traverseAllPaths();
