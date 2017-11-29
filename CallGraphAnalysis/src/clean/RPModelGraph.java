@@ -106,7 +106,9 @@ public class RPModelGraph {
 			}
 			
 			int k = getInDegree();
+//			if (productIndex > nS - 10) System.out.println(k);
 			k = Math.min(k, endNodeIndex - startNodeIndex + 1);
+			
 			
 			for (int j = 0; j < k; ++j) {
 				int substrateIndex;
@@ -183,9 +185,6 @@ public class RPModelGraph {
 		RPModelGraph.alpha = Math.abs(alpha);
 
 		random = new Random(System.nanoTime());
-				
-		DecimalFormat df = new DecimalFormat();
-		df.setMaximumFractionDigits(2);
 		
 		PrintWriter pw = new PrintWriter(new File("data//RPModelDAG_links.txt"));
 		uniqueEdge = new HashSet();
@@ -194,8 +193,8 @@ public class RPModelGraph {
 	}
 
 	public static void main(String[] args) throws Exception {
-		for (double i = 1.2; i < 2.1; i += 0.2) {
-			generateSimpleModel(i, 3, 250, 250, 500);
+		for (double i = 1.8; i < 2.1; i += 0.2) {
+			generateSimpleModel(i, 1, 250, 250, 500);
 			HourglassAnalysis hourglassAnalysis = new HourglassAnalysis();
 			hourglassAnalysis.runAnalysis("RPModelDAG");
 		}

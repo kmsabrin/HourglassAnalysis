@@ -240,7 +240,8 @@ public class SimpleModelDAG {
 //			initiateRandomWeightedCollection(maxZipfSize, zipfDistribution);
 //		}
 		
-		for (int productIndex = sS - 1; productIndex >= 0; --productIndex) {	
+		/* special situation sS - 2 */
+		for (int productIndex = sS - 2; productIndex >= 0; --productIndex) {	
 //			System.out.println(productIndex);
 			
 			int startNodeIndex = -1;
@@ -315,8 +316,9 @@ public class SimpleModelDAG {
 				}
 				
 				if (edgeWeights.containsKey(str)) {
-					int v = edgeWeights.get(str);
-					edgeWeights.put(str, v + 1);
+					
+//					int v = edgeWeights.get(str);
+//					edgeWeights.put(str, v + 1);
 				}
 				else {
 					edgeWeights.put(str, 1);
@@ -385,6 +387,11 @@ public class SimpleModelDAG {
 			int w = edgeWeights.get(key);
 			pw.println(key + " " + w);
 		}
+		
+		for (int i = sS; i < nT + nS + nI; ++i) {
+			pw.println(i + " " + (sS - 1) + " " + (1.0 / nS));
+		}
+		
 		pw.close();
 		
 //		System.out.println("Time Sum: " + (timeSum / 1000000000.0) );

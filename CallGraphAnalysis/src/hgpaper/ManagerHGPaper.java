@@ -263,12 +263,19 @@ public class ManagerHGPaper {
 //			DependencyDAG.isToy = true;
 //			DependencyDAG.isWeighted = true;
 
-			netPath = "toy_networks//RPModelDAG_links.txt";
+			netPath = "toy_networks//model-run+1.txt";
 			DependencyDAG.isSynthetic = true;
-			DependencyDAG.isWeighted = false;
+			DependencyDAG.isWeighted = true;
 			DependencyDAG.isSimpleModel = true;
 			String DAGType = "SimpleModelDAG";	
-			SimpleModelDAG.initModelProperties(250, 250, 500, 1);
+			
+//			String ratio = "-1";
+//			String a = "1";
+//			String din = "1";
+//			String networkID = DAGType + "r" + ratio + "a" + a + "d" + din;
+//			netPath = "synthetic_callgraphs//" + networkID + ".txt";
+//			SimpleModelDAG.generateSimpleModel(Double.parseDouble(a), Integer.parseInt(din), 4, 4, 4, Double.parseDouble(ratio));
+			SimpleModelDAG.initModelProperties(4, 4, 4, 1);
 		}
 		else if (netID.equals("celegans")) {			
 			netPath = "neuro_networks//celegans.socialrank.network";
@@ -528,29 +535,31 @@ public class ManagerHGPaper {
 	private static void runSyntheticStatisticalSignificanceTestsForTau() throws Exception {
 		DependencyDAG.isSynthetic = true;
 		DependencyDAG.isSimpleModel = true;
-		DependencyDAG.isWeighted = false;
+		DependencyDAG.isWeighted = true;
 		String DAGType = "SimpleModelDAG";
 		
-		String alphas[] = { "-1", "-0.5", "0", "0.5", "1" };
-//		String alphas[] = { "1" };
-		String dins[] = {"2", "3"};
+//		String alphas[] = { "-1", "-0.5", "0", "0.5", "1" };
+		String alphas[] = { "-0.5", "0" };
+//		String dins[] = {"2", "3"};
+		String dins[] = {"3"};
 			
 		for (String din : dins) {
 			for (String a : alphas) {
-				System.out.println("alpha=" + a + "\t" + "din=" + din );
+//				System.out.println("alpha=" + a + "\t" + "din=" + din );
 				int nT = 100;
 				int nI = 300;
 				int nS = 100;
 				String ratio = "-1";
 				String networkID = DAGType + "r" + ratio + "a" + a + "d" + din;
 				
-				int nRun = 50;
-				int minTau = 50;
-				int maxTau = 98;
+				int nRun = 20;
+				int minTau = 46;
+				int maxTau = 56;
 				int tauRange = maxTau - minTau + 1;
 				double hScores[][] = new double[tauRange][nRun];
 				
 				for (int i = 0; i < nRun; ++i) {
+					DependencyDAG.isWeighted = true; /* special */
 					SimpleModelDAG.generateSimpleModel(Double.parseDouble(a), Integer.parseInt(din), nT, nI, nS, Double.parseDouble(ratio));
 					SimpleModelDAG.initModelProperties(nT, nI, nS, Integer.parseInt(din));
 					System.out.println("Model Generated for run " + i );
@@ -593,23 +602,32 @@ public class ManagerHGPaper {
 	
 	private static void runSyntheticStatisticalSignificanceTests(int nT, int nI, int nS, int din) throws Exception {
 		DependencyDAG.isSynthetic = true;
-		DependencyDAG.isWeighted = false;
+		DependencyDAG.isWeighted = true; /* special */
 		DependencyDAG.isSimpleModel = true;
 		String DAGType = "SimpleModelDAG";
 
-		String alphas[] = { "-2", "-1.8", "-1.6", "-1.4", "-1.2",
-				            "-1", "-0.8", "-0.6", "-0.4", "-0.2", 
-				            "0", 
-				            "0.2", "0.4", "0.6", "0.8", "1", 
-				            "1.2", "1.4", "1.6", "1.8", "2"};
+//		String alphas[] = { "-2", "-1.8", "-1.6", "-1.4", "-1.2",
+//				            "-1", "-0.8", "-0.6", "-0.4", "-0.2", 
+//				            "0", 
+//				            "0.2", "0.4", "0.6", "0.8", "1", 
+//				            "1.2", "1.4", "1.6", "1.8", "2"};
+		
 //		String alphas[] = {"-1", "0", "1"};
-//		String alphas[] = {"2"};
+//		String alphas[] = {"1.4", "1.6", "2",};
+		String alphas[] = {"1.8"};
+
+//		String alphas[] = {"-2", "-1.8", "-1.6", "-1.4", "-1.2",
+//        "-1", "-0.8", "-0.6", "-0.4", "-0.2"};
+		
+//		String alphas[]	= {"0", 
+//		"0.2", "0.4", "0.6", "0.8", "1", 
+//        "1.2", "1.4", "1.6", "1.8", "2"};
 
 //		String dins[] = { "1", "2", "3", "4", "5" };
 //		String dins[] = {"1"};
 //		for (String din : dins) {
 		
-			for (String a : alphas) {
+		for (String a : alphas) {
 //				System.out.println("alpha=" + a + "\t" + "din=" + din );
 //				int nT = 333;
 //				int nI = 333;
@@ -617,7 +635,7 @@ public class ManagerHGPaper {
 				String ratio = "-1";
 				String networkID = DAGType + "r" + ratio + "a" + a + "d" + din;
 				
-				int nRun = 30;
+				int nRun = 50;
 				double coreSizes[] = new double[nRun];
 				double hScores[] = new double[nRun];
 				double nodeCoverages[] = new double[nRun];
@@ -627,13 +645,14 @@ public class ManagerHGPaper {
 				
 				int idx = 0;
 				for (int i = 0; i < nRun; ++i) {
+					DependencyDAG.isWeighted = true; /* special */
 					SimpleModelDAG.generateSimpleModel(Double.parseDouble(a), din, nT, nI, nS, Double.parseDouble(ratio));
 					SimpleModelDAG.initModelProperties(nT, nI, nS, din);
 //					System.out.println("Model Generated");
 					
 //					DependencyDAG.resetFlags();
 					DependencyDAG dependencyDAG = new DependencyDAG("synthetic_callgraphs//" + networkID + ".txt");
-//					printNetworkStat(dependencyDAG);
+//					dependencyDAG.printNetworkStat();
 //					dependencyDAG.printNetworkProperties();
 
 					CoreDetection.getCore(dependencyDAG, networkID);
@@ -645,7 +664,9 @@ public class ManagerHGPaper {
 						
 //					System.out.println(CoreDetection.nodeCoverage + "\t" + CoreDetection.weightedCoreLocation);
 					FlatNetwork.makeAndProcessFlat(dependencyDAG);	
-					CoreDetection.hScore = (1.0 - ((realCore - 1) / FlatNetwork.flatNetworkCoreSize));
+//					CoreDetection.hScore = (1.0 - ((realCore - 1) / FlatNetwork.flatNetworkCoreSize));
+					CoreDetection.hScore = (1.0 - (realCore / FlatNetwork.flatNetworkCoreSize));
+//					System.out.println(realCore + "\t" + FlatNetwork.flatNetworkCoreSize + "\t" + CoreDetection.hScore);
 					if (CoreDetection.hScore < 0) {
 //						System.out.println("Found");
 //						dependencyDAG = new DependencyDAG("synthetic_callgraphs//" + networkID + ".txt");
@@ -658,7 +679,10 @@ public class ManagerHGPaper {
 					
 //					System.out.println(idx);
 					++idx;					
+
+//					System.out.println(" - - - - - - - - - -");
 				}
+				
 				
 				double mWS = StatUtils.mean(coreSizes);
 				double mNC = StatUtils.mean(nodeCoverages);
@@ -782,28 +806,28 @@ public class ManagerHGPaper {
 //		ManagerHGPaper.runRandomizationTest();
 //		ManagerHGPaper.runSyntheticStatisticalSignificanceTestsForTau();
 		
-//		int n = 600;
-////		curve 1
+		int n = 1000;
+//		curve 1
 //		ManagerHGPaper.runSyntheticStatisticalSignificanceTests(n/3, n/3, n/3, 1);
-//
-////		curve 2
+
+//		curve 2
 //		SimpleModelDAG.isPoisson = false;
 //		ManagerHGPaper.runSyntheticStatisticalSignificanceTests(n/3, n/3, n/3, 2);
 //		SimpleModelDAG.isPoisson = true;
-//
-////		curve 3
+
+//		curve 3
 //		ManagerHGPaper.runSyntheticStatisticalSignificanceTests(n/3, n/3, n/3, 3);
-//		
-////		curve 4
+		
+//		curve 4
 //		ManagerHGPaper.runSyntheticStatisticalSignificanceTests(n/4, n/4, n/2, 1);
-//		
-////		curve 5
+		
+//		curve 5
 //		ManagerHGPaper.runSyntheticStatisticalSignificanceTests(n/2, n/4, n/4, 1);
-//
-////		curve 6
+
+//		curve 6
 //		ManagerHGPaper.runSyntheticStatisticalSignificanceTests(n/4, n/2, n/4, 1);
-//
-////		curve 7
+
+//		curve 7
 //		ManagerHGPaper.runSyntheticStatisticalSignificanceTests(n*2/5, n/5, n*2/5, 1);
 
 //		curve Toy

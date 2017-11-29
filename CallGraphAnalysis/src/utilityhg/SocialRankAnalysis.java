@@ -16,7 +16,7 @@ public class SocialRankAnalysis {
 	
 	static String directory = "neuro_networks";;
 	static String network_file = "celegans_network_clean.txt";
-	static String network_id = "celegans";
+	static String network_id = "celegans_target";
 	
 //	static String network_file = "celegans_graph.txt"
 //	static String network_id = "celegans_no_filter";
@@ -32,9 +32,63 @@ public class SocialRankAnalysis {
 		Scanner scanner = new Scanner(new File(directory + "//" + network_file));
 		PrintWriter pw = new PrintWriter(new File(directory + "//" + network_id + ".edges"));
 		int id = 0;
+		ManagerNeuro.loadNeuroMetaNetwork();
+		
+		labelIdMap.put("ss", id++);
+		labelIdMap.put("st", id++);
 		while (scanner.hasNext()) {
 			String server = scanner.next();
 			String dependent = scanner.next();
+			
+			/* create network for sensory, inter, motor individually */
+//			if (ManagerNeuro.source.contains(server)) {
+//				if (!ManagerNeuro.source.contains(dependent)) {
+//					if (!labelIdMap.containsKey(server)) {
+//						labelIdMap.put(server, id++);
+//					}
+//					pw.println(labelIdMap.get(server) + "\t" + labelIdMap.get("st"));
+//					continue;
+//				}
+//			}
+//			else {
+//				continue;
+//			}
+			
+//			if (ManagerNeuro.inter.contains(server)) {
+//				if (!ManagerNeuro.inter.contains(dependent)) {
+//					if (!labelIdMap.containsKey(server)) {
+//						labelIdMap.put(server, id++);
+//					}
+//					pw.println(labelIdMap.get(server) + "\t" + labelIdMap.get("st"));
+//					continue;
+//				}
+//			}
+//			else {
+//				if (ManagerNeuro.inter.contains(dependent)) {
+//					if (!labelIdMap.containsKey(dependent)) {
+//						labelIdMap.put(dependent, id++);
+//					}
+//					pw.println(labelIdMap.get("ss") + "\t" + labelIdMap.get(dependent));
+//				}
+//				continue;
+//			}
+			
+			if (ManagerNeuro.target.contains(server)) {
+				if (!ManagerNeuro.target.contains(dependent)) {
+					continue;
+				}
+			}
+			else {
+				if (ManagerNeuro.target.contains(dependent)) {
+					if (!labelIdMap.containsKey(dependent)) {
+						labelIdMap.put(dependent, id++);
+					}
+					pw.println(labelIdMap.get("ss") + "\t" + labelIdMap.get(dependent));
+				}
+				continue;
+			}
+			/* end */
+			
 //			String weight = scanner.next();
 			if (!labelIdMap.containsKey(server)) {
 				labelIdMap.put(server, id++);
@@ -69,7 +123,7 @@ public class SocialRankAnalysis {
 	
 	public static int getDemoCategory(int id) {
 		if (ManagerNeuro.source.contains(id)) return 0;
-		else if (ManagerNeuro.intermediate.contains(id)) return 1;
+		else if (ManagerNeuro.inter.contains(id)) return 1;
 		else return 2;
 	}
 	
@@ -392,6 +446,7 @@ public class SocialRankAnalysis {
 				*/
 			}
 			else if (substrateRank == productRank) {
+				System.out.println(oSubstrate + "#" + oProduct);
 				if (edges.contains(product + "#" + substrate)) {
 					double currentDirectionWeight = weights.get(oSubstrate + "#" + oProduct);
 					double backDirectionWeight = weights.get(oProduct + "#" + oSubstrate);
@@ -401,7 +456,7 @@ public class SocialRankAnalysis {
 						}
 						else {
 							// conjugate case, skip
-							System.out.println(oSubstrate + "\t" + oProduct);
+//							System.out.println(oSubstrate + "\t" + oProduct);
 						}
 					}
 					else {
@@ -417,6 +472,7 @@ public class SocialRankAnalysis {
 			else {
 				// try to add back in increasing rank-difference order
 //				System.out.println(oSubstrate + "\t" + oProduct + "\t" + (substrateRank - productRank));
+				System.out.println(oSubstrate + "#" + oProduct);
 			}
 		}
 		scanner.close();

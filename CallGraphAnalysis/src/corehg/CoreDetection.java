@@ -12,8 +12,8 @@ import neuro.ManagerNeuro;
 import org.apache.commons.math3.stat.StatUtils;
 
 public class CoreDetection {
-	public static boolean viewCore = true;
-	public static boolean viewStat = true;
+	public static boolean viewCore = false;
+	public static boolean viewStat = false;
 	public static HashSet<String> topRemovedWaistNodes = new HashSet();
 	public static HashMap<String, Double> averageCoreRank;
 	public static HashMap<String, Double> averagePathCovered;
@@ -142,7 +142,7 @@ public class CoreDetection {
 		HashMap<Integer, TreeSet<String>> pathEquivalentNodeSet2 = new HashMap();
 		HashSet<String> forIteratingTiedMaxPathCentralityNodes = new HashSet(tiedMaxPathCentralityNodes);
 		for (String s : tiedMaxPathCentralityNodes) {
-			
+			/*
 			if (alreadyInPES.contains(s)) {
 				continue;
 			}
@@ -173,9 +173,10 @@ public class CoreDetection {
 			topRemovedWaistNodes.remove(s);
 //			System.out.println("Adding " + PESet + " at " + nTiedNodes);
 			pathEquivalentNodeSet2.put(nTiedNodes++, new TreeSet(PESet));
-			
+			*/
 		}
 		
+		// why?
 		pathEquivalentNodeSet2.put(nTiedNodes++, new TreeSet(tiedMaxPathCentralityNodes));
 		
 //		System.out.println("Rank " + nodeRank); 
@@ -321,18 +322,21 @@ public class CoreDetection {
 		}
 		
 //		Use the first core as a sample
+		sampleCores = coreSet.keySet().iterator().next();
 		if (!FlatNetwork.isProcessingFlat) {
-			realCores = coreSet.keySet().iterator().next();
+//			System.out.println("Am i even here?");
+			realCores = new TreeSet(sampleCores);
 			getNodeCoverage(dependencyDAG, sampleCores);
 //			getNodeCoverage2(dependencyDAG, sampleCore);
 			coreLocationAnalysis(dependencyDAG);
 //			getCoreNeighborhood(dependencyDAG, sampleCore);
 		}
-		sampleCores = coreSet.keySet().iterator().next();
+		
 //		sampleCore.removeAll(blockedNodeSet);
 //		System.out.println(sampleCore);
 
-				
+
+//		System.out.println("Sample Core: " + sampleCores);
 		if (!FlatNetwork.isProcessingFlat & viewStat) {
 			System.out.println("Sample Core: " + sampleCores);
 			if (DependencyDAG.isCelegans) {

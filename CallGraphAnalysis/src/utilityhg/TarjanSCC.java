@@ -21,18 +21,20 @@ import corehg.DependencyDAG;
 
 public class TarjanSCC {
 	private HashSet<String> marked; // marked[v] = has v been visited?
-	private HashMap<String, Integer> id; // id[v] = id of strong component
-											// containing v
+	private HashMap<String, Integer> id; // id[v] = id of strong component containing v
 	private HashMap<String, Integer> low; // low[v] = low number of v
 	private int pre; // pre-order number counter
 	private int count; // number/id of strongly-connected components
 	private Stack<String> stack;
+	private DependencyDAG dependencyDAG;
+	public HashMap<String, HashSet<String>> SCCs;
 
-	TarjanSCC(DependencyDAG G) {
+	public TarjanSCC(DependencyDAG G) {
 		marked = new HashSet();
 		stack = new Stack();
 		id = new HashMap();
 		low = new HashMap();
+		this.dependencyDAG = G;
 
 		for (String v : G.nodes) {
 			if (!marked.contains(v)) {
@@ -74,13 +76,27 @@ public class TarjanSCC {
 	}
 
 	// Returns the number of strong components.
-	private int count() {
+	public int count() {
 		return count;
 	}
 
 	// Are vertices v and w in the same strong component?
 	private boolean stronglyConnected(String v, String w) {
 		return id.get(v) == id.get(w);
+	}
+	
+	public void getSCCs() {
+		SCCs = new HashMap();
+		for (String v : dependencyDAG.nodes) {
+			String sccId = String.valueOf(id.get(v));
+			if (SCCs.containsKey(sccId)) {
+				SCCs.get(sccId).add(v);
+			} else {
+				HashSet hashSet = new HashSet();
+				hashSet.add(v);
+				SCCs.put(sccId, hashSet);
+			}
+		}
 	}
 
 	public static void main(String[] args) throws Exception {

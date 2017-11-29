@@ -4,9 +4,12 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Scanner;
+import java.util.TreeSet;
+
+import corehg.DependencyDAG;
 
 public class HourglassAnalysis {
-	private class DependencyGraph{
+	public class DependencyGraph{
 		private HashSet<String> nodes;
 		private HashSet<String> targets;
 		private HashSet<String> sources;
@@ -19,13 +22,19 @@ public class HourglassAnalysis {
 		private double nTotalPath;
 		
 		private double pathCoverageTau = 0.98;
-		private HashSet<String> coreNodes;
+		public HashSet<String> coreNodes;
 		private HashSet<String> skipNodes;
 		
-		public boolean processingFlat;
+		private boolean isWeighted;
 		private HashMap<String, Double> edgeWeights;
 		
-		public DependencyGraph(boolean processingFlat) { 
+		private HashMap<String, Double> corePathContribution;
+		private HashMap<String, Double> location;
+		private HashSet<String> visited;
+		private boolean canReachSource;
+		private boolean canReachTarget;
+		
+		public DependencyGraph(boolean isWeighted) { 
 			nodes = new HashSet();
 			serves = new HashMap();
 			depends = new HashMap();
@@ -36,16 +45,18 @@ public class HourglassAnalysis {
 			nodePathThrough = new HashMap();
 			skipNodes = new HashSet();
 			edgeWeights = new HashMap();
-			this.processingFlat = processingFlat;
+			this.isWeighted = isWeighted;
+			location = new HashMap();
+			corePathContribution = new HashMap();
 		}
 		
-		public DependencyGraph(String dependencyGraphFilePath, String sourceFilePath, String targetFilePath, boolean processingFlat) throws Exception {
-			this(processingFlat);
+		public DependencyGraph(String dependencyGraphFilePath, String sourceFilePath, String targetFilePath, boolean isWeighted) throws Exception {
+			this(isWeighted);
 			loadNetwork(dependencyGraphFilePath);
 			loadSources(sourceFilePath);
 			loadTargets(targetFilePath);
 			// special case
-			if (!processingFlat) {
+			if (!isWeighted) {
 //				mergeNodes("107", "156", 1);
 //				mergeNodes("82", "99", 1);
 //				mergeNodes("126", "154", 1);
@@ -57,7 +68,7 @@ public class HourglassAnalysis {
 			addSuperSourceTarget();
 			getPathStats();
 			getCore();
-			if (!processingFlat) {
+			if (!isWeighted) {
 				getFlatNetwork();
 			}
 		}
@@ -126,13 +137,13 @@ public class HourglassAnalysis {
 		private void addSuperSourceTarget() {
 			for (String s: sources) {
 				addEdge("superSource", s);
-				if (processingFlat) {
+				if (isWeighted) {
 					edgeWeights.put("superSource#" + s, 1.0);
 				}
 			}
 			for (String t: targets) {
 				addEdge(t, "superTarget");
-				if (processingFlat) {
+				if (isWeighted) {
 					edgeWeights.put(t + "#superTarget", 1.0);
 				}
 			}
@@ -161,7 +172,7 @@ public class HourglassAnalysis {
 				String tokens[] = line.split("\\s+");
 				String server = tokens[0];
 				String dependent = tokens[1];
-				if (processingFlat) {
+				if (isWeighted) {
 					double weight = Double.parseDouble(tokens[2]);
 					edgeWeights.put(server + "#" + dependent, weight);
 				}
@@ -183,7 +194,7 @@ public class HourglassAnalysis {
 					for (String s : depends.get(node)) {
 						sourcePathsTraverse(s);
 						double weight = 1;
-						if (processingFlat) {
+						if (isWeighted) {
 							weight = edgeWeights.get(s + "#" + node);
 						}
 						nPath += numOfSourcePath.get(s) * weight;
@@ -206,7 +217,7 @@ public class HourglassAnalysis {
 					for (String s : serves.get(node)) {
 						targetPathsTraverse(s);
 						double weight = 1;
-						if (processingFlat) {
+						if (isWeighted) {
 							weight = edgeWeights.get(node + "#" + s);
 						}
 						nPath += numOfTargetPath.get(s) * weight;
@@ -236,6 +247,10 @@ public class HourglassAnalysis {
 					nPath = numOfSourcePath.get(s) * numOfTargetPath.get(s);
 				}
 				nodePathThrough.put(s, nPath);
+				
+				double loc  = (numOfSourcePath.get(s) - 1) / ((numOfSourcePath.get(s) - 1) + (numOfTargetPath.get(s) - 1));
+				loc = ((int) (loc * 100.0)) / 100.0; // round up to 2 decimal point
+				location.put(s, loc);
 			}
 			nTotalPath = nodePathThrough.get("superSource");
 		}
@@ -261,10 +276,6 @@ public class HourglassAnalysis {
 		
 		private void getCore() {
 			greedyTraverse(0, nTotalPath);
-			if (!processingFlat) {
-				savedCores = new HashSet(coreNodes);
-				System.out.println(savedCores);
-			}
 			// resetting everything
 			skipNodes.clear();
 			getPathStats(); 
@@ -291,12 +302,13 @@ public class HourglassAnalysis {
 			}				
 			skipNodes.add(maxPathCoveredNode);
 			getPathStats();
-			if (!processingFlat) {
+			if (!isWeighted) {
 //				System.out.println(maxPathCoveredNode + "\t" + ((cumulativePathCovered + maxPathCovered) / nPath));
 				if (tied) {
-					System.out.println(tied);
+//					System.out.println(tied);
 				}
 			}
+			corePathContribution.put(maxPathCoveredNode, maxPathCovered);
 			greedyTraverse(cumulativePathCovered + maxPathCovered, nPath);
 		}
 		
@@ -322,11 +334,81 @@ public class HourglassAnalysis {
 			}
 			getPathStats(); 
 		}
+		
+		private double getCoreWeightedLocation() {
+			double weightedCoreLocation = 0;
+			double totalCoreContribution = 0;
+			for (String s: coreNodes) {
+				weightedCoreLocation += location.get(s) * corePathContribution.get(s);
+				totalCoreContribution += corePathContribution.get(s);
+			}
+			weightedCoreLocation /= totalCoreContribution;
+			return weightedCoreLocation;
+		}
+		
+		private double getCoreNodeCoverage() {
+			HashSet<String> coreNodeCoverage = new HashSet();
+			for (String s : coreNodes) {
+				visited = new HashSet();
+				reachableUpwardsNodes(s); // how many nodes are using her
+				coreNodeCoverage.addAll(visited);
+				visited = new HashSet();
+				reachableDownwardsNodes(s); // how many nodes is used by her
+				coreNodeCoverage.addAll(visited);
+			}
+		
+			double numerator = 0;
+			double denominator = 0;
+			for (String s: nodes) {
+				canReachSource = false;
+				canReachTarget = false;
+				visited.clear();
+				reachableUpwardsNodes(s);
+				reachableDownwardsNodes(s);
+				visited.clear();
+				// check if a node is in a source/target path (for model networks)
+				if (canReachSource && canReachTarget) {
+					++denominator;
+					if (coreNodeCoverage.contains(s)) {
+						++numerator;
+					}
+				}
+			}
+			double nodeCoverage = numerator / denominator;
+			return nodeCoverage;
+		}
+		
+		private void reachableUpwardsNodes(String node) { // towards targets
+			if (visited.contains(node)) { // node already traversed
+				return;
+			}
+			if (sources.contains(node)) canReachSource = true;
+			if (targets.contains(node)) canReachTarget = true;
+			visited.add(node);
+			if (!serves.containsKey(node)) {
+				return;
+			}
+			for (String s : serves.get(node)) {
+				reachableUpwardsNodes(s);
+			}
+		}
+		
+		private void reachableDownwardsNodes(String node) { // towards sources
+			if (visited.contains(node)) { // node already traversed
+				return;
+			}
+			visited.add(node);
+			if (!depends.containsKey(node)) {
+				return;
+			}
+			for (String s : depends.get(node)) {
+				reachableDownwardsNodes(s);
+			}
+		}
 	}
 	
 	public DependencyGraph dependencyDAG;
 	public DependencyGraph flatDAG;
-	public HashSet<String> savedCores;
 	public void runAnalysis(String data) throws Exception {
 		String dependencyDAGFile = "data//" + data + "_links.txt";
 		String sourceFile = "data//" + data + "_sources.txt";
@@ -334,13 +416,14 @@ public class HourglassAnalysis {
 		dependencyDAG = new DependencyGraph(dependencyDAGFile, sourceFile, targetFile, false);
 //		System.out.println("Original_network");
 //		dependencyDAG.printNetworkProperties();
-//		System.out.println(savedCores);
+		System.out.println(dependencyDAG.coreNodes);
 		String flatDAGFile = "data//flat.txt";
 		flatDAG = new DependencyGraph(flatDAGFile, sourceFile, targetFile, true);
 //		System.out.println("Flat_network");
 //		flatDAG.printNetworkProperties();
 		double hScore = (1.0 - dependencyDAG.coreNodes.size() * 1.0 / flatDAG.coreNodes.size());
-//		System.out.println(savedCores);
-//		System.out.println(dependencyDAG.coreNodes.size() + "\t" + flatDAG.coreNodes.size() + "\t" + hScore);
+//		System.out.println(flatDAG.coreNodes);
+		System.out.println(dependencyDAG.coreNodes.size() + "\t" + hScore);
+//		System.out.println(dependencyDAG.getCoreWeightedLocation() + "\t" + dependencyDAG.getCoreNodeCoverage());
 	}
 }

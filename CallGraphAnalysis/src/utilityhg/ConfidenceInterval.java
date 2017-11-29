@@ -28,6 +28,7 @@ public class ConfidenceInterval {
 			// Calculate critical value
 			double critVal = tDist.inverseCumulativeProbability(1.0 - (1 - level) / 2);
 			// Calculate confidence interval
+//			System.out.println(critVal);
 			return critVal * stats.getStandardDeviation() / Math.sqrt(stats.getN());
 		} catch (MathIllegalArgumentException e) {
 			return Double.NaN;
