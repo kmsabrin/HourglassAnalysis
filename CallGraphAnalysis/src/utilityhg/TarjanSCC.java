@@ -104,7 +104,7 @@ public class TarjanSCC {
 
 		PrintWriter pw = new PrintWriter(new File("neuro_networks//dummy.txt"));
 		G.isToy = true;
-		G.loadGraph("neuro_networks//celegans_network_feedback_simple_cycle.txt"); 
+		G.loadGraph("neuro_networks//celegans.edges"); 
 		
 //		PrintWriter pw = new PrintWriter(new File("metabolic_networks//rat-consolidated.txt"));
 ////		G.isMetabolic = true;

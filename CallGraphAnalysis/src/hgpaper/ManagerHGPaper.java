@@ -613,8 +613,8 @@ public class ManagerHGPaper {
 //				            "1.2", "1.4", "1.6", "1.8", "2"};
 		
 //		String alphas[] = {"-1", "0", "1"};
-//		String alphas[] = {"1.4", "1.6", "2",};
-		String alphas[] = {"1.8"};
+//		String alphas[] = {"1.2", "1.4", "1.6", "2",};
+		String alphas[] = {"1.8", "2"};
 
 //		String alphas[] = {"-2", "-1.8", "-1.6", "-1.4", "-1.2",
 //        "-1", "-0.8", "-0.6", "-0.4", "-0.2"};
@@ -635,7 +635,7 @@ public class ManagerHGPaper {
 				String ratio = "-1";
 				String networkID = DAGType + "r" + ratio + "a" + a + "d" + din;
 				
-				int nRun = 50;
+				int nRun = 5;
 				double coreSizes[] = new double[nRun];
 				double hScores[] = new double[nRun];
 				double nodeCoverages[] = new double[nRun];
@@ -799,16 +799,16 @@ public class ManagerHGPaper {
 	}
 	
 	public static void main(String[] args) throws Exception {		
-		ManagerHGPaper.doRealNetworkAnalysis();
+//		ManagerHGPaper.doRealNetworkAnalysis();
 //		ManagerHGPaper.measureTauEffectOnRealNetwork();
 //		ManagerHGPaper.runThroughAllRealNets();
 //		ManagerHGPaper.runScalabilityTest();
 //		ManagerHGPaper.runRandomizationTest();
 //		ManagerHGPaper.runSyntheticStatisticalSignificanceTestsForTau();
 		
-		int n = 1000;
+		int n = 2000;
 //		curve 1
-//		ManagerHGPaper.runSyntheticStatisticalSignificanceTests(n/3, n/3, n/3, 1);
+		ManagerHGPaper.runSyntheticStatisticalSignificanceTests(n/3, n/3, n/3, 1);
 
 //		curve 2
 //		SimpleModelDAG.isPoisson = false;

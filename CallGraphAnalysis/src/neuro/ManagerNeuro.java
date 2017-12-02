@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Random;
@@ -265,7 +266,7 @@ public class ManagerNeuro {
 		loadNodes(nodes, inter, "neuro_networks//inter_neurons.txt");
 		loadNodes(nodes, target, "neuro_networks//motor_neurons.txt");
 		
-		int maxLabel = 279;
+		int maxLabel = 269;
 		for (int i = 1; i <= maxLabel; ++i) {
 			int k = 0;
 			if (source.contains(i)) ++k;
@@ -754,6 +755,7 @@ public class ManagerNeuro {
 		}
 		scanner.close();
 		maxKount += restoredEdge;
+//		System.out.println(restoredEdge);
 	}
 	
 	private static void optimizeAcyclicity() throws Exception {
@@ -990,7 +992,7 @@ public class ManagerNeuro {
 	
 	private static void randomSimulations() throws Exception {
 		random = new Random(System.nanoTime());
-		nRun = 100;
+		nRun = 10;
 		maxKount = 0;
 		allDAG = new ArrayList();
 		
@@ -1019,7 +1021,7 @@ public class ManagerNeuro {
 		
 		
 		for (String s: coreVarianceMembers.keySet()) {
-//			System.out.println((coreVarianceMembers.get(s) / 900.0) + "\t" + s);
+			System.out.println((coreVarianceMembers.get(s) / 900.0) + "\t" + s);
 		}
 //		System.out.println(" -------- \n");
 		for (String s: coreVarianceOrdered.keySet()) {
@@ -1032,11 +1034,19 @@ public class ManagerNeuro {
 		}
 		*/
 		
+		HashSet<String> allKeptEdges = new HashSet();
 		for (int i = 1; i <= nRun; ++i) {
 //			reduceNetwork_1();
 //			optimizeAcyclicity();
 			breakSCCs();
+			
+//			DependencyDAG.isToy = true;
+//			DependencyDAG dependencyDAG = new DependencyDAG("neuro_networks//celegans_network_clean_2.txt");
+//			keptEdges = new HashSet();
+//			addEdgeBack(dependencyDAG, "add_back_y");
+//			allKeptEdges.addAll(keptEdges);
 		}
+//		System.out.println(allKeptEdges.size());
 		
 //		System.out.println(" -- " + maxKount);
 //		for (String s: maxRedundantOrder) {
@@ -1047,11 +1057,11 @@ public class ManagerNeuro {
 			System.out.println(s + "\t" + (coreVarianceMembers.get(s) * 1.0 / nRun));
 		}
 		
-//		for (String s: addBackCounter.keySet()) {
+		for (String s: addBackCounter.keySet()) {
 //			System.out.println(s + "\t" + (addBackCounter.get(s) * 1.0 / nRun));
 //			int index = s.indexOf("#");
 //			System.out.println(s.substring(0, index) + "\t" + s.substring(index + 1) + "\t" + addBackCounter.get(s));
-//		}
+		}
 		
 		for (String s: removedCounter.keySet()) {
 			System.out.println(s + "\t" + (removedCounter.get(s) * 1.0 / nRun));
@@ -1232,9 +1242,246 @@ public class ManagerNeuro {
 		return true;
 	}
 	
+	public static void getAllShortestDistance(int nNodes, double dist[][], DependencyDAG dependencyDAG, boolean upward) {
+		for (int i = 0; i < nNodes; ++i) {
+			for (int j = 0; j < nNodes; ++j) {
+				dist[i][j] = Double.MAX_VALUE;
+			}
+		}
+		
+		for (int i = 0; i < nNodes; ++i) {
+			dist[i][i] = 0.0;
+		}
+		
+		if (upward) {
+			for (String s : dependencyDAG.nodes) {
+				if (!dependencyDAG.serves.containsKey(s))
+					continue;
+				for (String r : dependencyDAG.serves.get(s)) {
+					int si = Integer.parseInt(s);
+					int ri = Integer.parseInt(r);
+					dist[si][ri] = 1.0;
+				}
+			}
+		} 
+		else {
+			for (String s : dependencyDAG.nodes) {
+				if (!dependencyDAG.depends.containsKey(s))
+					continue;
+				for (String r : dependencyDAG.depends.get(s)) {
+					int si = Integer.parseInt(s);
+					int ri = Integer.parseInt(r);
+					dist[si][ri] = 1.0;
+				}
+			}
+		}
+		
+		for (int k = 0; k < nNodes; ++k) {
+			for (int i = 0; i < nNodes; ++i) {
+				for (int j = 0; j < nNodes; ++j) {
+					if (dist[i][j] > dist[i][k] + dist[k][j]) { 
+//						dist[i][j] = dist[i][k] + dist[k][j];
+					}
+				}
+			}
+		}
+		
+		for (int i = 0; i < nNodes; ++i) {
+			for (int j = 0; j < nNodes; ++j) {
+//				System.out.println(i + "\t" + j + "\t" + dist[i][j]);
+			}
+		}
+	}
+	
+	public static double getAverageShortestDistance(int nNodes, String node, double dist[][], DependencyDAG dependencyDAG, boolean upward) {
+		int ni = Integer.parseInt(node);	
+		double sum = 0.0;
+		double kount = 0;
+		double maxDistance = 1000;
+		for (int i = 0; i < nNodes; ++i) {
+			if (upward) {
+				if (!dependencyDAG.serves.containsKey(i) && dist[ni][i] < maxDistance) { // is target and is reachable
+					sum += dist[ni][i];
+					++kount;
+				}
+			} 
+			else {
+				if (!dependencyDAG.depends.containsKey(i) && dist[ni][i] < maxDistance) { // is source and is reachable
+					sum += dist[ni][i];
+					++kount;
+				}
+			}
+		}
+		
+		if (sum == 0) System.out.println(node + "\t" + sum + "\t" + kount + "\t" + upward);
+		return sum / kount;
+	}
+	
+	public static void breakCycles() throws Exception {
+		DependencyDAG.isToy = true;
+		DependencyDAG dependencyDAG = new DependencyDAG("neuro_networks//celegans.edges");
+		
+		String netPath = "neuro_networks//celegans";
+		HashMap<String, String> labelIdMap = new HashMap();
+		HashMap<String, String> idLabelMap = new HashMap();
+		Scanner scanner = new Scanner(new File(netPath + ".nodes"));
+		while (scanner.hasNext()) {
+			String id = scanner.next();
+			String label = scanner.next();
+			labelIdMap.put(label, id);
+			idLabelMap.put(id, label);
+		}
+		scanner.close();
+		
+		HashMap<String, Integer> idRankMap = new HashMap();
+		scanner = new Scanner(new File(netPath + ".ranks"));
+		while (scanner.hasNext()) {
+			String id = scanner.next();
+			int rank = scanner.nextInt();
+			int agony = scanner.nextInt();
+			idRankMap.put(id, rank);
+		}
+		scanner.close();
+		
+		HashSet<String> cleanEdge = new HashSet();
+		scanner = new Scanner(new File(netPath + ".edges"));
+		while (scanner.hasNext()) {
+			String src = scanner.next();
+			String dst = scanner.next();
+			cleanEdge.add(src + "#" + dst);
+		}
+		scanner.close();
+		
+		HashMap<String, Double> edgeWeight = new HashMap();
+		HashMap<String, Integer> edgeRank = new HashMap();
+		scanner = new Scanner(new File(netPath + "_graph.txt"));
+		while (scanner.hasNext()) {
+			String src = scanner.next();
+			String dst = scanner.next();
+			double weight = scanner.nextDouble();
+			String srcId = labelIdMap.get(src);
+			String dstId = labelIdMap.get(dst);
+			if (!cleanEdge.contains(srcId + "#" + dstId)) {
+				continue;
+			}
+			int srcRank = idRankMap.get(srcId);
+			int dstRank = idRankMap.get(dstId);
+			edgeRank.put(srcId + "#" + dstId, dstRank - srcRank);
+			edgeWeight.put(srcId + "#" + dstId, weight);
+		}
+		scanner.close();
+		
+		class SCCEdge implements Comparable<SCCEdge>{
+			String edge;
+			int rank;
+			double weight;
+			double sl;
+			double tl;
+			
+			public SCCEdge(String edge, int rank, double weight, double sl, double tl) {
+				this.edge = edge;
+				this.rank = rank;
+				this.weight = weight;
+				this.sl = sl;
+				this.tl = tl;
+			}
+		
+			public int compareTo(SCCEdge other) {
+				if (this.rank != other.rank) return this.rank - other.rank;
+				if (this.weight != other.weight) return (int)(this.weight - other.weight);
+				// average shortest path distance
+				double thisLocationAgony = this.tl - this.sl;
+				double otherLocationAgony = other.tl - other.sl;
+				if (thisLocationAgony != otherLocationAgony) return (int)(thisLocationAgony - otherLocationAgony);
+				return 0;
+			}
+		}
+		
+		// get shortest path based location
+		int nNodes = 269;
+		double distUp[][] = new double[nNodes][nNodes];
+		double distDown[][] = new double[nNodes][nNodes];
+		getAllShortestDistance(nNodes, distUp, dependencyDAG, true);
+		getAllShortestDistance(nNodes, distDown, dependencyDAG, false);
+		
+		int kount = 0;
+		for (String e: cleanEdge) {
+			String src = e.substring(0, e.indexOf("#"));
+			String dst = e.substring(e.indexOf("#") + 1);
+			int srcRank = idRankMap.get(src);
+			int dstRank = idRankMap.get(dst);
+			if (srcRank >= dstRank) {
+				++kount;
+			}
+		}
+		System.out.println(kount);
+		
+		
+		HashSet<String> processed = new HashSet();
+		for (String e: cleanEdge) {
+			String src = e.substring(0, e.indexOf("#"));
+			String dst = e.substring(e.indexOf("#") + 1);
+			if (!cleanEdge.contains(dst + "#" + src)) {
+				System.out.println(src + "\t" + dst);
+				continue;
+			}
+			if (processed.contains(src + "#" + dst)) continue;
+			processed.add(dst + "#" + src);
+			int srcRank = idRankMap.get(src);
+			int dstRank = idRankMap.get(dst);
+			double currentDirectionWeight = edgeWeight.get(src + "#" + dst);
+			double backDirectionWeight = edgeWeight.get(dst + "#" + src);
+			double sU = getAverageShortestDistance(nNodes, src, distUp, dependencyDAG, true);
+			double sD = getAverageShortestDistance(nNodes, src, distDown, dependencyDAG, false);
+			double dU = getAverageShortestDistance(nNodes, dst, distUp, dependencyDAG, true);
+			double dD = getAverageShortestDistance(nNodes, dst, distDown, dependencyDAG, false);
+			double sL = sU / (sU + sD);
+			double dL = dU / (dU + dD);
+			double currentDirectionLocationAgony = dL - sL; 
+			if (srcRank != dstRank) {
+				if (srcRank < dstRank) {
+					// keep
+					System.out.println(src + "\t" + dst);
+				}
+				else {
+					System.out.println(dst + "\t" + src);
+				}
+			}
+			else {
+				if (currentDirectionWeight != backDirectionWeight) {
+					// keep
+					if (currentDirectionWeight > backDirectionWeight) {
+						System.out.println(src + "\t" + dst);
+					}
+					else {
+						System.out.println(dst + "\t" + src);
+					}
+				}
+				else {
+					if (currentDirectionLocationAgony != 0) {
+						// keep
+						if (currentDirectionLocationAgony > 0) {
+							System.out.println(src + "\t" + dst);
+						}
+						else {
+							System.out.println(dst + "\t" + src);
+						}
+					}
+					else {
+						// keep
+						System.out.println(src + "\t" + dst);
+						System.out.println(dst + "\t" + src);
+//						System.out.println("Still tied for: " + src + "\t" + dst);
+					}
+				}
+			}	
+		}
+	}
+	
+	
 	public static void breakSCCs() throws Exception {
 		DependencyDAG.isToy = true;
-		DependencyDAG dependencyDAG = new DependencyDAG("neuro_networks//celegans_network_clean.txt");
+		DependencyDAG dependencyDAG = new DependencyDAG("neuro_networks//celegans.edges");
 		
 		String netPath = "neuro_networks//celegans";
 		HashMap<String, String> labelIdMap = new HashMap();
@@ -1281,18 +1528,67 @@ public class ManagerNeuro {
 			String dstId = labelIdMap.get(dst);
 			int srcRank = idRankMap.get(srcId);
 			int dstRank = idRankMap.get(dstId);
-			edgeRank.put(src + "#" + dst, dstRank - srcRank);
-			edgeWeight.put(src + "#" + dst, weight);
-			if (srcRank >= dstRank) {
-//				System.out.println((dstRank - srcRank) + "\t" + weight);
-				dependencyDAG.visited = new HashSet();
-				dependencyDAG.reachableUpwardsNodes(dst);
-				if (dependencyDAG.visited.contains(src)) {
-					System.out.println(src + "\t" + dst);
-				}
-			}
+			edgeRank.put(srcId + "#" + dstId, dstRank - srcRank);
+			edgeWeight.put(srcId + "#" + dstId, weight);
 		}
 		scanner.close();
+		
+		class SCCEdge implements Comparable<SCCEdge>{
+			String edge;
+			int rank;
+			double weight;
+			double sl;
+			double tl;
+			
+			public SCCEdge(String edge, int rank, double weight, double sl, double tl) {
+				this.edge = edge;
+				this.rank = rank;
+				this.weight = weight;
+				this.sl = sl;
+				this.tl = tl;
+			}
+		
+			public int compareTo(SCCEdge other) {
+				if (this.rank != other.rank) return this.rank - other.rank;
+				if (this.weight != other.weight) return (int)(this.weight - other.weight);
+				
+//				// average shortest path distance
+				double thisLocationAgony = this.tl - this.sl;
+				double otherLocationAgony = other.tl - other.sl;
+//				if (thisLocationAgony == otherLocationAgony) System.out.println(thisLocationAgony + "\t" + otherLocationAgony);
+				if (thisLocationAgony < 0 && otherLocationAgony < 0) {
+					if (thisLocationAgony < otherLocationAgony) {
+						return -1;
+					}
+					else if (otherLocationAgony < thisLocationAgony) {
+						return +1;
+					}
+				}
+				else if (thisLocationAgony > 0 && otherLocationAgony > 0) {
+					if (thisLocationAgony < otherLocationAgony) {
+						return +1;
+					}
+					else if (otherLocationAgony < thisLocationAgony) {
+						return -1;
+					}
+				}
+				else if (thisLocationAgony < 0) {
+					return -1;
+				}
+				else if (otherLocationAgony < 0) {
+					return +1;
+				}
+				
+				return 0;
+			}
+		}
+		
+		// get shortest path based location
+		int nNodes = 269;
+		double distUp[][] = new double[nNodes][nNodes];
+		double distDown[][] = new double[nNodes][nNodes];
+		getAllShortestDistance(nNodes, distUp, dependencyDAG, true);
+		getAllShortestDistance(nNodes, distDown, dependencyDAG, false);
 		
 		int removed = 0;
 		while (true) {
@@ -1303,44 +1599,29 @@ public class ManagerNeuro {
 				break;
 			}
 			
-			int maxSCCSize = 0;
+			int minSCCSize = Integer.MAX_VALUE;
 			for (String s: tarjanSCC.SCCs.keySet()) {
 				int size = tarjanSCC.SCCs.get(s).size();
-				if (size > maxSCCSize) {
-					maxSCCSize = size;
+				if (size < 2) {
+					continue;
+				}
+				if (size < minSCCSize) {
+					minSCCSize = size;
 				}
 			}
 			
 			for (String s: tarjanSCC.SCCs.keySet()) {
 				int size = tarjanSCC.SCCs.get(s).size();
-				if (size < maxSCCSize) {
-//					continue;
-				}
 				if (size < 2) {
 					continue;
 				}
+//				if (size != minSCCSize) {
+//					continue;
+//				}
 				HashSet<String> scc = tarjanSCC.SCCs.get(s);
 				
-				class SCCEdge implements Comparable<SCCEdge>{
-					String edge;
-					int rank;
-					double weight;
-					
-					public SCCEdge(String edge, int rank, double weight) {
-						this.edge = edge;
-						this.rank = rank;
-						this.weight = weight;
-					}
-					
-					public int compareTo(SCCEdge other) {
-						if (this.rank != other.rank) return this.rank - other.rank;
-						if (this.weight != other.weight) return -1 * (int)(this.weight - other.weight);
-						return 0;
-					}
-				}
-				
 //				System.out.println(size);
-//				System.out.println(maxSCCSize);
+//				System.out.println(minSCCSize);
 				ArrayList<SCCEdge> sortedSCCEdge = new ArrayList();
 				for(String n: scc) {
 					for (String v: dependencyDAG.serves.get(n)) {
@@ -1348,13 +1629,23 @@ public class ManagerNeuro {
 							continue;
 						}
 						String edge = n + "#" + v;
+//						System.out.println(edge);
 						int rank = edgeRank.get(edge);
 						double weight = edgeWeight.get(edge);
-						sortedSCCEdge.add(new SCCEdge(edge, rank, weight));
+						double sU = getAverageShortestDistance(nNodes, n, distUp, dependencyDAG, true);
+						double sD = getAverageShortestDistance(nNodes, n, distDown, dependencyDAG, false);
+						double tU = getAverageShortestDistance(nNodes, v, distUp, dependencyDAG, true);
+						double tD = getAverageShortestDistance(nNodes, v, distDown, dependencyDAG, false);
+//						System.out.println(edge + "\t" + sU + "\t" + sD + "\t" + tU + "\t" + tD);
+						sortedSCCEdge.add(new SCCEdge(edge, rank, weight, sU / (sU + sD), tU / (tU + tD)));
 					}
 				}
 				Collections.shuffle(sortedSCCEdge);
 				Collections.sort(sortedSCCEdge);
+				
+				for (SCCEdge sccEdge: sortedSCCEdge) {
+//					System.out.println(sccEdge.edge + "\t" + sccEdge.rank + "\t" + sccEdge.weight + "\t" + sccEdge.sl + "\t" + sccEdge.tl);
+				}
 				
 				for (SCCEdge sccEdge: sortedSCCEdge) {
 					String e = sccEdge.edge;
@@ -1362,7 +1653,7 @@ public class ManagerNeuro {
 					String dst = e.substring(e.indexOf("#") + 1);
 					dependencyDAG.removeEdge(src, dst);
 					++removed;
-//					System.out.println(e + "\t" + sccEdge.rank + "\t" + sccEdge.weight);
+//					System.out.println(e + "\t" + sccEdge.rank + "\t" + sccEdge.weight + "\t" + sccEdge.sl + "\t" + sccEdge.tl + "\t" + (sccEdge.tl - sccEdge.sl));
 					if (removedCounter.containsKey(e)) {
 						removedCounter.put(e, removedCounter.get(e) + 1);
 					} else {
@@ -1372,12 +1663,25 @@ public class ManagerNeuro {
 						break;
 					}
 				}
+//				System.out.println("SCC Broken");
 			}
-			
 //			System.out.println("Iteration complete");
+//			break;
 		}
-//		System.out.println("Edges removed: " + removed);
-		dependencyDAG.printLinks("celegans");
+		
+		System.out.println("Edges removed: " + removed);
+//		dependencyDAG.printLinks("celegans");
+		/* begin special case */
+		PrintWriter pw1 = new PrintWriter(new File("data//" + "celegans" + "_links.txt"));
+		for (String s : dependencyDAG.nodes) {
+			if (dependencyDAG.serves.containsKey(s)) {
+				for (String r : dependencyDAG.serves.get(s)) {
+					pw1.println(idLabelMap.get(s) + "\t" + idLabelMap.get(r));
+				}
+			}
+		}
+		pw1.close();
+		/* end special case */
 		HourglassAnalysis hourglassAnalysis = new HourglassAnalysis();
 		hourglassAnalysis.runAnalysis("celegans");
 		
@@ -1404,9 +1708,11 @@ public class ManagerNeuro {
 //		optimizeAcyclicityBasic();
 //		optimizeAcyclicityNeuro();
 //		optimizeAcyclicity();
-		breakSCCs();
+
+//		breakCycles();
+//		breakSCCs();
 		
-//		randomSimulations();
+		randomSimulations();
 		
 //		statisticalRun();
 //		traverseAllPaths();

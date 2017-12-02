@@ -141,15 +141,13 @@ public class DependencyDAG {
 	}
 	
 	private void loadNetworkAttributes() {
-		loadDegreeMetric();
-		/*		
-		loadPathStatistics();
-		loadLocationMetric(); // must load degree metric before
-		loadServerReachabilityAll();
-		loadPathCentralityMetric();
-		*/
-//		loadReachablityAll();
+		loadDegreeMetric();		
+//		loadPathStatistics();
+//		loadLocationMetric(); // must load degree metric before
+//		loadServerReachabilityAll();
+//		loadPathCentralityMetric();
 		
+//		loadReachablityAll();
 //		countDisconnectedNodes();
 //		removeIsolatedNodes(); 
 //		loadPagerankCentralityMetric();		
@@ -737,8 +735,8 @@ public class DependencyDAG {
 	
 	public boolean isSource(String node) {
 		if (isSynthetic) {
-//			if (Integer.parseInt(node) >= SimpleModelDAG.sS) {
-			if (Integer.parseInt(node) <= 4) {
+			if (Integer.parseInt(node) >= SimpleModelDAG.sS) {
+//			if (Integer.parseInt(node) <= 4) {
 				return true;
 			}
 			return false;
@@ -757,8 +755,8 @@ public class DependencyDAG {
 	
 	public boolean isTarget(String node) {
 		if (isSynthetic) {
-//			if (Integer.parseInt(node) < SimpleModelDAG.sI) {
-			if (Integer.parseInt(node) > 8) {
+			if (Integer.parseInt(node) < SimpleModelDAG.sI) {
+//			if (Integer.parseInt(node) > 8) {
 				return true;
 			}
 			return false;
@@ -777,8 +775,8 @@ public class DependencyDAG {
 	
 	public boolean isIntermediate(String node) {
 		if (isSynthetic) {
-//			if (Integer.parseInt(node) >= SimpleModelDAG.sI && Integer.parseInt(node) < SimpleModelDAG.sS) {
-			if (Integer.parseInt(node) > 4 && Integer.parseInt(node) < 9) {
+			if (Integer.parseInt(node) >= SimpleModelDAG.sI && Integer.parseInt(node) < SimpleModelDAG.sS) {
+//			if (Integer.parseInt(node) > 4 && Integer.parseInt(node) < 9) {
 				return true;
 			}
 			return false;
