@@ -11,6 +11,7 @@ import java.util.Random;
 import java.util.Scanner;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import java.util.concurrent.TimeUnit;
 
 import utilityhg.TarjanSCC;
 import clean.HourglassAnalysis;
@@ -1477,8 +1478,7 @@ public class ManagerNeuro {
 			}	
 		}
 	}
-	
-	
+		
 	public static void breakSCCs() throws Exception {
 		DependencyDAG.isToy = true;
 		DependencyDAG dependencyDAG = new DependencyDAG("neuro_networks//celegans.edges");
@@ -1694,7 +1694,235 @@ public class ManagerNeuro {
 			}
 		}
 	}
-	
+
+	public static void breakCyclesAgain() throws Exception {		
+		class NeuroEdge implements Comparable<NeuroEdge>{
+			String edge;
+			int rank;
+			double weight;
+			double srcLoc;
+			double tgtLoc;
+			
+			public NeuroEdge(String edge, int rank, double weight, double sl, double tl) {
+				this.edge = edge;
+				this.rank = rank;
+				this.weight = weight;
+				this.srcLoc = sl;
+				this.tgtLoc = tl;
+			}
+		
+			public int compareTo(NeuroEdge other) {
+				if (this.rank != other.rank) return this.rank - other.rank;
+				if (this.weight != other.weight) return (int)(this.weight - other.weight);
+				
+//				// average shortest path distance
+				double thisLocationAgony = this.tgtLoc - this.srcLoc;
+				double otherLocationAgony = other.tgtLoc - other.srcLoc;
+//				if (thisLocationAgony == otherLocationAgony) System.out.println(thisLocationAgony + "\t" + otherLocationAgony);
+				if (thisLocationAgony < 0 && otherLocationAgony < 0) {
+					if (thisLocationAgony < otherLocationAgony) {
+						return -1;
+					}
+					else if (otherLocationAgony < thisLocationAgony) {
+						return +1;
+					}
+				}
+				else if (thisLocationAgony > 0 && otherLocationAgony > 0) {
+					if (thisLocationAgony < otherLocationAgony) {
+						return +1;
+					}
+					else if (otherLocationAgony < thisLocationAgony) {
+						return -1;
+					}
+				}
+				else if (thisLocationAgony < 0) {
+					return -1;
+				}
+				else if (otherLocationAgony < 0) {
+					return +1;
+				}
+				
+				return 0;
+			}
+		}
+		
+		int removed = 0;
+		String netPath = "C:/MinGW/bin/";
+		
+		HashMap<String, String> labelIdMap = new HashMap();
+		HashMap<String, String> idLabelMap = new HashMap();
+		Scanner scanner = new Scanner(new File(netPath + "celegans.nodes"));
+		while (scanner.hasNext()) {
+			String id = scanner.next();
+			String label = scanner.next();
+			labelIdMap.put(label, id);
+			idLabelMap.put(id, label);
+		}
+		scanner.close();
+		
+		Process p1 = Runtime.getRuntime().exec("cmd /c del celegans.edges", new String[0], new File("C:/MinGW/bin"));
+		p1.waitFor();
+		Process p2 = Runtime.getRuntime().exec("cmd /c copy celegans.edges.1 celegans.edges", new String[0], new File("C:/MinGW/bin"));
+		p2.waitFor();
+//		if (true) System.exit(0);
+		
+		int kount = 0;
+		while (true) {
+			DependencyDAG.isToy = true;
+			DependencyDAG dependencyDAG = new DependencyDAG(netPath + "celegans.edges");
+			dependencyDAG.printNetworkStat();
+			
+			// compute shortest path based location
+			int nNodes = 269;
+			double distUp[][] = new double[nNodes][nNodes];
+			double distDown[][] = new double[nNodes][nNodes];
+			getAllShortestDistance(nNodes, distUp, dependencyDAG, true);
+			getAllShortestDistance(nNodes, distDown, dependencyDAG, false);
+
+			// compute socialrank
+			Process p3 = Runtime.getRuntime().exec("socialrank.exe summary_stats.txt celegans", new String[0], new File(netPath));
+//			int status3 = p3.waitFor();
+			boolean status3 = p3.waitFor(4L, TimeUnit.SECONDS);
+			p3.destroyForcibly();
+//			System.out.println(status3);
+			
+			// load updated ranks and edges and edge weights
+			HashMap<String, Integer> idRankMap = new HashMap();
+			scanner = new Scanner(new File(netPath + "celegans.ranks"));
+			scanner.nextLine(); // skip first line
+			while (scanner.hasNext()) {
+				String id = scanner.next();
+				int rank = scanner.nextInt();
+				int agony = scanner.nextInt();
+				if (id.contains(".")) break; // skip last line
+				idRankMap.put(id, rank);
+			}
+			scanner.close();
+			
+			// get original edges
+			HashSet<String> cleanEdge = new HashSet();
+			scanner = new Scanner(new File(netPath + "celegans.edges"));
+			while (scanner.hasNext()) {
+				String src = scanner.next();
+				String dst = scanner.next();
+				cleanEdge.add(idLabelMap.get(src) + "#" + idLabelMap.get(dst));
+			}
+			scanner.close();
+			
+			// get edge weights (weight source has original id)
+			HashMap<String, Double> edgeWeight = new HashMap();
+			HashMap<String, Integer> edgeRank = new HashMap();
+			scanner = new Scanner(new File(netPath + "celegans.graph"));
+			while (scanner.hasNext()) {
+				String src = scanner.next();
+				String dst = scanner.next();
+				double weight = scanner.nextDouble();
+				if (!cleanEdge.contains(src + "#" + dst)) {
+					continue;
+				}
+				String srcId = labelIdMap.get(src);
+				String dstId = labelIdMap.get(dst);
+				int srcRank = idRankMap.get(srcId);
+				int dstRank = idRankMap.get(dstId);
+				edgeRank.put(srcId + "#" + dstId, dstRank - srcRank);
+				edgeWeight.put(srcId + "#" + dstId, weight);
+			}
+			scanner.close();		
+			
+			ArrayList<NeuroEdge> sortedCycleEdges = new ArrayList();
+			for(String n: dependencyDAG.serves.keySet()) {
+				for (String v: dependencyDAG.serves.get(n)) {
+//					check if cause cycle	
+					if (!dependencyDAG.successors.containsKey(v)) {
+						dependencyDAG.loadReachability(v);
+					}
+					if (!dependencyDAG.successors.get(v).contains(n)) {
+						// is not part of a cycle
+						continue;
+					}
+					String edge = n + "#" + v;
+//					System.out.println(edge);
+					int rank = edgeRank.get(edge);
+					double weight = edgeWeight.get(edge);
+					double sU = getAverageShortestDistance(nNodes, n, distUp, dependencyDAG, true);
+					double sD = getAverageShortestDistance(nNodes, n, distDown, dependencyDAG, false);
+					double tU = getAverageShortestDistance(nNodes, v, distUp, dependencyDAG, true);
+					double tD = getAverageShortestDistance(nNodes, v, distDown, dependencyDAG, false);
+//					System.out.println(edge + "\t" + sU + "\t" + sD + "\t" + tU + "\t" + tD);
+					sortedCycleEdges.add(new NeuroEdge(edge, rank, weight, sU / (sU + sD), tU / (tU + tD)));
+				}
+			}
+			Collections.sort(sortedCycleEdges);
+				
+			int print5 = 5;
+			for (NeuroEdge neuroEdge: sortedCycleEdges) {
+//				System.out.println(neuroEdge.edge + "\t" + neuroEdge.rank + "\t" + neuroEdge.weight + "\t" + neuroEdge.srcLoc + "\t" + neuroEdge.tgtLoc);
+//				if (print5-- < 0) break;
+			}
+			
+//			if (true) break;
+				
+			for (NeuroEdge neuroEdge: sortedCycleEdges) {
+				String e = neuroEdge.edge;
+				String src = e.substring(0, e.indexOf("#"));
+				String dst = e.substring(e.indexOf("#") + 1);
+				dependencyDAG.removeEdge(src, dst);
+				++removed;
+				System.out.println(e + "\t" + neuroEdge.rank + "\t" + neuroEdge.weight + "\t" + neuroEdge.srcLoc + "\t" + neuroEdge.tgtLoc + "\t" + (neuroEdge.tgtLoc - neuroEdge.srcLoc));
+				if (removedCounter.containsKey(e)) {
+					removedCounter.put(e, removedCounter.get(e) + 1);
+				} else {
+					removedCounter.put(e, 1);
+				}
+				
+				// write celegans.edges back
+				PrintWriter pw = new PrintWriter(new File(netPath + "celegans.edges"));
+				for (String s : dependencyDAG.nodes) {
+					if (dependencyDAG.serves.containsKey(s)) {
+						for (String r : dependencyDAG.serves.get(s)) {
+							pw.println(s + "\t" + r);
+						}
+					}
+				}
+				pw.close();
+				break;
+			}
+			
+			if (sortedCycleEdges.isEmpty()) {
+				break;
+			}
+			
+			if (++kount > 0) {
+//				break;
+			}
+		}
+
+		System.out.println("Edges removed: " + removed);
+		/*
+		DependencyDAG dependencyDAG = new DependencyDAG(netPath + "celegans.edges");		
+		PrintWriter pw = new PrintWriter(new File("data//" + "celegans" + "_links.txt"));
+		for (String s : dependencyDAG.nodes) {
+			if (dependencyDAG.serves.containsKey(s)) {
+				for (String r : dependencyDAG.serves.get(s)) {
+					pw.println(idLabelMap.get(s) + "\t" + idLabelMap.get(r));
+				}
+			}
+		}
+		pw.close();
+		HourglassAnalysis hourglassAnalysis = new HourglassAnalysis();
+		hourglassAnalysis.runAnalysis("celegans");
+		
+		for (String s: hourglassAnalysis.dependencyDAG.coreNodes) {
+			if (coreVarianceMembers.containsKey(s)) {
+				coreVarianceMembers.put(s, coreVarianceMembers.get(s) + 1);
+			}
+			else {
+				coreVarianceMembers.put(s, 1);
+			}
+		}
+		*/
+	}
+		
 	public static void main(String[] args) throws Exception {
 //		getCleanNeuroNetwork();
 //		getFeedbackAndSimpleCycleRemovedNetwork();
@@ -1711,8 +1939,10 @@ public class ManagerNeuro {
 
 //		breakCycles();
 //		breakSCCs();
+		breakCyclesAgain();
 		
-		randomSimulations();
+//		randomSimulations();
+		
 		
 //		statisticalRun();
 //		traverseAllPaths();
