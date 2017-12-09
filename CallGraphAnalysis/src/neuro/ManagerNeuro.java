@@ -1,6 +1,7 @@
 package neuro;
 
 import java.io.File;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -1719,30 +1720,34 @@ public class ManagerNeuro {
 				double thisLocationAgony = this.tgtLoc - this.srcLoc;
 				double otherLocationAgony = other.tgtLoc - other.srcLoc;
 //				if (thisLocationAgony == otherLocationAgony) System.out.println(thisLocationAgony + "\t" + otherLocationAgony);
-				if (thisLocationAgony < 0 && otherLocationAgony < 0) {
-					if (thisLocationAgony < otherLocationAgony) {
-						return -1;
-					}
-					else if (otherLocationAgony < thisLocationAgony) {
-						return +1;
-					}
-				}
-				else if (thisLocationAgony > 0 && otherLocationAgony > 0) {
-					if (thisLocationAgony < otherLocationAgony) {
-						return +1;
-					}
-					else if (otherLocationAgony < thisLocationAgony) {
-						return -1;
-					}
-				}
-				else if (thisLocationAgony < 0) {
-					return -1;
-				}
-				else if (otherLocationAgony < 0) {
-					return +1;
-				}
+//				if (thisLocationAgony < 0 && otherLocationAgony < 0) {
+//					if (thisLocationAgony < otherLocationAgony) {
+//						return -1;
+//					}
+//					else if (otherLocationAgony < thisLocationAgony) {
+//						return +1;
+//					}
+//				}
+//				else if (thisLocationAgony > 0 && otherLocationAgony > 0) {
+//					if (thisLocationAgony < otherLocationAgony) {
+//						return +1;
+//					}
+//					else if (otherLocationAgony < thisLocationAgony) {
+//						return -1;
+//					}
+//				}
+//				else if (thisLocationAgony < 0) {
+//					return -1;
+//				}
+//				else if (otherLocationAgony < 0) {
+//					return +1;
+//				}
+//				
+//				return 0;
 				
-				return 0;
+				if (thisLocationAgony < otherLocationAgony) return -1;
+				else if (thisLocationAgony > otherLocationAgony) return +1;
+				else return 0;
 			}
 		}
 		
@@ -1760,17 +1765,24 @@ public class ManagerNeuro {
 		}
 		scanner.close();
 		
+		Process p0 = Runtime.getRuntime().exec("cmd /c del celegans.ranks", new String[0], new File("C:/MinGW/bin"));
+		p0.waitFor();
 		Process p1 = Runtime.getRuntime().exec("cmd /c del celegans.edges", new String[0], new File("C:/MinGW/bin"));
 		p1.waitFor();
 		Process p2 = Runtime.getRuntime().exec("cmd /c copy celegans.edges.1 celegans.edges", new String[0], new File("C:/MinGW/bin"));
 		p2.waitFor();
+//		p0.destroyForcibly();
+//		p1.destroyForcibly();
+//		p2.destroyForcibly();
 //		if (true) System.exit(0);
 		
 		int kount = 0;
+		int thirdCriterion = 0;
+		int a = 0, b = 0, c = 0;
 		while (true) {
 			DependencyDAG.isToy = true;
 			DependencyDAG dependencyDAG = new DependencyDAG(netPath + "celegans.edges");
-			dependencyDAG.printNetworkStat();
+//			dependencyDAG.printNetworkStat();
 			
 			// compute shortest path based location
 			int nNodes = 269;
@@ -1780,12 +1792,17 @@ public class ManagerNeuro {
 			getAllShortestDistance(nNodes, distDown, dependencyDAG, false);
 
 			// compute socialrank
-			Process p3 = Runtime.getRuntime().exec("socialrank.exe summary_stats.txt celegans", new String[0], new File(netPath));
+			Process p3 = Runtime.getRuntime().exec("cmd /c socialrank.exe summary_stats.txt celegans", new String[0], new File("C:/MinGW/bin"));
+//			Process p3 = Runtime.getRuntime().exec("socialrank.exe summary_stats.txt celegans", new String[0], new File(netPath));
 //			int status3 = p3.waitFor();
-			boolean status3 = p3.waitFor(4L, TimeUnit.SECONDS);
-			p3.destroyForcibly();
+//			boolean status3 = p3.waitFor(10L, TimeUnit.SECONDS);
+//			p3.destroyForcibly();
 //			System.out.println(status3);
-			
+//			Thread.sleep(3000);
+			InputStream is = p3.getInputStream();
+			is.close();
+			p3.waitFor(3L, TimeUnit.SECONDS);
+
 			// load updated ranks and edges and edge weights
 			HashMap<String, Integer> idRankMap = new HashMap();
 			scanner = new Scanner(new File(netPath + "celegans.ranks"));
@@ -1850,14 +1867,30 @@ public class ManagerNeuro {
 					double tD = getAverageShortestDistance(nNodes, v, distDown, dependencyDAG, false);
 //					System.out.println(edge + "\t" + sU + "\t" + sD + "\t" + tU + "\t" + tD);
 					sortedCycleEdges.add(new NeuroEdge(edge, rank, weight, sU / (sU + sD), tU / (tU + tD)));
+//					System.out.println(edge + "\t" + rank);
 				}
 			}
 			Collections.sort(sortedCycleEdges);
 				
-			int print5 = 5;
-			for (NeuroEdge neuroEdge: sortedCycleEdges) {
+//			int print5 = 2;
+//			for (NeuroEdge neuroEdge: sortedCycleEdges) {
 //				System.out.println(neuroEdge.edge + "\t" + neuroEdge.rank + "\t" + neuroEdge.weight + "\t" + neuroEdge.srcLoc + "\t" + neuroEdge.tgtLoc);
 //				if (print5-- < 0) break;
+//			}
+			if (sortedCycleEdges.size() > 1) {
+				NeuroEdge nE1 = sortedCycleEdges.get(0);
+				NeuroEdge nE2 = sortedCycleEdges.get(1);
+				if (nE1.rank != nE2.rank) ++a;
+				else if (nE1.weight != nE2.weight) ++b;
+				else ++c;
+				if (nE1.rank == nE2.rank && nE1.weight == nE2.weight) {
+					double nE1LocationAgony = nE1.tgtLoc - nE1.srcLoc;
+					double nE2LocationAgony = nE2.tgtLoc - nE2.srcLoc;
+					if (nE1LocationAgony > 0 && nE2LocationAgony > 0) {
+						++thirdCriterion;
+					}
+//					++thirdCriterion;
+				}
 			}
 			
 //			if (true) break;
@@ -1875,7 +1908,7 @@ public class ManagerNeuro {
 					removedCounter.put(e, 1);
 				}
 				
-				// write celegans.edges back
+//				write celegans.edges back
 				PrintWriter pw = new PrintWriter(new File(netPath + "celegans.edges"));
 				for (String s : dependencyDAG.nodes) {
 					if (dependencyDAG.serves.containsKey(s)) {
@@ -1895,10 +1928,13 @@ public class ManagerNeuro {
 			if (++kount > 0) {
 //				break;
 			}
+			System.out.println(" -- -- -- -- -- -- ");
 		}
 
 		System.out.println("Edges removed: " + removed);
-		/*
+		System.out.println("Third criterion used: " + thirdCriterion);
+		System.out.println(a + "\t" + b + "\t" + c);
+		
 		DependencyDAG dependencyDAG = new DependencyDAG(netPath + "celegans.edges");		
 		PrintWriter pw = new PrintWriter(new File("data//" + "celegans" + "_links.txt"));
 		for (String s : dependencyDAG.nodes) {
@@ -1920,7 +1956,6 @@ public class ManagerNeuro {
 				coreVarianceMembers.put(s, 1);
 			}
 		}
-		*/
 	}
 		
 	public static void main(String[] args) throws Exception {
