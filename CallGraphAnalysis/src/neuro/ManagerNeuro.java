@@ -261,6 +261,7 @@ public class ManagerNeuro {
 		loadNodes(nodes, inter, "neuro_networks//inter_neurons.txt");
 		loadNodes(nodes, target, "neuro_networks//motor_neurons.txt");
 		loadNeurons("neuro_networks//celegans_labels.txt");
+		
 	}
 	
 	public static void getCleanNeuroNetwork() throws Exception {		

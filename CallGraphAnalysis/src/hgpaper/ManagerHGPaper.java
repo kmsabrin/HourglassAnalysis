@@ -606,15 +606,15 @@ public class ManagerHGPaper {
 		DependencyDAG.isSimpleModel = true;
 		String DAGType = "SimpleModelDAG";
 
-//		String alphas[] = { "-2", "-1.8", "-1.6", "-1.4", "-1.2",
-//				            "-1", "-0.8", "-0.6", "-0.4", "-0.2", 
-//				            "0", 
-//				            "0.2", "0.4", "0.6", "0.8", "1", 
-//				            "1.2", "1.4", "1.6", "1.8", "2"};
+		String alphas[] = { "-2", "-1.8", "-1.6", "-1.4", "-1.2",
+				            "-1", "-0.8", "-0.6", "-0.4", "-0.2", 
+				            "0", 
+				            "0.2", "0.4", "0.6", "0.8", "1", 
+				            "1.2", "1.4", "1.6", "1.8", "2"};
 		
 //		String alphas[] = {"-1", "0", "1"};
 //		String alphas[] = {"1.2", "1.4", "1.6", "2",};
-		String alphas[] = {"1.8", "2"};
+//		String alphas[] = {"1.8", "2"};
 
 //		String alphas[] = {"-2", "-1.8", "-1.6", "-1.4", "-1.2",
 //        "-1", "-0.8", "-0.6", "-0.4", "-0.2"};
@@ -635,7 +635,7 @@ public class ManagerHGPaper {
 				String ratio = "-1";
 				String networkID = DAGType + "r" + ratio + "a" + a + "d" + din;
 				
-				int nRun = 5;
+				int nRun = 10;
 				double coreSizes[] = new double[nRun];
 				double hScores[] = new double[nRun];
 				double nodeCoverages[] = new double[nRun];
@@ -806,29 +806,29 @@ public class ManagerHGPaper {
 //		ManagerHGPaper.runRandomizationTest();
 //		ManagerHGPaper.runSyntheticStatisticalSignificanceTestsForTau();
 		
-		int n = 2000;
+		int n = 300;
 //		curve 1
 		ManagerHGPaper.runSyntheticStatisticalSignificanceTests(n/3, n/3, n/3, 1);
 
 //		curve 2
-//		SimpleModelDAG.isPoisson = false;
-//		ManagerHGPaper.runSyntheticStatisticalSignificanceTests(n/3, n/3, n/3, 2);
-//		SimpleModelDAG.isPoisson = true;
+		SimpleModelDAG.isPoisson = false;
+		ManagerHGPaper.runSyntheticStatisticalSignificanceTests(n/3, n/3, n/3, 2);
+		SimpleModelDAG.isPoisson = true;
 
 //		curve 3
-//		ManagerHGPaper.runSyntheticStatisticalSignificanceTests(n/3, n/3, n/3, 3);
+		ManagerHGPaper.runSyntheticStatisticalSignificanceTests(n/3, n/3, n/3, 3);
 		
 //		curve 4
-//		ManagerHGPaper.runSyntheticStatisticalSignificanceTests(n/4, n/4, n/2, 1);
+		ManagerHGPaper.runSyntheticStatisticalSignificanceTests(n/4, n/4, n/2, 1);
 		
 //		curve 5
-//		ManagerHGPaper.runSyntheticStatisticalSignificanceTests(n/2, n/4, n/4, 1);
+		ManagerHGPaper.runSyntheticStatisticalSignificanceTests(n/2, n/4, n/4, 1);
 
 //		curve 6
-//		ManagerHGPaper.runSyntheticStatisticalSignificanceTests(n/4, n/2, n/4, 1);
+		ManagerHGPaper.runSyntheticStatisticalSignificanceTests(n/4, n/2, n/4, 1);
 
 //		curve 7
-//		ManagerHGPaper.runSyntheticStatisticalSignificanceTests(n*2/5, n/5, n*2/5, 1);
+		ManagerHGPaper.runSyntheticStatisticalSignificanceTests(n*2/5, n/5, n*2/5, 1);
 
 //		curve Toy
 //		Manager.runSyntheticStatisticalSignificanceTests(66, 66, 66, 1);

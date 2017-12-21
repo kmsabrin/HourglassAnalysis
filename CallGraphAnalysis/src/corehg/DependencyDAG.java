@@ -142,10 +142,10 @@ public class DependencyDAG {
 	
 	private void loadNetworkAttributes() {
 		loadDegreeMetric();		
-//		loadPathStatistics();
-//		loadLocationMetric(); // must load degree metric before
-//		loadServerReachabilityAll();
-//		loadPathCentralityMetric();
+		loadPathStatistics();
+		loadLocationMetric(); // must load degree metric before
+		loadServerReachabilityAll();
+		loadPathCentralityMetric();
 		
 //		loadReachablityAll();
 //		countDisconnectedNodes();

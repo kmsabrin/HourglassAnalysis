@@ -316,12 +316,16 @@ public class SimpleModelDAG {
 				}
 				
 				if (edgeWeights.containsKey(str)) {
-					
 //					int v = edgeWeights.get(str);
 //					edgeWeights.put(str, v + 1);
 				}
 				else {
-					edgeWeights.put(str, 1);
+					if (substrateIndex >= sS) {
+						edgeWeights.put(str, nS);
+					}
+					else {
+						edgeWeights.put(str, 1);
+					}
 				}
 				
 				
@@ -389,7 +393,8 @@ public class SimpleModelDAG {
 		}
 		
 		for (int i = sS; i < nT + nS + nI; ++i) {
-			pw.println(i + " " + (sS - 1) + " " + (1.0 / nS));
+//			pw.println(i + " " + (sS - 1) + " " + (1.0 / nS));
+			pw.println(i + " " + (sS - 1) + " " + 1.0);
 		}
 		
 		pw.close();

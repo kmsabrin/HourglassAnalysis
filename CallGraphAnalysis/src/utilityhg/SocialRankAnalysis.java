@@ -121,10 +121,10 @@ public class SocialRankAnalysis {
 		pw.close();
 	}
 	
-	public static int getDemoCategory(int id) {
+	public static int getNeuronCategory(String id) {
 		if (ManagerNeuro.source.contains(id)) return 0;
-		else if (ManagerNeuro.inter.contains(id)) return 1;
-		else return 2;
+		else if (ManagerNeuro.target.contains(id)) return 2;
+		else return 1;
 	}
 	
 	public static void getSocialrankCompliantNetwork() throws Exception {
@@ -388,6 +388,9 @@ public class SocialRankAnalysis {
 		HashMap<String, String> idLabelMap = new HashMap();
 		HashMap<String, Integer> idRankMap = new HashMap();
 		ManagerNeuro.loadNeuroMetaNetwork(); // for finding sensory, inter and motor neurons
+//		System.out.println(ManagerNeuro.source);
+//		System.out.println(ManagerNeuro.inter);
+//		System.out.println(ManagerNeuro.target);
 		PrintWriter pw = new PrintWriter(new File(directory + "//" + network_id + ".socialrank.network"));
 
 		Scanner scanner = new Scanner(new File(directory + "//" + network_id + ".nodes"));
@@ -399,13 +402,25 @@ public class SocialRankAnalysis {
 		scanner.close();
 		
 		scanner = new Scanner(new File(directory + "//edges-ranks//" + network_id + ".ranks.1"));
+		HashMap<Integer, Integer> rankHistogram = new HashMap();
 		while (scanner.hasNext()) {
 			String id = scanner.next();
 			int rank = scanner.nextInt();
 			int agony = scanner.nextInt();
 			idRankMap.put(id, rank);
+			if (rankHistogram.containsKey(rank)) {
+				rankHistogram.put(rank, rankHistogram.get(rank) + 1);
+			}
+			else {
+				rankHistogram.put(rank, 1);
+			}
+			System.out.println(getNeuronCategory(idLabelMap.get(id)) + "\t" + rank);
 		}
 		scanner.close();
+		System.out.println("# # # # # #");
+		for (int rank : rankHistogram.keySet()) {
+			System.out.println(rank + "\t" + rankHistogram.get(rank));
+		}
 		
 		int kount = 0;
 		scanner = new Scanner(new File(directory + "//edges-ranks//" + network_id + ".edges.1"));
@@ -427,7 +442,7 @@ public class SocialRankAnalysis {
 		}
 		scanner.close();
 		
-		scanner = new Scanner(new File(directory + "//" + network_id + ".edges"));
+		scanner = new Scanner(new File(directory + "//edges-ranks//" + network_id + ".edges.1"));
 		HashSet<String> printed = new HashSet();
 		while (scanner.hasNext()) {
 			String substrate = scanner.next();
@@ -437,23 +452,24 @@ public class SocialRankAnalysis {
 			String oSubstrate = idLabelMap.get(substrate);
 			String oProduct = idLabelMap.get(product);
 			
+			/**********************************/
 			if (edges.contains(product + "#" + substrate) && edges.contains(substrate + "#" + product)) {
 //				System.out.println(oSubstrate + "#" + oProduct);
 				double currentDirectionWeight = weights.get(oSubstrate + "#" + oProduct);
 				double backDirectionWeight = weights.get(oProduct + "#" + oSubstrate);
 				if (substrateRank == productRank) {
 					if (currentDirectionWeight > backDirectionWeight) {
-//						System.out.println(substrate + "\t" + product);
+//						System.out.println(substrate + "#" + product);
 					}
 					else if (currentDirectionWeight == backDirectionWeight) {
 //						System.out.println(substrate + "\t" + product);
-						System.out.println(oSubstrate + "#" + oProduct);
+//						System.out.println(oSubstrate + "#" + oProduct);
 					}
 				}
 				else {
 //					System.out.println(oSubstrate + "#" + oProduct);
 					if (substrateRank < productRank) {
-//						System.out.println(substrate + "\t" + product);
+//						System.out.println(substrate + "#" + product);
 					}
 //					if (!printed.contains(product + "#" + substrate)) {
 //						System.out.print(substrate + "#" + product);
@@ -467,6 +483,14 @@ public class SocialRankAnalysis {
 //				System.out.println(substrate + "\t" + product);
 			}
 //			System.out.println(oSubstrate + " " + oProduct);
+			/********************************/
+			
+			
+			if (getNeuronCategory(oSubstrate) == getNeuronCategory(oProduct)) {
+//				System.out.println(productRank - substrateRank);
+			}
+//			System.out.println(oSubstrate + "#" + oProduct);
+//			System.out.println(getNeuronCategory(oSubstrate) + "\t" + getNeuronCategory(oProduct));
 			
 			if (substrateRank < productRank) {
 				pw.println(oSubstrate + "\t" + oProduct);
@@ -480,6 +504,7 @@ public class SocialRankAnalysis {
 				}
 				*/
 //				System.out.println(oSubstrate + " " + oProduct);
+
 			}
 			else if (substrateRank == productRank) {
 //				System.out.println(oSubstrate + "\t" + oProduct);
@@ -490,6 +515,7 @@ public class SocialRankAnalysis {
 					if (currentDirectionWeight != backDirectionWeight) {
 						if (currentDirectionWeight > backDirectionWeight) {
 							pw.println(oSubstrate + "\t" + oProduct);
+//							System.out.println(oSubstrate + "\t" + oProduct);
 						}
 						else {
 							// conjugate case, skip
@@ -505,15 +531,21 @@ public class SocialRankAnalysis {
 					// 54 of 58 case, add back
 //					System.out.println(oSubstrate + "\t" + oProduct);
 				}
+				
+//				System.out.println(getNeuronCategory(Integer.parseInt(oProduct)) - getNeuronCategory(Integer.parseInt(oSubstrate)));
 			}
 			else {
-				// try to add back in increasing rank-difference order
+//				try to add back in increasing rank-difference order
 //				System.out.println(oSubstrate + "\t" + oProduct + "\t" + (substrateRank - productRank));
 //				System.out.println(oSubstrate + "\t" + oProduct);
 //				System.out.println(substrate + "\t" + product);
+				
+//				System.out.println(getNeuronCategory(Integer.parseInt(oProduct)) - getNeuronCategory(Integer.parseInt(oSubstrate)));
 			}
 		}
 		scanner.close();
+		
+		
 		/*
 		if (addBackEdge) {
 			scanner = new Scanner(new File(directory + "//" + "celegansEdgeAddBack.txt"));
@@ -524,6 +556,7 @@ public class SocialRankAnalysis {
 			}
 		}
 		*/		
+		
 		pw.close();		
 	}
 	
