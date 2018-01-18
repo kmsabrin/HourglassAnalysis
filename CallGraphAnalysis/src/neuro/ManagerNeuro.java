@@ -1376,21 +1376,21 @@ public class ManagerNeuro {
 		
 		class SCCEdge implements Comparable<SCCEdge>{
 			String edge;
-			int rank;
+			int rankDiff;
 			double weight;
 			double sl;
 			double tl;
 			
 			public SCCEdge(String edge, int rank, double weight, double sl, double tl) {
 				this.edge = edge;
-				this.rank = rank;
+				this.rankDiff = rank;
 				this.weight = weight;
 				this.sl = sl;
 				this.tl = tl;
 			}
 		
 			public int compareTo(SCCEdge other) {
-				if (this.rank != other.rank) return this.rank - other.rank;
+				if (this.rankDiff != other.rankDiff) return this.rankDiff - other.rankDiff;
 				if (this.weight != other.weight) return (int)(this.weight - other.weight);
 				// average shortest path distance
 				double thisLocationAgony = this.tl - this.sl;
@@ -1517,7 +1517,7 @@ public class ManagerNeuro {
 		scanner.close();
 		
 		HashMap<String, Double> edgeWeight = new HashMap();
-		HashMap<String, Integer> edgeRank = new HashMap();
+		HashMap<String, Integer> edgeRankDiff = new HashMap();
 		scanner = new Scanner(new File(netPath + "_graph.txt"));
 		while (scanner.hasNext()) {
 			String src = scanner.next();
@@ -1530,30 +1530,31 @@ public class ManagerNeuro {
 			String dstId = labelIdMap.get(dst);
 			int srcRank = idRankMap.get(srcId);
 			int dstRank = idRankMap.get(dstId);
-			edgeRank.put(srcId + "#" + dstId, dstRank - srcRank);
+			edgeRankDiff.put(srcId + "#" + dstId, dstRank - srcRank);
 			edgeWeight.put(srcId + "#" + dstId, weight);
 		}
 		scanner.close();
 		
 		class SCCEdge implements Comparable<SCCEdge>{
 			String edge;
-			int rank;
+			int rankDiff;
 			double weight;
 			double sl;
 			double tl;
 			
 			public SCCEdge(String edge, int rank, double weight, double sl, double tl) {
 				this.edge = edge;
-				this.rank = rank;
+				this.rankDiff = rank;
 				this.weight = weight;
 				this.sl = sl;
 				this.tl = tl;
 			}
 		
 			public int compareTo(SCCEdge other) {
-				if (this.rank != other.rank) return this.rank - other.rank;
+				if (this.rankDiff != other.rankDiff) return this.rankDiff - other.rankDiff;
 				if (this.weight != other.weight) return (int)(this.weight - other.weight);
 				
+				/* skip
 //				// average shortest path distance
 				double thisLocationAgony = this.tl - this.sl;
 				double otherLocationAgony = other.tl - other.sl;
@@ -1580,6 +1581,7 @@ public class ManagerNeuro {
 				else if (otherLocationAgony < 0) {
 					return +1;
 				}
+				end skip */
 				
 				return 0;
 			}
@@ -1632,7 +1634,7 @@ public class ManagerNeuro {
 						}
 						String edge = n + "#" + v;
 //						System.out.println(edge);
-						int rank = edgeRank.get(edge);
+						int rank = edgeRankDiff.get(edge);
 						double weight = edgeWeight.get(edge);
 						double sU = getAverageShortestDistance(nNodes, n, distUp, dependencyDAG, true);
 						double sD = getAverageShortestDistance(nNodes, n, distDown, dependencyDAG, false);
@@ -1648,7 +1650,8 @@ public class ManagerNeuro {
 				for (SCCEdge sccEdge: sortedSCCEdge) {
 //					System.out.println(sccEdge.edge + "\t" + sccEdge.rank + "\t" + sccEdge.weight + "\t" + sccEdge.sl + "\t" + sccEdge.tl);
 				}
-				
+
+				/*
 				for (SCCEdge sccEdge: sortedSCCEdge) {
 					String e = sccEdge.edge;
 					String src = e.substring(0, e.indexOf("#"));
@@ -1665,6 +1668,36 @@ public class ManagerNeuro {
 						break;
 					}
 				}
+				*/
+				
+				for (int i = 0; i < sortedSCCEdge.size(); ++i) {
+					SCCEdge sccEdgeX = sortedSCCEdge.get(i);
+					int j = i;
+					int lateralKount = 0;
+					for (; j < sortedSCCEdge.size(); ++j) {
+						SCCEdge sccEdgeY = sortedSCCEdge.get(j);
+						if (sccEdgeX.rankDiff != sccEdgeY.rankDiff) break;
+						if (Math.abs(sccEdgeX.weight - sccEdgeY.weight) > 1) break;
+						String e = sccEdgeY.edge;
+						String src = e.substring(0, e.indexOf("#"));
+						String dst = e.substring(e.indexOf("#") + 1);
+						dependencyDAG.removeEdge(src, dst);
+						++removed;
+						++lateralKount;
+//						System.out.println(e + "\t" + sccEdge.rank + "\t" + sccEdge.weight + "\t" + sccEdge.sl + "\t" + sccEdge.tl + "\t" + (sccEdge.tl - sccEdge.sl));
+						if (removedCounter.containsKey(e)) {
+							removedCounter.put(e, removedCounter.get(e) + 1);
+						} else {
+							removedCounter.put(e, 1);
+						}
+					}
+					if (lateralKount > 1) System.out.println(lateralKount);
+					if (!isSCC(scc, dependencyDAG)) {
+						break;
+					}
+					i = j - 1;
+				}
+				
 //				System.out.println("SCC Broken");
 			}
 //			System.out.println("Iteration complete");
@@ -1695,6 +1728,19 @@ public class ManagerNeuro {
 				coreVarianceMembers.put(s, 1);
 			}
 		}
+	}
+	
+	private static void initRunSocialRank() throws Exception {
+		Process p0 = Runtime.getRuntime().exec("cmd /c del celegans.ranks", new String[0], new File("C:/MinGW/bin"));
+		p0.waitFor();
+		Process p1 = Runtime.getRuntime().exec("cmd /c del celegans.edges", new String[0], new File("C:/MinGW/bin"));
+		p1.waitFor();
+		Process p2 = Runtime.getRuntime().exec("cmd /c copy celegans.edges.1 celegans.edges", new String[0], new File("C:/MinGW/bin"));
+		p2.waitFor();
+		Process p3 = Runtime.getRuntime().exec("cmd /c socialrank.exe summary_stats.txt celegans", new String[0], new File("C:/MinGW/bin"));
+		InputStream is = p3.getInputStream();
+		is.close();
+		p3.waitFor(3L, TimeUnit.SECONDS);
 	}
 
 	public static void breakCyclesAgain() throws Exception {		
@@ -1973,9 +2019,10 @@ public class ManagerNeuro {
 //		optimizeAcyclicityNeuro();
 //		optimizeAcyclicity();
 
+//		initRunSocialRank();
 //		breakCycles();
-//		breakSCCs();
-		breakCyclesAgain();
+		breakSCCs();
+//		breakCyclesAgain();
 		
 //		randomSimulations();
 		
