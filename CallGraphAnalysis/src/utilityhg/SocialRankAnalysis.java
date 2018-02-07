@@ -164,7 +164,8 @@ public class SocialRankAnalysis {
 			}
 			else {
 				/* rank violation */
-//				System.out.println(idLabelMap.get(substrate) + "\t" + idLabelMap.get(product));
+				System.out.println(substrate + "#" + product);
+//				System.out.println(idLabelMap.get(substrate) + "#" + idLabelMap.get(product));
 //				System.out.println(substrateRank + "\t" + productRank);
 			}
 		}
@@ -414,12 +415,12 @@ public class SocialRankAnalysis {
 			else {
 				rankHistogram.put(rank, 1);
 			}
-			System.out.println(getNeuronCategory(idLabelMap.get(id)) + "\t" + rank);
+//			System.out.println(getNeuronCategory(idLabelMap.get(id)) + "\t" + rank);
 		}
 		scanner.close();
-		System.out.println("# # # # # #");
+//		System.out.println("# # # # # #");
 		for (int rank : rankHistogram.keySet()) {
-			System.out.println(rank + "\t" + rankHistogram.get(rank));
+//			System.out.println(rank + "\t" + rankHistogram.get(rank));
 		}
 		
 		int kount = 0;
@@ -454,7 +455,7 @@ public class SocialRankAnalysis {
 			
 			/**********************************/
 			if (edges.contains(product + "#" + substrate) && edges.contains(substrate + "#" + product)) {
-//				System.out.println(oSubstrate + "#" + oProduct);
+				System.out.println(oSubstrate + "#" + oProduct);
 				double currentDirectionWeight = weights.get(oSubstrate + "#" + oProduct);
 				double backDirectionWeight = weights.get(oProduct + "#" + oSubstrate);
 				if (substrateRank == productRank) {

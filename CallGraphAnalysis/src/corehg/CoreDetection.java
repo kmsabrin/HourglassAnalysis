@@ -12,7 +12,7 @@ import neuro.ManagerNeuro;
 import org.apache.commons.math3.stat.StatUtils;
 
 public class CoreDetection {
-	public static boolean viewCore = false;
+	public static boolean viewCore = true;
 	public static boolean viewStat = false;
 	public static HashSet<String> topRemovedWaistNodes = new HashSet();
 	public static HashMap<String, Double> averageCoreRank;

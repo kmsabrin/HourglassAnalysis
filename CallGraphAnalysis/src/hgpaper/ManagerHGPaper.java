@@ -606,15 +606,15 @@ public class ManagerHGPaper {
 		DependencyDAG.isSimpleModel = true;
 		String DAGType = "SimpleModelDAG";
 
-		String alphas[] = { "-2", "-1.8", "-1.6", "-1.4", "-1.2",
-				            "-1", "-0.8", "-0.6", "-0.4", "-0.2", 
-				            "0", 
-				            "0.2", "0.4", "0.6", "0.8", "1", 
-				            "1.2", "1.4", "1.6", "1.8", "2"};
+//		String alphas[] = { "-2", "-1.8", "-1.6", "-1.4", "-1.2",
+//				            "-1", "-0.8", "-0.6", "-0.4", "-0.2", 
+//				            "0", 
+//				            "0.2", "0.4", "0.6", "0.8", "1", 
+//				            "1.2", "1.4", "1.6", "1.8", "2"};
 		
 //		String alphas[] = {"-1", "0", "1"};
 //		String alphas[] = {"1.2", "1.4", "1.6", "2",};
-//		String alphas[] = {"1.8", "2"};
+		String alphas[] = {"-1"};
 
 //		String alphas[] = {"-2", "-1.8", "-1.6", "-1.4", "-1.2",
 //        "-1", "-0.8", "-0.6", "-0.4", "-0.2"};
@@ -635,7 +635,7 @@ public class ManagerHGPaper {
 				String ratio = "-1";
 				String networkID = DAGType + "r" + ratio + "a" + a + "d" + din;
 				
-				int nRun = 10;
+				int nRun = 1;
 				double coreSizes[] = new double[nRun];
 				double hScores[] = new double[nRun];
 				double nodeCoverages[] = new double[nRun];
@@ -646,7 +646,7 @@ public class ManagerHGPaper {
 				int idx = 0;
 				for (int i = 0; i < nRun; ++i) {
 					DependencyDAG.isWeighted = true; /* special */
-					SimpleModelDAG.generateSimpleModel(Double.parseDouble(a), din, nT, nI, nS, Double.parseDouble(ratio));
+//					SimpleModelDAG.generateSimpleModel(Double.parseDouble(a), din, nT, nI, nS, Double.parseDouble(ratio));
 					SimpleModelDAG.initModelProperties(nT, nI, nS, din);
 //					System.out.println("Model Generated");
 					
@@ -674,7 +674,7 @@ public class ManagerHGPaper {
 //						System.out.println(CoreDetection.verifyCore(dependencyDAG, sampleFlatCore));
 						CoreDetection.hScore = 0;
 					}
-//					System.out.println("[h-Score] " + CoreDetection.hScore);					
+					System.out.println("[h-Score] " + CoreDetection.hScore);					
 					hScores[idx] = CoreDetection.hScore;
 					
 //					System.out.println(idx);
@@ -692,8 +692,10 @@ public class ManagerHGPaper {
 				double ciNC = ConfidenceInterval.getConfidenceInterval(nodeCoverages);
 				double ciHS = ConfidenceInterval.getConfidenceInterval(hScores);
 				double ciWCL = ConfidenceInterval.getConfidenceInterval(weightedCoreLocation);
-				System.out.println(a + " " + din + " " + ratio + " " + mWS + " " + ciWS + " " 
-				+ mNC + " " + ciNC + " " + mHS + " " + ciHS + " " + mWCL + " " + ciWCL);
+//				System.out.println(a + " " + din + " " + ratio + " " + mWS + " " + ciWS + " " 
+//				+ mNC + " " + ciNC + " " + mHS + " " + ciHS + " " + mWCL + " " + ciWCL);
+				
+//				System.out.println(a + " " + din + " " + mWS + " " + ciWS + " " + mHS + " " + ciHS);
 			}
 			System.out.println();
 //		}
@@ -806,10 +808,11 @@ public class ManagerHGPaper {
 //		ManagerHGPaper.runRandomizationTest();
 //		ManagerHGPaper.runSyntheticStatisticalSignificanceTestsForTau();
 		
-		int n = 300;
+//		int n = 300;
+		int n = 12;
 //		curve 1
 		ManagerHGPaper.runSyntheticStatisticalSignificanceTests(n/3, n/3, n/3, 1);
-
+		/*
 //		curve 2
 		SimpleModelDAG.isPoisson = false;
 		ManagerHGPaper.runSyntheticStatisticalSignificanceTests(n/3, n/3, n/3, 2);
@@ -829,7 +832,7 @@ public class ManagerHGPaper {
 
 //		curve 7
 		ManagerHGPaper.runSyntheticStatisticalSignificanceTests(n*2/5, n/5, n*2/5, 1);
-
+		*/
 //		curve Toy
 //		Manager.runSyntheticStatisticalSignificanceTests(66, 66, 66, 1);
 //		SimpleModelDAG.isPoisson = false;
