@@ -15,6 +15,7 @@ public class ShortestPathHourglass {
 	public static HashSet<String> nodes = new HashSet();
 	public static HashMap<String, String> idNeuron = new HashMap();
 	public static HashMap<String, Integer> weights = new HashMap();
+	public static HashSet<String> coreNeurons = new HashSet();
 	static int flatCoreSize;
 	static int realCoreSize;
 	static double tau = 0.9;
@@ -32,6 +33,7 @@ public class ShortestPathHourglass {
 		nodes = new HashSet();
 		idNeuron = new HashMap();
 		weights = new HashMap();
+		coreNeurons = new HashSet();
 		flatCoreSize = 0;
 		realCoreSize = 0;
 		tau = 0.9;
@@ -94,6 +96,12 @@ public class ShortestPathHourglass {
 			weights.put(src + "#" + dst, (int)wgt);
 		}
 		scan.close();
+		
+		scan = new Scanner(new File("celegans//core_neurons.txt"));
+		while (scan.hasNext()) {
+			coreNeurons.add(scan.next());
+		}
+		scan.close();
 	}
 	
 	private static void shortestPathAnalysis_1() throws Exception {
@@ -109,7 +117,8 @@ public class ShortestPathHourglass {
 		scanner.close();
 		
 //		Scanner scanner = new Scanner(new File("all_sp_kount.txt"));
-		scanner = new Scanner(new File("celegans//dual_clean_sp.txt"));
+//		scanner = new Scanner(new File("celegans//dual_clean_sp.txt"));
+		scanner = new Scanner(new File("celegans//fb_clean_sp.txt"));
 		HashMap<Integer, Integer> SPLengthFreq = new HashMap();
 		HashSet<String> SPInter = new HashSet();
 		HashSet<String> shortestPathEdge = new HashSet();
@@ -141,14 +150,17 @@ public class ShortestPathHourglass {
 //				System.out.println(r);
 				if (inter.contains(r)) SPInter.add(r);
 				if (prev != "") {
-					/*
-					if (!shortestPathEdge.contains(prev + "#" + r)) {
-//						System.out.println(weights.get(prev + "#" + r));
-						shortestPathEdge.add(prev + "#" + r);
-						System.out.println(prev + "#" + r);
-					}
-					*/
 					String edg = prev + "#" + r;
+					
+					
+					if (!shortestPathEdge.contains(edg)) {
+//						System.out.println(weights.get(edg));
+						shortestPathEdge.add(edg);
+						System.out.println(edg);
+					}
+					
+					
+					/*
 					if (shortestPathEdgeFrequency.containsKey(edg)) {
 						shortestPathEdgeFrequency.put(edg, shortestPathEdgeFrequency.get(edg) + 1);
 					}
@@ -159,11 +171,12 @@ public class ShortestPathHourglass {
 					if (fbEdges.contains(edg)) {
 						containsBack = true;
 					}
+					*/
 				}
 				prev = r;
 			}
 			
-			if (containsBack) containsBackPath++;
+//			if (containsBack) containsBackPath++;
 //			break;
 		}
 		
@@ -176,7 +189,7 @@ public class ShortestPathHourglass {
 		}
 		
 //		System.out.println(SPInter.size());
-		System.out.println(containsBackPath);
+//		System.out.println(containsBackPath);
 	}
 	
 	private static void computeFlatCore() throws Exception {
@@ -325,19 +338,52 @@ public class ShortestPathHourglass {
 		}
 	}
 	
-
+	private static void createCoreNetwork() throws Exception {
+		loadNeuroMetaNetwork();
+		HashSet<String> ffEdges = new HashSet();
+		HashSet<String> fbEdges = new HashSet();
+		Scanner scan = new Scanner(new File("celegans//ff_edges.txt"));
+		while (scan.hasNext()) {
+			ffEdges.add(scan.next());
+		}
+		scan.close();
+		scan = new Scanner(new File("celegans//fb_edges.txt"));
+		while (scan.hasNext()) {
+			fbEdges.add(scan.next());
+		}
+		scan.close();
+		
+		scan = new Scanner(new File("celegans//dual_clean_links.txt"));
+		while (scan.hasNext()) {
+			String src = scan.next();
+			String dst = scan.next();
+			String edg = src + "#" + dst;
+			if (coreNeurons.contains(src) && coreNeurons.contains(dst)) {
+				if (ffEdges.contains(edg)) {
+					System.out.println(weights.get(edg));
+				}
+				else if (fbEdges.contains(edg)) {
+//					System.out.println(weights.get(edg));
+				}
+			}
+		}
+		scan.close();
+	}
+	
 	public static void main(String[] args) throws Exception {
 //		doToyNetworkAnalysis();
 //		shortestPathAnalysis_1();
-		shortestPathHourglassAnalysis();
-		computeFlatCore();
-		System.out.println(realCoreSize + "\t" + flatCoreSize);
-		System.out.println(1.0 - (realCoreSize * 1.0 / flatCoreSize));
+//		shortestPathHourglassAnalysis();
+//		computeFlatCore();
+//		System.out.println(realCoreSize + "\t" + flatCoreSize);
+//		System.out.println(1.0 - (realCoreSize * 1.0 / flatCoreSize));
 		
 //		for (tau = 0.96; tau <= 0.99; tau += 0.02) {
 //			shortestPathHourglassAnalysis();
 //			computeFlatCore();
 //			System.out.println(tau + "\t" + (1.0 - (realCoreSize * 1.0 / flatCoreSize)));
 //		}
+		
+		createCoreNetwork();
 	}
 }
