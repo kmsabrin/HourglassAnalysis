@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.math3.stat.StatUtils;
 
+import utilityhg.ShortestPathHourglass;
 import utilityhg.TarjanSCC;
 import clean.HourglassAnalysis;
 
@@ -281,9 +282,9 @@ public class ManagerNeuro {
 	}
 	
 	public static void loadNeuroMetaNetwork() throws Exception {
-		loadNodes(nodes, source, "neuro_networks//sensory_neurons.txt");
-		loadNodes(nodes, inter, "neuro_networks//inter_neurons.txt");
-		loadNodes(nodes, target, "neuro_networks//motor_neurons.txt");
+		loadNodes(nodes, source, "celegans//sensory_neurons.txt");
+		loadNodes(nodes, inter, "celegans//inter_neurons.txt");
+		loadNodes(nodes, target, "celegans//motor_neurons.txt");
 		loadNeurons("neuro_networks//celegans_labels.txt");	
 	}
 	
@@ -479,6 +480,50 @@ public class ManagerNeuro {
 		System.out.println("Total paths: " + numPaths);
 	}
 	
+	private static void traverseAlmostShortestPathsHelper(String node, String targetNode, int len, DependencyDAG dependencyDAG, ArrayList<String> pathNodes) {
+		if (pathNodes.size() > len + 1) return;
+		if (!dependencyDAG.serves.containsKey(node)) return;
+		
+		if (node.equals(targetNode)) {
+			for (String s: pathNodes) {
+				System.out.print(s + " ");
+			}
+			System.out.println();
+			return;
+		}
+		
+		for (String s: dependencyDAG.serves.get(node)) {
+			if (pathNodes.contains(s)) {
+				continue;
+			}
+			pathNodes.add(s);
+			traverseAlmostShortestPathsHelper(s, targetNode, len, dependencyDAG, pathNodes);
+			pathNodes.remove(s);
+		}
+	}
+	
+	private static void traverseAlmostShortestPaths() throws Exception {
+		DependencyDAG.isToy = true;
+		String neuroDAGName = "fb_clean_links";
+		DependencyDAG dependencyDAG = new DependencyDAG("celegans//" + neuroDAGName + ".txt");
+//		dependencyDAG.printNetworkProperties();
+//		dependencyDAG.printNetworkStat();
+		
+		loadNeuroMetaNetwork();
+		Scanner scanner = new Scanner(new File("celegans//sm_pair_sp_len.txt"));
+		while (scanner.hasNext()) {
+			String smPair = scanner.next();
+			int sp = scanner.nextInt();
+			ArrayList<String> nodes = ShortestPathHourglass.splitEdge(smPair);
+//			System.out.println(nodes.get(0) + "\t" + nodes.get(1) + "\t" + sp);
+			ArrayList<String> pathNodes = new ArrayList();
+			pathNodes.add(nodes.get(0));
+			traverseAlmostShortestPathsHelper(nodes.get(0), nodes.get(1), sp + 1, dependencyDAG, pathNodes);
+//			break;
+		}
+		scanner.close();
+	}
+	
 	private static void statisticalRun() throws Exception {
 		int nRun = 10;
 		
@@ -502,8 +547,7 @@ public class ManagerNeuro {
 			System.out.println(coreSize + "\t" + CoreDetection.hScore);
 		}
 	}
-	
-	
+		
 	private static void getWeightedNetwork() throws Exception {
 		Scanner scanner = new Scanner(new File("neuro_networks//celegans_graph.txt"));
 		HashMap<String, String> weights = new HashMap();
@@ -2113,7 +2157,7 @@ public class ManagerNeuro {
 	
 		
 	public static void main(String[] args) throws Exception {
-		getCleanNeuroNetwork();
+//		getCleanNeuroNetwork();
 //		getFeedbackAndSimpleCycleRemovedNetwork();
 		
 //		doNeuroNetworkAnalysis_1();
@@ -2135,5 +2179,6 @@ public class ManagerNeuro {
 		
 //		statisticalRun();
 //		traverseAllPaths();
+		traverseAlmostShortestPaths();
 	}
 }
