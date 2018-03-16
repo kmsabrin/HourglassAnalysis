@@ -156,10 +156,10 @@ public class Util {
 			 // System.out.println(scanner.next());
 			 a[i] = Double.valueOf(scanner.next()); // pcen
 			 b[i] = Double.valueOf(scanner.next()); // deg
-			 Double.valueOf(scanner.next()); // close
-			 Double.valueOf(scanner.next()); // between
-			 Double.valueOf(scanner.next()); // katz
-			 //Double.valueOf(scanner.next()); // eigen
+//			 Double.valueOf(scanner.next()); // close
+//			 Double.valueOf(scanner.next()); // between
+//			 Double.valueOf(scanner.next()); // katz
+//			 //Double.valueOf(scanner.next()); // eigen
 			 //Double.valueOf(scanner.next()); // pagerank
 			 ++i;
 		 }
@@ -167,9 +167,9 @@ public class Util {
 		 SpearmansCorrelation spearmanCorrealtion = new SpearmansCorrelation();
 		 KendallsCorrelation kendallsCorrelation = new KendallsCorrelation();
 		 PearsonsCorrelation pearsonCorrelation = new PearsonsCorrelation();
-//		 System.out.println(spearmanCorrealtion.correlation(a, b));
+		 System.out.println(spearmanCorrealtion.correlation(a, b));
 		 System.out.println(kendallsCorrelation.correlation(a, b));
-//		 System.out.println(pearsonCorrelation.correlation(a, b));
+		 System.out.println(pearsonCorrelation.correlation(a, b));
 		 
 		 scanner.close();
 	}
@@ -207,7 +207,7 @@ public class Util {
 		// getCCDF(new ParetoDistribution());
 
 		// tryWilcoxonRankSumTest();
-//		getCorrelation(1502);
+		getCorrelation(1802);
 
 		// System.out.println(Math.log(0.13));
 		// System.out.println(Math.exp(-2.0402208285265546));
@@ -228,7 +228,7 @@ public class Util {
 		for (int i = 1; i <= n; ++i) {
 //			 System.out.println(i + "\t" + zipfDistribution.probability(n - i + 1));
 //			 System.out.println(zipfDistribution.sample());
-			 System.out.println(i + "\t" + zipfDistribution.probability(i));
+//			 System.out.println(i + "\t" + zipfDistribution.probability(i));
 //			 System.out.println(i + "\t" + poissonDistribution.probability(i));
 		}
 		
@@ -283,6 +283,18 @@ public class Util {
 //		}
 //		scanner.close();
 //		getCCDF(v);
+		
+//		Scanner scan = new Scanner(new File("celegans//test.txt"));
+//		while (scan.hasNext()) {
+//			String s = scan.nextLine();
+//			String r = "";
+//			for (int i = 0; i < s.length(); ++i) {
+//				if (s.charAt(i) == '[' || s.charAt(i) == ']' || s.charAt(i) == ',') continue;
+//				r += s.charAt(i);
+//			}
+//			System.out.println(r);
+//		}
+//		scan.close();
 	}
 
 }

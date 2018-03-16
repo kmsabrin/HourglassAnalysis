@@ -104,7 +104,7 @@ public class ManagerNeuro {
 	
 	private static void writeFile(String edgeFileName, HashSet<String> source, HashSet<String> target, HashSet<String> intermediate, HashSet<String> nodes) throws Exception {
 		Scanner scan = new Scanner(new File(edgeFileName));
-		PrintWriter pw = new PrintWriter(new File("neuro_networks//celegans_dual_clean.txt"));
+		PrintWriter pw = new PrintWriter(new File("neuro_networks//full_fb_clean_links.txt"));
 		int nRemovedInedge = 0;
 		int nRemovedOutedge = 0;
 		int totalEdge = 0;
@@ -134,8 +134,9 @@ public class ManagerNeuro {
 			a[srcType][dstType]++;
 			
 			if (!nodes.contains(src) || !nodes.contains(dst)) {
-				++dualNodeRemovedEdge;
-				continue;
+				++dualNodeRemovedEdge; //dual sensory + motor neurons
+				System.out.println(src + "\t" + dst);
+//				continue;
 			}
 			
 			if (target.contains(src) && (intermediate.contains(dst) || source.contains(dst))) {
@@ -144,7 +145,7 @@ public class ManagerNeuro {
 				feedBackSum += weight;
 				feedBackCount++;
 				backwardEdges.put(src + "#" + dst, (int)weight);
-//				continue;
+				continue;
 			}
 			
 			if (intermediate.contains(src) && source.contains(dst)) {
@@ -153,7 +154,7 @@ public class ManagerNeuro {
 				feedBackSum += weight;
 				feedBackCount++;
 				backwardEdges.put(src + "#" + dst, (int)weight);
-//				continue;
+				continue;
 			}
 			
 			if (target.contains(src) || source.contains(dst)) {
@@ -282,16 +283,19 @@ public class ManagerNeuro {
 	}
 	
 	public static void loadNeuroMetaNetwork() throws Exception {
-		loadNodes(nodes, source, "celegans//sensory_neurons.txt");
-		loadNodes(nodes, inter, "celegans//inter_neurons.txt");
-		loadNodes(nodes, target, "celegans//motor_neurons.txt");
+//		loadNodes(nodes, source, "celegans//sensory_neurons.txt");
+//		loadNodes(nodes, inter, "celegans//inter_neurons.txt");
+//		loadNodes(nodes, target, "celegans//motor_neurons.txt");
+		loadNodes(nodes, source, "celegans//sensory_neurons_3.txt");
+		loadNodes(nodes, inter, "celegans//inter_neurons_3.txt");
+		loadNodes(nodes, target, "celegans//motor_neurons_3.txt");		
 		loadNeurons("neuro_networks//celegans_labels.txt");	
 	}
 	
 	public static void getCleanNeuroNetwork() throws Exception {		
-		loadNodes(nodes, source, "neuro_networks//sensory_neurons.txt");
-		loadNodes(nodes, inter, "neuro_networks//inter_neurons.txt");
-		loadNodes(nodes, target, "neuro_networks//motor_neurons.txt");
+//		loadNodes(nodes, source, "neuro_networks//sensory_neurons.txt");
+//		loadNodes(nodes, inter, "neuro_networks//inter_neurons.txt");
+//		loadNodes(nodes, target, "neuro_networks//motor_neurons.txt");
 		
 //		int maxLabel = 269;
 //		for (int i = 1; i <= maxLabel; ++i) {
@@ -306,15 +310,17 @@ public class ManagerNeuro {
 //			dualNodes.add(Integer.toString(i));
 //		}
 		
-		loadNeurons("neuro_networks//celegans_labels.txt");
+//		loadNeurons("neuro_networks//celegans_labels.txt");
+		loadNeuroMetaNetwork();
 		
 		/* temporary turn off 
 		removeDuplicate(source, intermediate, target, nodes);
 		removeDuplicate(intermediate, source, target, nodes);
 		removeDuplicate(target, source, intermediate, nodes);
 		*/
-		removeDuplicate(target, source, source, nodes); // only removing dual definition source-target nodes
+//		removeDuplicate(target, source, source, nodes); // only removing dual definition source-target nodes
 		// convert inter to source or target
+		/*
 		for (String s : source) {
 			if (inter.contains(s)) {
 				inter.remove(s);
@@ -325,6 +331,11 @@ public class ManagerNeuro {
 				inter.remove(s);
 			}
 		}
+		*/
+//		for (String s : inter) {
+//			if (source.contains(s)) source.remove(s);
+//			if (target.contains(s)) target.remove(s);
+//		}
 		
 		
 		System.out.println("Total nodes: " + nodes.size());
@@ -481,8 +492,8 @@ public class ManagerNeuro {
 	}
 	
 	private static void traverseAlmostShortestPathsHelper(String node, String targetNode, int len, DependencyDAG dependencyDAG, ArrayList<String> pathNodes) {
-		if (pathNodes.size() > len + 1) return;
-		if (!dependencyDAG.serves.containsKey(node)) return;
+		if (pathNodes.size() > len + 1) return; // +1 hop than shortest path
+		if (pathNodes.size() > 5) return; // special case length restriction
 		
 		if (node.equals(targetNode)) {
 			for (String s: pathNodes) {
@@ -491,6 +502,8 @@ public class ManagerNeuro {
 			System.out.println();
 			return;
 		}
+		
+		if (!dependencyDAG.serves.containsKey(node)) return;
 		
 		for (String s: dependencyDAG.serves.get(node)) {
 			if (pathNodes.contains(s)) {
@@ -504,7 +517,7 @@ public class ManagerNeuro {
 	
 	private static void traverseAlmostShortestPaths() throws Exception {
 		DependencyDAG.isToy = true;
-		String neuroDAGName = "fb_clean_links";
+		String neuroDAGName = "full_fb_clean_links";
 		DependencyDAG dependencyDAG = new DependencyDAG("celegans//" + neuroDAGName + ".txt");
 //		dependencyDAG.printNetworkProperties();
 //		dependencyDAG.printNetworkStat();
@@ -1564,7 +1577,6 @@ public class ManagerNeuro {
 		}
 	}
 		
-
 	public static void breakSCCs() throws Exception {
 		DependencyDAG.isToy = true;
 		DependencyDAG dependencyDAG = new DependencyDAG("neuro_networks//celegans.edges");
@@ -1879,7 +1891,6 @@ public class ManagerNeuro {
 		}
 	}
 
-	
 	private static void initRunSocialRank() throws Exception {
 		Process p0 = Runtime.getRuntime().exec("cmd /c del celegans.ranks", new String[0], new File("C:/MinGW/bin"));
 		p0.waitFor();
@@ -2154,7 +2165,6 @@ public class ManagerNeuro {
 			}
 		}
 	}
-	
 		
 	public static void main(String[] args) throws Exception {
 //		getCleanNeuroNetwork();
