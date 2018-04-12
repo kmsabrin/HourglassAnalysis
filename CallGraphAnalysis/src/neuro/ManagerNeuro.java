@@ -492,8 +492,8 @@ public class ManagerNeuro {
 	}
 	
 	private static void traverseAlmostShortestPathsHelper(String node, String targetNode, int len, DependencyDAG dependencyDAG, ArrayList<String> pathNodes) {
-		if (pathNodes.size() > len + 1) return; // +1 hop than shortest path
-		if (pathNodes.size() > 5) return; // special case length restriction
+//		if (pathNodes.size() > len + 1) return; // +1 hop than shortest path
+		if (pathNodes.size() > 6) return; // special case length restriction
 		
 		if (node.equals(targetNode)) {
 			for (String s: pathNodes) {
