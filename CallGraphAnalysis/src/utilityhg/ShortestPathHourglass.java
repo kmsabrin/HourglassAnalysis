@@ -29,9 +29,10 @@ public class ShortestPathHourglass {
 	public static HashMap<String, Integer> dummy = new HashMap();
 	public static ArrayList<String[]> canonicalPaths = new ArrayList();
 	public static HashMap<String, Integer> pairWeight = new HashMap();
+	public static HashMap<String, Integer> hierarchy = new HashMap();
 	static int flatCoreSize;
 	static int realCoreSize;
-	static double tau = 0.92;
+	static double tau = 0.9;
 	
 	private static class FlatEdge {
 		String src;
@@ -62,6 +63,30 @@ public class ShortestPathHourglass {
 //		tau = 0.9;
 		
 		pairWeight = new HashMap();
+		hierarchy = new HashMap();
+		
+		hierarchy.put("115", 8);
+		
+		hierarchy.put("210", 7);
+		
+		hierarchy.put("262", 6);
+		hierarchy.put("268", 6);
+		hierarchy.put("48", 6);
+		hierarchy.put("56", 6);
+		
+		hierarchy.put("119", 6);
+		
+		hierarchy.put("59", 3);
+		
+		hierarchy.put("97", 6);
+		hierarchy.put("106", 2);
+		hierarchy.put("117", 6);
+		
+		hierarchy.put("67", 6);
+		hierarchy.put("49", 2);
+		hierarchy.put("57", 2);
+		
+		hierarchy.put("254", 1);
 	}
 	
 	private static void loadNodes(HashSet<String> nodes, HashSet<String> typeNode, String fileName) throws Exception {
@@ -284,7 +309,8 @@ public class ShortestPathHourglass {
 //		scanner = new Scanner(new File("celegans//all_k_sp.txt"));
 //		scanner = new Scanner(new File("celegans//almost_sp.txt"));
 //		scanner = new Scanner(new File("celegans//almost_k_sp.txt"));
-		scanner = new Scanner(new File("celegans//all_4_path.txt"));
+//		scanner = new Scanner(new File("celegans//all_4_path.txt"));
+		scanner = new Scanner(new File("celegans//all_4_path_gap.txt"));
 		
 		HashSet<String> sPaths = new HashSet();
 		while (scanner.hasNext()) {
@@ -380,7 +406,8 @@ public class ShortestPathHourglass {
 //		scanner = new Scanner(new File("celegans//all_4_sp.txt"));
 //		scanner = new Scanner(new File("celegans//almost_sp.txt"));
 //		scanner = new Scanner(new File("celegans//almost_4_sp.txt"));
-		scanner = new Scanner(new File("celegans//all_4_path.txt"));
+//		scanner = new Scanner(new File("celegans//all_4_path.txt"));
+		scanner = new Scanner(new File("celegans//all_4_path_gap.txt"));
 
 		HashSet<String> sPaths = new HashSet();
 		while (scanner.hasNext()) {
@@ -490,15 +517,16 @@ public class ShortestPathHourglass {
 		HashSet<String> spEdges = new HashSet();
 		HashSet<String> fbEdges = new HashSet();
 		
-		Scanner scan = new Scanner(new File("celegans//sp_edges.txt"));
-		while (scan.hasNext()) {
-			String src = scan.next();
-			String dst = scan.next();
-			String edg = src + "#" + dst;
-			String spWeight = scan.next();
-			spEdges.add(edg);
-		}
-		scan.close();
+		Scanner scan;
+//		Scanner scan = new Scanner(new File("celegans//sp_edges.txt"));
+//		while (scan.hasNext()) {
+//			String src = scan.next();
+//			String dst = scan.next();
+//			String edg = src + "#" + dst;
+//			String spWeight = scan.next();
+//			spEdges.add(edg);
+//		}
+//		scan.close();
 		
 //		scan = new Scanner(new File("celegans//fb_edges.txt"));
 //		int knt = 0;
@@ -519,6 +547,8 @@ public class ShortestPathHourglass {
 		HashMap<String, Integer> coreOutdeg = new HashMap();
 		scan = new Scanner(new File("celegans//all_links.txt"));
 		int knt = 0;
+		int sum1 = 0;
+		int sum2 = 0;
 		HashMap<String, Integer> srId = new HashMap();
 		int idx = 0;
 		while (scan.hasNext()) {
@@ -526,16 +556,26 @@ public class ShortestPathHourglass {
 			String dst = scan.next();
 			String edg = src + "#" + dst;
 			if (coreNeurons.contains(src) && coreNeurons.contains(dst)) {
-				if (spEdges.contains(edg)) {
+				
+				if (edgeSPWeights.containsKey(edg)) {
 //					System.out.println(weights.get(edg));
 //					++knt;
 //					System.out.println(edg + "\t" + edgeSPWeights.get(edg));
-//					System.out.println(src + "\t" + dst + "\t" + Math.log(edgeSPWeights.get(edg)));
-					System.out.println(idNeuron.get(src) + "#" + idNeuron.get(dst) + "\t" + (edgeSPWeights.get(edg) / 1.0));
+//					System.out.println(src + "<" + dst + "\t" + edgeSPWeights.get(edg));
+//					System.out.println(idNeuron.get(src) + "\t" + idNeuron.get(dst) + "\t" + (edgeSPWeights.get(edg)));
 //					System.out.println(idNeuron.get(src) + "\t" + idNeuron.get(dst) + "\t" + (edgeSPWeights.get(edg) / 3168.0));
+					if (hierarchy.get(dst) < hierarchy.get(src)) {
+						System.out.println(edg);
+						sum1 += edgeSPWeights.get(edg);
+						++knt;
+					}
+					else {
+						sum2 += edgeSPWeights.get(edg);
+					}
 				}
 				else {
 //					System.out.println(idNeuron.get(src) + "\t" + idNeuron.get(dst));
+					
 				}
 				
 				if (fbEdges.contains(edg)) {
@@ -557,7 +597,7 @@ public class ShortestPathHourglass {
 			}
 		}
 		scan.close();
-//		System.out.println(knt);
+		System.out.println(knt + "\t" + sum1 + "\t" + sum2);
 		
 //		for (String s : coreNeurons) {
 //			System.out.println(idNeuron.get(s)  + "\t" + (coreIndeg.get(s) * 1.0 / coreOutdeg.get(s)));
@@ -859,19 +899,30 @@ public class ShortestPathHourglass {
 					}
 					if (pi != -1 && qi !=- 1) {
 						if (pi > qi) {
-							addMap(pairWeight, q + "#" + p);
+//							if (pi == qi + 1) {
+								addMap(pairWeight, q + "#" + p);
+//							}
 						}
 						else {
-							addMap(pairWeight, p + "#" + q);
+//							if (qi == pi + 1) {
+								addMap(pairWeight, p + "#" + q);
+//							}
 						}
 					}
 				}
 			}
 		}
 		
-		double d = 0.1;
+		for (String s : pairWeight.keySet()) {
+//			System.out.println(s + "\t" + pairWeight.get(s));
+		}
+		
+		
+		double d = 1;
 		int idx = 0;
 		HashMap<String, Integer> orderedId = new HashMap();
+		HashSet<String> relationships = new HashSet();
+		int knt = 0;
 		for (int i = 0; i < coreNeurons.size(); ++i) {
 			for (int j = i + 1; j < coreNeurons.size(); ++j) {
 				String p = coreList.get(i);
@@ -884,34 +935,77 @@ public class ShortestPathHourglass {
 				int qpw = 0;
 				if (pairWeight.containsKey(pq)) pqw = pairWeight.get(pq);
 				if (pairWeight.containsKey(qp)) qpw = pairWeight.get(qp);
+				/*
 				if (pqw != 0 && qpw != 0) {
 					double pqByqp = pqw * 1.0 / qpw;
+//					System.out.println(pq + "\t" + Math.max(pqByqp, 1.0 / pqByqp) + "\t" + Math.max(pqw, qpw));
 					if (pqByqp >= (1.0 - d) && pqByqp <= (1 + d)) {
-						System.out.println(orderedId.get(p) + "  " + orderedId.get(q));
-						System.out.println(orderedId.get(q) + "  " + orderedId.get(p));
+//						System.out.println(orderedId.get(p) + "  " + orderedId.get(q));
+//						System.out.println(orderedId.get(q) + "  " + orderedId.get(p));
+//						System.out.println(p + "=" + q + "\t" + Math.max(pqw, qpw));
+//						System.out.println(p + "<" + q + "\t" + pqw);
+//						System.out.println(q + "<" + p + "\t" + qpw);
+						if (hierarchy.get(p) != hierarchy.get(q)) {
+//							System.out.println(p + "=" + q);
+							++knt;
+						}
 					}
-					else if (pqByqp > (1.0 - d)) {
-						System.out.println(orderedId.get(q) + "  " + orderedId.get(p));
+					else if (pqByqp < (1.0 - d)) {
+//						System.out.println(orderedId.get(q) + "  " + orderedId.get(p));
+//						System.out.println(q + "<" + p + "\t" + qpw);
+						if (hierarchy.get(p) <= hierarchy.get(q)) {
+//							System.out.println(q + "<" + p);
+							++knt;
+						}
 					}
 					else {
-						System.out.println(orderedId.get(p) + "  " + orderedId.get(q));
+//						System.out.println(orderedId.get(p) + "  " + orderedId.get(q));
+//						System.out.println(p + "<" + q + "\t" + pqw);
+						if (hierarchy.get(p) >= hierarchy.get(q)) {
+//							System.out.println(p + "<" + q);
+							++knt;
+						}
 					}
 				}
 				else if (pqw != 0) {
-					System.out.println(orderedId.get(p) + "  " + orderedId.get(q));
+//					System.out.println(orderedId.get(p) + "  " + orderedId.get(q));
+//					System.out.println(p + "<" + q + "\t" + pqw);
+					if (hierarchy.get(p) >= hierarchy.get(q)) {
+//						System.out.println(p + "<" + q);
+						++knt;
+					}
 				}
 				else if (qpw != 0) {
-					System.out.println(orderedId.get(q) + "  " + orderedId.get(p));
+//					System.out.println(orderedId.get(q) + "  " + orderedId.get(p));
+//					System.out.println(q + "<" + p + "\t" + qpw);
+					if (hierarchy.get(p) <= hierarchy.get(q)) {
+//						System.out.println(q + "<" + p);
+						++knt;
+					}
 				}
 				else {
 					
 				}
+				*/
+				if (pqw != 0 || qpw != 0) {
+					double weightRatio = Math.min(pqw, qpw) * 1.0 / Math.max(pqw, qpw);
+					if (pqw > qpw) {
+						System.out.println(p + "<" + q + "\t" + weightRatio);
+					}
+					else {
+						System.out.println(q + "<" + p + "\t" + weightRatio);
+					}
+				}
+				
+//				System.out.println(p + "#" + q + "\t" + pqw + "\t" + qpw);
 			}
 		}
 		
 		for (String s : orderedId.keySet()) {
-			System.out.println(orderedId.get(s) + "\t" + s);
+//			System.out.println(orderedId.get(s) + "\t" + s);
 		}
+		
+//		System.out.println(knt);
 	}
 	
 	private static void getReducedCoreNetwork() throws Exception {
@@ -954,10 +1048,10 @@ public class ShortestPathHourglass {
 		
 //		shortestPathAnalysis_1();
 		
-//		shortestPathHourglassAnalysis();
-//		computeFlatCore();
-//		System.out.println(realCoreSize + "\t" + flatCoreSize);
-//		System.out.println(1.0 - (realCoreSize * 1.0 / flatCoreSize));
+		shortestPathHourglassAnalysis();
+		computeFlatCore();
+		System.out.println(realCoreSize + "\t" + flatCoreSize);
+		System.out.println(1.0 - (realCoreSize * 1.0 / flatCoreSize));
 		
 //		for (tau = 0.5; tau <= 0.99; tau += 0.02) {
 //			shortestPathHourglassAnalysis();
@@ -977,6 +1071,6 @@ public class ShortestPathHourglass {
 		
 //		topEdgeNeuronBypass();
 		
-		getReducedCoreNetwork();
+//		getReducedCoreNetwork();
 	}
 }

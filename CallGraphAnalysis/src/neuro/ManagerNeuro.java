@@ -361,7 +361,6 @@ public class ManagerNeuro {
 		pw.close();
 	}
 		
-	
 	private static void getLocationColorWeightedHistogram(DependencyDAG dependencyDAG) {
 		double binWidth = 0.1;
 		int numBin = (int)(1.0 / binWidth) + 2;
@@ -493,7 +492,7 @@ public class ManagerNeuro {
 	
 	private static void traverseAlmostShortestPathsHelper(String node, String targetNode, int len, DependencyDAG dependencyDAG, ArrayList<String> pathNodes) {
 //		if (pathNodes.size() > len + 1) return; // +1 hop than shortest path
-		if (pathNodes.size() > 6) return; // special case length restriction
+		if (pathNodes.size() > 5) return; // special case length restriction
 		
 		if (node.equals(targetNode)) {
 			for (String s: pathNodes) {
@@ -517,12 +516,14 @@ public class ManagerNeuro {
 	
 	private static void traverseAlmostShortestPaths() throws Exception {
 		DependencyDAG.isToy = true;
-		String neuroDAGName = "full_fb_clean_links";
+//		String neuroDAGName = "full_fb_clean_links";
+		String neuroDAGName = "gap_fb_clean_links";
 		DependencyDAG dependencyDAG = new DependencyDAG("celegans//" + neuroDAGName + ".txt");
 //		dependencyDAG.printNetworkProperties();
 //		dependencyDAG.printNetworkStat();
 		
 		loadNeuroMetaNetwork();
+		/*
 		Scanner scanner = new Scanner(new File("celegans//sm_pair_sp_len.txt"));
 		while (scanner.hasNext()) {
 			String smPair = scanner.next();
@@ -535,6 +536,15 @@ public class ManagerNeuro {
 //			break;
 		}
 		scanner.close();
+		*/
+		
+		for (String s : source) {
+			for (String r : target) {
+				ArrayList<String> pathNodes = new ArrayList();
+				pathNodes.add(s);
+				traverseAlmostShortestPathsHelper(s, r, -1, dependencyDAG, pathNodes);
+			}
+		}
 	}
 	
 	private static void statisticalRun() throws Exception {
@@ -1327,6 +1337,7 @@ public class ManagerNeuro {
 			System.out.println(src + "\t" + dst);
 		}
 	}
+	
 	
 	private static boolean isSCC(HashSet<String> scc, DependencyDAG dependencyDAG) {
 		for (String s: scc) {
