@@ -23,7 +23,7 @@ public class ShortestPathHourglass {
 	public static HashMap<String, String> neuronId = new HashMap();
 	public static HashMap<String, Integer> chemicalWeights = new HashMap();
 	public static HashSet<String> coreNeurons = new HashSet();
-	public static HashMap<String, Integer> edgeSPWeights = new HashMap();
+	public static HashMap<String, Integer> edgePathWeights = new HashMap();
 	public static HashMap<String, Integer> inDeg = new HashMap();
 	public static HashMap<String, Integer> outDeg = new HashMap();
 	public static HashMap<String, Integer> dummy = new HashMap();
@@ -55,7 +55,7 @@ public class ShortestPathHourglass {
 		dummy = new HashMap();
 
 		coreNeurons = new HashSet();
-		edgeSPWeights = new HashMap();
+		edgePathWeights = new HashMap();
 		canonicalPaths = new ArrayList();
 
 		flatCoreSize = 0;
@@ -162,7 +162,7 @@ public class ShortestPathHourglass {
 			canonicalPaths.add(Arrays.copyOf(tokens, tokens.length));
 			for (int i = 0; i < tokens.length - 1; ++i) {
 				String edg = tokens[i] + "#" + tokens[i + 1];
-				addMap(edgeSPWeights, edg);
+				addMap(edgePathWeights, edg);
 			}
 		}
 		
@@ -203,6 +203,7 @@ public class ShortestPathHourglass {
 //		scanner = new Scanner(new File("celegans//almost_sp.txt"));
 //		scanner = new Scanner(new File("celegans//almost_k_sp.txt"));
 		scanner = new Scanner(new File("celegans//all_4_path.txt"));
+		
 		HashMap<Integer, Integer> SPLengthFreq = new HashMap();
 		HashSet<String> SPInter = new HashSet();
 		HashSet<String> shortestPathEdge = new HashSet();
@@ -557,7 +558,7 @@ public class ShortestPathHourglass {
 			String edg = src + "#" + dst;
 			if (coreNeurons.contains(src) && coreNeurons.contains(dst)) {
 				
-				if (edgeSPWeights.containsKey(edg)) {
+				if (edgePathWeights.containsKey(edg)) {
 //					System.out.println(weights.get(edg));
 //					++knt;
 //					System.out.println(edg + "\t" + edgeSPWeights.get(edg));
@@ -566,11 +567,11 @@ public class ShortestPathHourglass {
 //					System.out.println(idNeuron.get(src) + "\t" + idNeuron.get(dst) + "\t" + (edgeSPWeights.get(edg) / 3168.0));
 					if (hierarchy.get(dst) < hierarchy.get(src)) {
 						System.out.println(edg);
-						sum1 += edgeSPWeights.get(edg);
+						sum1 += edgePathWeights.get(edg);
 						++knt;
 					}
 					else {
-						sum2 += edgeSPWeights.get(edg);
+						sum2 += edgePathWeights.get(edg);
 					}
 				}
 				else {
@@ -1046,12 +1047,12 @@ public class ShortestPathHourglass {
 	public static void main(String[] args) throws Exception {
 //		doToyNetworkAnalysis();
 		
-//		shortestPathAnalysis_1();
+		shortestPathAnalysis_1();
 		
-		shortestPathHourglassAnalysis();
-		computeFlatCore();
-		System.out.println(realCoreSize + "\t" + flatCoreSize);
-		System.out.println(1.0 - (realCoreSize * 1.0 / flatCoreSize));
+//		shortestPathHourglassAnalysis();
+//		computeFlatCore();
+//		System.out.println(realCoreSize + "\t" + flatCoreSize);
+//		System.out.println(1.0 - (realCoreSize * 1.0 / flatCoreSize));
 		
 //		for (tau = 0.5; tau <= 0.99; tau += 0.02) {
 //			shortestPathHourglassAnalysis();

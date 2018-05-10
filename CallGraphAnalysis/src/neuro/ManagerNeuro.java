@@ -517,10 +517,11 @@ public class ManagerNeuro {
 	private static void traverseAlmostShortestPaths() throws Exception {
 		DependencyDAG.isToy = true;
 //		String neuroDAGName = "full_fb_clean_links";
-		String neuroDAGName = "gap_fb_clean_links";
+//		String neuroDAGName = "gap_fb_clean_links";
+		String neuroDAGName = "gap_all_links";
 		DependencyDAG dependencyDAG = new DependencyDAG("celegans//" + neuroDAGName + ".txt");
 //		dependencyDAG.printNetworkProperties();
-//		dependencyDAG.printNetworkStat();
+		dependencyDAG.printNetworkStat();
 		
 		loadNeuroMetaNetwork();
 		/*
@@ -542,7 +543,7 @@ public class ManagerNeuro {
 			for (String r : target) {
 				ArrayList<String> pathNodes = new ArrayList();
 				pathNodes.add(s);
-				traverseAlmostShortestPathsHelper(s, r, -1, dependencyDAG, pathNodes);
+//				traverseAlmostShortestPathsHelper(s, r, -1, dependencyDAG, pathNodes);
 			}
 		}
 	}
@@ -1337,8 +1338,7 @@ public class ManagerNeuro {
 			System.out.println(src + "\t" + dst);
 		}
 	}
-	
-	
+		
 	private static boolean isSCC(HashSet<String> scc, DependencyDAG dependencyDAG) {
 		for (String s: scc) {
 			dependencyDAG.visited = new HashSet();

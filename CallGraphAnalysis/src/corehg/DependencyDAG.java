@@ -509,6 +509,7 @@ public class DependencyDAG {
 			nodes.add(server);
 
 			if (dependent.equals(server)) { // loop, do not add the edge
+				System.out.println("loop: " + server + "\t" + dependent);
 				continue;
 			}
 
