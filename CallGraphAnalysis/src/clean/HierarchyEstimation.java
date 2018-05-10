@@ -148,7 +148,7 @@ public class HierarchyEstimation {
 	}
 	
 	private DependencyGraph dependencyDAG;
-	private int  maxPathLength = 5;
+	private int  maxPathLength = 4;
 	private ArrayList<ArrayList<String>> allPaths;
 	HashMap<String, Integer>  nodePairPathFrequency = new HashMap();
 	private ArrayList<Relationship> allRelationships;
@@ -181,7 +181,7 @@ public class HierarchyEstimation {
 		}
 		
 		public String toString() {
-			return start + "\t" + end + "\t" + weight;
+			return start + "  " + end + "  " + weight;
 		}
 	}
 	
@@ -250,7 +250,7 @@ public class HierarchyEstimation {
 		for (String s : nodePairPathFrequency.keySet()) {
 			String start = s.substring(0, s.indexOf("#"));
 			String end = s.substring(s.indexOf("#") + 1);
-			System.out.println(start + "#" + end + "\t" + nodePairPathFrequency.get(s));
+//			System.out.println(start + "#" + end + "\t" + nodePairPathFrequency.get(s));
 			int forward = nodePairPathFrequency.get(s);
 			int reverse = 0;
 			if (nodePairPathFrequency.containsKey(end + "#" + start)) reverse = nodePairPathFrequency.get(end + "#" + start);
@@ -342,6 +342,9 @@ public class HierarchyEstimation {
 //		For each member y in p.B
 //			Add y to q.B
 //			Add q to y.A
+//		
+//		Add p.S to q.S
+//		Add q.S to p.S
 //		Add q to p.S
 //		Add p to q.S
 		for (String s : allNodeHierarchy.get(end).above) {
@@ -363,6 +366,10 @@ public class HierarchyEstimation {
 			allNodeHierarchy.get(end).below.add(s);
 			allNodeHierarchy.get(s).above.add(end);
 		}
+
+		allNodeHierarchy.get(start).same.addAll(allNodeHierarchy.get(end).same);
+		allNodeHierarchy.get(end).same.addAll(allNodeHierarchy.get(start).same);
+
 		
 		allNodeHierarchy.get(start).same.add(end);
 		allNodeHierarchy.get(end).same.add(start);
@@ -400,6 +407,7 @@ public class HierarchyEstimation {
 					updateFF(r.start, r.end);
 					skip = false;
 					ffRelationship.add(new Relationship(r.start, r.end, r.weight, r.mx));
+					System.out.println("Adding FF " + r );
 				}
 				else {
 					// LT
@@ -407,6 +415,7 @@ public class HierarchyEstimation {
 						updateLT(r.start, r.end);
 						skip = false;
 						ltRelationship.add(new Relationship(r.start, r.end, r.weight, r.mx));
+						System.out.println("Adding LT " + r );
 					}
 				}
 			}
@@ -416,12 +425,14 @@ public class HierarchyEstimation {
 					updateLT(r.start, r.end);
 					skip = false;
 					ltRelationship.add(new Relationship(r.start, r.end, r.weight, r.mx));
+					System.out.println("Adding LT " + r );
 				}
 			}
 			
 			index++;
 			if (skip) {
 				// FB
+				System.out.println("Adding FB " + r);
 				fbRelationship.add(new Relationship(r.start, r.end, r.weight, r.mx));
 				// update paths
 				ArrayList<ArrayList<String>> toRemove = new ArrayList();
@@ -431,6 +442,7 @@ public class HierarchyEstimation {
 					}
 				}
 				allPaths.removeAll(toRemove);
+				nodePairPathFrequency.clear();
 				getRelationships();
 				index = 0;
 			}
@@ -462,7 +474,7 @@ public class HierarchyEstimation {
 		String sourceFile = "data//" + data + "_sources.txt";
 		String targetFile = "data//" + data + "_targets.txt";
 		dependencyDAG = new DependencyGraph(dependencyDAGFile, sourceFile, targetFile);
-		dependencyDAG.printNetworkProperties();
+//		dependencyDAG.printNetworkProperties();
 		getPaths();
 		getRelationships();
 		printPathsAndRelationships();
