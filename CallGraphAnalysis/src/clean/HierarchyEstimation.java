@@ -14,9 +14,6 @@ public class HierarchyEstimation {
 		private HashSet<String> sources;
 		private HashMap<String, HashSet<String>> serves; 
 		private HashMap<String, HashSet<String>> depends;		
-		private HashSet<String> visited;
-		private boolean canReachSource;
-		private boolean canReachTarget;
 		
 		public DependencyGraph() { 
 			nodes = new HashSet();
@@ -89,61 +86,34 @@ public class HierarchyEstimation {
 		private void printNetworkProperties() throws Exception {
 //			PrintWriter pw = new PrintWriter(new File("hourglassAnalysis.txt"));
 			for (String s: nodes) {
-				System.out.println(s + "\t" + "[node]");
+				System.out.print("[node] "  + s);
 				if (serves.containsKey(s)) {
+					System.out.print("   [serves]");
 					for (String r : serves.get(s)) {
-						System.out.print(r + "  ");
+						System.out.print("  " + r);
 					}
-					System.out.println("[serves]");
 				}
 				if (depends.containsKey(s)) {
+					System.out.print("   [depends]");
 					for (String r : depends.get(s)) {
-						System.out.print(r + "  ");
+						System.out.print("  " + r);
 					}
-					System.out.println("[depends]");
+					
 				}
 				System.out.println();
 			}
 	
+			System.out.print("[sources]");
 			for (String s : sources) {
-				System.out.print(s + "\t");
+				System.out.print("  " + s);
 			}
-			System.out.println("[source]");
+			System.out.println();
 			
+			System.out.print("[targets]");
 			for (String s : targets) {
-				System.out.print(s + "\t");
+				System.out.print("  " + s);
 			}
-			System.out.println("[target]");
-
-//			pw.close();
-		}
-		
-		private void reachableUpwardsNodes(String node) { // towards targets
-			if (visited.contains(node)) { // node already traversed
-				return;
-			}
-			if (sources.contains(node)) canReachSource = true;
-			if (targets.contains(node)) canReachTarget = true;
-			visited.add(node);
-			if (!serves.containsKey(node)) {
-				return;
-			}
-			for (String s : serves.get(node)) {
-				reachableUpwardsNodes(s);
-			}
-		}
-		
-		private void reachableDownwardsNodes(String node) { // towards sources
-			if (visited.contains(node)) { // node already traversed
-				return;
-			}
-			visited.add(node);
-			if (!depends.containsKey(node)) {
-				return;
-			}
-			for (String s : depends.get(node)) {
-				reachableDownwardsNodes(s);
-			}
+			System.out.println();
 		}
 	}
 	
@@ -182,6 +152,10 @@ public class HierarchyEstimation {
 		
 		public String toString() {
 			return start + "  " + end + "  " + weight;
+		}
+		
+		public String toString(boolean noWeight) {
+			return start + "  " + end;
 		}
 	}
 	
@@ -261,12 +235,65 @@ public class HierarchyEstimation {
 	}
 	
 	private void printPathsAndRelationships() {
+		System.out.println("\nCurrent Paths");
 		for (ArrayList aList : allPaths) {
 			System.out.println(aList);
 		}
+		System.out.println();
 		
-		for (Relationship r : allRelationships) {
-			System.out.println(r);
+		System.out.println("Relationship Matrix");
+		printRelationshipMatrix();
+		System.out.println();
+		
+		System.out.println("Relationship Diff Matrix");
+		printRelationshipDifferenceMatrix();
+		System.out.println();
+	}
+	
+	private void printRelationshipMatrix() {
+		System.out.printf("   ");
+		for (String s : dependencyDAG.nodes) {
+			System.out.printf("%3s", s);
+		}
+		System.out.println();
+		for (String s : dependencyDAG.nodes) {
+			System.out.printf("%3s", s);
+			for (String r : dependencyDAG.nodes) {
+				String key = s + "#" + r;
+				if (nodePairPathFrequency.containsKey(key)) {
+					System.out.printf("%3d", nodePairPathFrequency.get(key));
+				}
+				else {
+					System.out.printf("  .");
+				}
+			}
+			System.out.println();
+		}
+	}
+	
+	private void printRelationshipDifferenceMatrix() {
+		System.out.printf("   ");
+		for (String s : dependencyDAG.nodes) {
+			System.out.printf("%3s", s);
+		}
+		System.out.println();
+		for (String s : dependencyDAG.nodes) {
+			System.out.printf("%3s", s);
+			for (String r : dependencyDAG.nodes) {
+				String fKey = s + "#" + r;
+				String rKey = r + "#" + s;
+				int forward = 0;
+				int reverse = 0;
+				if (nodePairPathFrequency.containsKey(fKey)) forward = nodePairPathFrequency.get(fKey);
+				if (nodePairPathFrequency.containsKey(rKey)) reverse = nodePairPathFrequency.get(rKey);
+				if (forward == 0 && reverse == 0) {
+					System.out.printf("  .");
+				}
+				else {
+					System.out.printf("%3d", forward - reverse);
+				}
+			}
+			System.out.println();
 		}
 	}
 	
@@ -342,7 +369,6 @@ public class HierarchyEstimation {
 //		For each member y in p.B
 //			Add y to q.B
 //			Add q to y.A
-//		
 //		Add p.S to q.S
 //		Add q.S to p.S
 //		Add q to p.S
@@ -385,6 +411,10 @@ public class HierarchyEstimation {
 	}
 	
 	private void buildIterativeRelationshipNetwork() throws Exception {
+		getPaths();
+		getRelationships();
+		printPathsAndRelationships();
+		
 		ffRelationship = new ArrayList();
 		fbRelationship = new ArrayList();
 		ltRelationship = new ArrayList();
@@ -407,7 +437,7 @@ public class HierarchyEstimation {
 					updateFF(r.start, r.end);
 					skip = false;
 					ffRelationship.add(new Relationship(r.start, r.end, r.weight, r.mx));
-					System.out.println("Adding FF " + r );
+					System.out.println("Adding FF  " + r  + "  " + proximity);
 				}
 				else {
 					// LT
@@ -415,7 +445,7 @@ public class HierarchyEstimation {
 						updateLT(r.start, r.end);
 						skip = false;
 						ltRelationship.add(new Relationship(r.start, r.end, r.weight, r.mx));
-						System.out.println("Adding LT " + r );
+						System.out.println("Adding LT  " + r + "  " + proximity);
 					}
 				}
 			}
@@ -425,14 +455,14 @@ public class HierarchyEstimation {
 					updateLT(r.start, r.end);
 					skip = false;
 					ltRelationship.add(new Relationship(r.start, r.end, r.weight, r.mx));
-					System.out.println("Adding LT " + r );
+					System.out.println("Adding LT  " + r + "  " + proximity);
 				}
 			}
 			
 			index++;
 			if (skip) {
 				// FB
-				System.out.println("Adding FB " + r);
+				System.out.println("Adding FB  " + r);
 				fbRelationship.add(new Relationship(r.start, r.end, r.weight, r.mx));
 				// update paths
 				ArrayList<ArrayList<String>> toRemove = new ArrayList();
@@ -445,26 +475,44 @@ public class HierarchyEstimation {
 				nodePairPathFrequency.clear();
 				getRelationships();
 				index = 0;
+				printPathsAndRelationships();
 			}
+			
+			printNodeHierarchy();
 		}
+		
+		printFinalRelationships();
+	}
+	
+	private void printNodeHierarchy() {
+		System.out.println("Node Hierarchy");
+		for (String s : allNodeHierarchy.keySet()) {
+			System.out.print(s);
+			System.out.print(" {above: " + allNodeHierarchy.get(s).above + "} ");
+			System.out.print(" {same: " + allNodeHierarchy.get(s).same + "} ");
+			System.out.print(" {below: " + allNodeHierarchy.get(s).below + "} ");
+			System.out.println();
+		}
+		System.out.println();
 	}
 	
 	private void printFinalRelationships() throws Exception {
+		System.out.println("\nFinal Relationships");
 		System.out.println("FF");
 		for (Relationship r : ffRelationship) {
-			System.out.println(r);
+			System.out.println(r.toString(false));
 		}
 		System.out.println();
 		
 		System.out.println("LT");
 		for (Relationship r : ltRelationship) {
-			System.out.println(r);
+			System.out.println(r.toString(false));
 		}
 		System.out.println();
 		
 		System.out.println("FB");
 		for (Relationship r : fbRelationship) {
-			System.out.println(r);
+			System.out.println(r.toString(false));
 		}
 		System.out.println();
 	}
@@ -474,16 +522,13 @@ public class HierarchyEstimation {
 		String sourceFile = "data//" + data + "_sources.txt";
 		String targetFile = "data//" + data + "_targets.txt";
 		dependencyDAG = new DependencyGraph(dependencyDAGFile, sourceFile, targetFile);
-//		dependencyDAG.printNetworkProperties();
-		getPaths();
-		getRelationships();
-		printPathsAndRelationships();
+		dependencyDAG.printNetworkProperties();
 		buildIterativeRelationshipNetwork();
-		printFinalRelationships();
 	}
 	
 	public static void main(String[] args) throws Exception {
 		HierarchyEstimation he = new HierarchyEstimation();
 		he.runAnalysis("h1");
+//		he.runAnalysis(args[0]);
 	}
 }
