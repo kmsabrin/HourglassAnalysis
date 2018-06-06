@@ -24,12 +24,14 @@ public class ShortestPathHourglass {
 	public static HashMap<String, Integer> chemicalWeights = new HashMap();
 	public static HashSet<String> coreNeurons = new HashSet();
 	public static HashMap<String, Integer> edgePathWeights = new HashMap();
+	public static HashMap<String, Integer> nodePathWeights = new HashMap();
 	public static HashMap<String, Integer> inDeg = new HashMap();
 	public static HashMap<String, Integer> outDeg = new HashMap();
 	public static HashMap<String, Integer> dummy = new HashMap();
 	public static ArrayList<String[]> canonicalPaths = new ArrayList();
 	public static HashMap<String, Integer> pairWeight = new HashMap();
 	public static HashMap<String, Integer> hierarchy = new HashMap();
+	public static HashMap<String, HashSet<String>> targetSourceDependence = new HashMap();
 	static int flatCoreSize;
 	static int realCoreSize;
 	static double tau = 0.9;
@@ -56,6 +58,7 @@ public class ShortestPathHourglass {
 
 		coreNeurons = new HashSet();
 		edgePathWeights = new HashMap();
+		nodePathWeights = new HashMap();
 		canonicalPaths = new ArrayList();
 
 		flatCoreSize = 0;
@@ -163,9 +166,18 @@ public class ShortestPathHourglass {
 			for (int i = 0; i < tokens.length - 1; ++i) {
 				String edg = tokens[i] + "#" + tokens[i + 1];
 				addMap(edgePathWeights, edg);
+				addMap(nodePathWeights, tokens[i]);
+			}
+			addMap(nodePathWeights, tokens[tokens.length - 1]);
+			if (targetSourceDependence.containsKey(tokens[tokens.length - 1])) {
+				targetSourceDependence.get(tokens[tokens.length - 1]).add(tokens[0]);
+			}
+			else {
+				HashSet<String> hset = new HashSet();
+				hset.add(tokens[0]);
+				targetSourceDependence.put(tokens[tokens.length - 1], hset);
 			}
 		}
-		
 	}
 	
 	private static void shortestPathAnalysis_1() throws Exception {
@@ -1044,10 +1056,84 @@ public class ShortestPathHourglass {
 		}
 	}
 	
+	private static void getWeightCorrelation() throws Exception {
+		loadNeuroMetaNetwork();
+		for (String s : chemicalWeights.keySet()) {
+			if (edgePathWeights.containsKey(s)) {
+				ArrayList<String> nodes = splitEdge(s);
+				System.out.print(chemicalWeights.get(s) + "\t" + edgePathWeights.get(s));
+				System.out.println("\t" + nodes.get(0) + "\t" + nodes.get(1));
+			}
+		}
+	}
+	
+	private static void addMapValueSet(String key, String value, HashMap<String, HashSet<String>> setValueMap) {
+		if (setValueMap.containsKey(key)) {
+			setValueMap.get(key).add(value);
+		}
+		else {
+			HashSet<String> hs = new HashSet();
+			hs.add(value);
+			setValueMap.put(key, hs);
+		}
+	}
+	
+	public static void computeDimensionalityReduction() throws Exception {
+		loadNeuroMetaNetwork();	
+		HashMap<String, HashSet<String>> targetCorePathMap = new HashMap();
+		HashMap<String, HashSet<String>> coreSourcePathMap = new HashMap();
+		HashMap<String, HashSet<String>> targetNoCorePathMap = new HashMap();
+		int numTargetNoCorePath = 0;
+		for (String[] path : canonicalPaths) {
+			String targetCorePath = path[path.length - 1];
+			String coreSourcePath = "";
+			String terminalCore = "";
+			boolean foundCore = false;
+			for (int i = path.length - 2; i >= 0; --i) {
+				if (foundCore == false) {
+					targetCorePath += "#" + path[i];
+				}
+				
+				if (foundCore == false && coreNeurons.contains(path[i])) {
+					foundCore = true;
+					terminalCore = path[i];
+					coreSourcePath = path[i];
+					continue;
+				}
+				
+				if (foundCore == true) {
+					coreSourcePath += "#" + path[i];
+				}
+				// path needs to be reversed if direction needed
+			}
+			
+			if (foundCore == false) { // path visits no core node
+				++numTargetNoCorePath;
+				addMapValueSet(path[path.length - 1], targetCorePath, targetNoCorePathMap);
+			}
+			else {
+				addMapValueSet(terminalCore, coreSourcePath, coreSourcePathMap);
+				addMapValueSet(path[path.length - 1], targetCorePath, targetCorePathMap);
+			}
+		}
+		
+		int numCoreSourcePath = 0;
+		for (String s : coreSourcePathMap.keySet()) {
+			numCoreSourcePath += coreSourcePathMap.get(s).size();
+		}
+		
+		int numTargetCorePath = 0;
+		for (String s : targetCorePathMap.keySet()) {
+			numTargetCorePath += targetCorePathMap.get(s).size();
+		}
+		
+		System.out.println(canonicalPaths.size() + "\t" + numCoreSourcePath + "\t" + numTargetCorePath + "\t" + numTargetNoCorePath);
+	}
+	
 	public static void main(String[] args) throws Exception {
 //		doToyNetworkAnalysis();
 		
-		shortestPathAnalysis_1();
+//		shortestPathAnalysis_1();
 		
 //		shortestPathHourglassAnalysis();
 //		computeFlatCore();
@@ -1073,5 +1159,9 @@ public class ShortestPathHourglass {
 //		topEdgeNeuronBypass();
 		
 //		getReducedCoreNetwork();
+		
+//		getWeightCorrelation();
+		
+		computeDimensionalityReduction();
 	}
 }
