@@ -143,7 +143,8 @@ public class ShortestPathHourglass {
 //			System.out.println(s + "\t" + dummy.get(s));
 //		}		
 		
-		scan = new Scanner(new File("celegans//core_neurons.txt"));
+		scan = new Scanner(new File("celegans//core_neurons_LTM.txt"));
+//		scan = new Scanner(new File("celegans//core_neurons_all_4.txt"));
 //		scan = new Scanner(new File("celegans//previous//core_neurons_tau_1.txt"));
 		int knt = 0;
 		while (scan.hasNext()) {
@@ -153,7 +154,8 @@ public class ShortestPathHourglass {
 		}
 		scan.close();
 		
-		Scanner scanner = new Scanner(new File("celegans//all_4_path.txt"));
+//		Scanner scanner = new Scanner(new File("celegans//all_4_path.txt"));
+		Scanner scanner = new Scanner(new File("celegans//all_LTM_path.txt"));
 		HashSet<String> sPaths = new HashSet();
 		while (scanner.hasNext()) {
 			String line = scanner.nextLine();
@@ -323,7 +325,9 @@ public class ShortestPathHourglass {
 //		scanner = new Scanner(new File("celegans//almost_sp.txt"));
 //		scanner = new Scanner(new File("celegans//almost_k_sp.txt"));
 //		scanner = new Scanner(new File("celegans//all_4_path.txt"));
-		scanner = new Scanner(new File("celegans//all_4_path_gap.txt"));
+//		scanner = new Scanner(new File("celegans//all_4_path_gap.txt"));
+		scanner = new Scanner(new File("celegans//all_LTM_path.txt"));
+//		scanner = new Scanner(new File("celegans//all_LTM_path_chem_gap.txt"));
 		
 		HashSet<String> sPaths = new HashSet();
 		while (scanner.hasNext()) {
@@ -420,8 +424,10 @@ public class ShortestPathHourglass {
 //		scanner = new Scanner(new File("celegans//almost_sp.txt"));
 //		scanner = new Scanner(new File("celegans//almost_4_sp.txt"));
 //		scanner = new Scanner(new File("celegans//all_4_path.txt"));
-		scanner = new Scanner(new File("celegans//all_4_path_gap.txt"));
-
+//		scanner = new Scanner(new File("celegans//all_4_path_gap.txt"));
+		scanner = new Scanner(new File("celegans//all_LTM_path.txt"));
+//		scanner = new Scanner(new File("celegans//all_LTM_path_chem_gap.txt"));
+		
 		HashSet<String> sPaths = new HashSet();
 		while (scanner.hasNext()) {
 			String line = scanner.nextLine();
@@ -1135,10 +1141,10 @@ public class ShortestPathHourglass {
 		
 //		shortestPathAnalysis_1();
 		
-//		shortestPathHourglassAnalysis();
-//		computeFlatCore();
-//		System.out.println(realCoreSize + "\t" + flatCoreSize);
-//		System.out.println(1.0 - (realCoreSize * 1.0 / flatCoreSize));
+		shortestPathHourglassAnalysis();
+		computeFlatCore();
+		System.out.println(realCoreSize + "\t" + flatCoreSize);
+		System.out.println(1.0 - (realCoreSize * 1.0 / flatCoreSize));
 		
 //		for (tau = 0.5; tau <= 0.99; tau += 0.02) {
 //			shortestPathHourglassAnalysis();
@@ -1162,6 +1168,6 @@ public class ShortestPathHourglass {
 		
 //		getWeightCorrelation();
 		
-		computeDimensionalityReduction();
+//		computeDimensionalityReduction();
 	}
 }

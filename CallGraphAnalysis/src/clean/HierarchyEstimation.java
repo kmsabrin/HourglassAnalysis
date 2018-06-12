@@ -2,6 +2,7 @@ package clean;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -84,7 +85,7 @@ public class HierarchyEstimation {
 		
 			
 		private void printNetworkProperties() throws Exception {
-//			PrintWriter pw = new PrintWriter(new File("hourglassAnalysis.txt"));
+			System.out.println("Given Network");
 			for (String s: nodes) {
 				System.out.print("[node] "  + s);
 				if (serves.containsKey(s)) {
@@ -118,7 +119,7 @@ public class HierarchyEstimation {
 	}
 	
 	private DependencyGraph dependencyDAG;
-	private int  maxPathLength = 4;
+	private int maxPathLength = 4;
 	private ArrayList<ArrayList<String>> allPaths;
 	HashMap<String, Integer>  nodePairPathFrequency = new HashMap();
 	private ArrayList<Relationship> allRelationships;
@@ -133,25 +134,31 @@ public class HierarchyEstimation {
 	private class Relationship implements Comparable<Relationship> {
 		String start;
 		String end;
-		int weight;
+		int sumWeight;
+		int diffWeight;
 		int mx;
 		
-		public Relationship(String start, String end, int weight, int mx) {
+		public Relationship(String start, String end, int sumWeight, int diffWeight, int mx) {
 			this.start = start;
 			this.end = end;
-			this.weight = weight;
+			this.sumWeight = sumWeight;
+			this.diffWeight = diffWeight;
 			this.mx = mx;
 		}
 		
 		public int compareTo(Relationship r) {
-			if (weight != r.weight) {
-				return r.weight - weight;
-			}
-			return r.mx - mx;
+//			if (weight != r.weight) {
+//				return r.weight - weight;
+//			}
+//			return r.mx - mx;
+//			return r.sumWeight - sumWeight;
+//			return sumWeight - r.sumWeight;
+			return r.diffWeight - diffWeight;
+//			return diffWeight - r.diffWeight;
 		}
 		
 		public String toString() {
-			return start + "  " + end + "  " + weight;
+			return start + "  " + end + "  " + sumWeight + " " + diffWeight;
 		}
 		
 		public String toString(boolean noWeight) {
@@ -202,6 +209,17 @@ public class HierarchyEstimation {
 		}
 	}
 	
+	private void loadPaths() throws Exception {
+		allPaths = new ArrayList();
+		Scanner scanner = new Scanner(new File("celegans//all_LTM_path.txt"));
+		while (scanner.hasNext()) {
+			String path = scanner.nextLine();
+			String nodes[] = path.split("\\s+");
+			allPaths.add(new ArrayList(Arrays.asList(nodes)));
+		}
+//		System.out.println(allPaths.size());
+	}
+	
 	private void getRelationships() throws Exception {
 		for (ArrayList aList : allPaths) {
 			for (int i = 0; i < aList.size(); ++i) {
@@ -221,17 +239,50 @@ public class HierarchyEstimation {
 		}
 		
 		allRelationships = new ArrayList();
+		HashSet<String> hset = new HashSet();
+		HashMap<String, Integer> nodeCover = new HashMap();
 		for (String s : nodePairPathFrequency.keySet()) {
 			String start = s.substring(0, s.indexOf("#"));
 			String end = s.substring(s.indexOf("#") + 1);
+			if (hset.contains(end + "#" + start)) {
+				continue;
+			}
+			addMap(nodeCover, start);
+			addMap(nodeCover, end);
 //			System.out.println(start + "#" + end + "\t" + nodePairPathFrequency.get(s));
 			int forward = nodePairPathFrequency.get(s);
 			int reverse = 0;
 			if (nodePairPathFrequency.containsKey(end + "#" + start)) reverse = nodePairPathFrequency.get(end + "#" + start);
-			allRelationships.add(new Relationship(start, end, Math.abs(forward - reverse), Math.max(forward, reverse)));
+//			allRelationships.add(new Relationship(start, end, forward - reverse, Math.max(forward, reverse)));
+			
+			if (forward >= reverse) {
+				allRelationships.add(new Relationship(start, end, forward + reverse, forward - reverse, forward));
+			}
+			else {
+				allRelationships.add(new Relationship(end, start, reverse + forward, reverse - forward, reverse));
+			}
+			hset.add(start + "#" + end);
 		}
 		
 		Collections.sort(allRelationships);
+		
+		for (String s : nodeCover.keySet()) {
+//			System.out.println(s + "\t" + nodeCover.get(s));
+		}
+		
+		for (Relationship r : allRelationships) {
+//			System.out.println(r + " " + (r.diffWeight * 1.0 / r.mx));
+//			System.out.println((r.diffWeight * 1.0 / r.mx));
+		}
+	}
+
+	private void addMap(HashMap<String, Integer> hmap, String key) {
+		if (hmap.containsKey(key)) {
+			hmap.put(key, hmap.get(key) + 1);
+		}
+		else {
+			hmap.put(key, 1);
+		}
 	}
 	
 	private void printPathsAndRelationships() {
@@ -410,43 +461,56 @@ public class HierarchyEstimation {
 		return true;
 	}
 	
-	private void buildIterativeRelationshipNetwork() throws Exception {
-		getPaths();
+	private void buildIterativeRelationshipNetwork_2() throws Exception {
+//		getPaths();
+		loadPaths();
 		getRelationships();
-		printPathsAndRelationships();
+//		printPathsAndRelationships();
 		
+		System.out.println(allRelationships.size());
 		ffRelationship = new ArrayList();
 		fbRelationship = new ArrayList();
 		ltRelationship = new ArrayList();
-		removedPaths = new ArrayList();
+//		removedPaths = new ArrayList();
 		
 		allNodeHierarchy = new HashMap();
 		for (String s : dependencyDAG.nodes) {
 			allNodeHierarchy.put(s, new NodeHierarchy());
 		}
 		
+		int kFF = 0, kLT = 0, kFB = 0;
 		int index = 0;
 		while (index < allRelationships.size()) {
 			Relationship r = allRelationships.get(index);
+//			System.out.println(r);
+//			if (r.diffWeight < 0) break;
 			usedPair.add(r.start + "#" + r.end);
-			double proximity = r.weight / r.mx;
+			double proximity = r.diffWeight * 1.0 / r.mx;
 			boolean skip = true;
 			if (proximity > proximityThreshold) {
 				// FF
 				if (validateFF(r.start, r.end)) {
 					updateFF(r.start, r.end);
 					skip = false;
-					ffRelationship.add(new Relationship(r.start, r.end, r.weight, r.mx));
-					System.out.println("Adding FF  " + r  + "  " + proximity);
+					ffRelationship.add(new Relationship(r.start, r.end, r.sumWeight, r.diffWeight, r.mx));
+//					System.out.println("Adding FF  " + r  + "  " + proximity);
+					++kFF;
 				}
 				else {
+//					++kFB;
+//					System.out.println("Conflict  " + r  + "  " + proximity);
+					break;
 					// LT
-					if (validateLT(r.start, r.end)) {
-						updateLT(r.start, r.end);
-						skip = false;
-						ltRelationship.add(new Relationship(r.start, r.end, r.weight, r.mx));
-						System.out.println("Adding LT  " + r + "  " + proximity);
-					}
+//					if (validateLT(r.start, r.end)) {
+//						updateLT(r.start, r.end);
+//						skip = false;
+//						ltRelationship.add(new Relationship(r.start, r.end, r.sumWeight, r.diffWeight, r.mx));
+////						System.out.println("Adding LT  " + r + "  " + proximity);
+//						++kLT;
+//					}
+//					else {
+////						break;
+//					}
 				}
 			}
 			else {
@@ -454,16 +518,24 @@ public class HierarchyEstimation {
 				if (validateLT(r.start, r.end)) {
 					updateLT(r.start, r.end);
 					skip = false;
-					ltRelationship.add(new Relationship(r.start, r.end, r.weight, r.mx));
-					System.out.println("Adding LT  " + r + "  " + proximity);
+					ltRelationship.add(new Relationship(r.start, r.end, r.sumWeight, r.diffWeight, r.mx));
+//					System.out.println("Adding LT  " + r + "  " + proximity);
+					++kLT;
+				}
+				else {
+//					++kFB;
+//					System.out.println("Conflict  " + r  + "  " + proximity);
+					break;
 				}
 			}
 			
 			index++;
+//			System.out.println(index);
+			/*
 			if (skip) {
 				// FB
 				System.out.println("Adding FB  " + r);
-				fbRelationship.add(new Relationship(r.start, r.end, r.weight, r.mx));
+				fbRelationship.add(new Relationship(r.start, r.end, r.sumWeight, r.diffWeight, r.mx));
 				// update paths
 				ArrayList<ArrayList<String>> toRemove = new ArrayList();
 				for (ArrayList aList : allPaths) {
@@ -475,13 +547,99 @@ public class HierarchyEstimation {
 				nodePairPathFrequency.clear();
 				getRelationships();
 				index = 0;
-				printPathsAndRelationships();
+//				printPathsAndRelationships();
+				++kFB;
 			}
-			
-			printNodeHierarchy();
+			*/
+//			System.out.println(allPaths.size() + "\t" + allRelationships.size() + "\t" + index + "\t" + nodePairPathFrequency.size());
+//			printNodeHierarchy();
 		}
 		
-		printFinalRelationships();
+//		printFinalRelationships();
+//		printFinalHierarchy();
+		System.out.println(kFF + "\t" + kLT + "\t" + kFB);
+	}
+	
+	private void buildIterativeRelationshipNetwork() throws Exception {
+		getPaths();
+		getRelationships();
+//		printPathsAndRelationships();
+		
+		ffRelationship = new ArrayList();
+		fbRelationship = new ArrayList();
+		ltRelationship = new ArrayList();
+		removedPaths = new ArrayList();
+		
+		allNodeHierarchy = new HashMap();
+		for (String s : dependencyDAG.nodes) {
+			allNodeHierarchy.put(s, new NodeHierarchy());
+		}
+		
+		int kFF = 0, kLT = 0, kFB = 0;
+		int index = 0;
+		while (index < allRelationships.size()) {
+			Relationship r = allRelationships.get(index);
+			if (r.sumWeight < 0) break;
+			usedPair.add(r.start + "#" + r.end);
+			double proximity = r.sumWeight * 1.0 / r.mx;
+			boolean skip = true;
+			if (proximity > proximityThreshold) {
+				// FF
+				if (validateFF(r.start, r.end)) {
+					updateFF(r.start, r.end);
+					skip = false;
+					ffRelationship.add(new Relationship(r.start, r.end, r.sumWeight, r.diffWeight, r.mx));
+					System.out.println("Adding FF  " + r  + "  " + proximity);
+					++kFF;
+				}
+				else {
+					// LT
+					if (validateLT(r.start, r.end)) {
+						updateLT(r.start, r.end);
+						skip = false;
+						ltRelationship.add(new Relationship(r.start, r.end, r.sumWeight, r.diffWeight, r.mx));
+						System.out.println("Adding LT  " + r + "  " + proximity);
+						++kLT;
+					}
+				}
+			}
+			else {
+				// LT
+				if (validateLT(r.start, r.end)) {
+					updateLT(r.start, r.end);
+					skip = false;
+					ltRelationship.add(new Relationship(r.start, r.end, r.sumWeight, r.diffWeight, r.mx));
+					System.out.println("Adding LT  " + r + "  " + proximity);
+					++kLT;
+				}
+			}
+			
+			index++;
+			if (skip) {
+				// FB
+				System.out.println("Adding FB  " + r);
+				fbRelationship.add(new Relationship(r.start, r.end, r.sumWeight, r.diffWeight, r.mx));
+				// update paths
+				ArrayList<ArrayList<String>> toRemove = new ArrayList();
+				for (ArrayList aList : allPaths) {
+					if (pathContains(aList, r.start, r.end)) {
+						toRemove.add(new ArrayList(aList));
+					}
+				}
+				allPaths.removeAll(toRemove);
+				nodePairPathFrequency.clear();
+				getRelationships();
+				index = 0;
+//				printPathsAndRelationships();
+				++kFB;
+			}
+//			System.out.println(allPaths.size() + "\t" + allRelationships.size() + "\t" + index + "\t" + nodePairPathFrequency.size());
+//			printNodeHierarchy();
+		}
+		
+//		printFinalRelationships();
+		printFinalHierarchy();
+		System.out.println(kFF + "\t" + kLT + "\t" + kFB);
 	}
 	
 	private void printNodeHierarchy() {
@@ -517,18 +675,74 @@ public class HierarchyEstimation {
 		System.out.println();
 	}
 	
+	private void printFinalHierarchy() {
+		HashMap<String, Integer> nodeLevel = new HashMap();
+		HashSet<String> tempNodes = new HashSet(dependencyDAG.nodes);
+//		System.out.println("Here");
+		int maxLevel = 0;
+//		int tryKount = 1000;
+		while (nodeLevel.size() < tempNodes.size() /*&& tryKount-- > 0*/) {
+			for (String s : tempNodes) {
+				if (nodeLevel.containsKey(s)) {
+					continue;
+				}
+				else if (allNodeHierarchy.get(s).below.size() == 0) {
+					nodeLevel.put(s, 1);
+				}
+				else {
+					int level = 0;
+					boolean complete = true;
+					for (String r : allNodeHierarchy.get(s).below) {
+						if (!nodeLevel.containsKey(r)) {
+							complete = false;
+							break;
+						}
+						level = Math.max(level, nodeLevel.get(r));
+					}
+					if (complete) {
+						nodeLevel.put(s, level + 1);
+					}
+				}
+				if (nodeLevel.containsKey(s) && nodeLevel.get(s) > maxLevel) {
+					maxLevel = nodeLevel.get(s);
+				}
+			}
+		}
+		
+		System.out.println("\nFinal Hierarchy");
+		for (int i = 1; i <= maxLevel; ++i) {
+			System.out.print("Level " + i + ":");
+			int k = 0;
+			for (String s : nodeLevel.keySet()) {
+				if (nodeLevel.get(s) == i) {
+					System.out.print("  " + s);
+					++k;
+				}
+			}
+			System.out.print(" " + k);
+			System.out.println();
+		}
+	}
+	
 	private void runAnalysis(String data) throws Exception {
 		String dependencyDAGFile = "data//" + data + "_links.txt";
 		String sourceFile = "data//" + data + "_sources.txt";
 		String targetFile = "data//" + data + "_targets.txt";
 		dependencyDAG = new DependencyGraph(dependencyDAGFile, sourceFile, targetFile);
-		dependencyDAG.printNetworkProperties();
-		buildIterativeRelationshipNetwork();
+//		dependencyDAG.printNetworkProperties();
+//		buildIterativeRelationshipNetwork());
+		buildIterativeRelationshipNetwork_2();
 	}
 	
 	public static void main(String[] args) throws Exception {
 		HierarchyEstimation he = new HierarchyEstimation();
-		he.runAnalysis("h1");
+		he.runAnalysis("celegans");
 //		he.runAnalysis(args[0]);
+		
+//		for (double d = 0.0; d < 1.01; d += 0.05) {
+//			HierarchyEstimation he = new HierarchyEstimation();
+//			he.proximityThreshold = d;
+//			he.runAnalysis("celegans");
+//		}
 	}
 }
