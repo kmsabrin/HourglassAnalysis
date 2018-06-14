@@ -15,6 +15,8 @@ public class HourglassAnalysis {
 		private HashSet<String> sources;
 		private HashMap<String, HashSet<String>> serves; 
 		private HashMap<String, HashSet<String>> depends;
+		private HashMap<String, Integer> nodeNumberMap;
+		private int nodeNumber = 0;
 		
 		private HashMap<String, Double> numOfTargetPath;
 		private HashMap<String, Double> numOfSourcePath;
@@ -48,6 +50,8 @@ public class HourglassAnalysis {
 			this.isWeighted = isWeighted;
 			location = new HashMap();
 			corePathContribution = new HashMap();
+			nodeNumberMap = new HashMap();
+			nodeNumber = 0;
 		}
 		
 		public DependencyGraph(String dependencyGraphFilePath, String sourceFilePath, String targetFilePath, boolean isWeighted) throws Exception {
@@ -177,6 +181,8 @@ public class HourglassAnalysis {
 					edgeWeights.put(server + "#" + dependent, weight);
 				}
 				addEdge(server, dependent);
+				if (!nodeNumberMap.containsKey(server)) nodeNumberMap.put(server, nodeNumber++);
+				if (!nodeNumberMap.containsKey(dependent)) nodeNumberMap.put(dependent, nodeNumber++);
 			}
 			scanner.close();
 		}

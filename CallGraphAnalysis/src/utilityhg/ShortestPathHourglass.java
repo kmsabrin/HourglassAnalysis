@@ -34,7 +34,7 @@ public class ShortestPathHourglass {
 	public static HashMap<String, HashSet<String>> targetSourceDependence = new HashMap();
 	static int flatCoreSize;
 	static int realCoreSize;
-	static double tau = 0.9;
+	static double tau = 1.0;
 	
 	private static class FlatEdge {
 		String src;
@@ -108,6 +108,48 @@ public class ShortestPathHourglass {
 		else return "motor";
 	}
 	
+	private static void loadMetaNetwork() throws Exception {
+		reset();
+	
+		String net = "h4";
+		loadNodes(nodes, source, "data//" + net + "_sources.txt");
+		loadNodes(nodes, inter, "data//" + net + "_inters.txt");
+		loadNodes(nodes, target, "data//" + net + "_targets.txt");
+	
+		Scanner scan = new Scanner(new File("data//" + net + "_cores.txt"));
+		while (scan.hasNext()) {			
+			coreNeurons.add(scan.next());
+		}
+		scan.close();
+//		System.out.println(coreNeurons);
+		
+		Scanner scanner = new Scanner(new File("data//" + net + "_paths.txt"));
+		HashSet<String> sPaths = new HashSet();
+		while (scanner.hasNext()) {
+			String line = scanner.nextLine();
+			sPaths.add(line);
+		}
+		scanner.close();
+		for (String line : sPaths) {
+			String[] tokens = line.split("\\s+");
+			canonicalPaths.add(Arrays.copyOf(tokens, tokens.length));
+			for (int i = 0; i < tokens.length - 1; ++i) {
+				String edg = tokens[i] + "#" + tokens[i + 1];
+				addFrequencyValuedMap(edgePathWeights, edg);
+				addFrequencyValuedMap(nodePathWeights, tokens[i]);
+			}
+			addFrequencyValuedMap(nodePathWeights, tokens[tokens.length - 1]);
+			if (targetSourceDependence.containsKey(tokens[tokens.length - 1])) {
+				targetSourceDependence.get(tokens[tokens.length - 1]).add(tokens[0]);
+			}
+			else {
+				HashSet<String> hset = new HashSet();
+				hset.add(tokens[0]);
+				targetSourceDependence.put(tokens[tokens.length - 1], hset);
+			}
+		}
+	}
+	
 	private static void loadNeuroMetaNetwork() throws Exception {
 		reset();
 //		loadNodes(nodes, source, "celegans//sensory_neurons.txt");
@@ -133,10 +175,10 @@ public class ShortestPathHourglass {
 			String dst = scan.next();
 			double wgt = scan.nextDouble();
 			chemicalWeights.put(src + "#" + dst, (int)wgt);
-			addMap(dummy, getType(src)+ "#" + getType(dst));
+			addFrequencyValuedMap(dummy, getType(src)+ "#" + getType(dst));
 //			System.out.println((wgt + "\t" + getType(src)+ "#" + getType(dst)));
-			addMap(inDeg, dst);
-			addMap(outDeg, src);
+			addFrequencyValuedMap(inDeg, dst);
+			addFrequencyValuedMap(outDeg, src);
 		}
 		scan.close();
 //		for (String s : dummy.keySet()) {
@@ -156,6 +198,7 @@ public class ShortestPathHourglass {
 		
 //		Scanner scanner = new Scanner(new File("celegans//all_4_path.txt"));
 		Scanner scanner = new Scanner(new File("celegans//all_LTM_path.txt"));
+//		Scanner scanner = new Scanner(new File("celegans//all_LTM_path_weighted.txt"));
 		HashSet<String> sPaths = new HashSet();
 		while (scanner.hasNext()) {
 			String line = scanner.nextLine();
@@ -167,10 +210,10 @@ public class ShortestPathHourglass {
 			canonicalPaths.add(Arrays.copyOf(tokens, tokens.length));
 			for (int i = 0; i < tokens.length - 1; ++i) {
 				String edg = tokens[i] + "#" + tokens[i + 1];
-				addMap(edgePathWeights, edg);
-				addMap(nodePathWeights, tokens[i]);
+				addFrequencyValuedMap(edgePathWeights, edg);
+				addFrequencyValuedMap(nodePathWeights, tokens[i]);
 			}
-			addMap(nodePathWeights, tokens[tokens.length - 1]);
+			addFrequencyValuedMap(nodePathWeights, tokens[tokens.length - 1]);
 			if (targetSourceDependence.containsKey(tokens[tokens.length - 1])) {
 				targetSourceDependence.get(tokens[tokens.length - 1]).add(tokens[0]);
 			}
@@ -216,7 +259,9 @@ public class ShortestPathHourglass {
 //		scanner = new Scanner(new File("celegans//all_k_sp.txt"));
 //		scanner = new Scanner(new File("celegans//almost_sp.txt"));
 //		scanner = new Scanner(new File("celegans//almost_k_sp.txt"));
-		scanner = new Scanner(new File("celegans//all_4_path.txt"));
+//		scanner = new Scanner(new File("celegans//all_4_path.txt"));
+//		scanner = new Scanner(new File("celegans//all_LTM_path.txt"));
+		scanner = new Scanner(new File("celegans//all_LTM_path_weighted.txt"));
 		
 		HashMap<Integer, Integer> SPLengthFreq = new HashMap();
 		HashSet<String> SPInter = new HashSet();
@@ -291,7 +336,7 @@ public class ShortestPathHourglass {
 //			System.out.println(s + "\t" + shortestPathEdgeFrequency.get(s) + "\t" + weights.get(s));
 //			ArrayList<String> edg = splitEdge(s);
 //			System.out.println(edg.get(0) + "\t" + edg.get(1) + "\t" + shortestPathEdgeFrequency.get(s));
-			System.out.println(shortestPathEdgeFrequency.get(s));
+//			System.out.println(shortestPathEdgeFrequency.get(s));
 		}
 		
 		for (String s : lengthSP.keySet()) {
@@ -303,9 +348,9 @@ public class ShortestPathHourglass {
 		for (int v : pathLengthList) {
 			values[idx++] = v;
 		}
-//		System.out.println(StatUtils.percentile(values, 10) + "\t" + StatUtils.percentile(values, 50) + "\t" + StatUtils.percentile(values, 90));
-//		System.out.println(lengthSP.size() * 1.0 / 9492.0);
-//		System.out.println(shortestPathEdge.size() * 1.0 / 1893.0);
+		System.out.println(StatUtils.percentile(values, 10) + "\t" + StatUtils.percentile(values, 50) + "\t" + StatUtils.percentile(values, 90));
+		System.out.println(lengthSP.size() * 1.0 / 9492.0);
+		System.out.println(shortestPathEdge.size() * 1.0 / 1893.0);
 		
 //		System.out.println(SPInter.size());
 //		System.out.println(containsBackPath);
@@ -321,13 +366,14 @@ public class ShortestPathHourglass {
 		
 		
 //		scanner = new Scanner(new File("celegans//all_sp.txt"));
-//		scanner = new Scanner(new File("celegans//all_k_sp.txt"));
+//		scanner = new Scanner(new File("celegans//all_4_sp.txt"));
 //		scanner = new Scanner(new File("celegans//almost_sp.txt"));
-//		scanner = new Scanner(new File("celegans//almost_k_sp.txt"));
-//		scanner = new Scanner(new File("celegans//all_4_path.txt"));
+//		scanner = new Scanner(new File("celegans//almost_4_sp.txt"));
+		scanner = new Scanner(new File("celegans//all_4_path.txt"));
 //		scanner = new Scanner(new File("celegans//all_4_path_gap.txt"));
-		scanner = new Scanner(new File("celegans//all_LTM_path.txt"));
+//		scanner = new Scanner(new File("celegans//all_LTM_path.txt"));
 //		scanner = new Scanner(new File("celegans//all_LTM_path_chem_gap.txt"));
+//		scanner = new Scanner(new File("celegans//all_LTM_path_weighted.txt"));
 		
 		HashSet<String> sPaths = new HashSet();
 		while (scanner.hasNext()) {
@@ -425,8 +471,9 @@ public class ShortestPathHourglass {
 //		scanner = new Scanner(new File("celegans//almost_4_sp.txt"));
 //		scanner = new Scanner(new File("celegans//all_4_path.txt"));
 //		scanner = new Scanner(new File("celegans//all_4_path_gap.txt"));
-		scanner = new Scanner(new File("celegans//all_LTM_path.txt"));
+//		scanner = new Scanner(new File("celegans//all_LTM_path.txt"));
 //		scanner = new Scanner(new File("celegans//all_LTM_path_chem_gap.txt"));
+		scanner = new Scanner(new File("celegans//all_LTM_path_weighted.txt"));
 		
 		HashSet<String> sPaths = new HashSet();
 		while (scanner.hasNext()) {
@@ -494,13 +541,13 @@ public class ShortestPathHourglass {
 			}
 			
 			cumPathCover += max;
-//			System.out.println(cumPathCover / sizeSP);
+			System.out.println(cumPathCover / sizeSP);
 			for (String v : maxSPCNeurons) {
 //				System.out.print(idNeuron.get(v) + "  " + (max * 1.0 / (sizeSP * 0.9)) + "\t");
-				System.out.print(v + "\t" + idNeuron.get(v) + "\t" + inDeg.get(v) + "\t" + outDeg.get(v));
+//				System.out.print(v + "\t" + idNeuron.get(v) + "\t" + inDeg.get(v) + "\t" + outDeg.get(v));
 //				System.out.print(idNeuron.get(v) + "\t" + getType(v) + "\t" + max);
 			}
-			System.out.println();
+//			System.out.println();
 //			System.out.println("\n-- -- -- -- --");
 			
 			HashSet<String> removeSPaths = new HashSet();
@@ -603,8 +650,8 @@ public class ShortestPathHourglass {
 				}
 //				++knt;
 //				System.out.println(edg);
-				addMap(coreIndeg, dst);
-				addMap(coreOutdeg, src);
+				addFrequencyValuedMap(coreIndeg, dst);
+				addFrequencyValuedMap(coreOutdeg, src);
 				
 				if (!srId.containsKey(src)) {
 					srId.put(src, idx++);
@@ -627,7 +674,7 @@ public class ShortestPathHourglass {
 		}
 	}
 	
-	private static void addMap(HashMap<String, Integer> hmap, String key) {
+	private static void addFrequencyValuedMap(HashMap<String, Integer> hmap, String key) {
 		if (hmap.containsKey(key)) {
 			hmap.put(key, hmap.get(key) + 1);
 		}
@@ -673,8 +720,8 @@ public class ShortestPathHourglass {
 			String edg = scan.next();
 			fbEdges.add(edg);
 			ArrayList<String> edgeNodes = splitEdge(edg);
-			addMap(neuronFbIn, edgeNodes.get(1));
-			addMap(neuronFbOut, edgeNodes.get(0));
+			addFrequencyValuedMap(neuronFbIn, edgeNodes.get(1));
+			addFrequencyValuedMap(neuronFbOut, edgeNodes.get(0));
 		}
 		scan.close();
 		
@@ -919,12 +966,12 @@ public class ShortestPathHourglass {
 					if (pi != -1 && qi !=- 1) {
 						if (pi > qi) {
 //							if (pi == qi + 1) {
-								addMap(pairWeight, q + "#" + p);
+								addFrequencyValuedMap(pairWeight, q + "#" + p);
 //							}
 						}
 						else {
 //							if (qi == pi + 1) {
-								addMap(pairWeight, p + "#" + q);
+								addFrequencyValuedMap(pairWeight, p + "#" + q);
 //							}
 						}
 					}
@@ -1073,7 +1120,7 @@ public class ShortestPathHourglass {
 		}
 	}
 	
-	private static void addMapValueSet(String key, String value, HashMap<String, HashSet<String>> setValueMap) {
+	private static void addSetValuedMap(String key, String value, HashMap<String, HashSet<String>> setValueMap) {
 		if (setValueMap.containsKey(key)) {
 			setValueMap.get(key).add(value);
 		}
@@ -1086,14 +1133,17 @@ public class ShortestPathHourglass {
 	
 	public static void computeDimensionalityReduction() throws Exception {
 		loadNeuroMetaNetwork();	
+//		loadMetaNetwork();
 		HashMap<String, HashSet<String>> targetCorePathMap = new HashMap();
 		HashMap<String, HashSet<String>> coreSourcePathMap = new HashMap();
 		HashMap<String, HashSet<String>> targetNoCorePathMap = new HashMap();
+		HashMap<String, Integer> targetPathCountMap = new HashMap();
 		int numTargetNoCorePath = 0;
 		for (String[] path : canonicalPaths) {
 			String targetCorePath = path[path.length - 1];
 			String coreSourcePath = "";
 			String terminalCore = "";
+			addFrequencyValuedMap(targetPathCountMap, path[path.length - 1]);
 			boolean foundCore = false;
 			for (int i = path.length - 2; i >= 0; --i) {
 				if (foundCore == false) {
@@ -1115,11 +1165,11 @@ public class ShortestPathHourglass {
 			
 			if (foundCore == false) { // path visits no core node
 				++numTargetNoCorePath;
-				addMapValueSet(path[path.length - 1], targetCorePath, targetNoCorePathMap);
+				addSetValuedMap(path[path.length - 1], targetCorePath, targetNoCorePathMap);
 			}
 			else {
-				addMapValueSet(terminalCore, coreSourcePath, coreSourcePathMap);
-				addMapValueSet(path[path.length - 1], targetCorePath, targetCorePathMap);
+				addSetValuedMap(terminalCore, coreSourcePath, coreSourcePathMap);
+				addSetValuedMap(path[path.length - 1], targetCorePath, targetCorePathMap);
 			}
 		}
 		
@@ -1133,18 +1183,130 @@ public class ShortestPathHourglass {
 			numTargetCorePath += targetCorePathMap.get(s).size();
 		}
 		
-		System.out.println(canonicalPaths.size() + "\t" + numCoreSourcePath + "\t" + numTargetCorePath + "\t" + numTargetNoCorePath);
+//		System.out.println(canonicalPaths.size() + "\t" + numCoreSourcePath + "\t" + numTargetCorePath + "\t" + numTargetNoCorePath);
+		for (String s : target) {
+			System.out.print(targetPathCountMap.get(s) + "\t");
+			int noCorePath = 0;
+			if (targetNoCorePathMap.containsKey(s)) noCorePath = targetNoCorePathMap.get(s).size();
+			System.out.print(noCorePath + "\t");
+			int corePath = 0;
+			if (targetCorePathMap.containsKey(s)) corePath = targetCorePathMap.get(s).size();
+			System.out.print(corePath + "\t");
+			System.out.print(numCoreSourcePath * 1.0 / coreNeurons.size());
+			System.out.println();
+		}
 	}
+	
+	private static void analyzeHierarchy() throws Exception {
+		loadNeuroMetaNetwork();
+		
+//		System.out.println(source.size());
+		HashSet<String> used = new HashSet();
+		ArrayList<ArrayList<Integer>> allHeats = new ArrayList();
+		int index = 0;
+		while (used.size() < source.size()) {
+			int max = Integer.MIN_VALUE;
+			String maxNode = "##";
+			ArrayList<Integer> maxHeats = new ArrayList();
+			int usedKount = 0;
+			for (String s : source) {
+				if (used.contains(s)) {
+					++usedKount;
+					continue;
+				}
+//				System.out.print(s + "-");
+				int sum = 0;
+				ArrayList<Integer> heats = new ArrayList();
+				for (String r : source) {
+					int forward = 0;
+					int backward = 0;
+					if (edgePathWeights.containsKey(s + "#" + r)) {
+						forward = edgePathWeights.get(s + "#" + r);
+					}
+					if (edgePathWeights.containsKey(r + "#" + s)) {
+						backward = edgePathWeights.get(r + "#" + s);
+					}
+					sum += (forward - backward);
+					heats.add(forward - backward);
+				}
+//				System.out.print(sum + " ");
+				if (sum > max) {
+					max = sum;
+					maxNode = s;
+					maxHeats = new ArrayList(heats);
+//					System.out.println("  newmax " + s + "\t" + max);
+				}
+			}
+//			System.out.println();
+			used.add(maxNode);
+			allHeats.add(maxHeats);
+			System.out.println(max);
+//			System.out.println(maxNode  + "\t" + max);
+//			System.out.println(used.size() + "\t" + source.size());
+		}
+		
+		for (ArrayList<Integer> aList : allHeats) {
+//			System.out.print(aList.get(0));
+			for (int i = 1; i < aList.size(); ++i) {
+//				System.out.print(",");
+//				System.out.print(aList.get(i));
+			}
+//			System.out.println();
+		}
+	}
+	
+	private static void traverseAllPathsHelper(String node, String targetNode, int len, DependencyDAG dependencyDAG, ArrayList<String> pathNodes) {
+//		if (pathNodes.size() > len + 1) return; // +1 hop than shortest path
+//		if (pathNodes.size() > 5) return; // special case length restriction
+		
+		if (node.equals(targetNode)) {
+			for (String s: pathNodes) {
+				System.out.print(s + " ");
+			}
+			System.out.println();
+			return;
+		}
+		
+		if (!dependencyDAG.serves.containsKey(node)) return;
+		
+		for (String s: dependencyDAG.serves.get(node)) {
+			if (pathNodes.contains(s)) {
+				continue;
+			}
+			pathNodes.add(s);
+			traverseAllPathsHelper(s, targetNode, len, dependencyDAG, pathNodes);
+			pathNodes.remove(s);
+		}
+	}
+	
+	private static void traverseAllPaths() throws Exception {
+		DependencyDAG.isToy = true;
+		String net = "h4";
+		DependencyDAG dependencyDAG = new DependencyDAG("data//" + net + "_links.txt");
+//		dependencyDAG.printNetworkProperties();
+//		dependencyDAG.printNetworkStat();
+		
+		loadMetaNetwork();
+	
+		for (String s : source) {
+			for (String r : target) {
+				ArrayList<String> pathNodes = new ArrayList();
+				pathNodes.add(s);
+				traverseAllPathsHelper(s, r, -1, dependencyDAG, pathNodes);
+			}
+		}
+	}
+	
 	
 	public static void main(String[] args) throws Exception {
 //		doToyNetworkAnalysis();
 		
 //		shortestPathAnalysis_1();
 		
-		shortestPathHourglassAnalysis();
-		computeFlatCore();
-		System.out.println(realCoreSize + "\t" + flatCoreSize);
-		System.out.println(1.0 - (realCoreSize * 1.0 / flatCoreSize));
+//		shortestPathHourglassAnalysis();
+//		computeFlatCore();
+//		System.out.println(realCoreSize + "\t" + flatCoreSize);
+//		System.out.println(1.0 - (realCoreSize * 1.0 / flatCoreSize));
 		
 //		for (tau = 0.5; tau <= 0.99; tau += 0.02) {
 //			shortestPathHourglassAnalysis();
@@ -1168,6 +1330,19 @@ public class ShortestPathHourglass {
 		
 //		getWeightCorrelation();
 		
-//		computeDimensionalityReduction();
+		computeDimensionalityReduction();
+		
+//		traverseAllPaths();
+		
+//		analyzeHierarchy();
+		
+//		loadNeuroMetaNetwork();
+//		Scanner scanner = new Scanner(new File("celegans/fb_clean_links.txt"));
+//		while(scanner.hasNext()) {
+//			int a = scanner.nextInt();
+//			int b = scanner.nextInt();
+//			System.out.println(a + "\t" + b + "\t" + chemicalWeights.get(a + "#" + b));
+//		}
+//		scanner.close();
 	}
 }

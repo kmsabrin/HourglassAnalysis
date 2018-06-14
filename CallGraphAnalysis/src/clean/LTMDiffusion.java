@@ -17,6 +17,8 @@ public class LTMDiffusion {
 		private HashMap<String, HashSet<String>> depends;
 		private HashMap<String, Double> weights;
 		private boolean isWeighted = false;
+		private HashMap<String, Integer> nodeNumberMap;
+		private int nodeNumber = 0;
 		
 		public DependencyGraph() { 
 			nodes = new HashSet();
@@ -25,6 +27,8 @@ public class LTMDiffusion {
 			targets = new HashSet();
 			sources = new HashSet();
 			weights = new HashMap();
+			nodeNumberMap = new HashMap();
+			nodeNumber = 0;
 		}
 		
 		public DependencyGraph(String dependencyGraphFilePath, String sourceFilePath, String targetFilePath, boolean isWeighted) throws Exception {
@@ -85,7 +89,10 @@ public class LTMDiffusion {
 				addEdge(server, dependent);
 				if (isWeighted) {
 					weights.put(server + "#" + dependent, Double.parseDouble((tokens[2])));
+//					System.out.println(server + "#" + dependent + "\t" +  Double.parseDouble((tokens[2])));
 				}
+				if (!nodeNumberMap.containsKey(server)) nodeNumberMap.put(server, nodeNumber++);
+				if (!nodeNumberMap.containsKey(dependent)) nodeNumberMap.put(dependent, nodeNumber++);
 			}
 			scanner.close();
 		}
@@ -128,10 +135,11 @@ public class LTMDiffusion {
 //		if (pathNodes.size() > maxPathLength + 1) return; // hop-size in edges
 		
 		if (diffusionDAG.targets.contains(node)) {
-			allPaths.add(new ArrayList(pathNodes));
+			allPaths.add(new ArrayList(pathNodes)); // skip for kamal
 		}
 		
 		if (!diffusionDAG.serves.containsKey(node)) {
+//			allPaths.add(new ArrayList(pathNodes));// for kamal
 			return;	
 		}
 		
@@ -155,7 +163,7 @@ public class LTMDiffusion {
 	private int maxPathLength = 4;
 	private ArrayList<ArrayList<String>> allPaths;
 	private HashMap<String, Integer> nodeActivationTimeMap;
-	private double diffusionThreshold = 0.24;
+	private double diffusionThreshold = 0.0;
 	private HashSet<String> visited;
 	
 	private void diffuse() throws Exception {
@@ -207,6 +215,7 @@ public class LTMDiffusion {
 //								+ "\t" + numActiveInput 
 //								+ "\t" + dependencyGraph.depends.get(n).size() 
 //								+ "\t" + (dependencyGraph.depends.get(n).size() * diffusionThreshold));
+//						System.out.println("for " + n + "\t" + activeInputWeight + "\t" + totalInputWeight + "\t" + diffusionThreshold);
 						if (activeInputWeight >= totalInputWeight * diffusionThreshold) {
 							isActive = true;
 						}
@@ -227,8 +236,9 @@ public class LTMDiffusion {
 				}
 			}
 			
+			System.out.println("For Source: " + src);
 			for (String r : nodeActivationTimeMap.keySet()) {
-//				System.out.println(r + "\t" + nodeActivationTimeMap.get(r));
+				System.out.println(r + "\t" + nodeActivationTimeMap.get(r));
 			}
 			
 			// create diffusion DAG
@@ -258,18 +268,19 @@ public class LTMDiffusion {
 //			System.out.println(src + "\t" + allPaths.size());
 			
 			for (String r : nodeActivationTimeMap.keySet()) {
-				activationVectors[srcIndex][Integer.parseInt(r) - 1] = 1.0;
+//				System.out.println(r + "\t" + dependencyGraph.nodeNumberMap.get(r));
+				activationVectors[srcIndex][dependencyGraph.nodeNumberMap.get(r)] = 1.0; // make sure input nodes are labelled with integers to get this activated
 			}
 			++srcIndex;
 		}
 		
 		for (ArrayList<String> aList : allPaths) {
 			for (String s : aList) {
-//				System.out.print(s + "  ");
+				System.out.print(s + "  ");
 			}
-//			System.out.println();
+			System.out.println();
 		}
-//		System.out.println(diffusionThreshold + "\t" + allPaths.size());
+		System.out.println(diffusionThreshold + "\t" + allPaths.size());
 		
 		// compute centroid
 		double centroid[] = new double[dependencyGraph.nodes.size()]; 
@@ -291,7 +302,7 @@ public class LTMDiffusion {
 			totalDistance += Math.sqrt(distance);
 		}
 		
-		System.out.println(diffusionThreshold + "\t" + totalDistance + "\t" + allPaths.size());
+//		System.out.println(diffusionThreshold + "\t" + totalDistance + "\t" + allPaths.size());
 	}
 	
 	private void loadDependencyDAG(String data1, String data2) throws Exception {
@@ -299,20 +310,22 @@ public class LTMDiffusion {
 		String sourceFile = "data//" + data2 + "_sources.txt";
 		String targetFile = "data//" + data2 + "_targets.txt";
 		dependencyGraph = new DependencyGraph(dependencyDAGFile, sourceFile, targetFile, false);
-//		dependencyGraph.printNetworkProperties();
+		dependencyGraph.printNetworkProperties();
 	}
 
 	public static void main(String[] args) throws Exception {
-//		LTMDiffusion ltmDiffusion = new LTMDiffusion();
-//		ltmDiffusion.loadDependencyDAG("chem_gap_fb_clean", "celegans");
-//		ltmDiffusion.diffuse();
+		LTMDiffusion ltmDiffusion = new LTMDiffusion();
+		ltmDiffusion.loadDependencyDAG("h4", "h4");
+//		ltmDiffusion.loadDependencyDAG("celegans", "celegans");
+		ltmDiffusion.diffuse();
 		
-		for (double d = 0; d <= 1.01; d += 0.01) {
-			LTMDiffusion ltmDiffusion = new LTMDiffusion();
-			ltmDiffusion.diffusionThreshold = d;
-//			ltmDiffusion.loadDependencyDAG("chem_gap_fb_clean", "celegans");
-			ltmDiffusion.loadDependencyDAG("celegans", "celegans");
-			ltmDiffusion.diffuse();
-		}
+//		for (double d = 0; d <= 1.01; d += 0.01) {
+//			LTMDiffusion ltmDiffusion = new LTMDiffusion();
+//			ltmDiffusion.diffusionThreshold = d;
+////			ltmDiffusion.loadDependencyDAG("chem_gap_fb_clean", "celegans");
+//			ltmDiffusion.loadDependencyDAG("celegans", "celegans");
+////			ltmDiffusion.loadDependencyDAG("m", "m");
+//			ltmDiffusion.diffuse();
+//		}
 	}
 }
