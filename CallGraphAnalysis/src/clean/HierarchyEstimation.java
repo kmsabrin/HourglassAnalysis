@@ -7,12 +7,14 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Scanner;
+import java.util.TreeMap;
 
 public class HierarchyEstimation {
 	private class DependencyGraph{
 		private HashSet<String> nodes;
 		private HashSet<String> targets;
 		private HashSet<String> sources;
+		private HashSet<String> inters;
 		private HashMap<String, HashSet<String>> serves; 
 		private HashMap<String, HashSet<String>> depends;		
 		
@@ -22,6 +24,7 @@ public class HierarchyEstimation {
 			depends = new HashMap();
 			targets = new HashSet();
 			sources = new HashSet();
+			inters = new HashSet();
 		}
 		
 		public DependencyGraph(String dependencyGraphFilePath, String sourceFilePath, String targetFilePath) throws Exception {
@@ -29,6 +32,7 @@ public class HierarchyEstimation {
 			loadNetwork(dependencyGraphFilePath);
 			loadSources(sourceFilePath);
 			loadTargets(targetFilePath);
+			loadInters();
 		}
 		
 		private void addEdge(String server, String dependent) {
@@ -83,7 +87,13 @@ public class HierarchyEstimation {
 			scanner.close();
 		}
 		
-			
+		private void loadInters() {
+			for (String s : nodes) {
+				if (!sources.contains(s) && !targets.contains(s)) {
+					inters.add(s);
+				}
+			}
+		}
 		private void printNetworkProperties() throws Exception {
 			System.out.println("Given Network");
 			for (String s: nodes) {
@@ -461,6 +471,114 @@ public class HierarchyEstimation {
 		return true;
 	}
 	
+	private void simpleHierarchy() throws Exception {
+//		getPaths();
+		loadPaths();
+		getRelationships();
+//		printPathsAndRelationships();
+		
+		int lowLevel = 0;
+		int highLevel = 100;
+		HashSet<String> candidates = new HashSet(dependencyDAG.inters);
+		TreeMap<Integer, HashSet<String>> hierarchy = new TreeMap();
+		while (candidates.size() > 0) {
+			hierarchy.put(lowLevel, new HashSet());
+			hierarchy.put(highLevel, new HashSet());
+			
+			// try low level first
+			for (String s : candidates) {
+				boolean valid = true;
+				for (String r : candidates) {
+					int forward = 0;
+					int backward = 0;
+					if (nodePairPathFrequency.containsKey(s + "#" + r)) {
+						forward = nodePairPathFrequency.get(s + "#" + r);
+					}
+					if (nodePairPathFrequency.containsKey(r + "#" + s)) {
+						backward = nodePairPathFrequency.get(r + "#" + s);
+					}
+					
+					if (forward == 0 && backward == 0) {
+						continue;
+					}
+					
+					if (backward >= forward){ // check if lateral
+						double proximity = (Math.max(forward, backward) - Math.min(forward, backward)) / Math.max(forward, backward);
+						if (proximity < proximityThreshold) {
+							valid = false;
+							break;
+						}
+					}
+					else {
+						// fine
+					}
+				}
+				if (valid) {
+					hierarchy.get(lowLevel).add(s);
+				}
+			}
+			
+			if (hierarchy.get(lowLevel).size() == 0) {
+//			    find high level now
+				HashSet<String> above = new HashSet();
+				for (String s : candidates) {
+					boolean valid = true;
+					for (String r : candidates) {
+						int forward = 0;
+						int backward = 0;
+						if (nodePairPathFrequency.containsKey(s + "#" + r)) {
+							forward = nodePairPathFrequency.get(s + "#" + r);
+						}
+						if (nodePairPathFrequency.containsKey(r + "#" + s)) {
+							backward = nodePairPathFrequency.get(r + "#" + s);
+						}
+						
+						if (forward == 0 && backward == 0) {
+							continue;
+						}
+						
+						if (forward >= backward){ // check if lateral
+							double proximity = (Math.max(forward, backward) - Math.min(forward, backward)) / Math.max(forward, backward);
+							if (proximity < proximityThreshold) {
+								valid = false;
+								break;
+							}
+						}
+						else {
+							// fine
+						}
+					}
+					if (valid) {
+						above.add(s);
+					}
+				}
+				
+				if (above.size() == 0) {
+					// nothing to do
+					hierarchy.put(lowLevel, new HashSet(candidates));
+					break;
+				}
+				else {
+					for (String t : candidates) {
+						if (!above.contains(t)) {
+							hierarchy.get(highLevel).add(t);
+						}
+					}
+					candidates = new HashSet(above);
+					--highLevel;
+				}
+			}
+			else {
+				candidates.removeAll(hierarchy.get(lowLevel));
+				++lowLevel;
+			}		
+		}
+		
+		for (int i : hierarchy.keySet()) {
+			System.out.println(i + "\t" + hierarchy.get(i).size());
+		}
+	}
+	
 	private void buildIterativeRelationshipNetwork_2() throws Exception {
 //		getPaths();
 		loadPaths();
@@ -559,8 +677,8 @@ public class HierarchyEstimation {
 //		printFinalHierarchy();
 		System.out.println(kFF + "\t" + kLT + "\t" + kFB);
 	}
-	
-	private void buildIterativeRelationshipNetwork() throws Exception {
+
+	private void buildIterativeRelationshipNetwork_1() throws Exception {
 		getPaths();
 		getRelationships();
 //		printPathsAndRelationships();
@@ -730,8 +848,9 @@ public class HierarchyEstimation {
 		String targetFile = "data//" + data + "_targets.txt";
 		dependencyDAG = new DependencyGraph(dependencyDAGFile, sourceFile, targetFile);
 //		dependencyDAG.printNetworkProperties();
-//		buildIterativeRelationshipNetwork());
-		buildIterativeRelationshipNetwork_2();
+//		buildIterativeRelationshipNetwork_1());
+//		buildIterativeRelationshipNetwork_2();
+		simpleHierarchy();
 	}
 	
 	public static void main(String[] args) throws Exception {

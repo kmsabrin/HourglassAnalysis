@@ -1184,16 +1184,20 @@ public class ShortestPathHourglass {
 		}
 		
 //		System.out.println(canonicalPaths.size() + "\t" + numCoreSourcePath + "\t" + numTargetCorePath + "\t" + numTargetNoCorePath);
-		for (String s : target) {
-			System.out.print(targetPathCountMap.get(s) + "\t");
-			int noCorePath = 0;
-			if (targetNoCorePathMap.containsKey(s)) noCorePath = targetNoCorePathMap.get(s).size();
-			System.out.print(noCorePath + "\t");
-			int corePath = 0;
-			if (targetCorePathMap.containsKey(s)) corePath = targetCorePathMap.get(s).size();
-			System.out.print(corePath + "\t");
-			System.out.print(numCoreSourcePath * 1.0 / coreNeurons.size());
-			System.out.println();
+//		for (String s : target) {
+//			System.out.print(targetPathCountMap.get(s) + "\t");
+//			int noCorePath = 0;
+//			if (targetNoCorePathMap.containsKey(s)) noCorePath = targetNoCorePathMap.get(s).size();
+//			System.out.print(noCorePath + "\t");
+//			int corePath = 0;
+//			if (targetCorePathMap.containsKey(s)) corePath = targetCorePathMap.get(s).size();
+//			System.out.print(corePath + "\t");
+////			System.out.print(numCoreSourcePath * 1.0 / coreNeurons.size());
+//			System.out.println();
+//		}
+		
+		for (String s : coreNeurons) {
+			System.out.println(coreSourcePathMap.get(s).size());
 		}
 	}
 	
@@ -1254,6 +1258,8 @@ public class ShortestPathHourglass {
 //			System.out.println();
 		}
 	}
+	
+	
 	
 	private static void traverseAllPathsHelper(String node, String targetNode, int len, DependencyDAG dependencyDAG, ArrayList<String> pathNodes) {
 //		if (pathNodes.size() > len + 1) return; // +1 hop than shortest path
@@ -1335,6 +1341,8 @@ public class ShortestPathHourglass {
 //		traverseAllPaths();
 		
 //		analyzeHierarchy();
+		
+//		simpleHierarchy();
 		
 //		loadNeuroMetaNetwork();
 //		Scanner scanner = new Scanner(new File("celegans/fb_clean_links.txt"));
