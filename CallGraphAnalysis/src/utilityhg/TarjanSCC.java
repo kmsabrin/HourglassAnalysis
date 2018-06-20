@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Stack;
 
+import clean.DependencyGraph;
 import corehg.DependencyDAG;
 
 /*************************************************************************
@@ -27,6 +28,7 @@ public class TarjanSCC {
 	private int count; // number/id of strongly-connected components
 	private Stack<String> stack;
 	private DependencyDAG dependencyDAG;
+	private DependencyGraph dependencyGraph;
 	public HashMap<String, HashSet<String>> SCCs;
 
 	public TarjanSCC(DependencyDAG G) {
@@ -38,12 +40,26 @@ public class TarjanSCC {
 
 		for (String v : G.nodes) {
 			if (!marked.contains(v)) {
-				dfs(G, v);
+				dfs_1(G, v);
+			}
+		}
+	}
+	
+	public TarjanSCC(DependencyGraph G) {
+		marked = new HashSet();
+		stack = new Stack();
+		id = new HashMap();
+		low = new HashMap();
+		this.dependencyGraph = G;
+
+		for (String v : G.nodes) {
+			if (!marked.contains(v)) {
+				dfs_2(G, v);
 			}
 		}
 	}
 
-	private void dfs(DependencyDAG G, String v) {
+	private void dfs_2(DependencyGraph G, String v) {
 		marked.add(v);
 		low.put(v, pre++);
 		int min = low.get(v);
@@ -52,7 +68,39 @@ public class TarjanSCC {
 		if (G.serves.containsKey(v)) {
 			for (String w : G.serves.get(v)) {
 				if (!marked.contains(w)) {
-					dfs(G, w);
+					dfs_2(G, w);
+				}
+
+				if (low.get(w) < min) {
+					min = low.get(w);
+				}
+			}
+		}
+
+		if (min < low.get(v)) {
+			low.put(v, min);
+			return;
+		}
+
+		String w = "";
+		do {
+			w = stack.pop();
+			id.put(w, count);
+			low.put(w, G.nodes.size());
+		} while (!w.equals(v));
+		count++;
+	}
+	
+	private void dfs_1(DependencyDAG G, String v) {
+		marked.add(v);
+		low.put(v, pre++);
+		int min = low.get(v);
+		stack.push(v);
+
+		if (G.serves.containsKey(v)) {
+			for (String w : G.serves.get(v)) {
+				if (!marked.contains(w)) {
+					dfs_1(G, w);
 				}
 
 				if (low.get(w) < min) {
@@ -85,9 +133,23 @@ public class TarjanSCC {
 		return id.get(v) == id.get(w);
 	}
 	
-	public void getSCCs() {
+	public void getSCCs_1() {
 		SCCs = new HashMap();
 		for (String v : dependencyDAG.nodes) {
+			String sccId = String.valueOf(id.get(v));
+			if (SCCs.containsKey(sccId)) {
+				SCCs.get(sccId).add(v);
+			} else {
+				HashSet hashSet = new HashSet();
+				hashSet.add(v);
+				SCCs.put(sccId, hashSet);
+			}
+		}
+	}
+	
+	public void getSCCs_2() {
+		SCCs = new HashMap();
+		for (String v : dependencyGraph.nodes) {
 			String sccId = String.valueOf(id.get(v));
 			if (SCCs.containsKey(sccId)) {
 				SCCs.get(sccId).add(v);

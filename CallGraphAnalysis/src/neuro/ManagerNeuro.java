@@ -52,6 +52,7 @@ public class ManagerNeuro {
 	public static HashSet<String> maxRedundantOrder;
 	public static HashSet<String> keptEdges;
 	public static ArrayList<HashSet<String>> allDAG;
+	public static HashSet<String> visited;
 	
 	private static void loadNodes(HashSet<String> nodes, HashSet<String> typeNode, String fileName) throws Exception {
 		Scanner scan = new Scanner(new File(fileName));
@@ -440,17 +441,16 @@ public class ManagerNeuro {
 		}
 	}
 	
-	private static void traverseAllPathsHelper(String node, DependencyDAG dependencyDAG, HashSet<String> pathNodes) {
+	private static void traverseAllPathsHelper(String node, DependencyDAG dependencyDAG, ArrayList<String> pathNodes) {
 		if (target.contains(node)) {
-			numPaths++;
-//			for (String s: pathNodes) {
-//				System.out.print(s + "\t");
-//			}
+			for (String s: pathNodes) {
+//				System.out.print(s + " ");
+				visited.add(s);
+			}
 //			System.out.println();
-//			System.out.println(numPaths);
 		}
 		
-		if (pathNodes.size() > 10) return;
+		if (pathNodes.size() > 4) return;
 		if (!dependencyDAG.serves.containsKey(node)) return;
 		
 		for (String s: dependencyDAG.serves.get(node)) {
@@ -464,38 +464,34 @@ public class ManagerNeuro {
 	}
 	
 	private static void traverseAllPaths() throws Exception {
-//		DependencyDAG.isCyclic = true;
-		
 		DependencyDAG.isToy = true;
-		String neuroDAGName = "celegans_network_full";
-		DependencyDAG dependencyDAG = new DependencyDAG("neuro_networks//" + neuroDAGName + ".txt");
+		String neuroDAGName = "fb_clean_links";
+		DependencyDAG dependencyDAG = new DependencyDAG("celegans//" + neuroDAGName + ".txt");
 //		dependencyDAG.printNetworkProperties();
-//		dependencyDAG.printNetworkStat();
+		dependencyDAG.printNetworkStat();
 		
-//		DependencyDAG.isToy = true;
-//		String toyDAGName = "toy_cyclic_2";
-//		DependencyDAG dependencyDAG = new DependencyDAG("toy_networks//" + toyDAGName + ".txt");
-
+		
 		loadNeuroMetaNetwork();
-		HashSet<String> pathNodes = new HashSet();
-		numPaths = 0;
+		ArrayList<String> pathNodes = new ArrayList();
+		numPaths = 0;	
+		visited = new HashSet();
+		System.out.println(nodes.size());
 		for (String s: dependencyDAG.nodes) {
 			if (!source.contains(s)) continue;
+//			if (!s.equals("11")) continue; // WTF
 			pathNodes.add(s);
 			traverseAllPathsHelper(s, dependencyDAG, pathNodes);
 			pathNodes.remove(s);
-			System.out.println(s + "\t" + numPaths);
 		}
-		
-		System.out.println("Total paths: " + numPaths);
+		System.out.println(visited.size());
 	}
 	
-	private static void traverseAlmostShortestPathsHelper(String node, String targetNode, int len, DependencyDAG dependencyDAG, ArrayList<String> pathNodes) {
-//		if (pathNodes.size() > len + 1) return; // +1 hop than shortest path
-		if (pathNodes.size() > 5) return; // special case length restriction
+	private static void traverseAlmostShortestPathsHelper(String node, String targetNode, int len, DependencyDAG dependencyDAG, ArrayList<String> pathNodeList, HashSet<String> pathNodeSet) {
+		if (pathNodeList.size() > len + 2) return; // +1, +2 hop than shortest path
+//		if (pathNodes.size() > 5) return; // special case length restriction
 		
 		if (node.equals(targetNode)) {
-			for (String s: pathNodes) {
+			for (String s: pathNodeList) {
 				System.out.print(s + " ");
 			}
 			System.out.println();
@@ -505,47 +501,51 @@ public class ManagerNeuro {
 		if (!dependencyDAG.serves.containsKey(node)) return;
 		
 		for (String s: dependencyDAG.serves.get(node)) {
-			if (pathNodes.contains(s)) {
+			if (pathNodeSet.contains(s)) {
 				continue;
 			}
-			pathNodes.add(s);
-			traverseAlmostShortestPathsHelper(s, targetNode, len, dependencyDAG, pathNodes);
-			pathNodes.remove(s);
+			pathNodeList.add(s);
+			pathNodeSet.add(s);
+			traverseAlmostShortestPathsHelper(s, targetNode, len, dependencyDAG, pathNodeList, pathNodeSet);
+			pathNodeList.remove(pathNodeList.size() - 1);
+			pathNodeSet.remove(s);
 		}
 	}
 	
 	private static void traverseAlmostShortestPaths() throws Exception {
 		DependencyDAG.isToy = true;
-//		String neuroDAGName = "full_fb_clean_links";
+		String neuroDAGName = "fb_clean_links";
 //		String neuroDAGName = "gap_fb_clean_links";
-		String neuroDAGName = "gap_all_links";
+//		String neuroDAGName = "gap_all_links";
 		DependencyDAG dependencyDAG = new DependencyDAG("celegans//" + neuroDAGName + ".txt");
 //		dependencyDAG.printNetworkProperties();
-		dependencyDAG.printNetworkStat();
+//		dependencyDAG.printNetworkStat();
 		
 		loadNeuroMetaNetwork();
-		/*
-		Scanner scanner = new Scanner(new File("celegans//sm_pair_sp_len.txt"));
+		
+		Scanner scanner = new Scanner(new File("celegans//sm_pair_sp_len.txt")); // this file is in hops
 		while (scanner.hasNext()) {
 			String smPair = scanner.next();
 			int sp = scanner.nextInt();
 			ArrayList<String> nodes = ShortestPathHourglass.splitEdge(smPair);
 //			System.out.println(nodes.get(0) + "\t" + nodes.get(1) + "\t" + sp);
-			ArrayList<String> pathNodes = new ArrayList();
-			pathNodes.add(nodes.get(0));
-			traverseAlmostShortestPathsHelper(nodes.get(0), nodes.get(1), sp + 1, dependencyDAG, pathNodes);
+			ArrayList<String> pathNodeList = new ArrayList();
+			pathNodeList.add(nodes.get(0));
+			HashSet<String> pathNodeSet = new HashSet();
+			pathNodeSet.add(nodes.get(0));
+			traverseAlmostShortestPathsHelper(nodes.get(0), nodes.get(1), sp + 1, dependencyDAG, pathNodeList, pathNodeSet);
 //			break;
 		}
 		scanner.close();
-		*/
 		
-		for (String s : source) {
-			for (String r : target) {
-				ArrayList<String> pathNodes = new ArrayList();
-				pathNodes.add(s);
-//				traverseAlmostShortestPathsHelper(s, r, -1, dependencyDAG, pathNodes);
-			}
-		}
+		
+//		for (String s : source) {
+//			for (String r : target) {
+//				ArrayList<String> pathNodes = new ArrayList();
+//				pathNodes.add(s);
+////				traverseAlmostShortestPathsHelper(s, r, -1, dependencyDAG, pathNodes);
+//			}
+//		}
 	}
 	
 	private static void statisticalRun() throws Exception {
@@ -1716,7 +1716,7 @@ public class ManagerNeuro {
 		HashMap<Double, Integer> removedWeight = new HashMap();
 		while (true) {
 			TarjanSCC tarjanSCC = new TarjanSCC(dependencyDAG);
-			tarjanSCC.getSCCs();
+			tarjanSCC.getSCCs_1();
 			
 			if(tarjanSCC.count() == dependencyDAG.nodes.size()) {
 				break;
@@ -2199,7 +2199,7 @@ public class ManagerNeuro {
 //		randomSimulations();
 		
 //		statisticalRun();
-//		traverseAllPaths();
-		traverseAlmostShortestPaths();
+		traverseAllPaths();
+//		traverseAlmostShortestPaths();
 	}
 }
