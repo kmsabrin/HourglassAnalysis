@@ -25,6 +25,10 @@ public class HierarchyEstimation {
 	private ArrayList<Relationship> ltRelationship;
 	private HashSet<String> usedPair = new HashSet();
 	public HashSet<String> coreNeurons = new HashSet();
+	public HashSet<String> source = new HashSet();
+	public HashSet<String> inter = new HashSet();
+	public HashSet<String> target = new HashSet();
+	public HashSet<String> nodes = new HashSet();
 
 	
 	private class Relationship implements Comparable<Relationship> {
@@ -106,8 +110,11 @@ public class HierarchyEstimation {
 	}
 	
 	private void loadRelationships() throws Exception {
-		Scanner scanner = new Scanner(new File("celegans//all_sp+2.txt"));
-//		HashSet<String> howManyNodes = new HashSet();
+		int threshold = 0;
+//		Scanner scanner = new Scanner(new File("data//h6_paths.txt"));
+		Scanner scanner = new Scanner(new File("celegans//all_p_5.txt"));
+//		Scanner scanner = new Scanner(new File("celegans//all_p_5.txt"));
+		HashSet<String> howManyNodes = new HashSet();
 		while (scanner.hasNext()) {
 			String path = scanner.nextLine();
 			String nodes[] = path.split("\\s+");
@@ -128,20 +135,24 @@ public class HierarchyEstimation {
 			}
 		}
 		
+		System.out.println(nodePairPathFrequency.size());
+		
 		HashSet<String> visited = new HashSet();
 		HashSet<String> filter = new HashSet();
-		int kount = 0;
+		double kountC = 0;
+		double kountB = 0;
 		for (String s : nodePairPathFrequency.keySet()) {
 //			System.out.println(s + "\t" + nodePairPathFrequency.get(s));
 //			System.out.println(nodePairPathFrequency.get(s));
 			
 			// build relationship network, check if necessary to prune
 			ArrayList<String> aList = splitEdge(s);
-			if (nodePairPathFrequency.get(s) >= 1) {
+			if (nodePairPathFrequency.get(s) >= threshold) {
 				relationshipGraph.addEdge(aList.get(0), aList.get(1));
 			}
 			else {
 				filter.add(s);
+				continue;
 			}
 			
 			
@@ -156,21 +167,34 @@ public class HierarchyEstimation {
 			
 			if (nodePairPathFrequency.containsKey(f) && nodePairPathFrequency.containsKey(b)) {
 				if (!visited.contains(b)) {
-					System.out.println(nodePairPathFrequency.get(f) + "\t" + nodePairPathFrequency.get(b));
+//					System.out.println(nodePairPathFrequency.get(f) + "\t" + nodePairPathFrequency.get(b));
 				}
 			}
 			visited.add(f);
 			
 			if (nodePairPathFrequency.containsKey(b)) {
-				++kount;
+				++kountC;
 			}
+			else {
+				++kountB;
+			}
+			
+			howManyNodes.add(aList.get(0));
+			howManyNodes.add(aList.get(1));
 		}
 		
 		for (String s : filter) {
 			nodePairPathFrequency.remove(s);
 		}
-		System.out.println(filter.size() + "\t" + nodePairPathFrequency.size() + "\t" + kount);
+//		System.out.println(filter.size() + "\t" + nodePairPathFrequency.size() + "\t" + kount);
 //		System.out.println(relationshipGraph.nodes.size() + "\t" + howManyNodes.size());
+		kountC /= 2;
+		double maxPair = 37781;
+		double kountA = maxPair - kountC - kountB; 
+		System.out.println(kountA/maxPair); // pairs not connected at all
+		System.out.println(kountB/maxPair); // pairs connected in both directions
+		System.out.println(kountC/maxPair); // pairs connected in one direction
+		System.out.println((279.0 - howManyNodes.size())/279.0);
 		System.out.println("Finished Loading Path Matrix");
 	}
 	
@@ -602,20 +626,27 @@ public class HierarchyEstimation {
 	private void simpleHierarchy_2() throws Exception {
 		loadRelationships();
 		loadCoreNeurons();
+		loadNeuroMetaNetwork();
 		
 		int level = 0;
 		HashSet<String> candidates = new HashSet(relationshipGraph.nodes);
 		TreeMap<Integer, HashSet<String>> hierarchy = new TreeMap();
 //		System.out.println(candidates.size());
+		ArrayList<String> aList = new ArrayList();
 		while (candidates.size() > 0) {
 			hierarchy.put(level, new HashSet());
 			// compute SCC
 			TarjanSCC tarjanSCC = new TarjanSCC(relationshipGraph);
 			tarjanSCC.getSCCs_2();
+			int maxSCCSize = -1;
+			int kountSCCPut = 0;
 //			System.out.println("SCC size: " + tarjanSCC.SCCs.size());
+//			System.out.println("Current Level: " + level);
+//			System.out.println("SCCs: ");
 			for (String s : tarjanSCC.SCCs.keySet()) {
 				HashSet<String> sccNodes = tarjanSCC.SCCs.get(s);
-//				if (level == 0) System.out.println(sccNodes);
+//				System.out.println(sccNodes);
+//				if (sccNodes.size() > maxSCCSize) maxSCCSize = sccNodes.size();
 				for (String r : sccNodes) {
 					boolean valid = true;
 					for (String t : candidates) {
@@ -655,26 +686,42 @@ public class HierarchyEstimation {
 						for (String t : sccNodes) {
 							relationshipGraph.removeNode(t);
 						}
+						kountSCCPut++;
+						if (sccNodes.size() > maxSCCSize) {
+							maxSCCSize = sccNodes.size();
+						}
 						break;
 					}
 				}
 			}
+			aList.add("[" + kountSCCPut + "," + maxSCCSize + "]");
+//			System.out.println("[" + kountSCCPut + "," + maxSCCSize + "]");
+//			System.out.println(tarjanSCC.SCCs.size() + "," + maxSCCSize);
 //			System.out.println(level + "\t" + hierarchy.get(level).size());
+//			System.out.println("Added to this level: " + hierarchy.get(level));
 			candidates.removeAll(hierarchy.get(level));
 			++level;
 		}
 		
-		
+		int j = 0;
 		for (int i : hierarchy.keySet()) {
-			int k = 0;
+			int nC = 0;
+			int nS = 0;
+			int nI = 0;
+			int nM = 0;
 			if (hierarchy.get(i).size() > 0) {
 				for (String s : hierarchy.get(i)) {
 //					System.out.print(s + " ");
-					if (coreNeurons.contains(s)) ++k;
+					if (coreNeurons.contains(s)) ++nC;
+					if (source.contains(s)) ++nS;
+					if (inter.contains(s)) ++nI;
+					if (target.contains(s)) ++nM;
 				}
 //				System.out.println();
 			}
-			System.out.println(i + "\t" + hierarchy.get(i).size() + "\t" + k);
+//			System.out.println(i + "\t" + hierarchy.get(i).size() + "\t" + k);
+//			System.out.println(i + "\t" + hierarchy.get(i) + "\t" + nC);
+			System.out.println(hierarchy.get(i).size() + "=" + nS + "+" + nI + "+" + nM + "(" + nC + ")" + " " + aList.get(j++));
 		}
 	}
 
@@ -950,6 +997,22 @@ public class HierarchyEstimation {
 		scan.close();
 	}
 	
+	private  void loadNodes(HashSet<String> nodes, HashSet<String> typeNode, String fileName) throws Exception {
+		Scanner scan = new Scanner(new File(fileName));
+		while (scan.hasNext()) {
+			String i = scan.next();
+			typeNode.add(i);
+			nodes.add(i);
+		}
+		scan.close();
+	}
+	
+	public void loadNeuroMetaNetwork() throws Exception {
+		loadNodes(nodes, source, "celegans//sensory_neurons_3.txt");
+		loadNodes(nodes, inter, "celegans//inter_neurons_3.txt");
+		loadNodes(nodes, target, "celegans//motor_neurons_3.txt");		
+	}
+	
 	private void runAnalysis(String data) throws Exception {
 //		String dependencyDAGFile = "data//" + data + "_links.txt";
 //		String sourceFile = "data//" + data + "_sources.txt";
@@ -971,7 +1034,7 @@ public class HierarchyEstimation {
 	public static void main(String[] args) throws Exception {
 		HierarchyEstimation he = new HierarchyEstimation();
 		he.runAnalysis("celegans");
-//		he.runAnalysis("h4");
+//		he.runAnalysis("h6");
 //		he.runAnalysis(args[0]);
 		
 //		for (double d = 0.9; d < 1.01; d += 0.01) {

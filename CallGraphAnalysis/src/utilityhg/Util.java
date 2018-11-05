@@ -61,6 +61,7 @@ public class Util {
 		for (double d : CDF.keySet()) {
 			double ccdfP = 1.0 - CDF.get(d);
 			pw.println(d + "\t" + ccdfP);
+			System.out.println(d + "\t" + ccdfP);
 			ccdfMap.put(d, ccdfP);
 		}
 
@@ -170,7 +171,7 @@ public class Util {
 		 System.out.println(spearmanCorrealtion.correlation(a, b));
 		 System.out.println(kendallsCorrelation.correlation(a, b));
 		 System.out.println(pearsonCorrelation.correlation(a, b));
-		 
+//		 System.out.println(ConfidenceInterval.getConfidenceInterval(data));
 		 scanner.close();
 	}
 	
@@ -207,7 +208,36 @@ public class Util {
 		// getCCDF(new ParetoDistribution());
 
 		// tryWilcoxonRankSumTest();
-		getCorrelation(1805);
+//		getCorrelation(263);
+		
+		HashSet<String> nodes = new HashSet();
+		HashSet<String> hasIn = new HashSet();
+		HashSet<String> hasOut = new HashSet();
+		HashSet<String> edges = new HashSet();
+		Scanner scan = new Scanner(new File("data//" + "rat"+ "_links.txt"));
+		while (scan.hasNext()) {
+			String src = scan.next();
+			String dst = scan.next();
+			hasOut.add(src);
+			hasIn.add(dst);
+			nodes.add(src);
+			nodes.add(dst);
+			if (edges.contains(src+"#"+dst)) {
+				System.out.println(src+"#"+dst);
+			}
+			edges.add(src+"#"+dst);
+		}
+		
+		for (String s : nodes) {
+			if (!hasOut.contains(s)) {
+				// is Target
+//				System.out.println(s);
+			}
+			if (!hasIn.contains(s)) {
+				// is Source
+//				System.out.println(s);
+			}
+		}
 
 		// System.out.println(Math.log(0.13));
 		// System.out.println(Math.exp(-2.0402208285265546));

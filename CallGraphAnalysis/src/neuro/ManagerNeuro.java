@@ -53,6 +53,7 @@ public class ManagerNeuro {
 	public static HashSet<String> keptEdges;
 	public static ArrayList<HashSet<String>> allDAG;
 	public static HashSet<String> visited;
+	public static boolean found;
 	
 	private static void loadNodes(HashSet<String> nodes, HashSet<String> typeNode, String fileName) throws Exception {
 		Scanner scan = new Scanner(new File(fileName));
@@ -105,7 +106,7 @@ public class ManagerNeuro {
 	
 	private static void writeFile(String edgeFileName, HashSet<String> source, HashSet<String> target, HashSet<String> intermediate, HashSet<String> nodes) throws Exception {
 		Scanner scan = new Scanner(new File(edgeFileName));
-		PrintWriter pw = new PrintWriter(new File("neuro_networks//full_fb_clean_links.txt"));
+		PrintWriter pw = new PrintWriter(new File("celegans//chemical_fb_clean_links.txt"));
 		int nRemovedInedge = 0;
 		int nRemovedOutedge = 0;
 		int totalEdge = 0;
@@ -199,8 +200,8 @@ public class ManagerNeuro {
 //		System.out.println("Removed in-edges " + nRemovedInedge);
 //		System.out.println("Removed out-edges " + nRemovedOutedge);
 //		System.out.println("Removed total edge" + totalRemovedEdge);
-		System.out.println("Total edge " + totalEdge);
-		System.out.println("Total node " + retainedNode.size());
+//		System.out.println("Total edge " + totalEdge);
+//		System.out.println("Total node " + retainedNode.size());
 //		System.out.println("Dual Node Removed Edge " + dualNodeRemovedEdge);
 //		System.out.println((feedForwardSum/feedForwardCount) + "\t" + (feedBackSum/feedBackCount));
 		
@@ -222,13 +223,13 @@ public class ManagerNeuro {
 			}
 		}
 		for (int i: diffFrequencey.keySet()) {
-			System.out.println(i + "\t" + diffFrequencey.get(i));
+//			System.out.println(i + "\t" + diffFrequencey.get(i));
 		}
 		
 //		System.out.println(backwardEdges.size() + "\t" + forwardEdges.size());
 		for (String s : backwardEdges.keySet()) {
 //			System.out.println(backwardEdges.get(s));
-			System.out.println(s);
+//			System.out.println(s);
 		}
 		for (String s : forwardEdges.keySet()) {
 //			System.out.println(forwardEdges.get(s));
@@ -441,25 +442,29 @@ public class ManagerNeuro {
 		}
 	}
 	
-	private static void traverseAllPathsHelper(String node, DependencyDAG dependencyDAG, ArrayList<String> pathNodes) {
+	private static void traverseAllPathsHelper(String node, DependencyDAG dependencyDAG, ArrayList<String> pathNodes, HashSet<String> visited) {
+		if (pathNodes.size() > 5) return;
+		
 		if (target.contains(node)) {
-			for (String s: pathNodes) {
-//				System.out.print(s + " ");
-				visited.add(s);
+			System.out.print(pathNodes.get(0));
+			for (int i = 1; i < pathNodes.size(); ++i) {
+				System.out.print(" " + pathNodes.get(i));
+//				visited.add(s);
 			}
-//			System.out.println();
+			System.out.println();
 		}
 		
-		if (pathNodes.size() > 4) return;
 		if (!dependencyDAG.serves.containsKey(node)) return;
 		
 		for (String s: dependencyDAG.serves.get(node)) {
-			if (pathNodes.contains(s)) {
+			if (visited.contains(s)) {
 				continue;
 			}
 			pathNodes.add(s);
-			traverseAllPathsHelper(s, dependencyDAG, pathNodes);
-			pathNodes.remove(s);
+			visited.add(s);
+			traverseAllPathsHelper(s, dependencyDAG, pathNodes, visited);
+			pathNodes.remove(pathNodes.size() - 1);
+			visited.remove(s);
 		}
 	}
 	
@@ -468,33 +473,35 @@ public class ManagerNeuro {
 		String neuroDAGName = "fb_clean_links";
 		DependencyDAG dependencyDAG = new DependencyDAG("celegans//" + neuroDAGName + ".txt");
 //		dependencyDAG.printNetworkProperties();
-		dependencyDAG.printNetworkStat();
+//		dependencyDAG.printNetworkStat();
 		
 		
 		loadNeuroMetaNetwork();
-		ArrayList<String> pathNodes = new ArrayList();
+		
 		numPaths = 0;	
-		visited = new HashSet();
-		System.out.println(nodes.size());
+//		System.out.println(nodes.size());
 		for (String s: dependencyDAG.nodes) {
 			if (!source.contains(s)) continue;
-//			if (!s.equals("11")) continue; // WTF
+			ArrayList<String> pathNodes = new ArrayList();
+			HashSet<String> visitedNodes = new HashSet();
 			pathNodes.add(s);
-			traverseAllPathsHelper(s, dependencyDAG, pathNodes);
-			pathNodes.remove(s);
+			visitedNodes.add(s);
+			traverseAllPathsHelper(s, dependencyDAG, pathNodes, visitedNodes);
 		}
-		System.out.println(visited.size());
+//		System.out.println(visited.size());
 	}
 	
 	private static void traverseAlmostShortestPathsHelper(String node, String targetNode, int len, DependencyDAG dependencyDAG, ArrayList<String> pathNodeList, HashSet<String> pathNodeSet) {
-		if (pathNodeList.size() > len + 2) return; // +1, +2 hop than shortest path
-//		if (pathNodes.size() > 5) return; // special case length restriction
+		if (pathNodeList.size() > len + 2) return; // +0, +1, +2 hop than shortest path
+		if (pathNodeList.size() > 9) return; // special case length restriction // ssshhh don't tell anyone, allowing max 8 hops
 		
 		if (node.equals(targetNode)) {
-			for (String s: pathNodeList) {
-				System.out.print(s + " ");
+			System.out.print(pathNodeList.get(0));
+			for (int i = 1; i < pathNodeList.size(); ++i) {
+				System.out.print(" " + pathNodeList.get(i));
 			}
 			System.out.println();
+			found = true;
 			return;
 		}
 		
@@ -514,8 +521,8 @@ public class ManagerNeuro {
 	
 	private static void traverseAlmostShortestPaths() throws Exception {
 		DependencyDAG.isToy = true;
-		String neuroDAGName = "fb_clean_links";
-//		String neuroDAGName = "gap_fb_clean_links";
+//		String neuroDAGName = "fb_clean_links";
+		String neuroDAGName = "gap+chemical_clean_links";
 //		String neuroDAGName = "gap_all_links";
 		DependencyDAG dependencyDAG = new DependencyDAG("celegans//" + neuroDAGName + ".txt");
 //		dependencyDAG.printNetworkProperties();
@@ -523,7 +530,7 @@ public class ManagerNeuro {
 		
 		loadNeuroMetaNetwork();
 		
-		Scanner scanner = new Scanner(new File("celegans//sm_pair_sp_len.txt")); // this file is in hops
+		Scanner scanner = new Scanner(new File("celegans//gap+chemical_sm_pair_sp_len.txt")); // this file is in hops
 		while (scanner.hasNext()) {
 			String smPair = scanner.next();
 			int sp = scanner.nextInt();
@@ -533,7 +540,12 @@ public class ManagerNeuro {
 			pathNodeList.add(nodes.get(0));
 			HashSet<String> pathNodeSet = new HashSet();
 			pathNodeSet.add(nodes.get(0));
+			found = false;
+			if (sp > 8) continue; // ssshhh
 			traverseAlmostShortestPathsHelper(nodes.get(0), nodes.get(1), sp + 1, dependencyDAG, pathNodeList, pathNodeSet);
+			if (found == false) {
+//				System.out.println(smPair);
+			}
 //			break;
 		}
 		scanner.close();
@@ -2199,7 +2211,7 @@ public class ManagerNeuro {
 //		randomSimulations();
 		
 //		statisticalRun();
-		traverseAllPaths();
-//		traverseAlmostShortestPaths();
+//		traverseAllPaths();
+		traverseAlmostShortestPaths();
 	}
 }

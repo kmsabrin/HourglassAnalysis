@@ -4,9 +4,10 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Scanner;
-import java.util.TreeSet;
 
 import corehg.DependencyDAG;
+
+//import corehg.DependencyDAG;
 
 public class HourglassAnalysis {
 	public class DependencyGraph{
@@ -23,7 +24,7 @@ public class HourglassAnalysis {
 		private HashMap<String, Double> nodePathThrough;
 		private double nTotalPath;
 		
-		private double pathCoverageTau = 0.98;
+		private double pathCoverageTau = 1.0;
 		public HashSet<String> coreNodes;
 		private HashSet<String> skipNodes;
 		
@@ -35,6 +36,8 @@ public class HourglassAnalysis {
 		private HashSet<String> visited;
 		private boolean canReachSource;
 		private boolean canReachTarget;
+		
+		private int wccSize;
 		
 		public DependencyGraph(boolean isWeighted) { 
 			nodes = new HashSet();
@@ -54,6 +57,56 @@ public class HourglassAnalysis {
 			nodeNumber = 0;
 		}
 		
+		private void WCCHelper(String s) {
+			// if (visited.contains(s)) return;
+			++wccSize;
+			visited.add(s);
+
+			if (serves.containsKey(s)) {
+				for (String r : serves.get(s)) {
+					if (!visited.contains(r)) {
+						WCCHelper(r);
+					}
+				}
+			}
+
+			if (depends.containsKey(s)) {
+				for (String r : depends.get(s)) {
+					if (!visited.contains(r)) {
+						WCCHelper(r);
+					}
+				}
+			}
+		}
+
+		private void findWeaklyConnectedComponents(String filePath) throws Exception {
+			PrintWriter pw = new PrintWriter(new File("data//largestWCC-" + filePath + ".txt"));
+			int largestWCCSize = 0;
+			String largestWCCSeed = "";
+			visited = new HashSet();
+			int nWCC = 0;
+			for (String s : nodes) {
+				if (!visited.contains(s)) {
+					wccSize = 0;
+					++nWCC;
+					WCCHelper(s);
+					System.out.println("Component " + nWCC + " with size " + wccSize);
+					if (wccSize > largestWCCSize) {
+						largestWCCSize = wccSize;
+						largestWCCSeed = s;
+					}
+				}
+			}
+
+			System.out.println("Largest WCC size: " + largestWCCSize);
+			visited.clear();
+			WCCHelper(largestWCCSeed);
+			for (String s : visited) {
+				pw.println(s);
+			}
+			pw.close();
+		}
+		
 		public DependencyGraph(String dependencyGraphFilePath, String sourceFilePath, String targetFilePath, boolean isWeighted) throws Exception {
 			this(isWeighted);
 			loadNetwork(dependencyGraphFilePath);
@@ -69,12 +122,16 @@ public class HourglassAnalysis {
 //				mergeNodes("263", "265", 1);
 			}
 			// end special case
+			
+			findWeaklyConnectedComponents("rat");
+			/*
 			addSuperSourceTarget();
 			getPathStats();
 			getCore();
 			if (!isWeighted) {
 				getFlatNetwork();
 			}
+			*/
 		}
 		
 		private void mergeHelper(String n1, String m) {
@@ -273,9 +330,9 @@ public class HourglassAnalysis {
 			for (String s: nodes) {
 				if (isSuperNode(s)) continue;
 //				System.out.println(s + "\tComplexity: " + numOfSourcePath.get(s) + "\tGenerality: " + numOfTargetPath.get(s) + "\tPath_centrality: " + nodePathThrough.get(s));
-//				System.out.println(s + "\t" + nodePathThrough.get(s));
+				System.out.println(s + "\t" + nodePathThrough.get(s));
 			}
-//			System.out.println("Total_paths: " + nTotalPath);
+			System.out.println("Total_paths: " + nTotalPath);
 //			System.out.println("Core_size: " + coreNodes.size() + "\t" + "Core_set: " + coreNodes);
 //			pw.close();
 		}
@@ -420,9 +477,12 @@ public class HourglassAnalysis {
 		String sourceFile = "data//" + data + "_sources.txt";
 		String targetFile = "data//" + data + "_targets.txt";
 		dependencyDAG = new DependencyGraph(dependencyDAGFile, sourceFile, targetFile, false);
-//		System.out.println("Original_network");
-//		dependencyDAG.printNetworkProperties();
-		System.out.println(dependencyDAG.coreNodes);
+		System.out.println("Original_network");
+		dependencyDAG.printNetworkProperties();
+//		System.out.println(dependencyDAG.coreNodes);
+		for (String s : dependencyDAG.corePathContribution.keySet()) {
+			System.out.println(s + "\t" + (dependencyDAG.corePathContribution.get(s)/dependencyDAG.nTotalPath));
+		}
 		String flatDAGFile = "data//flat.txt";
 		flatDAG = new DependencyGraph(flatDAGFile, sourceFile, targetFile, true);
 //		System.out.println("Flat_network");
@@ -431,5 +491,10 @@ public class HourglassAnalysis {
 //		System.out.println(flatDAG.coreNodes);
 		System.out.println(dependencyDAG.coreNodes.size() + "\t" + hScore);
 //		System.out.println(dependencyDAG.getCoreWeightedLocation() + "\t" + dependencyDAG.getCoreNodeCoverage());
+	}
+	
+	public static void main(String[] args) throws Exception {
+		HourglassAnalysis hgAnalysis = new HourglassAnalysis();
+		hgAnalysis.runAnalysis("rat");
 	}
 }

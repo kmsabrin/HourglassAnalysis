@@ -146,7 +146,7 @@ public class DependencyDAG {
 		/* applicable on DAGs only */
 //		loadPathStatistics();
 //		loadLocationMetric(); // must load degree metric before
-//		loadServerReachabilityAll();
+		loadServerReachabilityAll();
 //		loadPathCentralityMetric();
 		
 		/* not used anymore */
