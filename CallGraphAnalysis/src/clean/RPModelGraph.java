@@ -1,7 +1,6 @@
 package clean;
 import java.io.File;
 import java.io.PrintWriter;
-import java.text.DecimalFormat;
 import java.util.HashSet;
 import java.util.NavigableMap;
 import java.util.Random;

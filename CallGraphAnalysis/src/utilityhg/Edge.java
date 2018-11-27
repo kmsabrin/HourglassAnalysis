@@ -11,10 +11,12 @@ public class Edge implements Comparable<Edge> {
 		this.pathCentrality = pathCentrality;
 	}
 	
+	@Override
 	public int compareTo(Edge other) {
 	    return -1 * Double.compare(this.pathCentrality, other.pathCentrality);
 	}
 	
+	@Override
 	public String toString() {
 		return source + "\t" + target + "\t" + pathCentrality;
 	}

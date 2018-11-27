@@ -9,16 +9,12 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeMap;
 
-import org.apache.commons.math3.distribution.AbstractRealDistribution;
-import org.apache.commons.math3.distribution.PoissonDistribution;
 import org.apache.commons.math3.distribution.ZipfDistribution;
 import org.apache.commons.math3.stat.StatUtils;
 import org.apache.commons.math3.stat.correlation.KendallsCorrelation;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 import org.apache.commons.math3.stat.inference.MannWhitneyUTest;
-
-import corehg.DependencyDAG;
 
 public class Util {
 	/*

@@ -5,7 +5,6 @@ import java.io.PrintWriter;
 import java.util.Random;
 
 import org.apache.commons.math3.distribution.NormalDistribution;
-import org.apache.commons.math3.distribution.UniformIntegerDistribution;
 import org.apache.commons.math3.distribution.ZipfDistribution;
 
 public class ComplexModelDAG {

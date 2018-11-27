@@ -12,8 +12,6 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeSet;
 
-import neuro.ManagerNeuro;
-
 import org.apache.commons.lang3.StringUtils;
 
 import utilityhg.CourtCaseCornellParser;

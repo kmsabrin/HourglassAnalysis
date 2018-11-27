@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Scanner;
 
-import corehg.DependencyDAG;
-
 //import corehg.DependencyDAG;
 
 public class HourglassAnalysis {

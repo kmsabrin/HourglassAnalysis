@@ -1508,6 +1508,7 @@ public class ManagerNeuro {
 				this.tl = tl;
 			}
 		
+			@Override
 			public int compareTo(SCCEdge other) {
 				if (this.rankDiff != other.rankDiff) return this.rankDiff - other.rankDiff;
 				if (this.weight != other.weight) return (int)(this.weight - other.weight);
@@ -1679,6 +1680,7 @@ public class ManagerNeuro {
 				this.tl = tl;
 			}
 		
+			@Override
 			public int compareTo(SCCEdge other) {
 				if (this.rankDiff != other.rankDiff) return this.rankDiff - other.rankDiff;
 				if (this.weight != other.weight) return (int)(this.weight - other.weight);
@@ -1943,6 +1945,7 @@ public class ManagerNeuro {
 				this.tgtLoc = tl;
 			}
 		
+			@Override
 			public int compareTo(NeuroEdge other) {
 				if (this.rank != other.rank) return this.rank - other.rank;
 				if (this.weight != other.weight) return (int)(this.weight - other.weight);

@@ -2,7 +2,6 @@ package initial_2;
 
 import java.io.File;
 import java.io.PrintWriter;
-import java.io.ObjectInputStream.GetField;
 import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;

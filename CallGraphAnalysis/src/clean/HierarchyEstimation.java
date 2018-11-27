@@ -46,6 +46,7 @@ public class HierarchyEstimation {
 			this.mx = mx;
 		}
 		
+		@Override
 		public int compareTo(Relationship r) {
 //			if (weight != r.weight) {
 //				return r.weight - weight;
@@ -57,6 +58,7 @@ public class HierarchyEstimation {
 //			return diffWeight - r.diffWeight;
 		}
 		
+		@Override
 		public String toString() {
 			return start + "  " + end + "  " + sumWeight + " " + diffWeight;
 		}

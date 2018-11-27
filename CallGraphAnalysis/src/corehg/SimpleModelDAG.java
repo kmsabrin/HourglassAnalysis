@@ -3,7 +3,6 @@ package corehg;
 import java.io.File;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.NavigableMap;
 import java.util.Random;

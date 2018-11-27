@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.PrintWriter;
 
 import neuro.ManagerNeuro;
-import utilityhg.DistributionAnalysis;
 
 public class FlatNetwork {
 	public static double flatNetworkCoreSize = -1;

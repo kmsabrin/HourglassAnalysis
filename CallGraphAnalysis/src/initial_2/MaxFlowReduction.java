@@ -3,8 +3,6 @@ package initial_2;
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.Scanner;
-import java.util.TreeMap;
-
 import corehg.DependencyDAG;
 
 public class MaxFlowReduction {

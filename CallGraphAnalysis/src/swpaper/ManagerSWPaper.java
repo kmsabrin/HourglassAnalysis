@@ -16,8 +16,6 @@ import org.apache.commons.math3.distribution.TDistribution;
 import org.apache.commons.math3.stat.StatUtils;
 import org.apache.commons.math3.stat.correlation.KendallsCorrelation;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
-import org.omg.CORBA.VersionSpecHelper;
-
 import corehg.CoreDetection;
 import corehg.DependencyDAG;
 
@@ -445,6 +443,7 @@ public class ManagerSWPaper {
 //			else return 0;
 //		}
 		
+		@Override
 		public int compareTo(CentralityVersionPatch instance2) {
 			if (this.LOC < instance2.LOC) return -1;
 			else if (this.LOC > instance2.LOC) return 1;
